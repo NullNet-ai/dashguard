@@ -84,8 +84,11 @@ export function ManageFilterProvider({
           errors[`filterGroups.${groupIndex}.filters.${index}.field`] = 'This field is required.'
         }
         if (required_fields.includes(item.field)) {
-          if (item.hasOwnProperty('values') && !item?.[item.field]) {
-            errors[`filterGroups.${groupIndex}.filters.${index}.${item.field}`] = 'This field is required.'
+          if (item.hasOwnProperty('values')) {
+            if (item?.[item.field] && item?.[item.field].slice(1, 2)) {
+            } else {
+              errors[`filterGroups.${groupIndex}.filters.${index}.${item.field}`] = 'This field is required.'
+            }
           }
         }
         else if (item.hasOwnProperty('values') && Array.isArray(item.values) && item.values.length === 0) {
