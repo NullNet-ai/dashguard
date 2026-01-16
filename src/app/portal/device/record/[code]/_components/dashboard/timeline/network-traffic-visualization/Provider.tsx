@@ -119,7 +119,7 @@ export default function NetworkFlowProvider({ children, params }: IProps) {
   const fetchBandwidth = useCallback(async (startIndex: number, add_data_count: number, isInitial = false) => {  
     const getBandwidthParams = {
       device_id: params?.id || '',
-      time_range: getLastTimeStamp({ count: isInitial ? time_count: 2, unit: isInitial ? time_unit : 'second', add_remaining_time: isInitial }) as any,
+      time_range: getLastTimeStamp({ count: time_count, unit: time_unit, add_remaining_time: true }) as any,
       bucket_size: resolution,
       source_ips: uniqueSourceIpsRef.current?.slice(startIndex, startIndex + add_data_count) || [],
     }
@@ -137,8 +137,6 @@ export default function NetworkFlowProvider({ children, params }: IProps) {
       );
       return;
     }
-
-    if (isInitial) return
 
     let updated_new_bandwidth = new_bandwidth
 
@@ -206,6 +204,46 @@ export default function NetworkFlowProvider({ children, params }: IProps) {
 
     await fetchBandwidth(startIndex, addCount)
   }, [fetchBandwidth, filterId])
+  
+  const fetchMoreDataInternalV2 = useCallback(async () => {
+    console.debug('[pooling] fetchMoreDataV2')
+    if(!filterId && filterId === '01JNQ9WPA2JWNTC27YCTCYC1FE') return
+    const ips = uniqueSourceIpsRef.current
+    if (!ips || ips.length === 0) {
+      console.warn('No source IPs available for fetching new_bandwidth')
+      return
+    }
+
+    const tr = getLastTimeStamp({ count: 2, unit: 'second', add_remaining_time: true }) as any
+    const data = await getUniqueSourceActions.mutateAsync({
+    device_id: params?.id || '',
+    time_range: tr,
+    filter_id: filterId,
+  });
+    // Get Connections
+    const getBandwidthParams = {
+      device_id: params?.id || '',
+      time_range: tr,
+      bucket_size: resolution,
+      source_ips: data
+    }
+    const _bandwidth: any = await getBandwidthActions.mutateAsync(getBandwidthParams);
+
+    let updated_new_bandwidth = new_bandwidth
+
+    // @ts-expect-error - No type yet
+    _bandwidth.data.forEach(e => {
+      // @ts-expect-error - No type yet
+      updated_new_bandwidth = updated_new_bandwidth.reduce((acc, curr) => {
+        if(curr?.source_ip === e?.source_ip) {
+          return [...acc, { ...curr, result: [...curr.result, ...e.result] }]
+        }
+        return [...acc, curr]
+      }, [])
+    })
+
+    setNewBandwidth(updated_new_bandwidth)
+  }, [fetchBandwidth, filterId])
 
   const fetchMoreData = useCallback(async () => {
     enqueueTask(fetchMoreDataInternal)
@@ -214,13 +252,13 @@ export default function NetworkFlowProvider({ children, params }: IProps) {
   useEffect(() => {
     if (!isQueueEnabled) return
     const interval = window.setInterval(() => {
-      enqueueTask(fetchMoreDataInternal)
+      enqueueTask(fetchMoreDataInternalV2)
     }, 2000)
 
     return () => {
       window.clearInterval(interval)
     }
-  }, [enqueueTask, fetchMoreDataInternal, isQueueEnabled])
+  }, [enqueueTask, fetchMoreDataInternalV2, isQueueEnabled])
 
   useEffect(() => {
     if (!eventEmitter) return
@@ -262,12 +300,10 @@ export default function NetworkFlowProvider({ children, params }: IProps) {
         
           // Fetch unique source IPs
           const fetchUniqueSourceIP = async () => {
-            const now = new Date()
-            now.setMinutes(0, 0, 0) // truncate to current hour
             const data = await getUniqueSourceActions.mutateAsync({
               device_id: params?.id || '',
               // @ts-expect-error - No type yet
-              time_range: getLastTimeStamp({ count: time_count, unit: time_unit, _now: now }) as any,
+              time_range: getLastTimeStamp({ count: time_count, unit: time_unit, add_remaining_time: true }) as any,
               filter_id: filterId,
             });
         
@@ -327,11 +363,9 @@ export default function NetworkFlowProvider({ children, params }: IProps) {
     if (!filterId) return
 
     const fetchUniqueSourceIP = async () => {
-      const now = new Date()
-      now.setMinutes(0, 0, 0) // truncate to current hour
       const data = await getUniqueSourceActions.mutateAsync({
         device_id: params?.id || '',
-        time_range: getLastTimeStamp({ count: time_count, unit: time_unit, _now: now }) as any,
+        time_range: getLastTimeStamp({ count: time_count, unit: time_unit, add_remaining_time: true }) as any,
         filter_id: filterId,
       })
 
@@ -342,8 +376,7 @@ export default function NetworkFlowProvider({ children, params }: IProps) {
       setLoading(false)
     }
 
-    // setTimeout(() => fetchUniqueSourceIP(), 1000) // delay to wait for the searchBy to be set in redis
-    fetchUniqueSourceIP()
+    setTimeout(() => fetchUniqueSourceIP(), 1000) // delay to wait for the searchBy to be set in redis
   }, [filterId, time_count, time_unit, resolution, (searchBy ?? [])?.length])
 
   useEffect(() => {
@@ -359,7 +392,7 @@ export default function NetworkFlowProvider({ children, params }: IProps) {
 
     setCurrentIndex(prevIndex => prevIndex + 20)
     setNewBandwidth([])
-    //  filterId !== '01JNQ9WPA2JWNTC27YCTCYC1FE' && fetchBandwidth(20)
+    //  filterId !== '01JNQ9WPA2JWNTC27YCTCYC1FE' && fetchBandwidth(0, 20)
     setIsQueueEnabled(false)
     taskQueueRef.current = []
     void (async () => {

@@ -253,7 +253,7 @@ export const FilterGroup = ({ form, groupIndex, onRemoveFilter, onUpdateJunction
                         },
                         {
                           id: `${prefix}.values`,
-                          formType: 'multi-select',
+                          formType: 'input',
                           name: `${prefix}.values`,
                           placeholder: 'Enter the value',
                           multiSelectEnableCreate: true,

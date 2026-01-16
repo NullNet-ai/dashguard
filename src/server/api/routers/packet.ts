@@ -681,8 +681,8 @@ export const packetRouter = createTRPCRouter({
       _query,
     }
   }),
-  getBandwidthOfSourceIP: privateProcedure.input(z.object({ device_id: z.string(), time_range: z.array(z.string()), bucket_size: z.string(), source_ips: z.array(z.string()) })).mutation(async ({ input, ctx }) => {
-    const { device_id, time_range, bucket_size = '1s', source_ips } = input
+  getBandwidthOfSourceIP: privateProcedure.input(z.object({ device_id: z.string(), time_range: z.array(z.string()), bucket_size: z.string(), source_ips: z.array(z.string()), limit: z.number().optional() })).mutation(async ({ input, ctx }) => {
+    const { device_id, time_range, bucket_size = '1s', source_ips, limit = 60 } = input
     // return []
     const ips = await Bluebird.map(source_ips, async (source_ip: string) => {
       const res = await ctx.dnaClient.aggregate({
@@ -734,7 +734,8 @@ export const packetRouter = createTRPCRouter({
             order_by: 'bucket',
             order_direction: EOrderDirection.DESC,
           },
-          // timezone,
+          timezone: 'Asia/Manila',
+          limit: limit || 60,
         },
         token: ctx.token.value,
 
@@ -785,7 +786,25 @@ export const packetRouter = createTRPCRouter({
 
       const findFilter = Array.isArray(__filter) ? __filter?.find((item: any) => item?.id === filter_id) : undefined
 
-      const _filter = findFilter?.group_advance_filters || []
+      let _filter = findFilter?.group_advance_filters || []
+      _filter = _filter.map(e => {
+        if (e.filters) {
+          return {
+            ...e,
+            filters: e.filters.map(filter => {
+              if (Array.isArray(filter.values)) {
+                return filter
+              }
+              return {
+                ...filter,
+                values: [filter.values]
+              }
+            })
+          }
+        }
+        return e
+      })
+      console.log(`#@#@ filters`, JSON.stringify(_filter))
 
       const [,,...rest_group_filter] = _filter || []
       // Separate filters for "country"

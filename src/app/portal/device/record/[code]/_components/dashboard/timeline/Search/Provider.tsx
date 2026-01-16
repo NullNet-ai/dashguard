@@ -212,6 +212,12 @@ export default function GraphSearchProvider({ children, params, filter_type }: I
 
   const handleClearSearchItems = async () => {
     setQuery('')
+    setSearchItems([])
+
+    await UpdateSearchFilter({
+      filters: [],
+      filter_type,
+    })
   }
 
   const {

@@ -141,7 +141,7 @@ export default function GridVirtualizerFixed(props: any) {
     horizontal: true,
     count: columnCount,
     getScrollElement: () => parentRef.current,
-    estimateSize: (index) => (index === 0 ? 220 : 15),
+    estimateSize: (index) => (index === 0 ? 200 : 15),
     overscan: 5,
   });
 
@@ -356,12 +356,14 @@ export default function GridVirtualizerFixed(props: any) {
                             }}
                           />
                         </TooltipTrigger>
-                        <TooltipContent side="top">
+                        <TooltipContent side="top" className="z-[9999]">
                           <div className="text-xs">
                             <div>
                               <strong>Time:</strong>{' '}
                               {
                                 formatted[virtualRow.index][
+                                  virtualColumn.index - 1
+                                ].bucketTime || formatted[virtualRow.index][
                                   virtualColumn.index - 1
                                 ].time
                               }

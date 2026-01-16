@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useRef, useState, useEffect, useCallback } from 'react'
+import React, { useRef, useState, useEffect, useMemo } from 'react'
 
 import '@xyflow/react/dist/style.css'
 
@@ -54,19 +54,19 @@ export default function NetworkFlowView() {
     });
   }, [flowData?.length]);
 
-  // Generate formattedArr for this render
-  const formattedArr = (flowData || []).map((el, idx) => {
-    const isLive = el.time_count === 1 && el.time_unit === "day" && el.resolution === "1s";
-    return isLive
-      ? generateTimeSeriesDataForLiveData(el.result, prevFormattedArr[idx])
-      : generateTimeSeriesData(el.result, el.resolution, el.time_count, el.time_unit);
-  });
+  const formattedArr = useMemo(() => {
+    return (flowData || []).map((el, idx) => {
+      const isLive = el.time_count === 1 && el.time_unit === "day" && el.resolution === "1s";
+      return false // isLive
+        ? generateTimeSeriesDataForLiveData(el.result, prevFormattedArr[idx])
+        : generateTimeSeriesData(el.result, el.resolution, el.time_count, el.time_unit);
+    });
+  }, [flowData]);
 
   // After render, update prevFormattedArr with the latest formattedArr
   useEffect(() => {
     setPrevFormattedArr(formattedArr);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [JSON.stringify(formattedArr)]);
+  }, [formattedArr]);
 
   const totalCount = (flowData || []).length;
   const totalHeight = totalCount * rowHeight;
@@ -74,20 +74,6 @@ export default function NetworkFlowView() {
   const startIndex = Math.floor(scrollTop / rowHeight);
   const endIndex = Math.min(totalCount - 1, Math.floor((scrollTop + containerHeight) / rowHeight));
   const visibleData = flowData?.slice(startIndex, endIndex + 1) || [];
-
-  const onScroll = useCallback(() => {
-    if (containerRef.current) {
-      setScrollTop(containerRef.current.scrollTop);
-    }
-  }, []);
-
-  useEffect(() => {
-    const container = containerRef.current;
-    if (container) {
-      container.addEventListener("scroll", onScroll);
-      return () => container.removeEventListener("scroll", onScroll);
-    }
-  }, [onScroll]);
 
   if (loading) {
     return (

@@ -87,19 +87,19 @@ export function generateTimeSeriesData(
 
   // Find the reference date
   let refDate = sampleData.length > 0 ? new Date(sampleData[0].bucket.replace(' ', 'T')) : new Date();
-  // sampleData.forEach((item: any) => {
-  //   const d = new Date(item.bucket.replace(' ', 'T'));
-  //   if (d < refDate) refDate = d;
-  // });
+  sampleData.forEach((item: any) => {
+    const d = new Date(item.bucket.replace(' ', 'T'));
+    if (d < refDate) refDate = d;
+  });
 
   let startDate = new Date(refDate);
-  startDate.setMinutes(0, 0, 0); // Align to the top of the current hour (e.g., 8:14 PM -> 8:00 PM)
-  // if (resolution_unit === 'h') {
-  //   startDate.setHours(0, 0, 0, 0); // Start from 00:00:00 if hourly
-  // } else {
-  //   // For minutes/seconds, start from the time of the earliest sample
-  //   startDate = new Date(refDate);
-  // }
+  // startDate.setMinutes(0, 0, 0); // Align to the top of the current hour (e.g., 8:14 PM -> 8:00 PM)
+  if (resolution_unit === 'h') {
+    startDate.setHours(0, 0, 0, 0); // Start from 00:00:00 if hourly
+  } else {
+    // For minutes/seconds, start from the time of the earliest sample
+    startDate = new Date(refDate);
+  }
 
   // Build a map for fast lookup
   const bucketMap: Record<string, any> = {};
@@ -108,10 +108,45 @@ export function generateTimeSeriesData(
   });
 
   // Calculate number of intervals (inclusive)
-  const intervals = Math.floor(totalSpanMs / intervalMs);
+  const intervals = 60 // Math.floor(totalSpanMs / intervalMs);
 
   // Generate the full range of time intervals
-  let currentDate = new Date(startDate);
+  const now = new Date()
+  const endDate = new Date(now)
+  if (resolution_unit === 's') {
+    const needsAdvance = endDate.getMilliseconds() !== 0
+    endDate.setMilliseconds(0)
+    const currentSeconds = endDate.getSeconds()
+    const remainder = currentSeconds % resolution_value
+    if (remainder !== 0) {
+      endDate.setSeconds(currentSeconds + (resolution_value - remainder))
+    } else if (needsAdvance) {
+      endDate.setSeconds(currentSeconds + resolution_value)
+    }
+  } else if (resolution_unit === 'm') {
+    const needsAdvance = endDate.getSeconds() !== 0 || endDate.getMilliseconds() !== 0
+    endDate.setSeconds(0, 0)
+    const currentMinutes = endDate.getMinutes()
+    const remainder = currentMinutes % resolution_value
+    if (remainder !== 0) {
+      endDate.setMinutes(currentMinutes + (resolution_value - remainder))
+    } else if (needsAdvance) {
+      endDate.setMinutes(currentMinutes + resolution_value)
+    }
+  } else if (resolution_unit === 'h') {
+    const needsAdvance =
+      endDate.getMinutes() !== 0 || endDate.getSeconds() !== 0 || endDate.getMilliseconds() !== 0
+    endDate.setMinutes(0, 0, 0)
+    const currentHours = endDate.getHours()
+    const remainder = currentHours % resolution_value
+    if (remainder !== 0) {
+      endDate.setHours(currentHours + (resolution_value - remainder))
+    } else if (needsAdvance) {
+      endDate.setHours(currentHours + resolution_value)
+    }
+  }
+
+  let currentDate = new Date(endDate.getTime() - intervals * intervalMs)
   let timeSeriesArray: { time: string, bandwidth: string }[] = [];
 
   for (let i = 0; i <= intervals; i++) {
