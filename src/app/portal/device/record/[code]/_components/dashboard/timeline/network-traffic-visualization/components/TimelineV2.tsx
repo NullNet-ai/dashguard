@@ -2,7 +2,7 @@ import React, { useMemo } from 'react';
 
 import { useVirtualizer } from '@tanstack/react-virtual';
 
-import dummyTimeline from '../data/dummy_timeline';
+// import dummyTimeline from '../data/dummy_timeline';
 import {
   Tooltip,
   TooltipContent,

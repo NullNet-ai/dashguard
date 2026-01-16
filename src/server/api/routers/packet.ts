@@ -787,10 +787,12 @@ export const packetRouter = createTRPCRouter({
       const findFilter = Array.isArray(__filter) ? __filter?.find((item: any) => item?.id === filter_id) : undefined
 
       let _filter = findFilter?.group_advance_filters || []
+      // @ts-expect-error - Fix no type yet
       _filter = _filter.map(e => {
         if (e.filters) {
           return {
             ...e,
+            // @ts-expect-error - Fix no type yet
             filters: e.filters.map(filter => {
               if (Array.isArray(filter.values)) {
                 return filter
