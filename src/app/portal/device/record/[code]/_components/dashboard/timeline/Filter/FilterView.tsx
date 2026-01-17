@@ -11,6 +11,7 @@ import GridManageFilter from './components/GroupFilterSideDrawer/View'
 import FilterProperty from './FilterProperty'
 import { FilterContext } from './FilterProvider'
 import { useRouter } from 'next/navigation'
+import { useEventEmitter } from '~/context/EventEmitterProvider'
 
 const FilterView = () => {
   const { state } = useContext(FilterContext)
@@ -19,14 +20,21 @@ const FilterView = () => {
   const { openSideDrawer } = sideDrawerActions
   const router = useRouter();
   const defaultTab = filters.find(tab => tab.label === 'Live Data')?.id || ''
-
+  
   const [activeLabel, setActiveLabel] = useState<string>(defaultTab)
-
+  
+  const eventEmitter = useEventEmitter()
+  
   useEffect(() => {
-    if (!activeLabel && defaultTab) {
-      setActiveLabel(defaultTab)
+    const setFID = (data: any) => {
+      if (typeof data !== 'string') return
+      setActiveLabel(filters?.find(e => e.id === data)?.id || defaultTab)
     }
-  }, [defaultTab])
+    eventEmitter.on(`timeline_filter_id_active_label`, setFID)
+    return () => {
+      eventEmitter.off(`timeline_filter_id_active_label`, setFID)
+    }
+  }, [eventEmitter, filters])
 
   const handleTabClick = (tabHref: string) => {
     setActiveLabel(tabHref)

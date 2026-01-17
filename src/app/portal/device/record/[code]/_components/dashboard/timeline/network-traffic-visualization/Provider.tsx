@@ -402,6 +402,12 @@ export default function NetworkFlowProvider({ children, params }: IProps) {
     })()
   }, [unique_source_ips])
 
+  useEffect(() => {
+    if (!filterId) return
+
+    eventEmitter.emit('timeline_filter_id_active_label', filterId)
+  }, [filterId])
+
 const chartData = useMemo(() => new_bandwidth,[new_bandwidth])
 
   const state = {
