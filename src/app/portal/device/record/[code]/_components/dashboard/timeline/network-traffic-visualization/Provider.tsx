@@ -121,6 +121,7 @@ export default function NetworkFlowProvider({ children, params }: IProps) {
       device_id: params?.id || '',
       time_range: getLastTimeStamp({ count: time_count, unit: time_unit, add_remaining_time: true }) as any,
       bucket_size: resolution,
+      // @ts-expect-error - No type yet
       source_ips: (searchBy && searchBy.length) ? uniqueSourceIpsRef.current : (uniqueSourceIpsRef.current?.slice(startIndex, startIndex + add_data_count) || []),
     }
 

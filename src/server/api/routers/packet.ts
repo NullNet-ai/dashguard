@@ -626,6 +626,7 @@ export const packetRouter = createTRPCRouter({
     } = input
 
     // Extract Entity Advance Filters & Other Entity Advance Filters (For now, get ip_infos)
+    // @ts-expect-error - No type yet
     let { entityAdvanceFilters, otherEntityAdvanceFilters } = advance_filters.reduce((acc: any, item: any) => {
       if (item.entity === 'connections') {
         acc.entityAdvanceFilters.push(item)
@@ -636,6 +637,7 @@ export const packetRouter = createTRPCRouter({
     }, { entityAdvanceFilters: [], otherEntityAdvanceFilters: [] })
 
     // Add OR operator in between
+    // @ts-expect-error - No type yet
     entityAdvanceFilters = entityAdvanceFilters.reduce((acc, curr) => {
       return [...acc, curr, {
         type: 'operator',
@@ -666,9 +668,11 @@ export const packetRouter = createTRPCRouter({
               filters: [
                 {
                   type: 'criteria',
+                  // @ts-expect-error - No type yet
                   field: 'timestamp',
                   entity: 'connections',
                   operator: EOperator.IS_BETWEEN,
+                  // @ts-expect-error - No type yet
                   values: time_range,
                 },
                 {
@@ -677,9 +681,11 @@ export const packetRouter = createTRPCRouter({
                 },
                 {
                   type: 'criteria',
+                  // @ts-expect-error - No type yet
                   field: 'device_id',
                   entity: 'connections',
                   operator: EOperator.EQUAL,
+                  // @ts-expect-error - No type yet
                   values: [device_id],
                 },
               ],
@@ -706,6 +712,7 @@ export const packetRouter = createTRPCRouter({
 
     if (entityAdvanceFilters.length) {
       const filteredData = res?.data?.filter((e) => {
+        // @ts-expect-error - No type yet
         return entityAdvanceFilters.some(entityAdvanceFilter => {
           return e[entityAdvanceFilter.field]?.includes(entityAdvanceFilter.values[0])
         })
@@ -915,6 +922,7 @@ export const packetRouter = createTRPCRouter({
         return acc
       }, { entitySearch: [], otherEntitySearch: [] })
 
+      // @ts-expect-error - No type yet
       entitySearch = entitySearch.reduce((acc, curr) => {
         return [...acc, curr, {
           type: 'operator',
