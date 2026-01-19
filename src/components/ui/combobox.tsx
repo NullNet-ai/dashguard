@@ -85,6 +85,14 @@ const ComboBox = React.forwardRef<HTMLDivElement, ComboBoxProps>(
           className
         )}
       >
+        <Input
+          disabled={disabled}
+          value={inputValue}
+          onChange={handleInputChange}
+          placeholder={inputPlaceholder}
+          className="border-0 rounded-l-none focus-visible:ring-0 shadow-none rounded-r-md"
+          readOnly={readonly}
+        />
         <Select value={selectValue} onValueChange={handleSelectChange} disabled={disabled || readonly}  >
           <SelectTrigger
             className={cn("h-[36px] w-[120px] border-0 bg-secondary rounded-r-none focus:ring-primary group-focus-visible:border-r-primary focus:ring-0 shadow-none rounded-l-md border-r border-r-input disabled:cursor-auto  focus-visible:ring-1",disabled && "border-r-0 text-muted-foreground disabled:cursor-not-allowed" )}
@@ -100,14 +108,6 @@ const ComboBox = React.forwardRef<HTMLDivElement, ComboBoxProps>(
             ))}
           </SelectContent>
         </Select>
-        <Input
-          disabled={disabled}
-          value={inputValue}
-          onChange={handleInputChange}
-          placeholder={inputPlaceholder}
-          className="border-0 rounded-l-none focus-visible:ring-0 shadow-none rounded-r-md"
-          readOnly={readonly}
-        />
       </div>
     );
   }
