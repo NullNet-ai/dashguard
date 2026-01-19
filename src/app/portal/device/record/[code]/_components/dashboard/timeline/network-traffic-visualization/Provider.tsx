@@ -121,7 +121,7 @@ export default function NetworkFlowProvider({ children, params }: IProps) {
       device_id: params?.id || '',
       time_range: getLastTimeStamp({ count: time_count, unit: time_unit, add_remaining_time: true }) as any,
       bucket_size: resolution,
-      source_ips: uniqueSourceIpsRef.current?.slice(startIndex, startIndex + add_data_count) || [],
+      source_ips: (searchBy && searchBy.length) ? uniqueSourceIpsRef.current : (uniqueSourceIpsRef.current?.slice(startIndex, startIndex + add_data_count) || []),
     }
 
     const _bandwidth: any = await getBandwidthActions.mutateAsync(getBandwidthParams);
@@ -147,13 +147,13 @@ export default function NetworkFlowProvider({ children, params }: IProps) {
         if(curr?.source_ip === e?.source_ip) {
           return [...acc, { ...curr, result: [...curr.result, ...e.result] }]
         }
-        return [...acc, curr]
+        return [...acc, { ...curr, time_unit, time_count, resolution, time_range }]
       }, [])
     })
 
     setNewBandwidth(updated_new_bandwidth)
    
-  }, [getBandwidthActions, params?.id, resolution, time_count, time_range, time_unit])
+  }, [getBandwidthActions, params?.id, resolution, time_count, time_range, time_unit, searchBy])
   
   
   useEffect(() => {
@@ -215,19 +215,26 @@ export default function NetworkFlowProvider({ children, params }: IProps) {
     }
 
     const tr = getLastTimeStamp({ count: 2, unit: 'second', add_remaining_time: true }) as any
+    // const trV2 = getLastTimeStamp({ count: 60, unit: 'second', add_remaining_time: true }) as any
     const data = await getUniqueSourceActions.mutateAsync({
     device_id: params?.id || '',
-    time_range: tr,
+    time_range: tr, // trV2
     filter_id: filterId,
   });
     // Get Connections
     const getBandwidthParams = {
       device_id: params?.id || '',
-      time_range: tr,
+      time_range: tr, // trV2, // tr,
       bucket_size: resolution,
-      source_ips: data
+      source_ips: data, // uniq([...data, ...ips]).slice(20)
     }
     const _bandwidth: any = await getBandwidthActions.mutateAsync(getBandwidthParams);
+
+    // setNewBandwidth(_bandwidth?.data?.map((item: Record<string, any>) => {
+    //   return { ...item, time_unit, time_count, resolution, time_range };
+    // }) || [])
+
+    // return
 
     let updated_new_bandwidth = new_bandwidth
 

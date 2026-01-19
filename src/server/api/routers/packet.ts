@@ -623,7 +623,27 @@ export const packetRouter = createTRPCRouter({
       time_range,
       device_id,
       _query,
-    } = input || {}
+    } = input
+
+    // Extract Entity Advance Filters & Other Entity Advance Filters (For now, get ip_infos)
+    let { entityAdvanceFilters, otherEntityAdvanceFilters } = advance_filters.reduce((acc: any, item: any) => {
+      if (item.entity === 'connections') {
+        acc.entityAdvanceFilters.push(item)
+      } else if (item.entity === 'ip_infos') {
+        acc.otherEntityAdvanceFilters.push(item)
+      }
+      return acc
+    }, { entityAdvanceFilters: [], otherEntityAdvanceFilters: [] })
+
+    // Add OR operator in between
+    entityAdvanceFilters = entityAdvanceFilters.reduce((acc, curr) => {
+      return [...acc, curr, {
+        type: 'operator',
+        operator: EOperator.OR,
+      }]
+    }, [])
+    entityAdvanceFilters.pop()
+
 
     if ((Array.isArray(advance_filters) && advance_filters.length && !advance_filters[0]?.values?.[0]) || !Array.isArray(advance_filters) || !advance_filters.length) {
       return {
@@ -631,41 +651,49 @@ export const packetRouter = createTRPCRouter({
       }
     }
 
-    const res = await ctx.dnaClient
+    let res = await ctx.dnaClient
       .findAll({
         entity: 'connections',
         token: ctx.token.value,
         query: {
           track_total_records: true,
           pluck: [
-            'id', 'status', 'interface_name', 'source_ip', 'destination_ip', 'timestamp'
+            'id', 'status', 'interface_name', 'source_ip', 'destination_ip', 'timestamp', 'protocol', 'interface_name'
           ],
-          advance_filters: [
-
+          group_advance_filters: [
             {
               type: 'criteria',
-              field: 'timestamp',
-              entity: 'connections',
-              operator: EOperator.IS_BETWEEN,
-              values: time_range,
+              filters: [
+                {
+                  type: 'criteria',
+                  field: 'timestamp',
+                  entity: 'connections',
+                  operator: EOperator.IS_BETWEEN,
+                  values: time_range,
+                },
+                {
+                  type: 'operator',
+                  operator: EOperator.AND,
+                },
+                {
+                  type: 'criteria',
+                  field: 'device_id',
+                  entity: 'connections',
+                  operator: EOperator.EQUAL,
+                  values: [device_id],
+                },
+              ],
             },
-            {
-              type: 'operator',
-              operator: EOperator.AND,
-            },
-            {
-              type: 'criteria',
-              field: 'device_id',
-              entity: 'connections',
-              operator: EOperator.EQUAL,
-              values: [device_id],
-            },
-            {
-              type: 'operator',
-              operator: EOperator.AND,
-            },
-            ...advance_filters as any,
-
+            // {
+            //   type: 'operator',
+            //   operator: 'and',
+            // },
+            // {
+            //   type: 'criteria',
+            //   filters: [
+            //     ...entityAdvanceFilters as any,
+            //   ],
+            // },
           ],
           order: {
             limit: limit as number,
@@ -675,6 +703,59 @@ export const packetRouter = createTRPCRouter({
         },
       })
       .execute()
+
+    if (entityAdvanceFilters.length) {
+      const filteredData = res?.data?.filter((e) => {
+        return entityAdvanceFilters.some(entityAdvanceFilter => {
+          return e[entityAdvanceFilter.field]?.includes(entityAdvanceFilter.values[0])
+        })
+      })
+      if (filteredData?.length) {
+        res.data = filteredData
+      }
+    }
+    
+    // If there's Other Entity Advance Filters = ip_infos
+    if (otherEntityAdvanceFilters.length && otherEntityAdvanceFilters[0]?.entity === 'ip_infos') {
+      // Filter Connections
+      const filteredConnections = await Bluebird.filter(
+        res?.data,
+        async (e) => {
+          const resIpInfo = await ctx.dnaClient
+            .findAll({
+              entity: 'ip_infos',
+              token: ctx.token.value,
+              query: {
+                track_total_records: true,
+                pluck: ['ip', 'country'],
+                advance_filters: [
+                  {
+                    type: 'criteria',
+                    field: 'ip',
+                    entity: 'ip_infos',
+                    operator: EOperator.EQUAL,
+                    values: [e.source_ip],
+                  },
+                  {
+                    type: 'operator',
+                    operator: EOperator.AND,
+                  },
+                  ...otherEntityAdvanceFilters as any,
+                ],
+                order: {
+                  limit: 1,
+                  by_field: 'code',
+                  by_direction: EOrderDirection.DESC,
+                },
+              },
+            })
+            .execute()
+          return resIpInfo?.data?.length > 0
+        },
+        { concurrency: 100 },
+      )
+      res.data = filteredConnections
+    }
 
     return {
       items: res?.data,
@@ -825,9 +906,26 @@ export const packetRouter = createTRPCRouter({
         return true
       })
 
+      let { entitySearch, otherEntitySearch } = search?.reduce((acc: any, item: any) => {
+      if (item.entity === 'connections') {
+          acc.entitySearch.push(item)
+        } else if (item.entity === 'ip_infos') {
+          acc.otherEntitySearch.push(item)
+        }
+        return acc
+      }, { entitySearch: [], otherEntitySearch: [] })
+
+      entitySearch = entitySearch.reduce((acc, curr) => {
+        return [...acc, curr, {
+          type: 'operator',
+          operator: EOperator.OR,
+        }]
+      }, [])
+      entitySearch.pop()
+
       let default_filters: any = [
-        ...(search?.length
-          ? [...search || [],
+        ...(entitySearch?.length
+          ? [...entitySearch || [],
               {
                 type: 'operator',
                 operator: EOperator.AND,
@@ -973,6 +1071,47 @@ export const packetRouter = createTRPCRouter({
         return _res?.filter(Boolean)
       }
       else {
+        // If there's Other Entity Advance Filters = ip_infos
+        if (source_ips?.length && otherEntitySearch.length && otherEntitySearch[0]?.entity === 'ip_infos') {
+        // Filter Source IPs
+          const filteredSourceIPs = await Bluebird.filter(source_ips, async (source_ip: string) => {
+            const resIpInfo = await ctx.dnaClient
+              .findAll({
+                entity: 'ip_infos',
+                token: ctx.token.value,
+                query: {
+                  advance_filters: [
+                    {
+                      type: 'criteria',
+                      field: 'ip',
+                      operator: EOperator.EQUAL,
+                      values: [source_ip],
+                    },
+                    {
+                      type: 'operator',
+                      operator: EOperator.AND,
+                    },
+                    {
+                      type: 'criteria',
+                      field: 'country',
+                      operator: EOperator.EQUAL,
+                      values: otherEntitySearch?.[0]?.values,
+                    },
+                  ],
+                  order: {
+                    limit: 1,
+                    by_field: 'ip',
+                    by_direction: EOrderDirection.DESC,
+                  },
+                  pluck: ['ip', 'country'],
+                },
+              })
+              .execute()
+
+            return resIpInfo?.data?.length > 0
+          }, { concurrency: 100 })
+          source_ips = filteredSourceIPs
+        }
         if (_connections_length == limit) {
           const new_start = starts_at + limit
           await filterConnections(new_start)
