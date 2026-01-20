@@ -65,6 +65,8 @@ const TrafficGraph = ({defaultValues, params}: IFormProps) => {
   const getAccount = api.organizationAccount.getAccountID.useMutation();
   const taskQueueRef = useRef<Array<() => Promise<void>>>([])
   const isQueueWorkerRunningRef = useRef(false)
+  const isQueueEnabledRef = useRef(true)
+  const queueEpochRef = useRef(0)
   const isUnmountedRef = useRef(false)
   const startQueueServiceRef = useRef<(() => void) | null>(null)
 
@@ -75,6 +77,7 @@ const TrafficGraph = ({defaultValues, params}: IFormProps) => {
     void (async () => {
       try {
         while (!isUnmountedRef.current) {
+          if (!isQueueEnabledRef.current) break
           const next = taskQueueRef.current.shift()
           if (!next) break
           try {
@@ -85,7 +88,7 @@ const TrafficGraph = ({defaultValues, params}: IFormProps) => {
         }
       } finally {
         isQueueWorkerRunningRef.current = false
-        if (!isUnmountedRef.current && taskQueueRef.current.length > 0) {
+        if (!isUnmountedRef.current && isQueueEnabledRef.current && taskQueueRef.current.length > 0) {
           startQueueServiceRef.current?.()
         }
       }
@@ -97,7 +100,20 @@ const TrafficGraph = ({defaultValues, params}: IFormProps) => {
   }, [startQueueService])
 
   const enqueueTask = useCallback((task: () => Promise<void>) => {
+    if (!isQueueEnabledRef.current) return
     taskQueueRef.current.push(task)
+    startQueueServiceRef.current?.()
+  }, [])
+
+  const stopQueueService = useCallback(() => {
+    isQueueEnabledRef.current = false
+    queueEpochRef.current += 1
+    taskQueueRef.current = []
+  }, [])
+
+  const resumeQueueService = useCallback(() => {
+    if (isUnmountedRef.current) return
+    isQueueEnabledRef.current = true
     startQueueServiceRef.current?.()
   }, [])
 const { refetch: refetchTimeUnitandResolution } = api.cachedFilter.fetchCachedFilterTimeUnitandResolution.useQuery(
@@ -111,6 +127,7 @@ const { refetch: refetchTimeUnitandResolution } = api.cachedFilter.fetchCachedFi
   )
     useEffect(() => {
       if (filterId) {
+        stopQueueService()
         setLoading(true)
         const fetchTimeUnitandResolution = async() => {
           const {
@@ -123,12 +140,13 @@ const { refetch: refetchTimeUnitandResolution } = api.cachedFilter.fetchCachedFi
               time_unit: time_unit  as 'day' | 'hour',
               resolution: resolution as '1h'
             })
-            
             setGraphType(graph_type ?? "area")
+            resumeQueueService()
+            setLoading(false)
         }
         fetchTimeUnitandResolution()
       }
-    }, [filterId, (searchBy ?? [])?.length])
+    }, [filterId, (searchBy ?? [])?.length, refetchTimeUnitandResolution, resumeQueueService, stopQueueService])
 
      useEffect(() => {
         if (!eventEmitter) return
@@ -155,33 +173,38 @@ const { refetch: refetchTimeUnitandResolution } = api.cachedFilter.fetchCachedFi
         }
       }, [eventEmitter])
 
-  const timeRangeFormat = React.useMemo(() => {
+  const timeRangeFormat = () => {
     setResolution(null)
-    // if(filterId === '01JNQ9WPA2JWNTC27YCTCYC1FE') {
-    //   return getLastTimeStamp({count: 2, unit: 'minute', _now: new Date()})
-    // }
-    return getLastTimeStamp({count: time_count, unit: time_unit})
-  }, [ time_count, time_unit, filterId])
+    if(filterId === '01JNQ9WPA2JWNTC27YCTCYC1FE') {
+      return getLastTimeStamp({count: 2, unit: 'minute', _now: new Date(), add_remaining_time: true, })
+    }
+    return getLastTimeStamp({count: time_count, unit: time_unit, _now: new Date(), add_remaining_time: true, })
+  }
   
 
-
-  const { data: packetsIP = [], refetch } = api.packet.getBandwith.useQuery(
-    {
-      bucket_size: resolution,
-      time_range: timeRangeFormat as any,
-      timezone,
-      // @ts-expect-error - No type yet
-      device_id: params.id,
-    }, { enabled:false })
+  const getBandwidth = api.packet.getBandwith.useMutation()
+  const [packetsIP, setPacketsIP] = useState<any[]>([])
   
   const enqueueRefetch = useCallback(() => {
+    if (!isQueueEnabledRef.current) return
+    const epochAtEnqueue = queueEpochRef.current
     enqueueTask(async () => {
-      setLoading(true)
       console.debug('[pooling] getBandwidth')
-      await refetch()
+      const tr = timeRangeFormat() as any
+      const res = await getBandwidth.mutateAsync({
+        bucket_size: resolution,
+        time_range: tr,
+        timezone,
+        // @ts-expect-error - No type yet
+        device_id: params.id,
+      })
+      if (isUnmountedRef.current) return
+      if (!isQueueEnabledRef.current) return
+      if (queueEpochRef.current !== epochAtEnqueue) return
+      setPacketsIP(res || [])
       setLoading(false)
     })
-  }, [enqueueTask, refetch])
+  }, [enqueueTask, getBandwidth, params?.id, resolution])
 
     useEffect(() => {
       if(!packetsIP?.length) return
@@ -255,6 +278,7 @@ const { refetch: refetchTimeUnitandResolution } = api.cachedFilter.fetchCachedFi
   useEffect(() => {
     const twelveHoursMs = 2000 // 12 * 60 * 60 * 1000
     const interval = window.setInterval(() => {
+      if (loading) return
       enqueueRefetch()
     }, twelveHoursMs)
 
@@ -281,7 +305,7 @@ const { refetch: refetchTimeUnitandResolution } = api.cachedFilter.fetchCachedFi
           <Filter params={params} type='traffic_graph_filter'  />
           <Search  params={{...params, router: 'packet', resolver: 'filterPackets' }} filter_type='traffic_graph_search' />
         </div>
-    {  loading ? <Loader
+    {loading ? <Loader
       className="bg-primary text-primary"
       label="Fetching data..."
       size="md"

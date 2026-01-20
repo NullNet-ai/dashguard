@@ -39,9 +39,9 @@ export const columns = [
     label: 'Destination Mac Address',
     accessorKey: 'destination_mac',
   },
-  {
-    header: 'Country',
-    label: 'Country',
-    accessorKey: 'country',
-  },
+  // {
+  //   header: 'Country',
+  //   label: 'Country',
+  //   accessorKey: 'country',
+  // },
 ]

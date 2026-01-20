@@ -235,7 +235,7 @@ export const packetRouter = createTRPCRouter({
       return res?.data
     }),
 
-  getBandwith: privateProcedure.input(z.object({ bucket_size: z.string().nullable(), time_range: z.array(z.string()), timezone: z.string(), device_id: z.string() })).query(async ({ input, ctx }) => {
+  getBandwith: privateProcedure.input(z.object({ bucket_size: z.string().nullable(), time_range: z.array(z.string()), timezone: z.string(), device_id: z.string() })).mutation(async ({ input, ctx }) => {
     const { bucket_size, time_range, timezone, device_id } = input
     if (
       !bucket_size
@@ -281,6 +281,7 @@ export const packetRouter = createTRPCRouter({
           order_direction: EOrderDirection.ASC,
         },
         timezone,
+        limit: 60,
       },
       token: ctx.token.value,
 
@@ -297,7 +298,7 @@ export const packetRouter = createTRPCRouter({
     //
     const { unit, value = '' } = parseTimeString(bucket_size) as any || {}
 
-    const timestamps = getAllTimestampsBetweenDates(_start, _end, unit, value)
+    const timestamps = getAllTimestampsBetweenDates(_start, _end, unit, value).slice(-60)
 
     const result = timestamps.map((item) => {
       const data = res?.data.find((element: any) => element.bucket?.includes(item))
