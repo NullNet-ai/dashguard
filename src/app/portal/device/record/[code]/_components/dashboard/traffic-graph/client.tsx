@@ -298,6 +298,12 @@ const { refetch: refetchTimeUnitandResolution } = api.cachedFilter.fetchCachedFi
     return () => cancelAnimationFrame(raf)
   }, [filteredData])
 
+  useEffect(() => {
+      if (!filterId) return
+  
+      eventEmitter.emit('timeline_filter_id_active_label', filterId)
+    }, [filterId])
+
   return (
     <div className=" mx-auto max-w-[calc(100vw-39em)]">
       <div className='sticky top-[29px] z-[50] bg-white'>

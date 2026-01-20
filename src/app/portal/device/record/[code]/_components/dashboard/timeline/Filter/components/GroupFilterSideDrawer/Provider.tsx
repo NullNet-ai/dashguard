@@ -188,6 +188,7 @@ export function ManageFilterProvider({
     const {id: filter_id, href} = await saveGridFilter(modifyFilterDetails, filter_type) as { id: string, href: string }
     eventEmitter.emit(`${filter_type}_manage_filter`, { modifyFilterDetails: { ...modifyFilterDetails, id: filter_id } })
     eventEmitter.emit('timeline_filter_id', filter_id)
+    eventEmitter.emit('traffic_graph_filter_id', filter_id)
 
     setCreateFilterLoading(false)
     closeSideDrawer()
