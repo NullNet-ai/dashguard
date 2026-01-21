@@ -12,6 +12,7 @@ import { api } from '~/trpc/react'
 import { type IFormProps } from '../types'
 import { formatBytes } from './function/formatBytes'
 import { useSocketConnection } from '../custom-hooks/useSocketConnection';
+import { useChartSize } from '../multi-graph/components/ChartCustomContainer'
 
 const channel_name = 'connections_pie_chart'
 const timezone = Intl.DateTimeFormat().resolvedOptions().timeZone
@@ -25,6 +26,54 @@ const chartConfig = {
   },
 } satisfies ChartConfig
 
+const calculateRadius = (containerWidth: number) => {
+  // Base values when width is 300
+  const BASE_WIDTH = 300;
+  const BASE_INNER_RADIUS = 124;
+  const BASE_OUTER_RADIUS = 147;
+  // Cap the width at 300 maximum
+  const clampedWidth = Math.min(containerWidth, BASE_WIDTH);
+  
+  // Calculate the scaling factor
+  const scale = clampedWidth / BASE_WIDTH;
+  
+  return {
+    innerRadius: Math.round(BASE_INNER_RADIUS * scale),
+    outerRadius: Math.round(BASE_OUTER_RADIUS * scale),
+  };
+};
+
+
+const calculateNeedlePoints = (containerWidth: number) => {
+  // Base values when width is 300
+  const BASE_WIDTH = 300;
+  
+  // Cap the width at 300 maximum
+  const clampedWidth = Math.min(containerWidth, BASE_WIDTH);
+  const scale = clampedWidth / BASE_WIDTH;
+  
+  // Base needle coordinates (for 300x300 viewBox)
+  // points="150,45 142,150 158,150"
+  // These form a triangle: tip at (150,45), left base at (142,150), right base at (158,150)
+  
+  const centerX = BASE_WIDTH / 2 * scale;
+  const centerY = BASE_WIDTH / 2 * scale;
+  
+  // Tip of needle (top center)
+  const tipY = 45 * scale;
+  
+  // Base of needle (at center, with width)
+  const baseLeftX = 142 * scale;
+  const baseRightX = 158 * scale;
+  
+  return {
+    viewBox: `0 0 ${clampedWidth} ${clampedWidth}`,
+    points: `${centerX},${tipY} ${baseLeftX},${centerY} ${baseRightX},${centerY}`,
+    circleCenter: { cx: centerX, cy: centerY },
+    circleRadius: 8 * scale,
+  };
+};
+
 const PieChartComponent = ({ defaultValues, interfaces }: IFormProps) => {
   const [trafficData, setTrafficData] = useState({
     traffic: initialTraffic,
@@ -33,6 +82,8 @@ const PieChartComponent = ({ defaultValues, interfaces }: IFormProps) => {
   const [animatedTraffic, setAnimatedTraffic] = useState(initialTraffic)
   const [token, setToken] = React.useState<string | null>(null)
   const [org_acc_id, setOrgAccountID] = React.useState<string | null>(null)
+
+  const {size} = useChartSize()
 
   const {socket} = useSocketConnection({channel_name, token})
   
@@ -135,23 +186,28 @@ const PieChartComponent = ({ defaultValues, interfaces }: IFormProps) => {
 
   const previousTraffic = previousTrafficRef.current
 
+  const { innerRadius, outerRadius } = calculateRadius(size.width || 300);
+   const needleProps = calculateNeedlePoints(size.width || 300);
+   
   return (
-    <ResponsiveContainer height={280} width="100%">
-      <div className="flex-1 pb-0 relative">
+    <ResponsiveContainer height={
+      Math.min(size.width, 280) || 280
+    } width="100%">
+      <div className="flex-1 pb-0 relative test-cont">
         <ChartContainer
-          className="mx-auto aspect-square max-h-[300px]"
+          className="mx-auto aspect-square max-h-[300px] chart-container-pie"
           config={chartConfig}
         >
-          <PieChart className="relative z-10" height={300} width={300}>
+          <PieChart className="relative z-10 the-pie-chart" height={Math.min(size.width, 300) || 300} width={Math.min(size.width, 300) || 300}>
             <Tooltip content={<ChartTooltipContent hideLabel={true} />} />
             {/* Background gauge */}
             <Pie
               data={[{ name: 'Full', value: trafficData.maxTraffic, fill: '#E5E7EB' }]}
               dataKey="value"
               endAngle={0}
-              innerRadius={117} // Increased from 110 by 7
+              innerRadius={innerRadius} // Increased from 110 by 7
               nameKey="name"
-              outerRadius={147} // Increased from 140 by 7
+              outerRadius={outerRadius} // Increased from 140 by 7
               startAngle={180}
             />
             {/* Traffic gauge */}
@@ -161,16 +217,16 @@ const PieChartComponent = ({ defaultValues, interfaces }: IFormProps) => {
               data={[{ name: 'Traffic', value: trafficData?.traffic, fill: chartConfig.traffic.color }]}
               dataKey="value"
               endAngle={pieEndAngle}
-              innerRadius={117} // Increased from 110 by 7
+              innerRadius={innerRadius} // Increased from 110 by 7
               nameKey="name"
-              outerRadius={147} // Increased from 140 by 7
+              outerRadius={outerRadius} // Increased from 140 by 7
               startAngle={180}
             />
           </PieChart>
         </ChartContainer>
         <div className="absolute inset-0 flex flex-col items-center justify-center z-30">
           {/* Gauge needle */}
-          <svg
+          {/* <svg
             className="absolute transition-transform duration-[16ms] ease-linear"
             height="300"
             style={{ transform: `rotate(${arrowRotation}deg)` }}
@@ -179,7 +235,24 @@ const PieChartComponent = ({ defaultValues, interfaces }: IFormProps) => {
           >
             <polygon fill="black" points="150,45 142,150 158,150" />
             <circle cx="150" cy="150" fill="black" r="8" />
+          </svg> */}
+
+            <svg
+              className="absolute transition-transform duration-[16ms] ease-linear"
+              height={size.width || 300}
+              style={{ transform: `rotate(${arrowRotation}deg)` }}
+              viewBox={needleProps.viewBox}
+              width={size.width || 300}
+            >
+            <polygon fill="black" points={needleProps.points} />
+            <circle 
+              cx={needleProps.circleCenter.cx} 
+              cy={needleProps.circleCenter.cy} 
+              fill="black" 
+              r={needleProps.circleRadius} 
+            />
           </svg>
+          
           {/* Traffic value display */}
           <div className="absolute top-[160px] bg-background/80 rounded-lg px-4 py-2 backdrop-blur-sm">
             <div className="text-xl font-bold tabular-nums">

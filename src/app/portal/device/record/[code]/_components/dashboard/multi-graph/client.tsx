@@ -21,6 +21,7 @@ import { renderChart } from './function/renderChart'
 import { useSocketConnection } from '../custom-hooks/useSocketConnection';
 import { updateNetworkBuckets } from './function/updateNetworkBucket';
 import { Alert, AlertContent, AlertTitle } from "~/components/ui/alert";
+import ChartCustomContainer from './components/ChartCustomContainer'
 
 
 const timezone = Intl.DateTimeFormat().resolvedOptions().timeZone
@@ -198,7 +199,7 @@ const InteractiveGraph = ({
   }, [form.watch('interfaces')])
 
   return (
-    <div className="mt-4 flex flex-col gap-2">
+    <div className="flex flex-col gap-3">
       {/* Display offline message if the device is offline */}
       { !defaultValues?.is_device_online && (
         <Alert variant="warning" dismissible>
@@ -210,7 +211,7 @@ const InteractiveGraph = ({
       )}
   
       {/* Always display the graphs */}
-      <div className="flex flex-row gap-4 px-4">
+      <div className="flex flex-row gap-3  px-0">
         <div className="w-[30%]">
           <Card className="px-4 min-h-[432px]">
             <div className="text-base py-2 pt-4">
@@ -247,9 +248,12 @@ const InteractiveGraph = ({
                       },
                       render: () => {
                         return (
-                          <div className="flex items-center justify-center mt-10">
-                            <FormClientFetch interfaces={_pie_chart_interfaces} />
-                          </div>
+                          <ChartCustomContainer>
+                            <div className="flex items-center justify-center mt-10 pie-container-form">
+                              <FormClientFetch interfaces={_pie_chart_interfaces} />
+                            </div>
+                          </ChartCustomContainer>
+                          
                         );
                       },
                     },
@@ -274,7 +278,7 @@ const InteractiveGraph = ({
               {/* <h3>Chart Label</h3> */}
             </div>
             <Form {...form}>
-              <div className="grid !grid-cols-4 gap-4 pt-2">
+              <div className="grid !grid-cols-4 gap-4 pt-2.5">
                 <FormModule
                   fields={[
                     {
