@@ -154,6 +154,7 @@ const ConfigurationRuleGrid = ({
           disableDefaultAction: true,
           hideCreateButton: true,
           enableRowSelection: false,
+          enableRowClick: false,
           // rowClickCustomAction: ({ row }) => {
           //   const { original } = row || {};
           //   const { code: page_code } = original?.page || {};
