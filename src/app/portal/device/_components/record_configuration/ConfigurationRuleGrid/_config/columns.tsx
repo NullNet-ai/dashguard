@@ -36,13 +36,6 @@ const gridColumns = [
     },
   },
   {
-    header: 'Type',
-    accessorKey: 'type',
-    search_config: {
-      operator: 'like',
-    },
-  },
-  {
     header: 'Action',
     accessorKey: 'policy',
     search_config: {
