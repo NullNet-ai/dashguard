@@ -18,7 +18,7 @@ import { generateOceanCoordinates } from '../functions/generateOceanCoordinates'
 import { getConnectionKey } from '../functions/getConnectionKey'
 import { createDestinationMarker, createSourceMarker, ORANGE } from '../functions/createMarker'
 
-const MapComponent = ({ countryTrafficData }: Record<string, any>) => {
+const MapComponent = ({ countryTrafficData, filterId }: Record<string, any>) => {
   const { ipData = [] } = countryTrafficData ?? {};
   const [map, setMap] = useState<any>(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -29,6 +29,86 @@ const MapComponent = ({ countryTrafficData }: Record<string, any>) => {
   const activeConnections: any = useRef({});
   const priorityConnections: any = useRef([]);
   const connectionElements: any = useRef({});
+  const mapInstanceRef: any = useRef(null);
+  const svgDefsElement: any = useRef(null);
+  const trafficLayersRef: any = useRef(new Set());
+  const drawSessionRef: any = useRef(0);
+  const drawTimeoutsRef: any = useRef(new Set());
+
+  const clearConnectionLayers = useCallback((mapInstance: any) => {
+    if (!mapInstance) return;
+
+    trafficLayersRef.current.forEach((layer: any) => {
+      if (layer && mapInstance.hasLayer(layer)) {
+        mapInstance.removeLayer(layer);
+      }
+    });
+    trafficLayersRef.current.clear();
+
+    mapInstance.eachLayer((layer: any) => {
+      const iconClassName = layer?.options?.icon?.options?.className;
+      const layerClassName = layer?.options?.className;
+
+      const isTrafficMarker =
+        typeof iconClassName === 'string' &&
+        (iconClassName.includes('source-dot') || iconClassName.includes('destination-dot'));
+
+      const isTrafficLine =
+        typeof layerClassName === 'string' && layerClassName.includes('traffic-flow-line');
+
+      if (isTrafficMarker || isTrafficLine) {
+        mapInstance.removeLayer(layer);
+      }
+    });
+
+    Object.keys(connectionElements.current).forEach((key) => {
+      const elementsArr = connectionElements.current[key];
+      if (Array.isArray(elementsArr)) {
+        elementsArr.forEach((elements) => {
+          if (elements?.sourceMarker) mapInstance.removeLayer(elements.sourceMarker);
+          if (elements?.destMarker) mapInstance.removeLayer(elements.destMarker);
+          if (elements?.flowLine) mapInstance.removeLayer(elements.flowLine);
+        });
+      } else if (elementsArr) {
+        if (elementsArr.sourceMarker) mapInstance.removeLayer(elementsArr.sourceMarker);
+        if (elementsArr.destMarker) mapInstance.removeLayer(elementsArr.destMarker);
+        if (elementsArr.flowLine) mapInstance.removeLayer(elementsArr.flowLine);
+      }
+    });
+
+    connectionElements.current = {};
+  }, []);
+
+  const trackTrafficLayer = useCallback((layer: any) => {
+    if (!layer) return;
+    trafficLayersRef.current.add(layer);
+  }, []);
+
+  const clearDrawTimeouts = useCallback(() => {
+    drawTimeoutsRef.current.forEach((timeoutId: any) => clearTimeout(timeoutId));
+    drawTimeoutsRef.current.clear();
+  }, []);
+
+  const scheduleTimeout = useCallback((fn: () => void, delayMs: number) => {
+    const timeoutId: any = setTimeout(() => {
+      drawTimeoutsRef.current.delete(timeoutId);
+      fn();
+    }, delayMs);
+    drawTimeoutsRef.current.add(timeoutId);
+    return timeoutId;
+  }, []);
+
+  const clearAllCountryHighlights = useCallback((mapInstance: any) => {
+    if (!mapInstance) return;
+
+    Object.keys(countryHighlights.current).forEach((country) => {
+      const { highlight, label } = countryHighlights.current[country] || {};
+      if (highlight) mapInstance.removeLayer(highlight);
+      if (label) mapInstance.removeLayer(label);
+    });
+
+    countryHighlights.current = {};
+  }, []);
 
   // Check if a point is on land using the GeoJSON data
   const isPointOnLand = useCallback((lat: any, lng: any) => {
@@ -393,6 +473,7 @@ const MapComponent = ({ countryTrafficData }: Record<string, any>) => {
         maxBounds: [[-85, -180], [85, 180]],
         maxBoundsViscosity: 1.0,
       });
+      mapInstanceRef.current = mapInstance;
       
       // Disable all zoom interactions
       mapInstance.scrollWheelZoom.disable();
@@ -421,6 +502,7 @@ const MapComponent = ({ countryTrafficData }: Record<string, any>) => {
         </defs>
       `;
       document.body.appendChild(svg);
+      svgDefsElement.current = svg;
       // Add world borders
       const countries = await fetchGeoJSON(countriesGeoJSON);
       L.geoJSON(countries, {
@@ -473,7 +555,15 @@ const MapComponent = ({ countryTrafficData }: Record<string, any>) => {
     initializeMap().catch(console.error);
     
     return () => {
-      if (map) map.remove();
+      clearDrawTimeouts();
+      if (mapInstanceRef.current) {
+        mapInstanceRef.current.remove();
+        mapInstanceRef.current = null;
+      }
+      if (svgDefsElement.current) {
+        svgDefsElement.current.remove();
+        svgDefsElement.current = null;
+      }
     };
   }, []);
 
@@ -481,9 +571,23 @@ const MapComponent = ({ countryTrafficData }: Record<string, any>) => {
 
   useEffect(() => {
     if (!map || isLoading) return;
+
+    drawSessionRef.current += 1;
+    clearDrawTimeouts();
+    clearConnectionLayers(map);
+    clearAllCountryHighlights(map);
+    activeConnections.current = {};
+    priorityConnections.current = [];
+    removedIpCache.current = {};
+  }, [filterId, map, isLoading, clearConnectionLayers, clearAllCountryHighlights, clearDrawTimeouts]);
+
+  useEffect(() => {
+    if (!map || isLoading) return;
   
     const loadAllConnections = async () => {
+      const drawSession = drawSessionRef.current;
       const allConnections = await processIpData();
+      if (drawSessionRef.current !== drawSession) return;
   
       let currentDataPoints: any = [];
   
@@ -491,26 +595,12 @@ const MapComponent = ({ countryTrafficData }: Record<string, any>) => {
         currentDataPoints = updateDataPoints(currentDataPoints, conn, removedIpCache);
       }
   
-      // Remove all old markers and lines from the map and clear connectionElements
-      Object.keys(connectionElements.current).forEach((key) => {
-        const elementsArr = connectionElements.current[key];
-        if (Array.isArray(elementsArr)) {
-          elementsArr.forEach((elements) => {
-            if (elements.sourceMarker) map.removeLayer(elements.sourceMarker);
-            if (elements.destMarker) map.removeLayer(elements.destMarker);
-            if (elements.flowLine) map.removeLayer(elements.flowLine);
-          });
-        } else if (elementsArr) {
-          if (elementsArr.sourceMarker) map.removeLayer(elementsArr.sourceMarker);
-          if (elementsArr.destMarker) map.removeLayer(elementsArr.destMarker);
-          if (elementsArr.flowLine) map.removeLayer(elementsArr.flowLine);
-        }
-      });
-      connectionElements.current = {};
+      clearConnectionLayers(map);
 
       const usedCountries = new Set();
 
       currentDataPoints.forEach((conn: Record<string, any>) => {
+        if (drawSessionRef.current !== drawSession) return;
         const hasSource = conn.source_country && conn.source_country.country && conn.source_country.country !== "No IP Info";
         const hasDest = conn.destination_country && conn.destination_country.country && conn.destination_country.country !== "No IP Info";
 
@@ -518,15 +608,19 @@ const MapComponent = ({ countryTrafficData }: Record<string, any>) => {
         let destinationCoordinates = null;
         let sourceLabel = conn.sourceIsNoIpInfo ? 'Ocean (No IP Info)' : conn.sourceLocation;
         let destLabel = conn.destIsNoIpInfo ? 'Ocean (No IP Info)' : conn.destinationLocation;
+        let sourceMarker = null;
+        let destMarker = null;
 
         // Always assign coordinates, even for ocean-to-ocean
         if (hasSource) {
+          if (drawSessionRef.current !== drawSession) return;
           const aliasSource = COUNTRY_ALIASES[conn.source_country.country] || conn.source_country.country;
           sourceCoordinates = normalizeLatLng(highlightCountry(map, aliasSource));
           usedCountries.add(aliasSource);
         } else {
+          if (drawSessionRef.current !== drawSession) return;
           sourceCoordinates = OCEAN_SOURCE_COORDINATE;
-          L.marker(sourceCoordinates, {
+          sourceMarker = L.marker(sourceCoordinates, {
             icon: L.divIcon({
               className: 'source-dot ocean-dot',
               html: `<div class="dot" style="background:${ORANGE}; width:8px; height:8px;"></div>`,
@@ -539,19 +633,23 @@ const MapComponent = ({ countryTrafficData }: Record<string, any>) => {
               `<div style="text-align: center;">
                 <strong>Source (Ocean)</strong><br/>
                 <span style="color: #000;">${conn.source_ip}</span><br/>
-                No IP Info
+                No IP Info<br/>
+                ${conn.trafficLevel > 1024 ? (conn.trafficLevel / 1024).toFixed(2) + ' KB' : conn.trafficLevel + ' bytes'} <br/>
               </div>`,
               {direction: 'top', className: 'custom-tooltip' }
             );
+          trackTrafficLayer(sourceMarker);
         }
 
         if (hasDest) {
+          if (drawSessionRef.current !== drawSession) return;
           const aliasDest = COUNTRY_ALIASES[conn.destination_country.country] || conn.destination_country.country;
           destinationCoordinates = normalizeLatLng(highlightCountry(map, aliasDest));
           usedCountries.add(aliasDest);
         } else {
+          if (drawSessionRef.current !== drawSession) return;
           destinationCoordinates = OCEAN_DEST_COORDINATE;
-          L.marker(destinationCoordinates, {
+          destMarker = L.marker(destinationCoordinates, {
             icon: L.divIcon({
               className: 'destination-dot ocean-dot dot-animated',
               html: `<div class="dot" style="background:${ORANGE}; width:16px; height:16px;"></div>`,
@@ -564,16 +662,17 @@ const MapComponent = ({ countryTrafficData }: Record<string, any>) => {
               `<div style="text-align: center;">
                 <strong>Destination (Ocean)</strong><br/>
                 <span style="color: #000;"> ${conn.destination_ip}</span><br/>
-                No IP Info
+                No IP Info<br/>
+                ${conn.trafficLevel > 1024 ? (conn.trafficLevel / 1024).toFixed(2) + ' KB' : conn.trafficLevel + ' bytes'} <br/>
               </div>`,
               { direction: 'top', className: 'custom-tooltip' }
             );
+          trackTrafficLayer(destMarker);
         }
 
         // Draw markers for countries and ocean
-        let sourceMarker = null;
-        let destMarker = null;
-        if (hasSource && sourceCoordinates) {
+        if (hasSource && sourceCoordinates && !sourceMarker) {
+          if (drawSessionRef.current !== drawSession) return;
           sourceMarker = createSourceMarker(
             map,
             sourceCoordinates,
@@ -581,8 +680,10 @@ const MapComponent = ({ countryTrafficData }: Record<string, any>) => {
             conn.trafficLevel,
             conn.source_ip
           );
+          trackTrafficLayer(sourceMarker);
         }
-        if (hasDest && destinationCoordinates) {
+        if (hasDest && destinationCoordinates && !destMarker) {
+          if (drawSessionRef.current !== drawSession) return;
           destMarker = createDestinationMarker(
             map,
             destinationCoordinates,
@@ -590,6 +691,7 @@ const MapComponent = ({ countryTrafficData }: Record<string, any>) => {
             conn.trafficLevel,
             conn.destination_ip
           );
+          trackTrafficLayer(destMarker);
         }
 
         // Always draw the curve line if both coordinates are present (including ocean-to-ocean)
@@ -597,31 +699,92 @@ const MapComponent = ({ countryTrafficData }: Record<string, any>) => {
           Array.isArray(sourceCoordinates) && sourceCoordinates.length === 2 &&
           Array.isArray(destinationCoordinates) && destinationCoordinates.length === 2
         ) {
+          if (drawSessionRef.current !== drawSession) return;
           const curvePoints: [number, number][] = [];
           const segments = 50;
 
-          // Calculate distance between points to adjust curve strength
-          const latDiff = Math.abs(sourceCoordinates[0] - destinationCoordinates[0]);
-          const lngDiff = Math.abs(sourceCoordinates[1] - destinationCoordinates[1]);
-          const distance = Math.sqrt(latDiff * latDiff + lngDiff * lngDiff);
-          const curveStrength = distance > 10 ? 2 : 0; // No curve for short hops
+          const sourceLat = sourceCoordinates[0];
+          const sourceLng = sourceCoordinates[1];
+          const destLat = destinationCoordinates[0];
+          const destLng = destinationCoordinates[1];
 
-          for (let i = 0; i <= segments; i++) {
-            const t = i / segments;
-            const lat =
-              sourceCoordinates[0] * (1 - t) +
-              destinationCoordinates[0] * t +
-              Math.sin(Math.PI * t) * curveStrength;
-            const lng =
-              sourceCoordinates[1] * (1 - t) +
-              destinationCoordinates[1] * t;
-            curvePoints.push([lat, lng]);
+          const sameCoordinates = sourceLat === destLat && sourceLng === destLng;
+
+          let variant = Math.floor(Math.random() * 3);
+          let direction = Math.random() < 0.5 ? -1 : 1;
+          let curveStrength = 0;
+
+          const midLat = (sourceLat + destLat) / 2;
+          const midLng = (sourceLng + destLng) / 2;
+          const dLat = destLat - sourceLat;
+          const dLng = destLng - sourceLng;
+          const lineLength = Math.sqrt(dLat * dLat + dLng * dLng) || 1;
+
+          let controlLat = midLat;
+          let controlLng = midLng;
+
+          if (sameCoordinates) {
+            variant = 2;
+            direction = 1;
+
+            const zoom = typeof map?.getZoom === 'function' ? map.getZoom() : 2;
+            const radiusDeg = Math.min(8, Math.max(1.2, 8 / Math.max(1, zoom)));
+            const sweepRad = Math.PI * 1.2;
+            const centerAngle = Math.PI / 2;
+            const startAngle = centerAngle - sweepRad / 2;
+            const cosLat = Math.cos((sourceLat * Math.PI) / 180) || 1;
+
+            for (let i = 0; i <= segments; i++) {
+              const t = i / segments;
+              const r = Math.sin(Math.PI * t) * radiusDeg;
+              const angle = startAngle + sweepRad * t;
+              const lat = sourceLat + r * Math.sin(angle);
+              const lng = sourceLng + (r * Math.cos(angle)) / Math.max(0.2, cosLat);
+              curvePoints.push([lat, lng]);
+            }
+          } else {
+            const latDiff = Math.abs(sourceLat - destLat);
+            const lngDiff = Math.abs(sourceLng - destLng);
+            const distance = Math.sqrt(latDiff * latDiff + lngDiff * lngDiff);
+            const baseCurveStrength = distance > 10 ? 2 : 0;
+            curveStrength =
+              baseCurveStrength === 0 ? 0 : baseCurveStrength * (0.75 + Math.random() * 0.75);
+
+            const perpLat = (-dLng / lineLength) * curveStrength * 1.25 * direction;
+            const perpLng = (dLat / lineLength) * curveStrength * 1.25 * direction;
+            controlLat = midLat + perpLat;
+            controlLng = midLng + perpLng;
+
+            for (let i = 0; i <= segments; i++) {
+              const t = i / segments;
+              const inv = 1 - t;
+
+              let lat = sourceLat * inv + destLat * t;
+              let lng = sourceLng * inv + destLng * t;
+
+              if (variant === 0) {
+                lat += Math.sin(Math.PI * t) * curveStrength * direction;
+              } else if (variant === 1) {
+                lng += Math.sin(Math.PI * t) * curveStrength * direction;
+              } else {
+                lat =
+                  inv * inv * sourceLat + 2 * inv * t * controlLat + t * t * destLat;
+                lng =
+                  inv * inv * sourceLng + 2 * inv * t * controlLng + t * t * destLng;
+              }
+              curvePoints.push([lat, lng]);
+            }
           }
-          // Ensure last point is exactly the destination
           curvePoints[curvePoints.length - 1] = [
             destinationCoordinates[0],
             destinationCoordinates[1],
           ];
+
+          const animationStartDelayMs =
+            variant * 200 + (direction === 1 ? 0 : 110) + Math.floor(Math.random() * 280);
+          const animationFrameDelayMs = 22 + Math.floor(Math.random() * 18);
+          const animationStep = 1 + Math.floor(Math.random() * 2);
+
           const flowLine: Record<string, any> = animateFlowLine(
             map,
             curvePoints,
@@ -629,9 +792,13 @@ const MapComponent = ({ countryTrafficData }: Record<string, any>) => {
               color: getTrafficColor(conn.trafficLevel),
               weight: 3,
               opacity: 0.8,
-              className: 'traffic-flow-line'
+              className: 'traffic-flow-line',
+              animationStartDelayMs,
+              animationFrameDelayMs,
+              animationStep,
             }
           );
+          trackTrafficLayer(flowLine);
 
           // Store multiple lines per connectionKey
           const key = conn.connectionKey;
@@ -646,14 +813,24 @@ const MapComponent = ({ countryTrafficData }: Record<string, any>) => {
           };
           connectionElements.current[key].push(lineObj);
 
-          // Fade out and remove after 2 seconds
-          setTimeout(() => {
+          const estimatedDrawMs =
+            Math.ceil(curvePoints.length / animationStep) * animationFrameDelayMs +
+            animationStartDelayMs;
+          const fadeStartMs = Math.max(2000, estimatedDrawMs + 700);
+
+          scheduleTimeout(() => {
+            if (drawSessionRef.current !== drawSession) {
+              if (flowLine && map.hasLayer(flowLine)) map.removeLayer(flowLine);
+              trafficLayersRef.current.delete(flowLine);
+              return;
+            }
             if (flowLine && map.hasLayer(flowLine)) {
               if (flowLine?._path) {
                 flowLine?._path.classList.add('fade-out');
               }
-              setTimeout(() => {
+              scheduleTimeout(() => {
                 map.removeLayer(flowLine);
+                trafficLayersRef.current.delete(flowLine);
                 // Remove from array
                 const arr = connectionElements.current[key];
                 if (arr) {
@@ -663,7 +840,7 @@ const MapComponent = ({ countryTrafficData }: Record<string, any>) => {
                 }
               }, 1000);
             }
-          }, 2000);
+          }, fadeStartMs);
 
           // If more than 3 lines for this connection, fade out and remove the oldest
           const arr = connectionElements.current[key];
@@ -673,10 +850,13 @@ const MapComponent = ({ countryTrafficData }: Record<string, any>) => {
               if (oldest.flowLine._path) {
                 oldest.flowLine._path.classList.add('fade-out');
               }
-              setTimeout(() => {
+              scheduleTimeout(() => {
                 map.removeLayer(oldest.flowLine);
+                trafficLayersRef.current.delete(oldest.flowLine);
                 if (oldest.sourceMarker) map.removeLayer(oldest.sourceMarker);
                 if (oldest.destMarker) map.removeLayer(oldest.destMarker);
+                if (oldest.sourceMarker) trafficLayersRef.current.delete(oldest.sourceMarker);
+                if (oldest.destMarker) trafficLayersRef.current.delete(oldest.destMarker);
               }, 1000);
             }
           }
@@ -696,7 +876,7 @@ const MapComponent = ({ countryTrafficData }: Record<string, any>) => {
     };
 
     loadAllConnections();
-  }, [map, isLoading, processIpData]);
+  }, [map, isLoading, processIpData, filterId, clearConnectionLayers, trackTrafficLayer, scheduleTimeout]);
 
 
   //   .traffic-flow-line {
@@ -709,15 +889,15 @@ return (
       <style>
         {`
           .source-dot .dot, .destination-dot .dot {
-            width: 16px;
-            height: 16px;
+            width: 12px;
+            height: 12px;
             border-radius: 50%;
             position: absolute;
             animation: emphasize-dot 1.5s infinite;
           }
           .ocean-dot .dot {
-            width: 10px !important;
-            height: 10px !important;
+            width: 12px !important;
+            height: 12px !important;
             animation: emphasize-dot-ocean 1.5s infinite;
           }
           @keyframes emphasize-dot {

@@ -8,6 +8,7 @@ import { api } from '~/trpc/react'
 
 import MapComponent from './components/MapComponent'
 import { useSocketConnection } from '../../custom-hooks/useSocketConnection'
+import Filter from '../../timeline/Filter'
 
 /**
  * Formats IP data with country information, handling cases where country info is missing
@@ -292,7 +293,7 @@ export default function TrafficMaps({ params }: Record<string, any>) {
   const getUniqueSourceAndDestinationIP = api.packet.getUniqueSourceAndDestinationIP.useMutation()
   const { refetch: refetchTimeUnitandResolution } = api.cachedFilter.fetchCachedFilterTimeUnitandResolution.useQuery(
     {
-      type: 'timeline_filter',
+      type: 'map_filter',
       filter_id: filterId,
     }, {
       enabled: false,
@@ -355,7 +356,7 @@ export default function TrafficMaps({ params }: Record<string, any>) {
       
       // Process source country flag
       if (ipData.source_country) {
-        const sourceFlagDetails = await getFlagDetails(ipData.source_country);
+        const sourceFlagDetails = await getFlagDetails(ipData.source_country?.country);
         if (sourceFlagDetails?.name) {
           updatedData.source_country = {
             country: sourceFlagDetails.name,
@@ -365,7 +366,7 @@ export default function TrafficMaps({ params }: Record<string, any>) {
       
       // Process destination country flag
       if (ipData.destination_country) {
-        const destFlagDetails = await getFlagDetails(ipData.destination_country);
+        const destFlagDetails = await getFlagDetails(ipData.destination_country?.country);
         if (destFlagDetails?.name) {
           updatedData.destination_country = {
             country: destFlagDetails.name,
@@ -430,9 +431,13 @@ export default function TrafficMaps({ params }: Record<string, any>) {
     setIsLoading(true);
     
     try {
-      const timeRange = getLastTimeStamp({
-        count: timeSettings.time_count,
-        unit: timeSettings.time_unit,
+      const timeRange = isInitial ? getLastTimeStamp({
+          count: 1,
+          unit: 'day',
+          add_remaining_time: true,
+        }) : getLastTimeStamp({
+        count: 2,  // timeSettings.time_count,
+        unit: 'second', // timeSettings.time_unit,
         add_remaining_time: true,
       });
       
@@ -440,8 +445,8 @@ export default function TrafficMaps({ params }: Record<string, any>) {
         device_id: params?.id || '',
         time_range: timeRange,
         filter_id: filterId,
-        batch_size: isInitial ? 1 : 100, // Just fetch one record for initial display
-        batch_offset: 0,
+        // batch_size: isInitial ? 1 : 100, // Just fetch one record for initial display
+        // batch_offset: 0,
       };
       
       const result = await getUniqueSourceAndDestinationIP.mutateAsync(input);
@@ -450,19 +455,14 @@ export default function TrafficMaps({ params }: Record<string, any>) {
       if (ipData.length > 0) {
         // Process the IP data
         let processedDatas = []
-        if (isInitial) {
-          const processedData = await processIPData(ipData[0]);
-          processedDatas = [processedData]
-        } else {
           processedDatas = await Promise.all(ipData.map(async (ip) => await processIPData(ip)))
-        }
         
         // Update map data with the processed data
         setMapData((prev: any) => {
           return ({
           ...prev,
           countryTrafficData: {
-            ipData: processedDatas.filter(e => e.source_country.country !== 'No IP Info')
+            ipData: processedDatas // .filter(e => e.source_country.country !== 'No IP Info')
           }
         })});
       }
@@ -559,10 +559,16 @@ export default function TrafficMaps({ params }: Record<string, any>) {
     }
   }, [reloadData])
 
+  useEffect(() => {
+    if (!filterId) return
+
+    eventEmitter.emit('timeline_filter_id_active_label', filterId)
+  }, [filterId])
+
   return (
     <div>
-      {/* <Filter params={params} type='map_filter' />
-      <Search filter_type='map_search' params={{ ...params, router: 'packet', resolver: 'filterPackets' }} /> */}
+      <Filter params={params} type='map_filter' />
+      {/* <Search filter_type='map_search' params={{ ...params, router: 'packet', resolver: 'filterPackets' }} /> */}
       <h1>Traffic Flow</h1>
 
       {false ? (// isLoading ? (
@@ -576,8 +582,9 @@ export default function TrafficMaps({ params }: Record<string, any>) {
         <div className='relative z-[1]'>
           { (
             <>
-              <MapComponent 
+              <MapComponent
                 countryTrafficData={mapData.countryTrafficData}
+                filterId={filterId}
               />
             </>
           )}

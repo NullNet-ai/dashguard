@@ -65,12 +65,13 @@ const time_resolution_options: { [key: string]: string[] } = {
   '7d': ['12h', '1d'],
 }
 
-export const FilterGroup = ({ form, groupIndex, onRemoveFilter, onUpdateJunctionOperator }: {
+export const FilterGroup = ({ form, groupIndex, filter_type, onRemoveFilter, onUpdateJunctionOperator }: {
   onRemoveFilter: (index: number) => void, form: any, filter_type: string, groupIndex: number
   onUpdateJunctionOperator: (index: number, operator: string) => void; }) => {
   const { state } = useManageFilter()
   const { columns, errors } = state ?? {}
   const [resolutionOptions, setResolutionOptions] = useState<any>([])
+  const isMapFilterGroupLocked = filter_type === 'map_filter' && groupIndex === 0
 
 
   const fields = form.getValues().filterGroups
@@ -117,7 +118,10 @@ export const FilterGroup = ({ form, groupIndex, onRemoveFilter, onUpdateJunction
   return (
     <div className="space-y-4 rounded-lg bg-gray-50 p-4 mt-[8px]">
       <Form {...form}>
-        <div className="space-y-4">
+        <fieldset
+          aria-disabled={isMapFilterGroupLocked}
+          className={`space-y-4 ${isMapFilterGroupLocked ? 'pointer-events-none opacity-50' : ''}`}
+        >
           {fields?.[groupIndex]?.filters?.map((field: any, index: number) => {
             const criteriaIndex
           = fields?.[groupIndex]?.filters?.slice(0, index + 1).filter((f: Record<string, any>) => f.type === 'criteria')
@@ -276,7 +280,7 @@ export const FilterGroup = ({ form, groupIndex, onRemoveFilter, onUpdateJunction
                       }}
                     />
 
-                    {hasManyFilters && (
+                    {hasManyFilters && !isMapFilterGroupLocked && (
                       <Button
                         variant = "ghost"
                         onClick = { () => onRemoveFilter(criteriaIndex) }
@@ -289,7 +293,7 @@ export const FilterGroup = ({ form, groupIndex, onRemoveFilter, onUpdateJunction
               </div>
             )
           })}
-        </div>
+        </fieldset>
       </Form>
     </div>
   )

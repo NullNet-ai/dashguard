@@ -12,6 +12,7 @@ import { getAllTimestampsBetweenDates, parseTimeString } from '~/app/portal/devi
 import { createTRPCRouter, privateProcedure } from '~/server/api/trpc'
 
 import { createDefineRoutes } from '../baseCrud'
+import _, { get } from 'lodash'
 
 interface InputData {
   bucket: string
@@ -1143,7 +1144,7 @@ export const packetRouter = createTRPCRouter({
     batch_offset: z.number().optional()
       .default(0), // Starting position for the batch
   })).mutation(async ({ input, ctx }) => {
-    const { device_id, time_range, batch_size = 10, batch_offset = 0 } = input
+    const { device_id, time_range, batch_size = 10, batch_offset = 0, filter_id } = input
     let source_and_destination_ips: Record<string, any>[] = []
 
     const filterConnections = async () => {
@@ -1153,7 +1154,7 @@ export const packetRouter = createTRPCRouter({
           token: ctx.token.value,
           query: {
             track_total_records: true,
-            pluck: ['source_ip', 'timestamp', 'destination_ip'],
+            pluck: ['source_ip', 'timestamp', 'destination_ip', 'total_byte', 'timestamp'],
             advance_filters: [
               {
                 type: 'criteria',
@@ -1175,8 +1176,9 @@ export const packetRouter = createTRPCRouter({
               },
             ],
             order: {
-              starts_at: batch_offset, // Use the batch_offset parameter
-              limit: batch_size, // Use the batch_size parameter
+              // starts_at: batch_offset, // Use the batch_offset parameter
+              // limit: batch_size, // Use the batch_size parameter
+              limit: 20,
               by_field: 'timestamp',
               by_direction: EOrderDirection.DESC,
               is_case_sensitive_sorting: true,
@@ -1195,6 +1197,8 @@ export const packetRouter = createTRPCRouter({
           sourceAndDestinationIPs.add({
             source_ip: (_connections[i] as any).source_ip,
             destination_ip: (_connections[i] as any).destination_ip,
+            total_byte: (_connections[i] as any).total_byte,
+            timestamp: (_connections[i] as any).timestamp,
           })
         }
       }
@@ -1210,10 +1214,17 @@ export const packetRouter = createTRPCRouter({
       }
     }
 
+    const { account } = ctx.session
+    const { contact } = account
+
+    const [filter = [], search = []]: any = await Promise.all(['filter', 'search'].map(async type => await ctx.redisClient.getCachedData(`map_filter_${contact.id}`)))
+
+    const findFilter = filter?.find((item: any) => item?.id === filter_id)
+
     const { connections, batch_info } = await filterConnections()
 
     // Process this batch of IPs
-    const _res = await Bluebird.map(connections, async (ips: Record<string, any>) => {
+    let _res = await Bluebird.map(connections, async (ips: Record<string, any>) => {
       const source_country = await ctx.dnaClient
         .findAll({
           entity: 'ip_info',
@@ -1269,6 +1280,15 @@ export const packetRouter = createTRPCRouter({
               country: 'No IP Info',
               region: 'No IP Info',
               city: 'No IP Info',
+
+              // country: 'NL',
+              // region: 'North Holland',
+              // city: 'Amsterdam',
+
+              // country: 'US',
+              // region: 'Virginia',
+              // city: 'Ashburn',
+
               ip: ips?.source_ip,
             },
         destination_country: destination_country?.data?.length
@@ -1277,11 +1297,77 @@ export const packetRouter = createTRPCRouter({
               country: 'No IP Info',
               region: 'No IP Info',
               city: 'No IP Info',
+
+              // country: 'US',
+              // region: 'Virginia',
+              // city: 'Ashburn',
+              
               ip: ips?.destination_ip,
             },
+        total_byte: ips?.total_byte,
+        timestamp: ips?.timestamp,
       }
     }, { concurrency: 100 })
 
+    // Asummed only filtering Country
+    if (findFilter && Object.keys(findFilter).length) {
+      const { filterGroups } = findFilter
+      let [, ...restFilterGroups] = filterGroups
+      const evaluateBooleanExpression = (tokens) => {
+        const ops = {
+          and: { fn: (a, b) => a && b, precedence: 2 },
+          or:  { fn: (a, b) => a || b, precedence: 1 },
+        }
+
+        const values = []
+        const operators = []
+
+        const applyOp = () => {
+          const b = values.pop()
+          const a = values.pop()
+          const op = operators.pop()
+          values.push(ops[op].fn(a, b))
+        }
+
+        for (const token of tokens) {
+          if (typeof token === 'boolean') {
+            values.push(token)
+          } else if (ops[token]) {
+            while (
+              operators.length &&
+              ops[operators.at(-1)].precedence >= ops[token].precedence
+            ) {
+              applyOp()
+            }
+            operators.push(token)
+          } else {
+            throw new Error(`Invalid token: ${token}`)
+          }
+        }
+
+        while (operators.length) applyOp()
+
+        return values[0]
+      }
+      const _res_filtered = _res.filter(e => {
+        const booleanExpression = restFilterGroups
+          .reduce((acc, curr) => {
+            const { filters, groupOperator } = curr
+            const value = filters.every(f => {
+              return f.values === get(e, f.field)
+            })
+            return [
+              ...acc,
+              value,
+              groupOperator
+            ]
+          }, [])
+          .slice(0, -1)
+        return evaluateBooleanExpression(booleanExpression)
+      })
+      _res = _res_filtered
+    }
+    
     // Return both the processed data and batch information
     return {
       data: _res || [],

@@ -5,7 +5,7 @@ import { Fragment, useContext, useState, useEffect } from 'react'
 import { useSideDrawer } from '~/components/platform/SideDrawer'
 import { Button } from '~/components/ui/button'
 
-import { columns } from './components/GroupFilterSideDrawer/config'
+import { columns as configColumns, } from './components/GroupFilterSideDrawer/config'
 import { ManageFilterProvider } from './components/GroupFilterSideDrawer/Provider'
 import GridManageFilter from './components/GroupFilterSideDrawer/View'
 import FilterProperty from './FilterProperty'
@@ -24,6 +24,29 @@ const FilterView = () => {
   const [activeLabel, setActiveLabel] = useState<string>(defaultTab)
   
   const eventEmitter = useEventEmitter()
+
+  const [columns, setColumns] = useState<any>([])
+
+  useEffect(() => {
+    if (filter_type === 'map_filter') {
+      setColumns([
+        {
+          header: 'Source Country',
+          label: 'Source Country',
+          accessorKey: 'source_country.country',
+          custom: true,
+        },
+        {
+          header: 'Destination Country',
+          label: 'Destination Country',
+          accessorKey: 'destination_country.country',
+          custom: true,
+        },
+      ])
+    } else {
+      setColumns(configColumns)
+    }
+  }, [filter_type])
   
   useEffect(() => {
     const setFID = (data: any) => {
@@ -37,6 +60,7 @@ const FilterView = () => {
   }, [eventEmitter, filters])
 
   const handleTabClick = (tabHref: string) => {
+    eventEmitter.emit('timeline_filter_id', tabHref)
     setActiveLabel(tabHref)
   }
 

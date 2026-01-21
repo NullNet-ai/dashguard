@@ -46,6 +46,34 @@ const useFilterContentActions = (filter_type: string) => {
 
   const default_filters = (type: string) => {
     if (type === 'timeline_filter') return _def_filters
+    if (type === 'map_filter') return [
+      {
+        field: 'Time Range',
+        operator: 'equal',
+        label: 'Time Range',
+        values: [],
+        type: 'criteria',
+        default: true,
+        input_type: 'select',
+        static: true,
+        'Time Range': "1d"
+      }, {
+        operator: 'and',
+        type: 'operator',
+        default: true,
+      },
+      {
+        field: 'Resolution',
+        operator: 'equal',
+        label: 'Resolution',
+        values: [],
+        type: 'criteria',
+        default: true,
+        input_type: 'select',
+        static: true,
+        Resolution: "s1"
+      },
+    ]
 
     return [
       ..._def_filters,

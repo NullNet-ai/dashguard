@@ -202,7 +202,20 @@ export function ManageFilterProvider({
         state: {
           tab_props: tab,
           filterDetails,
-          columns,
+          columns: filter_type === 'map_filter' ? [
+            {
+              header: 'Source Country',
+              label: 'Source Country',
+              accessorKey: 'source_country.country',
+              custom: true,
+            },
+            {
+              header: 'Destination Country',
+              label: 'Destination Country',
+              accessorKey: 'destination_country.country',
+              custom: true,
+            },
+          ]: columns,
           createFilterLoading,
           updateFilterLoading,
           searchConfig,
