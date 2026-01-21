@@ -1313,28 +1313,39 @@ export const packetRouter = createTRPCRouter({
     if (findFilter && Object.keys(findFilter).length) {
       const { filterGroups } = findFilter
       let [, ...restFilterGroups] = filterGroups
+      // @ts-expect-error - No type yet
       const evaluateBooleanExpression = (tokens) => {
         const ops = {
+          // @ts-expect-error - No type yet
           and: { fn: (a, b) => a && b, precedence: 2 },
+          // @ts-expect-error - No type yet
           or:  { fn: (a, b) => a || b, precedence: 1 },
         }
 
+        // @ts-expect-error - No type yet
         const values = []
+        // @ts-expect-error - No type yet
         const operators = []
 
         const applyOp = () => {
+          // @ts-expect-error - No type yet
           const b = values.pop()
+          // @ts-expect-error - No type yet
           const a = values.pop()
+          // @ts-expect-error - No type yet
           const op = operators.pop()
+          // @ts-expect-error - No type yet
           values.push(ops[op].fn(a, b))
         }
 
         for (const token of tokens) {
           if (typeof token === 'boolean') {
             values.push(token)
+            // @ts-expect-error - No type yet
           } else if (ops[token]) {
             while (
               operators.length &&
+              // @ts-expect-error - No type yet
               ops[operators.at(-1)].precedence >= ops[token].precedence
             ) {
               applyOp()
@@ -1351,8 +1362,10 @@ export const packetRouter = createTRPCRouter({
       }
       const _res_filtered = _res.filter(e => {
         const booleanExpression = restFilterGroups
+          // @ts-expect-error - No type yet
           .reduce((acc, curr) => {
             const { filters, groupOperator } = curr
+            // @ts-expect-error - No type yet
             const value = filters.every(f => {
               return f.values === get(e, f.field)
             })
