@@ -125,6 +125,7 @@ const PieChartComponent = ({ defaultValues, interfaces }: IFormProps) => {
          currentTraffic = trafficData.traffic + data?.total_byte
       }
       const maxTraffic = Math.max(currentTraffic * 2 + 100, trafficData.maxTraffic)
+      // @ts-expect-error - No type yet
       setTrafficData({ traffic: currentTraffic, maxTraffic })
       currentTime = data?.timestamp
     })
