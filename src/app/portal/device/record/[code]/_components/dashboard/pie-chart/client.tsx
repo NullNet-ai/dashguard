@@ -77,6 +77,7 @@ const calculateNeedlePoints = (containerWidth: number) => {
 const PieChartComponent = ({ defaultValues, interfaces }: IFormProps) => {
   const [trafficData, setTrafficData] = useState({
     traffic: initialTraffic,
+    previousTraffic: initialTraffic,
     maxTraffic: 100,
   })
   const [animatedTraffic, setAnimatedTraffic] = useState(initialTraffic)
@@ -97,7 +98,7 @@ const PieChartComponent = ({ defaultValues, interfaces }: IFormProps) => {
       bucket_size: '1s',
       timezone,
       device_id: defaultValues?.id,
-      time_range: getLastTimeStamp({ count: 2, unit: 'minute', _now: new Date() }) as string[],
+      time_range: getLastTimeStamp({ count: 1, unit: 'second', _now: new Date() }) as string[],
       interface_names: interfaces?.map((item: any) => item?.value),
     }, { enabled: false })
 
@@ -145,7 +146,19 @@ const PieChartComponent = ({ defaultValues, interfaces }: IFormProps) => {
 
         // Ensure maxTraffic is always above currentTraffic for proper gauge display
         const maxTraffic = Math.max(currentTraffic * 2 + 100, trafficData.maxTraffic)
-        setTrafficData({ traffic: currentTraffic, maxTraffic })
+        if(currentTraffic) {
+          setTrafficData({ traffic: currentTraffic, previousTraffic: currentTraffic, maxTraffic })
+        } else {
+          setTrafficData((prev) => {
+            if (prev.traffic > 0) {
+              return {
+                ...prev,
+                traffic: prev.traffic - 1
+              }
+            }
+            return prev
+          })
+        }
       }
       catch (error) {
         console.error('Error fetching bandwidth data:', error)
@@ -153,8 +166,8 @@ const PieChartComponent = ({ defaultValues, interfaces }: IFormProps) => {
     }
 
     fetchChartData()
-    // const interval = setInterval(fetchChartData, 1000)
-    // return () => clearInterval(interval)
+    const interval = setInterval(fetchChartData, 1000)
+    return () => clearInterval(interval)
   }, [defaultValues?.id, defaultValues?.device_status, fetchBandWidth, interfaces])
 
   // Update previousTrafficRef whenever trafficData.traffic changes
@@ -163,17 +176,17 @@ const PieChartComponent = ({ defaultValues, interfaces }: IFormProps) => {
   }, [trafficData.traffic])
 
   // Smooth animation effect - update more frequently with smaller steps
-  useEffect(() => {
-    const animationInterval = setInterval(() => {
-      setAnimatedTraffic((prev) => {
-        const diff = trafficData.traffic - prev
-        // Use a smaller factor for smoother animation (0.05 instead of 0.1)
-        return Math.abs(diff) < 0.1 ? trafficData.traffic : prev + diff * 0.05
-      })
-    }, 16) // Update at 60fps for smoother animation
+  // useEffect(() => {
+  //   const animationInterval = setInterval(() => {
+  //     setAnimatedTraffic((prev) => {
+  //       const diff = trafficData.traffic - prev
+  //       // Use a smaller factor for smoother animation (0.05 instead of 0.1)
+  //       return Math.abs(diff) < 0.1 ? trafficData.traffic : prev + diff * 0.05
+  //     })
+  //   }, 16) // Update at 60fps for smoother animation
 
-    return () => clearInterval(animationInterval)
-  }, [trafficData.traffic])
+  //   return () => clearInterval(animationInterval)
+  // }, [trafficData.traffic])
 
   // Ensure a minimum fill color (1% of maxTraffic)
   const minTrafficFill = Math.max(trafficData.traffic, trafficData.maxTraffic * 0.01);
@@ -256,10 +269,10 @@ const PieChartComponent = ({ defaultValues, interfaces }: IFormProps) => {
           {/* Traffic value display */}
           <div className="absolute top-[160px] bg-background/80 rounded-lg px-4 py-2 backdrop-blur-sm">
             <div className="text-xl font-bold tabular-nums">
-              {formatBytes(Math.round(animatedTraffic), 2)}
+              {formatBytes(Math.round(trafficData?.traffic), 2)}
             </div>
             <div className="text-sm text-gray-500">
-              Previous: {formatBytes(Math.round(previousTraffic), 2)}
+              Previous: {formatBytes(Math.round(trafficData?.previousTraffic), 2)}
             </div>
           </div>
         </div>
