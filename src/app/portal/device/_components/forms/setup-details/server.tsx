@@ -7,7 +7,6 @@ const FormServerFetch = async () => {
   const [, , , , identifier] = pathname.split('/');
 
   return (
-    // @ts-expect-error - No type yet
     <SetupDetails
       identifier={identifier!}
     />
