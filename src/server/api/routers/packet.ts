@@ -279,7 +279,7 @@ export const packetRouter = createTRPCRouter({
         bucket_size,
         order: {
           order_by: 'bucket',
-          order_direction: EOrderDirection.ASC,
+          order_direction: EOrderDirection.DESC,
         },
         timezone,
         limit: 60,
