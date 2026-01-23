@@ -96,6 +96,7 @@
     "cmdk": "1.0.0",
     "cookies-next": "^6.0.0",
     "copy-to-clipboard": "^3.3.3",
+    "countrycitystatejson": "^25.8.101",
     "date-fns": "^3.6.0",
     "date-fns-tz": "^3.2.0",
     "dotenv": "^16.4.7",

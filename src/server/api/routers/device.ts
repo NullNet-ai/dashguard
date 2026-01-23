@@ -307,8 +307,11 @@ export const deviceRouter = createTRPCRouter({
     .input(
       z.object({
         id: z.string().min(1),
-        device_category: z.string().min(1),
+        device_category: z.string().optional(),
+        address_city: z.string().optional(),
+        address_state: z.string().optional(),
         address_country: z.string().optional(),
+        address_country_code: z.string().optional(),
       }),
     )
     .mutation(async ({ input, ctx }) => {
@@ -318,6 +321,9 @@ export const deviceRouter = createTRPCRouter({
 
       const address = {
         "country": input['address_country'],
+        "state": input['address_state'],
+        "city": input['address_city'],
+        "country_code": input['address_country_code'],
       }
 
       // Create Address
