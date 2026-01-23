@@ -1143,8 +1143,13 @@ export const packetRouter = createTRPCRouter({
       .default(100), // Number of records to fetch per batch
     batch_offset: z.number().optional()
       .default(0), // Starting position for the batch
+      address: z.object({
+        country: z.string().optional(),
+        state: z.string().optional(),
+        city: z.string().optional(),
+      }).optional(),
   })).mutation(async ({ input, ctx }) => {
-    const { device_id, time_range, batch_size = 10, batch_offset = 0, filter_id } = input
+    const { device_id, time_range, batch_size = 10, batch_offset = 0, filter_id, address } = input
     let source_and_destination_ips: Record<string, any>[] = []
 
     const filterConnections = async () => {
@@ -1271,11 +1276,38 @@ export const packetRouter = createTRPCRouter({
         })
         .execute()
 
-      return {
-        source_ip: ips?.source_ip,
-        destination_ip: ips?.destination_ip,
-        source_country: source_country?.data?.length
-          ? source_country?.data?.[0]
+      const sourceIp = ips?.source_ip as string | undefined
+      const sourceIpFirstOctet = (() => {
+        if (typeof sourceIp !== 'string') return null
+        const [first] = sourceIp.split('.')
+        const octet = Number(first)
+        if (!Number.isInteger(octet)) return null
+        if (octet < 0 || octet > 255) return null
+        return octet
+      })()
+
+      const sourceIpClass =
+        sourceIpFirstOctet === null
+          ? null
+          : sourceIpFirstOctet >= 0 && sourceIpFirstOctet <= 127
+            ? 'A'
+            : sourceIpFirstOctet >= 128 && sourceIpFirstOctet <= 191
+              ? 'B'
+              : sourceIpFirstOctet >= 192 && sourceIpFirstOctet <= 223
+                ? 'C'
+                : null
+
+      const isSourceIpClassABC = sourceIpClass !== null
+      const sourceIpInfo = source_country?.data?.[0]
+      const resolvedSourceCountry =
+        sourceIpInfo ??
+        (isSourceIpClassABC && address
+          ? {
+              country: address?.country ?? 'No IP Info',
+              region: address?.state ?? 'No IP Info',
+              city: address?.city ?? 'No IP Info',
+              ip: ips?.source_ip,
+            }
           : {
               country: 'No IP Info',
               region: 'No IP Info',
@@ -1290,9 +1322,40 @@ export const packetRouter = createTRPCRouter({
               // city: 'Ashburn',
 
               ip: ips?.source_ip,
-            },
-        destination_country: destination_country?.data?.length
-          ? destination_country?.data?.[0]
+            })
+
+      const destinationIp = ips?.destination_ip as string | undefined
+      const destinationIpFirstOctet = (() => {
+        if (typeof destinationIp !== 'string') return null
+        const [first] = destinationIp.split('.')
+        const octet = Number(first)
+        if (!Number.isInteger(octet)) return null
+        if (octet < 0 || octet > 255) return null
+        return octet
+      })()
+
+      const destinationIpClass =
+        destinationIpFirstOctet === null
+          ? null
+          : destinationIpFirstOctet >= 0 && destinationIpFirstOctet <= 127
+            ? 'A'
+            : destinationIpFirstOctet >= 128 && destinationIpFirstOctet <= 191
+              ? 'B'
+              : destinationIpFirstOctet >= 192 && destinationIpFirstOctet <= 223
+                ? 'C'
+                : null
+
+      const isDestinationIpClassABC = destinationIpClass !== null
+      const destinationIpInfo = destination_country?.data?.[0]
+      const resolvedDestinationCountry =
+        destinationIpInfo ??
+        (isDestinationIpClassABC && address
+          ? {
+              country: address?.country ?? 'No IP Info',
+              region: address?.state ?? 'No IP Info',
+              city: address?.city ?? 'No IP Info',
+              ip: ips?.destination_ip,
+            }
           : {
               country: 'No IP Info',
               region: 'No IP Info',
@@ -1301,9 +1364,15 @@ export const packetRouter = createTRPCRouter({
               // country: 'US',
               // region: 'Virginia',
               // city: 'Ashburn',
-              
+
               ip: ips?.destination_ip,
-            },
+            })
+
+      return {
+        source_ip: ips?.source_ip,
+        destination_ip: ips?.destination_ip,
+        source_country: resolvedSourceCountry,
+        destination_country: resolvedDestinationCountry,
         total_byte: ips?.total_byte,
         timestamp: ips?.timestamp,
       }

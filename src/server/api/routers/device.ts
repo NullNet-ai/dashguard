@@ -251,7 +251,9 @@ export const deviceRouter = createTRPCRouter({
               'device_os',
               'is_device_authorized',
               'is_device_online',
-              'address_id'
+              'address_id',
+              'status',
+              'device_status'
             ],
             advance_filters: createAdvancedFilter({ code: code! }),
             order: {

@@ -259,7 +259,7 @@ export function prepareMapComponentData(formattedData: Record<string, any>) {
   return mapReadyData
 }
 
-export default function TrafficMaps({ params }: Record<string, any>) {
+export default function TrafficMaps({ params, defaultValues }: Record<string, any>) {
   const eventEmitter = useEventEmitter()
   const [filterId, setFilterID] = useState('01JNQ9WPA2JWNTC27YCTCYC1FE')
   const [searchBy, setSearchBy] = useState()
@@ -447,6 +447,7 @@ export default function TrafficMaps({ params }: Record<string, any>) {
         filter_id: filterId,
         // batch_size: isInitial ? 1 : 100, // Just fetch one record for initial display
         // batch_offset: 0,
+        address: defaultValues?.address
       };
       
       const result = await getUniqueSourceAndDestinationIP.mutateAsync(input);

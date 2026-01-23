@@ -8,13 +8,11 @@ const FormServerFetch = async () => {
   const headerList = await headers()
   const pathname = headerList.get('x-pathname') || ''
   const [, , main_entity, application, identifier] = pathname.split('/')
-  const fetched_device = await api.record.getByCode({
-    id: identifier!,
-    pluck_fields: ['id', 'code', 'status', 'device_status'],
-    main_entity: main_entity!,
+  const fetched_device = await api.device.fetchDeviceInfo({
+    code: identifier!,
   })
 
-  const defaultValues = fetched_device?.data
+  const defaultValues = fetched_device
 
   return (
     <TrafficMaps
