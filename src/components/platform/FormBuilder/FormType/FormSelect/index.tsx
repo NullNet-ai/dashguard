@@ -57,7 +57,7 @@ export default function FormSelect({
   const [isCreateLoading, setIsCreateLoading] = useState(false);
   const [, setUpdateCounter] = useState(0); // Counter to force re-render
 
-  const isDisabled = fieldConfig.disabled ?? false;
+  const isDisabled = !!(formRenderProps.field.disabled || fieldConfig.disabled);
   const isReadOnly = fieldConfig.isCustomFormField
     ? fieldConfig.readonly
     : formRenderProps.field.disabled || fieldConfig.readonly;
