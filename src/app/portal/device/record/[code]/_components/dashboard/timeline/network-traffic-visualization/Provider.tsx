@@ -239,18 +239,24 @@ export default function NetworkFlowProvider({ children, params }: IProps) {
 
     let updated_new_bandwidth = new_bandwidth
 
-    // @ts-expect-error - No type yet
+    let realNewBandwidths = []
+    // // @ts-expect-error - No type yet
     _bandwidth.data.forEach(e => {
+      let isExist = false
       // @ts-expect-error - No type yet
       updated_new_bandwidth = updated_new_bandwidth.reduce((acc, curr) => {
         if(curr?.source_ip === e?.source_ip) {
+          isExist = true
           return [...acc, { ...curr, result: [...curr.result, ...e.result] }]
         }
         return [...acc, curr]
       }, [])
+      if (!isExist) {
+        realNewBandwidths.push({ ...e, time_unit, time_count, resolution, time_range })
+      }
     })
 
-    setNewBandwidth(updated_new_bandwidth)
+    setNewBandwidth([...realNewBandwidths, ...updated_new_bandwidth].slice(0, 20))
   }, [fetchBandwidth, filterId])
 
   const fetchMoreData = useCallback(async () => {
