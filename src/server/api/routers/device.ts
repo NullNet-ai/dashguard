@@ -849,9 +849,7 @@ export const deviceRouter = createTRPCRouter({
       const transformed_device_interface_address =
         configuration?.interfaces?.map((iface: Record<string, any>) => ({
           name: iface.device_interfaces?.name || '',
-          address: iface.device_interface_addresses?.length
-            ? iface.device_interface_addresses?.[0].address
-            : null,
+          address: iface.device_interface_addresses?.address
         }));
       const { id: device_group_setting_id, name } =
         device_group.data[0]?.device_group_settings || {};
