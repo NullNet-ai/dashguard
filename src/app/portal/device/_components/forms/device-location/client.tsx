@@ -177,16 +177,16 @@ export default function DeviceLocation({ params, defaultValues }: IFormProps) {
 
           if (shouldResetDependentFields) {
             lastStateNameRef.current = null;
-            form.setValue('address_state', '', {
-              shouldDirty: true,
-              shouldTouch: true,
-              shouldValidate: true,
-            });
-            form.setValue('address_city', '', {
-              shouldDirty: true,
-              shouldTouch: true,
-              shouldValidate: true,
-            });
+            // form.setValue('address_state', '', {
+            //   shouldDirty: true,
+            //   shouldTouch: true,
+            //   shouldValidate: true,
+            // });
+            // form.setValue('address_city', '', {
+            //   shouldDirty: true,
+            //   shouldTouch: true,
+            //   shouldValidate: true,
+            // });
             setIsAddressCityDisabled(true);
             setAddressCityOptions([]);
             return;
@@ -212,7 +212,7 @@ export default function DeviceLocation({ params, defaultValues }: IFormProps) {
         fieldClassName: '',
         readonly: false,
         required: true,
-        disabled: isAddressStateDisabled,
+        // disabled: isAddressStateDisabled,
         selectSearchable: true,
         selectOnChange: (
           stateName: string,
@@ -232,11 +232,11 @@ export default function DeviceLocation({ params, defaultValues }: IFormProps) {
           );
 
           if (form && previousStateName !== stateName) {
-            form.setValue('address_city', '', {
-              shouldDirty: true,
-              shouldTouch: true,
-              shouldValidate: true,
-            });
+            // form.setValue('address_city', '', {
+            //   shouldDirty: true,
+            //   shouldTouch: true,
+            //   shouldValidate: true,
+            // });
           }
         },
         fieldStyle: {
@@ -254,7 +254,7 @@ export default function DeviceLocation({ params, defaultValues }: IFormProps) {
         fieldClassName: '',
         readonly: false,
         required: true,
-        disabled: isAddressCityDisabled,
+        // disabled: isAddressCityDisabled,
         selectSearchable: true,
         fieldStyle: {
           gridColumn: '1 / span 1',
