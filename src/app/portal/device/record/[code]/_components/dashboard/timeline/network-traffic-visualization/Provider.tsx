@@ -239,8 +239,9 @@ export default function NetworkFlowProvider({ children, params }: IProps) {
 
     let updated_new_bandwidth = new_bandwidth
 
+    // @ts-expect-error - No type yet
     let realNewBandwidths = []
-    // // @ts-expect-error - No type yet
+    // @ts-expect-error - No type yet
     _bandwidth.data.forEach(e => {
       let isExist = false
       // @ts-expect-error - No type yet
@@ -256,6 +257,7 @@ export default function NetworkFlowProvider({ children, params }: IProps) {
       }
     })
 
+    // @ts-expect-error - No type yet
     setNewBandwidth([...realNewBandwidths, ...updated_new_bandwidth].slice(0, 20))
   }, [fetchBandwidth, filterId])
 

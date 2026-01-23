@@ -18,6 +18,7 @@ const FormServerFetch = async () => {
     <TrafficMaps
       defaultValues={defaultValues ?? {}}
       params={{
+        // @ts-expect-error
         id: defaultValues?.id! ?? '',
         shell_type: application! as 'record' | 'wizard',
         entity: main_entity,
