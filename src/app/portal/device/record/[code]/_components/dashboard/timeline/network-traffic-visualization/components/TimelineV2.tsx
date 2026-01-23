@@ -43,7 +43,7 @@ export default function GridVirtualizerFixed(props: any) {
 
   function getColorForValue(value: number, maxBandwidth: number) {
     const range = maxBandwidth / 3;
-    if (value === undefined || value <= 0) return '#fff';
+    if (value == null || !Number.isFinite(value) || value <= 0) return '#fff';
     if (value >= maxBandwidth) return '#00364b';
     if (value > 2 * range) return '#1d576e';
     if (value > range) return '#325e6f';
@@ -132,6 +132,93 @@ export default function GridVirtualizerFixed(props: any) {
 
     return bestRow;
   }, [formatted]);
+
+  const lastValueIndexByRow = useMemo(() => {
+    const rows = Array.isArray(formatted) ? formatted : [];
+    return rows.map((row) => {
+      if (!Array.isArray(row) || row.length === 0) return null;
+      for (let i = row.length - 1; i >= 0; i--) {
+        const bandwidthValue = Number(row[i]?.bandwidth);
+        if (Number.isFinite(bandwidthValue) && bandwidthValue > 0) return i;
+      }
+      return null;
+    });
+  }, [formatted]);
+
+  const [flashingByRow, setFlashingByRow] = React.useState<Record<number, boolean>>(
+    {},
+  );
+  const didInitFlashRef = React.useRef(false);
+  const prevLatestTimeByRowRef = React.useRef<(string | null)[]>([]);
+  const flashTimeoutsByRowRef = React.useRef(new Map<number, number>());
+  const blinkedTimesByRowRef = React.useRef(new Map<number, Set<string>>());
+
+  const lastValueTimeByRow = useMemo(() => {
+    const rows = Array.isArray(formatted) ? formatted : [];
+    return rows.map((row, rowIndex) => {
+      if (!Array.isArray(row) || row.length === 0) return null;
+      const lastValueIndex = lastValueIndexByRow[rowIndex];
+      if (lastValueIndex == null) return null;
+
+      const lastItem = row[lastValueIndex];
+      const bandwidthValue = Number(lastItem?.bandwidth);
+      if (!Number.isFinite(bandwidthValue) || bandwidthValue <= 0) return null;
+
+      const timeValue = lastItem?.bucketTime ?? lastItem?.time;
+      if (timeValue == null) return null;
+      return String(timeValue);
+    });
+  }, [formatted, lastValueIndexByRow]);
+
+  React.useEffect(() => {
+    if (!didInitFlashRef.current) {
+      didInitFlashRef.current = true;
+      prevLatestTimeByRowRef.current = lastValueTimeByRow;
+      return;
+    }
+
+    const prevTimes = prevLatestTimeByRowRef.current;
+
+    lastValueTimeByRow.forEach((latestTime, rowIndex) => {
+      if (!latestTime) return;
+      if (latestTime === prevTimes[rowIndex]) return;
+      const alreadyBlinkedForRow = blinkedTimesByRowRef.current.get(rowIndex);
+      if (alreadyBlinkedForRow?.has(latestTime)) return;
+
+      setFlashingByRow((current) => ({ ...current, [rowIndex]: true }));
+      if (alreadyBlinkedForRow) {
+        alreadyBlinkedForRow.add(latestTime);
+      } else {
+        blinkedTimesByRowRef.current.set(rowIndex, new Set([latestTime]));
+      }
+
+      const existingTimeoutId = flashTimeoutsByRowRef.current.get(rowIndex);
+      if (existingTimeoutId != null) window.clearTimeout(existingTimeoutId);
+
+      const timeoutId = window.setTimeout(() => {
+        setFlashingByRow((current) => {
+          if (!current[rowIndex]) return current;
+          const next = { ...current };
+          delete next[rowIndex];
+          return next;
+        });
+        flashTimeoutsByRowRef.current.delete(rowIndex);
+      }, 1000);
+
+      flashTimeoutsByRowRef.current.set(rowIndex, timeoutId);
+    });
+
+    prevLatestTimeByRowRef.current = lastValueTimeByRow;
+  }, [lastValueTimeByRow]);
+
+  React.useEffect(() => {
+    return () => {
+      flashTimeoutsByRowRef.current.forEach((timeoutId) =>
+        window.clearTimeout(timeoutId),
+      );
+      flashTimeoutsByRowRef.current.clear();
+    };
+  }, []);
 
   const columnCount = (timeAxisRow?.length || 0) + 1;
   const lastAxisPoint = timeAxisRow?.[timeAxisRow.length - 1];
@@ -347,12 +434,28 @@ export default function GridVirtualizerFixed(props: any) {
                           <div
                             className="size-4"
                             style={{
-                              backgroundColor: getColorForValue(
-                                formatted[virtualRow.index][
-                                  virtualColumn.index - 1
-                                ].bandwidth,
-                                getMaxBandwidth(formatted[virtualRow.index]),
-                              ),
+                              backgroundColor: (() => {
+                                const bandwidthValue = Number(
+                                  formatted[virtualRow.index][virtualColumn.index - 1]
+                                    ?.bandwidth,
+                                );
+                                const maxBandwidth = getMaxBandwidth(formatted[virtualRow.index]);
+                                const lastValueIndex = lastValueIndexByRow?.[virtualRow.index];
+                                const isLastNonEmptyValue =
+                                  lastValueIndex != null &&
+                                  virtualColumn.index - 1 === lastValueIndex;
+
+                                if (
+                                  isLastNonEmptyValue &&
+                                  flashingByRow?.[virtualRow.index] &&
+                                  Number.isFinite(bandwidthValue) &&
+                                  bandwidthValue > 0
+                                ) {
+                                  return '#ff0000';
+                                }
+
+                                return getColorForValue(bandwidthValue, maxBandwidth);
+                              })(),
                             }}
                           />
                         </TooltipTrigger>
