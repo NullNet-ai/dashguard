@@ -12,9 +12,15 @@ export default function GridDeviceLastHeartbeat({ device_id }: { device_id: stri
       timestamp: '',
     }] },
 
-  } = api.deviceHeartbeat.getLastHeartbeat.useQuery({
-    device_id,
-  })
+  } = api.deviceHeartbeat.getLastHeartbeat.useQuery(
+    {
+      device_id,
+    },
+    {
+      enabled: Boolean(device_id),
+      refetchInterval: 1000,
+    },
+  )
 
   const recordData = record?.data;
   const timestamp = useMemo(() => {
