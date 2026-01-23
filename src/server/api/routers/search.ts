@@ -68,7 +68,6 @@ export const searchRouter = createTRPCRouter({
                   : EOrderDirection.ASC
                 : EOrderDirection.DESC,
           },
-          // @ts-expect-error - No type yet
           multiple_sort:
             sorting?.length && sorting?.length > 1
               // @ts-expect-error - No type yet
@@ -136,7 +135,6 @@ export const searchRouter = createTRPCRouter({
               // by_field: "created_date",
               // by_direction: EOrderDirection.ASC,
             },
-            // @ts-expect-error - No type yet
             multiple_sort: input.sorting?.length
               // @ts-expect-error - No type yet
               ? formatSorting(input.sorting)
@@ -269,7 +267,6 @@ export const searchRouter = createTRPCRouter({
                     (input.limit || 100),
               limit: input.limit || 1,
             },
-            // @ts-expect-error - No type yet
             multiple_sort: input.sorting?.length
               // @ts-expect-error - No type yet
               ? formatSorting(input.sorting)

@@ -614,7 +614,6 @@ export const organizationRouter = createTRPCRouter({
             by_field: 'code',
             by_direction: EOrderDirection.DESC,
           },
-          // @ts-expect-error - No type yet
           multiple_sort: input.sorting?.length
             // @ts-expect-error - No type yet
             ? formatSorting(input.sorting)

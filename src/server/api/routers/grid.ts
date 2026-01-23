@@ -256,7 +256,6 @@ export const gridRouter = createTRPCRouter({
                   : EOrderDirection.ASC
                 : EOrderDirection.DESC,
           },
-          // @ts-expect-error - No type yet
           multiple_sort:
             sorting?.length && sorting?.length > 1
               // @ts-expect-error - No type yet
