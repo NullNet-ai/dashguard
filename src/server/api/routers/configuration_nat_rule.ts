@@ -29,7 +29,7 @@ export const deviceNatRuleRouter = createTRPCRouter({
         // @ts-expect-error - No type yet
         is_case_sensitive_sorting = "false"
       } = input
-      const _sorting = sorting?.filter(({id}: {id: string}) => ['created_by', 'updated_by'].includes(id))
+      const _sorting = sorting // ?.filter(({id}: {id: string}) => ['created_by', 'updated_by'].includes(id))
 
       const device_configuration = await ctx.dnaClient.findAll({
         entity: 'device_configurations',
@@ -102,7 +102,6 @@ export const deviceNatRuleRouter = createTRPCRouter({
             by_field: 'code',
             by_direction: EOrderDirection.DESC,
           },
-          // @ts-expect-error - No type yet
           multiple_sort: _sorting?.length
             ? formatSorting(_sorting, 'device_nat_rules', is_case_sensitive_sorting)
             : [],
