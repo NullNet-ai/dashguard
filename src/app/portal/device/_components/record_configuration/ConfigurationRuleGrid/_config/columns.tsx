@@ -72,13 +72,13 @@ const gridColumns = [
   },
   {
     header: 'Source',
-    accessorKey: 'source_addr',
+    accessorKey: 'source_ip_value',
     search_config: {
       operator: 'like',
     },
     cell: ({row}) => {
       const source_type = row.original?.source_type ?? "address";
-      const source_addr = row.original?.source_addr ?? "*";
+      const source_addr = row.original?.source_ip_value ?? "*";
       return <>{mapRuleEndpointAddress(source_addr, source_type)}</>
     }
   },
@@ -92,13 +92,13 @@ const gridColumns = [
 
   {
     header: 'Destination',
-    accessorKey: 'destination_addr',
+    accessorKey: 'destination_ip_value',
     search_config: {
       operator: 'like',
     },
     cell: ({row}) => {
       const destination_type = row.original?.destination_type ?? "address";
-      const destination_addr = row.original?.destination_addr ?? "*";
+      const destination_addr = row.original?.destination_ip_value ?? "*";
       return <>{mapRuleEndpointAddress(destination_addr, destination_type)}</>
     }
   },
