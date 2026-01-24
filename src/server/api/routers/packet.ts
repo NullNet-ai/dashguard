@@ -1036,6 +1036,7 @@ export const packetRouter = createTRPCRouter({
       }
       // 209.58.181.171
       source_ips = [...new Set([...source_ips, ...sourceIPs])] as string[]
+      source_ips = source_ips.slice(0, limit)
       if (countryFilters?.length) {
         const _res = await Bluebird.map(source_ips, async (source_ip: string) => {
           const res = await ctx.dnaClient

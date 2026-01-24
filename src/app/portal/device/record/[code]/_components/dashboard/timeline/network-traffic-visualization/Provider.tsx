@@ -426,6 +426,14 @@ export default function NetworkFlowProvider({ children, params }: IProps) {
 
 const chartData = useMemo(() => new_bandwidth,[new_bandwidth])
 
+  useEffect(() => {
+    eventEmitter.emit('timeline_chart_data', chartData)
+  }, [chartData])
+
+  useEffect(() => {
+    eventEmitter.emit('timeline_loading', loading)
+  }, [loading])
+
   const state = {
     flowData: new_bandwidth,
     loading,

@@ -11,7 +11,7 @@ import {
 } from '@headlessui/react';
 import { MagnifyingGlassIcon } from '@heroicons/react/20/solid';
 import { Clock, SearchIcon, X } from 'lucide-react';
-import { useContext, useMemo, useState } from 'react';
+import { useContext, useEffect, useMemo, useState } from 'react';
 
 import { Button } from '~/components/ui/button';
 import { useDebounce } from '~/components/ui/multi-select';
@@ -27,10 +27,14 @@ import { Separator } from '~/components/ui/separator';
 import { usePathname } from 'next/navigation'
 import { testIDFormatter } from '~/utils/formatter'
 import { GridContext } from '~/components/platform/Grid/Provider';
+import { useEventEmitter } from '~/context/EventEmitterProvider';
 
 export default function SearchDialog() {
+  const eventEmitter = useEventEmitter()
   const { state, actions } = useContext(SearchGraphContext);
   const [openDialog, setOpenDialog] = useState(false);
+  const [loading, setLoading] = useState(false)
+
   const path =  usePathname()
   const [, , path1, path2] = path.split('/')
 
@@ -96,6 +100,17 @@ export default function SearchDialog() {
       })
 
   },[debouncedSearchInput])
+
+  useEffect(() => {
+    const setLoadingState = (data: boolean) => {
+      setLoading(data)
+    }
+    eventEmitter.on('timeline_loading', setLoadingState)
+    return () => {
+      eventEmitter.off('timeline_loading', setLoadingState)
+    }
+  }, [eventEmitter])
+
   const handleOpenDialog = () => {
     setOpenDialog(true);
   };
@@ -112,6 +127,7 @@ export default function SearchDialog() {
         variant="softPrimary"
         onClick={() => handleOpenDialog()}
         data-test-id={`${testIDFormatter(`${path1}-${path2}-srch-btn`)}`}
+        disabled={loading}
       >
         <SearchIcon className="size-4" />
         <span className="mr-1">Search</span>
