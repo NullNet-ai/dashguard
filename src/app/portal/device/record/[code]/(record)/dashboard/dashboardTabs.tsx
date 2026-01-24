@@ -33,27 +33,27 @@ export default async function DashboardTabs() {
 
 
   const tabs = [
-    // {
-    //   id: 'live_graph',
-    //   label: 'Live Graph',
-    //   content: (
-    //     <Suspense
-    //       fallback={
-    //         <div className="flex h-[500px] w-full items-center justify-center">
-    //           <div className="flex items-center justify-center">
-    //             <Loader
-    //               className="h-8 w-8 bg-primary text-primary"
-    //               label=""
-    //               variant="spinner"
-    //             />
-    //           </div>
-    //         </div>
-    //       }
-    //     >
-    //       <InteractiveGraph />
-    //     </Suspense>
-    //   ),
-    // },
+    {
+      id: 'live_graph',
+      label: 'Live Graph',
+      content: (
+        <Suspense
+          fallback={
+            <div className="flex h-[500px] w-full items-center justify-center">
+              <div className="flex items-center justify-center">
+                <Loader
+                  className="h-8 w-8 bg-primary text-primary"
+                  label=""
+                  variant="spinner"
+                />
+              </div>
+            </div>
+          }
+        >
+          <InteractiveGraph />
+        </Suspense>
+      ),
+    },
     {
       id: 'timeline',
       label: 'Timeline',
@@ -75,49 +75,49 @@ export default async function DashboardTabs() {
         </Suspense>
       ),
     },
-    // {
-    //   id: 'traffic_graph',
-    //   label: 'Traffic Graph',
-    //   content: (
-    //     <Suspense
-    //       fallback={
-    //         <div className="flex h-[500px] w-full items-center justify-center">
-    //           <div className="flex items-center justify-center">
-    //             <Loader
-    //               className="h-8 w-8 bg-primary text-primary"
-    //               label=""
-    //               variant="spinner"
-    //             />
-    //           </div>
-    //         </div>
-    //       }
-    //     >
+    {
+      id: 'traffic_graph',
+      label: 'Traffic Graph',
+      content: (
+        <Suspense
+          fallback={
+            <div className="flex h-[500px] w-full items-center justify-center">
+              <div className="flex items-center justify-center">
+                <Loader
+                  className="h-8 w-8 bg-primary text-primary"
+                  label=""
+                  variant="spinner"
+                />
+              </div>
+            </div>
+          }
+        >
           
-    //       <TrafficGraph />
-    //     </Suspense>
-    //   ),
-    // },
-    // {
-    //   id: 'map',
-    //   label: 'Map',
-    //   content: (
-    //     <Suspense
-    //       fallback={
-    //         <div className="flex h-[500px] w-full items-center justify-center">
-    //           <div className="flex items-center justify-center">
-    //             <Loader
-    //               className="h-8 w-8 bg-primary text-primary"
-    //               label=""
-    //               variant="spinner"
-    //             />
-    //           </div>
-    //         </div>
-    //       }
-    //     >
-    //       < TrafficMaps />
-    //     </Suspense>
-    //   ),
-    // }
+          <TrafficGraph />
+        </Suspense>
+      ),
+    },
+    {
+      id: 'map',
+      label: 'Map',
+      content: (
+        <Suspense
+          fallback={
+            <div className="flex h-[500px] w-full items-center justify-center">
+              <div className="flex items-center justify-center">
+                <Loader
+                  className="h-8 w-8 bg-primary text-primary"
+                  label=""
+                  variant="spinner"
+                />
+              </div>
+            </div>
+          }
+        >
+          < TrafficMaps />
+        </Suspense>
+      ),
+    }
   ];
 
   return (
