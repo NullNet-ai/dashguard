@@ -395,7 +395,8 @@ export default function GridVirtualizerFixed(props: any) {
                                   : null}
                                 <span
                                   className={
-                                    flowData?.[virtualRow.index]?.active
+                                    flowData?.[virtualRow.index]?.active ||
+                                    flowData?.[virtualRow.index]?.isNew
                                       ? 'text-red-600'
                                       : 'text-black'
                                   }
@@ -445,14 +446,14 @@ export default function GridVirtualizerFixed(props: any) {
                                   lastValueIndex != null &&
                                   virtualColumn.index - 1 === lastValueIndex;
 
-                                if (
-                                  isLastNonEmptyValue &&
-                                  flashingByRow?.[virtualRow.index] &&
-                                  Number.isFinite(bandwidthValue) &&
-                                  bandwidthValue > 0
-                                ) {
-                                  return '#ff0000';
-                                }
+                                // if (
+                                //   isLastNonEmptyValue &&
+                                //   flashingByRow?.[virtualRow.index] &&
+                                //   Number.isFinite(bandwidthValue) &&
+                                //   bandwidthValue > 0
+                                // ) {
+                                //   return '#ff0000';
+                                // }
 
                                 return getColorForValue(bandwidthValue, maxBandwidth);
                               })(),

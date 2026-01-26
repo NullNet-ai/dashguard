@@ -74,6 +74,18 @@ export default function NetworkFlowProvider({ children, params }: IProps) {
   // const { notifications, isConnected, disconnectSocket } = useSocketNotifications(userToken);
   
   const time_range = getLastTimeStamp({ count: time_count, unit: time_unit, add_remaining_time: true })
+
+  const clearIsNewAfterDelay = useCallback((ips: string[], delayMs = 1000) => {
+    if (!ips?.length) return
+    window.setTimeout(() => {
+      if (isUnmountedRef.current) return
+      setNewBandwidth((prev: any[]) => {
+        if (!prev?.length) return prev
+        const ipSet = new Set(ips)
+        return prev.map((entry: any) => (ipSet.has(entry?.source_ip) ? { ...entry, isNew: false } : entry))
+      })
+    }, delayMs)
+  }, [])
   
   const startQueueService = useCallback(() => {
     if (isQueueWorkerRunningRef.current) return
@@ -97,6 +109,12 @@ export default function NetworkFlowProvider({ children, params }: IProps) {
         }
       }
     })()
+  }, [])
+
+  useEffect(() => {
+    return () => {
+      isUnmountedRef.current = true
+    }
   }, [])
 
   useEffect(() => {
@@ -139,7 +157,10 @@ export default function NetworkFlowProvider({ children, params }: IProps) {
       return;
     }
 
-    let updated_new_bandwidth = new_bandwidth
+    let updated_new_bandwidth = new_bandwidth?.map((entry: any) => ({
+      ...entry,
+      isNew: false,
+    }))
 
     // @ts-expect-error - No type yet
     _bandwidth.data.forEach(e => {
@@ -177,13 +198,16 @@ export default function NetworkFlowProvider({ children, params }: IProps) {
       // if((searchBy ?? [])?.length && !(searchBy as any)?.[0]?.values?.includes(data?.source_ip)) return
       const updated_bandwidth = await updateBandwidth(new_bandwidth, data, time, searchBy);
       setNewBandwidth([...updated_bandwidth])
+      clearIsNewAfterDelay(
+        (updated_bandwidth || []).filter((e: any) => e?.isNew).map((e: any) => e?.source_ip).filter(Boolean),
+      )
     });
   
     // Cleanup function to remove the event listener
     return () => {
       socket.off(eventKey);
     };
-  }, [socket, org_acc_id, new_bandwidth]);
+  }, [socket, org_acc_id, new_bandwidth, clearIsNewAfterDelay]);
   
   
 
@@ -253,12 +277,15 @@ export default function NetworkFlowProvider({ children, params }: IProps) {
         return [...acc, curr]
       }, [])
       if (!isExist) {
-        realNewBandwidths.push({ ...e, time_unit, time_count, resolution, time_range })
+        realNewBandwidths.push({ ...e, time_unit, time_count, resolution, time_range, isNew: true })
       }
     })
 
     // @ts-expect-error - No type yet
     setNewBandwidth([...realNewBandwidths, ...updated_new_bandwidth].slice(0, 20))
+    clearIsNewAfterDelay(
+      (realNewBandwidths || []).map((e: any) => e?.source_ip).filter(Boolean),
+    )
   }, [fetchBandwidth, filterId])
 
   const fetchMoreData = useCallback(async () => {
