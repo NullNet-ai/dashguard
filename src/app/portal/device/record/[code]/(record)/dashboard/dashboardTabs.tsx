@@ -2,6 +2,8 @@ import { headers } from 'next/headers';
 import { Suspense, lazy } from 'react';
 import StateTab from '~/components/platform/StateTab';
 import { Loader } from '~/components/ui/loader';
+import { api } from '~/trpc/server';
+import OfflineWarning from './offlineWarning';
 
 // Lazy load components
 const Timeline = lazy(
@@ -27,10 +29,17 @@ const TrafficGraph = lazy(
 export default async function DashboardTabs() {
   const headerList = await headers();
   const pathname = headerList.get('x-pathname') || '';
-  const [, , , , identifier] = pathname.split('/');
+  const [, , main_entity, , identifier] = pathname.split('/');
   // Should Refetch Every ??
   
-
+  const fetched_device = identifier
+    ? await api.record.getByCode({
+        id: identifier!,
+        pluck_fields: ['is_device_online'],
+        main_entity: main_entity!,
+      })
+    : null;
+  const isDeviceOnline = fetched_device?.data?.is_device_online;
 
   const tabs = [
     {
@@ -75,6 +84,7 @@ export default async function DashboardTabs() {
             </div>
           }
         >
+          <OfflineWarning isOnline={isDeviceOnline} />
           <Timeline />
         </Suspense>
       ),
@@ -96,6 +106,7 @@ export default async function DashboardTabs() {
             </div>
           }
         >
+          <OfflineWarning isOnline={isDeviceOnline} />
           < TrafficMaps />
         </Suspense>
       ),

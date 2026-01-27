@@ -205,7 +205,7 @@ const InteractiveGraph = ({
         <Alert variant="warning" dismissible>
           {/* <AlertTitle>Device is offline.</AlertTitle> */}
           <AlertContent>
-            The device is Offline. Data transmission is unavailable.
+            The device is Offline. Data transmission unavailable.
           </AlertContent>
         </Alert>
       )}
