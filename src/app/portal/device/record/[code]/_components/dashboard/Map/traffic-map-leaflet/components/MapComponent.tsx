@@ -652,9 +652,9 @@ const MapComponent = ({ countryTrafficData, filterId }: Record<string, any>) => 
           destMarker = L.marker(destinationCoordinates, {
             icon: L.divIcon({
               className: 'destination-dot ocean-dot dot-animated',
-              html: `<div class="dot" style="background:${ORANGE}; width:16px; height:16px;"></div>`,
-              iconSize: [16, 16],
-              iconAnchor: [8, 8],
+              html: `<div class="dot" style="background:${ORANGE}; width:8px; height:8px;"></div>`,
+              iconSize: [8, 8],
+              iconAnchor: [4, 4],
             }),
           })
             .addTo(map)
@@ -728,8 +728,8 @@ const MapComponent = ({ countryTrafficData, filterId }: Record<string, any>) => 
             direction = 1;
 
             const zoom = typeof map?.getZoom === 'function' ? map.getZoom() : 2;
-            const radiusDeg = Math.min(8, Math.max(1.2, 8 / Math.max(1, zoom)));
-            const sweepRad = Math.PI * 1.2;
+            const radiusDeg = Math.min(12, Math.max(2, 12 / Math.max(1, zoom)));
+            const sweepRad = Math.PI * 1.5;
             const centerAngle = Math.PI / 2;
             const startAngle = centerAngle - sweepRad / 2;
             const cosLat = Math.cos((sourceLat * Math.PI) / 180) || 1;
@@ -746,12 +746,12 @@ const MapComponent = ({ countryTrafficData, filterId }: Record<string, any>) => 
             const latDiff = Math.abs(sourceLat - destLat);
             const lngDiff = Math.abs(sourceLng - destLng);
             const distance = Math.sqrt(latDiff * latDiff + lngDiff * lngDiff);
-            const baseCurveStrength = distance > 10 ? 2 : 0;
+            const baseCurveStrength = distance > 10 ? 3 : 0;
             curveStrength =
-              baseCurveStrength === 0 ? 0 : baseCurveStrength * (0.75 + Math.random() * 0.75);
+              baseCurveStrength === 0 ? 0 : baseCurveStrength * (0.9 + Math.random() * 0.9);
 
-            const perpLat = (-dLng / lineLength) * curveStrength * 1.25 * direction;
-            const perpLng = (dLat / lineLength) * curveStrength * 1.25 * direction;
+            const perpLat = (-dLng / lineLength) * curveStrength * 1.6 * direction;
+            const perpLng = (dLat / lineLength) * curveStrength * 1.6 * direction;
             controlLat = midLat + perpLat;
             controlLng = midLng + perpLng;
 
@@ -889,15 +889,15 @@ return (
       <style>
         {`
           .source-dot .dot, .destination-dot .dot {
-            width: 12px;
-            height: 12px;
+            width: 8px;
+            height: 8px;
             border-radius: 50%;
             position: absolute;
             animation: emphasize-dot 1.5s infinite;
           }
           .ocean-dot .dot {
-            width: 12px !important;
-            height: 12px !important;
+            width: 8px !important;
+            height: 8px !important;
             animation: emphasize-dot-ocean 1.5s infinite;
           }
           @keyframes emphasize-dot {
@@ -905,7 +905,7 @@ return (
               box-shadow: 0 0 0 0 rgba(255, 165, 0, 0.5), 0 0 0 0 rgba(255, 165, 0, 0.3);
             }
             70% {
-              box-shadow: 0 0 0 8px rgba(255, 165, 0, 0), 0 0 0 16px rgba(255, 165, 0, 0);
+              box-shadow: 0 0 0 5px rgba(255, 165, 0, 0), 0 0 0 10px rgba(255, 165, 0, 0);
             }
             100% {
               box-shadow: 0 0 0 0 rgba(255, 165, 0, 0), 0 0 0 0 rgba(255, 165, 0, 0);
@@ -916,7 +916,7 @@ return (
               box-shadow: 0 0 0 0 rgba(255, 165, 0, 0.3);
             }
             70% {
-              box-shadow: 0 0 0 5px rgba(255, 165, 0, 0);
+              box-shadow: 0 0 0 4px rgba(255, 165, 0, 0);
             }
             100% {
               box-shadow: 0 0 0 0 rgba(255, 165, 0, 0);

@@ -11,9 +11,9 @@ export const createSourceMarker = (
   ) => {
   const divIcon = L.divIcon({
     className: 'source-dot',
-    html: `<div class="dot" style="background:${ORANGE}; width:12px; height:12px;"></div>`,
-    iconSize: [12, 12],
-    iconAnchor: [8, 8],
+    html: `<div class="dot" style="background:${ORANGE}; width:8px; height:8px;"></div>`,
+    iconSize: [8, 8],
+    iconAnchor: [4, 4],
   });
 
   const marker = L.marker(coordinates, { icon: divIcon }).addTo(mapInstance);
@@ -43,9 +43,9 @@ export const createDestinationMarker = (
   ) => {
   const divIcon = L.divIcon({
     className: 'destination-dot',
-    html: `<div class="dot" style="background:${ORANGE}; width:12px; height:12px;"></div>`,
-    iconSize: [12, 12],
-    iconAnchor: [8, 8],
+    html: `<div class="dot" style="background:${ORANGE}; width:8px; height:8px;"></div>`,
+    iconSize: [8, 8],
+    iconAnchor: [4, 4],
   });
 
   const marker = L.marker(coordinates, { icon: divIcon }).addTo(mapInstance);
