@@ -308,7 +308,7 @@ const { refetch: refetchTimeUnitandResolution } = api.cachedFilter.fetchCachedFi
     <div className=" mx-auto max-w-[calc(100vw-39em)]">
       <div className='sticky top-[29px] z-[50] bg-white'>
         <div className="px-2">
-          <Filter params={params} type='traffic_graph_filter'  />
+          {/* <Filter params={params} type='traffic_graph_filter'  /> */}
           {/* <Search  params={{...params, router: 'packet', resolver: 'filterPackets' }} filter_type='traffic_graph_search' /> */}
         </div>
     {loading ? <Loader
