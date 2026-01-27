@@ -51,6 +51,10 @@ export default async function DashboardTabs() {
           }
         >
           <InteractiveGraph />
+
+          <div className="mt-2">
+            <TrafficGraph />
+          </div>
         </Suspense>
       ),
     },
@@ -72,28 +76,6 @@ export default async function DashboardTabs() {
           }
         >
           <Timeline />
-        </Suspense>
-      ),
-    },
-    {
-      id: 'traffic_graph',
-      label: 'Traffic Graph',
-      content: (
-        <Suspense
-          fallback={
-            <div className="flex h-[500px] w-full items-center justify-center">
-              <div className="flex items-center justify-center">
-                <Loader
-                  className="h-8 w-8 bg-primary text-primary"
-                  label=""
-                  variant="spinner"
-                />
-              </div>
-            </div>
-          }
-        >
-          
-          <TrafficGraph />
         </Suspense>
       ),
     },
