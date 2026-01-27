@@ -41,7 +41,7 @@ const SettingDetails = ({ params, defaultValues }: IFormProps) => {
     <FormBuilder
       defaultValues={defaultValues}
       enableFormRegisterToParent = { true }
-      customDesign={{ formClassName: 'sm:grid-cols-3 lg:grid-cols-3' }}
+      customDesign={{ formClassName: 'grid !grid-cols-1 gap-4' }}
       fields={[
         {
           id: 'is_traffic_monitoring_enabled',
