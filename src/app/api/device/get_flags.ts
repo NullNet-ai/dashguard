@@ -1,7 +1,7 @@
 import axios from 'axios'
 
 export async function getFlagDetails(country: string) {
-  if (!country || typeof country !== 'string' || country.length < 2) {
+  if (!country || typeof country !== 'string') {
     console.error('Invalid country code:', country)
     return { flag: '/unknown-flag.svg', name: 'No IP Info', country: 'No IP Info' }
   }

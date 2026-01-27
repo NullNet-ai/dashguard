@@ -1146,7 +1146,8 @@ export const packetRouter = createTRPCRouter({
       .default(0), // Starting position for the batch
       address: z.object({
         country: z.string().optional(),
-        state: z.string().optional(),
+        country_code: z.string().optional(),
+        // state: z.string().optional(),
         city: z.string().optional(),
       }).optional(),
   })).mutation(async ({ input, ctx }) => {
@@ -1304,8 +1305,8 @@ export const packetRouter = createTRPCRouter({
         sourceIpInfo ??
         (isSourceIpClassABC && address
           ? {
-              country: address?.country ?? 'No IP Info',
-              region: address?.state ?? 'No IP Info',
+              country: address?.country_code ?? 'No IP Info',
+              region: 'No IP Info', // address?.state ?? 'No IP Info',
               city: address?.city ?? 'No IP Info',
               ip: ips?.source_ip,
             }
@@ -1352,8 +1353,8 @@ export const packetRouter = createTRPCRouter({
         destinationIpInfo ??
         (isDestinationIpClassABC && address
           ? {
-              country: address?.country ?? 'No IP Info',
-              region: address?.state ?? 'No IP Info',
+              country: address?.country_code ?? 'No IP Info',
+              region: 'No IP Info', // address?.state ?? 'No IP Info',
               city: address?.city ?? 'No IP Info',
               ip: ips?.destination_ip,
             }
@@ -1378,6 +1379,8 @@ export const packetRouter = createTRPCRouter({
         timestamp: ips?.timestamp,
       }
     }, { concurrency: 100 })
+
+    _res = _res.filter(e => e.source_country?.country !== 'No IP Info')
 
     // Asummed only filtering Country
     if (findFilter && Object.keys(findFilter).length) {
