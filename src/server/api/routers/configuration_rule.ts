@@ -109,9 +109,35 @@ export const deviceRuleRouter = createTRPCRouter({
       })
         .execute()
 
-      const { total_count: totalCount = 1, data: items }
+      let { total_count: totalCount = 1, data: items }
       = device_rules
-
+      const groupedItems = items.reduce((acc, curr) => {
+        if (curr.interface === 'wan') {
+          return {
+            ...acc,
+            wan: [...acc.wan, curr]
+          }
+        } else {
+          return {
+            ...acc,
+            lan: [...acc.lan, curr]
+          }
+        }
+      }, {
+        wan: [],
+        lan: []
+      })
+      const orderSort = _sorting?.find?.((s: { id?: string, desc?: boolean }) => s?.id === 'order')
+      const isOrderDesc = orderSort?.desc === true
+      const lanLength = groupedItems.lan.length
+      items = [
+        ...groupedItems.wan,
+        ...groupedItems.lan.map((e: Record<string, any>, index: number) => {
+          return {
+            ...e,
+            order: isOrderDesc ? (lanLength - 1 - index) : index,
+          }
+        })]
       const formatted_items = items?.map((item: Record<string, any>) => {
         const {
           [pluralize(input?.entity)]: entity_data,
