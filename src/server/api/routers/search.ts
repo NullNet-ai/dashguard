@@ -27,7 +27,7 @@ export const searchRouter = createTRPCRouter({
     // Define input using zod for validation
     .input(ZodSearchSuggestions)
     .query(async ({ input, ctx }) => {
-      const {
+      let {
         advance_filters: _advance_filters = [],
         entity,
         sorting,
@@ -39,6 +39,20 @@ export const searchRouter = createTRPCRouter({
         ...addCommonGridPluckObject(),
         [pluralize(entity)]: input.pluck,
       };
+      if (entity === 'device_filter_rules' || entity === 'device_nat_rules') {
+        _advance_filters = _advance_filters.map(e => {
+          if (e.field === 'order' || e.field === 'disabled') {
+            return {
+              ...e,
+              parse_as: 'text',
+            }
+          }
+          return {
+            ...e,
+
+          }
+        })
+      }
 
       const query = ctx.dnaClient.searchSuggestions({
         entity,

@@ -166,7 +166,7 @@ const ConfigurationNatRuleGrid = ({
             router: 'deviceRule',
             resolver: 'mainGrid',
             query_params: {
-              entity: 'device_rules',
+              entity: 'device_nat_rules',
               pluck: _pluck,
               group_advance_filters: filters?.groupAdvanceFilters,
               sorting: gridCachedData?.sorts?.sorting,

@@ -166,7 +166,7 @@ const ConfigurationRuleGrid = ({
             router: 'deviceRule',
             resolver: 'mainGrid',
             query_params: {
-              entity: 'device_rules',
+              entity: 'device_filter_rules',
               pluck: _pluck,
               group_advance_filters: filters?.groupAdvanceFilters,
               sorting: gridCachedData?.sorts?.sorting,
