@@ -5,6 +5,7 @@ export function animateFlowLine(map: any, points: [number, number][], options: a
     animationStep = 2,
     animationFrameDelayMs = 0,
     animationStartDelayMs = 0,
+    onAnimationEnd,
     ...polylineOptions
   } = options ?? {};
 
@@ -16,6 +17,7 @@ export function animateFlowLine(map: any, points: [number, number][], options: a
   const startDelayMs = Math.max(0, Number(animationStartDelayMs) || 0);
 
   let lastFrameTime = 0;
+  let didComplete = false;
   function drawStep(now: number) {
     if (i < points.length) {
       if (frameDelayMs === 0 || now - lastFrameTime >= frameDelayMs) {
@@ -28,6 +30,10 @@ export function animateFlowLine(map: any, points: [number, number][], options: a
     }
 
     line.setLatLngs(points);
+    if (!didComplete) {
+      didComplete = true;
+      if (typeof onAnimationEnd === "function") onAnimationEnd(line);
+    }
   }
 
   if (startDelayMs > 0) {

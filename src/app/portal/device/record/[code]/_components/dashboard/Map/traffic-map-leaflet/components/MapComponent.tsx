@@ -26,7 +26,6 @@ const MapComponent = ({ countryTrafficData, filterId }: Record<string, any>) => 
   const ipCoordinatesCache: any = useRef({}); // New cache to store IP-to-coordinates mappings
   const countriesGeoJSON: any = useRef(null);
   const countryHighlights: any = useRef({});
-  const activeConnections: any = useRef({});
   const priorityConnections: any = useRef([]);
   const connectionElements: any = useRef({});
   const mapInstanceRef: any = useRef(null);
@@ -393,13 +392,6 @@ const MapComponent = ({ countryTrafficData, filterId }: Record<string, any>) => 
       // Create a connection key
       const connectionKey = getConnectionKey(source_ip, destination_ip);
 
-      // Skip if this connection is already being displayed
-      if (activeConnections.current[connectionKey]) {
-        // Update existing connection's timestamp to mark it as still active
-        activeConnections.current[connectionKey].lastSeen = Date.now();
-        continue;
-      }
-
       // Use the consistent coordinates from our mapping
       const sourceCoordinates = ipAddressToCoordinates[source_ip];
       const destCoordinates = ipAddressToCoordinates[destination_ip];
@@ -409,7 +401,7 @@ const MapComponent = ({ countryTrafficData, filterId }: Record<string, any>) => 
       const destIsNoIpInfo = destination_country && destination_country.country === "No IP Info";
 
       // Calculate traffic level if not provided
-      const trafficLevel: number = connection.total_byte || 0;
+      const trafficLevel: number = Number(connection.total_byte) || 0;
 
       // Determine condition based on traffic pattern
       let condition = null;
@@ -576,7 +568,6 @@ const MapComponent = ({ countryTrafficData, filterId }: Record<string, any>) => 
     clearDrawTimeouts();
     clearConnectionLayers(map);
     clearAllCountryHighlights(map);
-    activeConnections.current = {};
     priorityConnections.current = [];
     removedIpCache.current = {};
   }, [filterId, map, isLoading, clearConnectionLayers, clearAllCountryHighlights, clearDrawTimeouts]);
@@ -594,10 +585,6 @@ const MapComponent = ({ countryTrafficData, filterId }: Record<string, any>) => 
       for (const conn of allConnections) {
         currentDataPoints = updateDataPoints(currentDataPoints, conn, removedIpCache);
       }
-  
-      clearConnectionLayers(map);
-
-      const usedCountries = new Set();
 
       currentDataPoints.forEach((conn: Record<string, any>) => {
         if (drawSessionRef.current !== drawSession) return;
@@ -616,7 +603,6 @@ const MapComponent = ({ countryTrafficData, filterId }: Record<string, any>) => 
           if (drawSessionRef.current !== drawSession) return;
           const aliasSource = COUNTRY_ALIASES[conn.source_country.country] || conn.source_country.country;
           sourceCoordinates = normalizeLatLng(highlightCountry(map, aliasSource));
-          usedCountries.add(aliasSource);
         } else {
           if (drawSessionRef.current !== drawSession) return;
           sourceCoordinates = OCEAN_SOURCE_COORDINATE;
@@ -645,7 +631,6 @@ const MapComponent = ({ countryTrafficData, filterId }: Record<string, any>) => 
           if (drawSessionRef.current !== drawSession) return;
           const aliasDest = COUNTRY_ALIASES[conn.destination_country.country] || conn.destination_country.country;
           destinationCoordinates = normalizeLatLng(highlightCountry(map, aliasDest));
-          usedCountries.add(aliasDest);
         } else {
           if (drawSessionRef.current !== drawSession) return;
           destinationCoordinates = OCEAN_DEST_COORDINATE;
@@ -796,6 +781,34 @@ const MapComponent = ({ countryTrafficData, filterId }: Record<string, any>) => 
               animationStartDelayMs,
               animationFrameDelayMs,
               animationStep,
+              onAnimationEnd: () => {
+                const removeElements = () => {
+                  if (flowLine && map.hasLayer(flowLine)) map.removeLayer(flowLine);
+                  if (sourceMarker && map.hasLayer(sourceMarker)) map.removeLayer(sourceMarker);
+                  if (destMarker && map.hasLayer(destMarker)) map.removeLayer(destMarker);
+
+                  if (flowLine) trafficLayersRef.current.delete(flowLine);
+                  if (sourceMarker) trafficLayersRef.current.delete(sourceMarker);
+                  if (destMarker) trafficLayersRef.current.delete(destMarker);
+
+                  const arr = connectionElements.current[key];
+                  if (arr) {
+                    const idx = arr.indexOf(lineObj);
+                    if (idx !== -1) arr.splice(idx, 1);
+                    if (arr.length === 0) delete connectionElements.current[key];
+                  }
+                };
+
+                if (drawSessionRef.current !== drawSession) {
+                  removeElements();
+                  return;
+                }
+
+                if (flowLine?._path) {
+                  flowLine._path.classList.add('fade-out');
+                }
+                scheduleTimeout(removeElements, 1000);
+              },
             }
           );
           trackTrafficLayer(flowLine);
@@ -812,71 +825,13 @@ const MapComponent = ({ countryTrafficData, filterId }: Record<string, any>) => 
             createdAt: Date.now(),
           };
           connectionElements.current[key].push(lineObj);
-
-          const estimatedDrawMs =
-            Math.ceil(curvePoints.length / animationStep) * animationFrameDelayMs +
-            animationStartDelayMs;
-          const fadeStartMs = Math.max(2000, estimatedDrawMs + 700);
-
-          scheduleTimeout(() => {
-            if (drawSessionRef.current !== drawSession) {
-              if (flowLine && map.hasLayer(flowLine)) map.removeLayer(flowLine);
-              trafficLayersRef.current.delete(flowLine);
-              return;
-            }
-            if (flowLine && map.hasLayer(flowLine)) {
-              if (flowLine?._path) {
-                flowLine?._path.classList.add('fade-out');
-              }
-              scheduleTimeout(() => {
-                map.removeLayer(flowLine);
-                trafficLayersRef.current.delete(flowLine);
-                // Remove from array
-                const arr = connectionElements.current[key];
-                if (arr) {
-                  const idx = arr.indexOf(lineObj);
-                  if (idx !== -1) arr.splice(idx, 1);
-                  if (arr.length === 0) delete connectionElements.current[key];
-                }
-              }, 1000);
-            }
-          }, fadeStartMs);
-
-          // If more than 3 lines for this connection, fade out and remove the oldest
-          const arr = connectionElements.current[key];
-          if (arr.length > 3) {
-            const oldest = arr.shift();
-            if (oldest && oldest.flowLine && map.hasLayer(oldest.flowLine)) {
-              if (oldest.flowLine._path) {
-                oldest.flowLine._path.classList.add('fade-out');
-              }
-              scheduleTimeout(() => {
-                map.removeLayer(oldest.flowLine);
-                trafficLayersRef.current.delete(oldest.flowLine);
-                if (oldest.sourceMarker) map.removeLayer(oldest.sourceMarker);
-                if (oldest.destMarker) map.removeLayer(oldest.destMarker);
-                if (oldest.sourceMarker) trafficLayersRef.current.delete(oldest.sourceMarker);
-                if (oldest.destMarker) trafficLayersRef.current.delete(oldest.destMarker);
-              }, 1000);
-            }
-          }
-        }
-      });
-
-      // Only remove highlights for countries NOT in usedCountries
-      Object.keys(countryHighlights.current).forEach((country) => {
-        if (!usedCountries.has(country)) {
-          const { highlight, label } = countryHighlights.current[country];
-          if (highlight) map.removeLayer(highlight);
-          if (label) map.removeLayer(label);
-          delete countryHighlights.current[country];
         }
       });
 
     };
 
     loadAllConnections();
-  }, [map, isLoading, processIpData, filterId, clearConnectionLayers, trackTrafficLayer, scheduleTimeout]);
+  }, [map, isLoading, processIpData, filterId, trackTrafficLayer, scheduleTimeout]);
 
 
   //   .traffic-flow-line {
@@ -905,7 +860,7 @@ return (
               box-shadow: 0 0 0 0 rgba(255, 165, 0, 0.5), 0 0 0 0 rgba(255, 165, 0, 0.3);
             }
             70% {
-              box-shadow: 0 0 0 5px rgba(255, 165, 0, 0), 0 0 0 10px rgba(255, 165, 0, 0);
+              box-shadow: 0 0 0 2px rgba(255, 165, 0, 0), 0 0 0 4px rgba(255, 165, 0, 0);
             }
             100% {
               box-shadow: 0 0 0 0 rgba(255, 165, 0, 0), 0 0 0 0 rgba(255, 165, 0, 0);
