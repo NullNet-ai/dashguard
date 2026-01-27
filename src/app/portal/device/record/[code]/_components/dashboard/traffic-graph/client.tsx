@@ -30,7 +30,7 @@ const chartConfig = {
     label: 'Visitors',
   },
   bandwidth: {
-    label: 'Bandwidth',
+    label: 'Bandwidth:',
     color: 'hsl(var(--chart-2))',
   },
 } satisfies ChartConfig
