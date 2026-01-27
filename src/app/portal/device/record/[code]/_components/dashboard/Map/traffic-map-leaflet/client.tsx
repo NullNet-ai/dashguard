@@ -568,7 +568,7 @@ export default function TrafficMaps({ params, defaultValues }: Record<string, an
 
   return (
     <div>
-      <Filter params={params} type='map_filter' />
+      {/* <Filter params={params} type='map_filter' /> */}
       {/* <Search filter_type='map_search' params={{ ...params, router: 'packet', resolver: 'filterPackets' }} /> */}
       <h1>Traffic Flow</h1>
 
