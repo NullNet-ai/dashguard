@@ -12,134 +12,108 @@ import {
 import { useToast } from '~/context/ToastProvider';
 import { type IFormProps } from '../types';
 import { api } from "~/trpc/react";
-import countryCityStateJson from 'countrycitystatejson';
-
-const countryInfos = countryCityStateJson.getCountries() as Array<{
-  name?: string;
-  shortName: string;
-}>;
-
-const addressCountryOptions = countryInfos
-  .filter((country) => !!country.name)
-  .map((country) => ({
-    label: country.name as string,
-    value: country.name as string,
-  }))
-  .sort((a, b) => a.label.localeCompare(b.label));
 
 const FormSchema = z.object({
   address_city: z.string().min(1, 'City is required'),
-  address_state: z.string().min(1, 'State is required'),
   address_country: z.string().min(1, 'Country is required'),
 });
 
 export default function DeviceLocation({ params, defaultValues }: IFormProps) {
-  console.log("🚀 ~ DeviceLocation ~ defaultValues:", defaultValues)
   const toast = useToast();
 
   const updateDeviceCategory = api.device.updateDeviceCategory.useMutation();
 
-  const countryNameToShortName = useMemo(() => {
-    const map = new Map<string, string>();
-    for (const countryInfo of countryInfos) {
-      if (countryInfo?.name && countryInfo?.shortName) {
-        map.set(countryInfo.name, countryInfo.shortName);
-      }
-    }
-    return map;
-  }, []);
+  const [countryCitiesData, setCountryCitiesData] = useState<
+    Record<string, { code?: string; cities?: string[] }> | null
+  >(null);
 
-  const buildStateOptionsForCountryName = useCallback(
+  useEffect(() => {
+    let isActive = true;
+
+    const load = async () => {
+      try {
+        const res = await fetch('/countries.json', {
+          cache: 'force-cache',
+        });
+
+        if (!res.ok) throw new Error('Failed to fetch countries and cities');
+
+        const data = (await res.json()) as Record<
+          string,
+          { code?: string; cities?: string[] }
+        >;
+
+        if (isActive) setCountryCitiesData(data);
+      } catch (_error) {
+        if (isActive) setCountryCitiesData({});
+      }
+    };
+
+    void load();
+
+    return () => {
+      isActive = false;
+    };
+  }, [toast]);
+
+  const addressCountryOptions = useMemo((): ISelectOptions[] => {
+    if (!countryCitiesData) return [];
+
+    return Object.keys(countryCitiesData)
+      .filter(Boolean)
+      .sort((a, b) => a.localeCompare(b))
+      .map((countryName) => ({
+        label: countryName,
+        value: countryName,
+      }));
+  }, [countryCitiesData]);
+
+  const buildCityOptionsForCountryName = useCallback(
     (countryName: string | undefined | null): ISelectOptions[] => {
       if (!countryName) return [];
+      if (!countryCitiesData) return [];
 
-      const shortName = countryNameToShortName.get(countryName);
-      if (!shortName) return [];
+      const cities = countryCitiesData[countryName]?.cities ?? [];
 
-      const states = countryCityStateJson.getStatesByShort(shortName) ?? [];
-
-      return states
+      return Array.from(new Set(cities))
         .filter(Boolean)
         .sort((a, b) => a.localeCompare(b))
-        .map((stateName) => ({
-          label: stateName,
-          value: stateName,
-        }));
+        .map((cityName) => ({ label: cityName, value: cityName }));
     },
-    [countryNameToShortName],
-  );
-
-  const buildCityOptionsForCountryAndState = useCallback(
-    (
-      countryName: string | undefined | null,
-      stateName: string | undefined | null,
-    ): ISelectOptions[] => {
-      if (!countryName || !stateName) return [];
-
-      const shortName = countryNameToShortName.get(countryName);
-      if (!shortName) return [];
-
-      const cities = countryCityStateJson.getCities(shortName, stateName) ?? [];
-
-      return cities
-        .filter(Boolean)
-        .sort((a, b) => a.localeCompare(b))
-        .map((cityName) => ({
-          label: cityName,
-          value: cityName,
-        }));
-    },
-    [countryNameToShortName],
-  );
-
-  const [addressStateOptions, setAddressStateOptions] = useState<ISelectOptions[]>(
-    () => buildStateOptionsForCountryName(defaultValues?.address_country),
-  );
-  const [isAddressStateDisabled, setIsAddressStateDisabled] = useState<boolean>(
-    () => !defaultValues?.address_country,
+    [countryCitiesData],
   );
 
   const [addressCityOptions, setAddressCityOptions] = useState<ISelectOptions[]>(
-    () =>
-      buildCityOptionsForCountryAndState(
-        defaultValues?.address_country,
-        defaultValues?.address_state,
-      ),
+    [],
   );
   const [isAddressCityDisabled, setIsAddressCityDisabled] = useState<boolean>(
-    () => !defaultValues?.address_country || !defaultValues?.address_state,
+    () => !defaultValues?.address_country,
   );
   const lastCountryNameRef = useRef<string | null>(
     defaultValues?.address_country ?? null,
   );
-  const lastStateNameRef = useRef<string | null>(
-    defaultValues?.address_state ?? null,
-  );
 
   useEffect(() => {
     const countryName = defaultValues?.address_country;
-    const stateName = defaultValues?.address_state;
 
-    setIsAddressStateDisabled(!countryName);
-    setAddressStateOptions(buildStateOptionsForCountryName(countryName));
-
-    setIsAddressCityDisabled(!countryName || !stateName);
-    setAddressCityOptions(buildCityOptionsForCountryAndState(countryName, stateName));
+    setIsAddressCityDisabled(!countryName);
+    setAddressCityOptions(buildCityOptionsForCountryName(countryName));
   }, [
-    buildCityOptionsForCountryAndState,
-    buildStateOptionsForCountryName,
+    buildCityOptionsForCountryName,
     defaultValues?.address_country,
-    defaultValues?.address_state,
   ]);
 
   const handleSave = async ({
     data,
   }: IHandleSubmit<z.infer<typeof FormSchema>>) => {
+    console.log("🚀 ~ handleSave ~ data:", data)
+    console.log("🚀 ~ handleSave ~ countryCitiesData:", countryCitiesData)
     try {
       await updateDeviceCategory.mutateAsync({
         id: params.id,
         ...data,
-        address_country_code: countryNameToShortName.get(data.address_country),
+        address_country_code:
+          countryCitiesData?.[data.address_country]?.code ?? undefined,
       });
     } catch (error) {
       toast.error('Failed to update device location');
@@ -166,81 +140,19 @@ export default function DeviceLocation({ params, defaultValues }: IFormProps) {
           const previousCountryName = lastCountryNameRef.current;
           lastCountryNameRef.current = countryName;
 
-          setIsAddressStateDisabled(!countryName);
-          setAddressStateOptions(buildStateOptionsForCountryName(countryName));
-
-          const currentStateName =
-            form?.getValues('address_state') ?? lastStateNameRef.current ?? '';
-
-          const shouldResetDependentFields =
-            !!form && previousCountryName !== countryName;
-
-          if (shouldResetDependentFields) {
-            lastStateNameRef.current = null;
-            // form.setValue('address_state', '', {
-            //   shouldDirty: true,
-            //   shouldTouch: true,
-            //   shouldValidate: true,
-            // });
-            // form.setValue('address_city', '', {
-            //   shouldDirty: true,
-            //   shouldTouch: true,
-            //   shouldValidate: true,
-            // });
-            setIsAddressCityDisabled(true);
-            setAddressCityOptions([]);
-            return;
+          if (form && previousCountryName !== countryName) {
+            form.setValue('address_city', '', {
+              shouldDirty: true,
+              shouldTouch: true,
+              shouldValidate: true,
+            });
           }
 
-          setIsAddressCityDisabled(!countryName || !currentStateName);
-          setAddressCityOptions(
-            buildCityOptionsForCountryAndState(countryName, currentStateName),
-          );
+          setIsAddressCityDisabled(!countryName);
+          setAddressCityOptions(buildCityOptionsForCountryName(countryName));
         },
         fieldStyle: {
           gridColumn: '1 / span 1',
-          gridRow: '1 / span 1',
-        },
-      },
-      {
-        id: 'address_state',
-        formType: 'select',
-        name: 'address_state',
-        label: 'State',
-        description: 'Field Description',
-        placeholder: 'Enter value...',
-        fieldClassName: '',
-        readonly: false,
-        required: true,
-        // disabled: isAddressStateDisabled,
-        selectSearchable: true,
-        selectOnChange: (
-          stateName: string,
-          form?: UseFormReturn<Record<string, any>>,
-        ) => {
-          const previousStateName = lastStateNameRef.current;
-          lastStateNameRef.current = stateName;
-
-          const currentCountryName =
-            form?.getValues('address_country') ??
-            lastCountryNameRef.current ??
-            '';
-
-          setIsAddressCityDisabled(!currentCountryName || !stateName);
-          setAddressCityOptions(
-            buildCityOptionsForCountryAndState(currentCountryName, stateName),
-          );
-
-          if (form && previousStateName !== stateName) {
-            // form.setValue('address_city', '', {
-            //   shouldDirty: true,
-            //   shouldTouch: true,
-            //   shouldValidate: true,
-            // });
-          }
-        },
-        fieldStyle: {
-          gridColumn: '2 / span 1',
           gridRow: '1 / span 1',
         },
       },
@@ -254,19 +166,17 @@ export default function DeviceLocation({ params, defaultValues }: IFormProps) {
         fieldClassName: '',
         readonly: false,
         required: true,
-        // disabled: isAddressCityDisabled,
+        disabled: isAddressCityDisabled,
         selectSearchable: true,
         fieldStyle: {
-          gridColumn: '1 / span 1',
-          gridRow: '2 / span 1',
+          gridColumn: '2 / span 1',
+          gridRow: '1 / span 1',
         },
       },
     ];
   }, [
-    buildCityOptionsForCountryAndState,
-    buildStateOptionsForCountryName,
+    buildCityOptionsForCountryName,
     isAddressCityDisabled,
-    isAddressStateDisabled,
   ]);
 
   return (
@@ -287,7 +197,6 @@ export default function DeviceLocation({ params, defaultValues }: IFormProps) {
       }}
       selectOptions={{
         address_country: addressCountryOptions,
-        address_state: addressStateOptions,
         address_city: addressCityOptions,
       }}
       multiSelectOptions={{}}
