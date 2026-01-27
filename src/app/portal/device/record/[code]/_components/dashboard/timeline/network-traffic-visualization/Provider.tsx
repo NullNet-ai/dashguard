@@ -284,6 +284,7 @@ export default function NetworkFlowProvider({ children, params }: IProps) {
     // @ts-expect-error - No type yet
     setNewBandwidth([...realNewBandwidths, ...updated_new_bandwidth].slice(0, 20))
     clearIsNewAfterDelay(
+      // @ts-expect-error - No type yet
       (realNewBandwidths || []).map((e: any) => e?.source_ip).filter(Boolean),
     )
   }, [fetchBandwidth, filterId])
