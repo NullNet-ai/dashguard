@@ -63,11 +63,17 @@ const gridColumns = [
       operator: 'like',
     },
     cell: ({row}) => {
-      const [first, second] = row.original?.protocol?.toUpperCase().split('/')
-      if (first)
-        return `${first.includes('6') ? 'IPv4' : 'IPv6'}/${second}`
-
-      return '*'
+      return {
+        'inet/any': 'IPv4/*',
+        'inet/tcp': 'IPv4/TCP',
+        'inet/tcp/udp': 'IPv4/TCP/UDP',
+        'inet6/any': 'IPv6/*',
+        'inet6/tcp': 'IPv6/TCP',
+        'inet6/tcp/udp': 'IPv6/TCP/UDP',
+        'inet46/any': 'IPv4+6/*',
+        'inet46/tcp': 'IPv4+6/TCP',
+        'inet46/tcp/udp': 'IPv4+6/TCP/UDP',
+      }[row.original?.protocol] ?? row.original?.protocol ?? ''
     } 
   },
   {
