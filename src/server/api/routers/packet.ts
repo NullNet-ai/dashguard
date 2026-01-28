@@ -304,9 +304,10 @@ export const packetRouter = createTRPCRouter({
     const result = timestamps.map((item) => {
       const data = res?.data.find((element: any) => element.bucket?.includes(item))
       if (data) {
-        return { bucket: item, bandwidth: data.bandwidth }
+        const bandwidth = typeof data.bandwidth === 'string' ? parseInt(data.bandwidth, 10) : (data.bandwidth ?? 0)
+        return { bucket: item, bandwidth, bandwidth_formatted: bandwidth.toLocaleString('en-US') }
       }
-      return { bucket: item, bandwidth: 0 }
+      return { bucket: item, bandwidth: 0, bandwidth_formatted: '0' }
     })
 
     return result
