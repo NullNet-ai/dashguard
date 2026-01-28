@@ -44,7 +44,7 @@ export default async function DashboardTabs() {
   const tabs = [
     {
       id: 'live_graph',
-      label: 'Live Graph',
+      label: 'Graphs',
       content: (
         <Suspense
           fallback={
