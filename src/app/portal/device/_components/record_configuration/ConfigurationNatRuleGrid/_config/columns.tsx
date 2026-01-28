@@ -63,6 +63,7 @@ const gridColumns = [
       operator: 'like',
     },
     cell: ({row}) => {
+      // @ts-expect-error - No type yet
       return {
         'inet/any': 'IPv4/*',
         'inet/tcp': 'IPv4/TCP',
