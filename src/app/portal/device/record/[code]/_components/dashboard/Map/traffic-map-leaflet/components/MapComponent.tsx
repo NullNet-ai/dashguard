@@ -139,6 +139,32 @@ const MapComponent = ({ countryTrafficData, filterId }: Record<string, any>) => 
     countryHighlights.current = {};
   }, []);
 
+  const hasAnyTrafficLayers = useCallback((mapInstance: any, excludeLayers?: Set<any>) => {
+    if (!mapInstance || typeof mapInstance.eachLayer !== 'function') return false;
+
+    let found = false;
+    mapInstance.eachLayer((layer: any) => {
+      if (found) return;
+      if (excludeLayers && excludeLayers.has(layer)) return;
+
+      const iconClassName = layer?.options?.icon?.options?.className;
+      const layerClassName = layer?.options?.className;
+
+      const isTrafficMarker =
+        typeof iconClassName === 'string' &&
+        (iconClassName.includes('source-dot') || iconClassName.includes('destination-dot'));
+
+      const isTrafficLine =
+        typeof layerClassName === 'string' && layerClassName.includes('traffic-flow-line');
+
+      if (isTrafficMarker || isTrafficLine) {
+        found = true;
+      }
+    });
+
+    return found;
+  }, []);
+
   // Check if a point is on land using the GeoJSON data
   const isPointOnLand = useCallback((lat: any, lng: any) => {
     if (!countriesGeoJSON.current) return false;
@@ -883,11 +909,24 @@ const MapComponent = ({ countryTrafficData, filterId }: Record<string, any>) => 
                     if (idx !== -1) arr.splice(idx, 1);
                     if (arr.length === 0) delete connectionElements.current[key];
                   }
+
+                  if (!hasAnyTrafficLayers(map)) {
+                    clearAllCountryHighlights(map);
+                  }
                 };
 
                 if (drawSessionRef.current !== drawSession) {
                   removeElements();
                   return;
+                }
+
+                const excluded = new Set<any>();
+                if (flowLine) excluded.add(flowLine);
+                if (sourceMarker) excluded.add(sourceMarker);
+                if (destMarker) excluded.add(destMarker);
+
+                if (!hasAnyTrafficLayers(map, excluded)) {
+                  clearAllCountryHighlights(map);
                 }
 
                 if (flowLine?._path) {
@@ -917,7 +956,7 @@ const MapComponent = ({ countryTrafficData, filterId }: Record<string, any>) => 
     };
 
     loadAllConnections();
-  }, [map, isLoading, processIpData, filterId, trackTrafficLayer, scheduleTimeout]);
+  }, [map, isLoading, processIpData, filterId, trackTrafficLayer, scheduleTimeout, clearAllCountryHighlights, hasAnyTrafficLayers]);
 
 
   //   .traffic-flow-line {
