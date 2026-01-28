@@ -744,21 +744,55 @@ const MapComponent = ({ countryTrafficData, filterId }: Record<string, any>) => 
             direction = 1;
 
             const sizeFactor = variant === 0 ? 0.7 : variant === 1 ? 1 : 1.35;
-            const baseRadiusDeg = 12 / Math.max(1, zoom);
-            const radiusDeg = Math.min(16, Math.max(1.4, baseRadiusDeg * sizeFactor));
-
-            const sweepRad =
-              (variant === 0 ? Math.PI * 1.1 : variant === 1 ? Math.PI * 1.5 : Math.PI * 1.85);
-            const centerAngle = Math.PI / 2;
-            const startAngle = centerAngle - sweepRad / 2;
             const cosLat = Math.cos((sourceLat * Math.PI) / 180) || 1;
+            const cosLatSafe = Math.max(0.2, cosLat);
 
-            for (let i = 0; i <= segments; i++) {
-              const t = i / segments;
-              const r = Math.sin(Math.PI * t) * radiusDeg;
-              const angle = startAngle + sweepRad * t;
-              const lat = sourceLat + r * Math.sin(angle);
-              const lng = sourceLng + (r * Math.cos(angle)) / Math.max(0.2, cosLat);
+            const baseHeightDeg = 18 / Math.max(1, zoom);
+            const baseWidthDeg = 6 / Math.max(0.8, zoom);
+            const heightDeg = Math.min(22, Math.max(2.0, baseHeightDeg * sizeFactor));
+            const widthDeg = Math.min(14, Math.max(1.2, baseWidthDeg * sizeFactor));
+
+            let radius = Math.min(widthDeg * 1.1, heightDeg * 0.45);
+            let d = heightDeg - radius;
+            if (d <= radius * 1.05) {
+              radius = heightDeg / 2.2;
+              d = heightDeg - radius;
+            }
+
+            const alpha = Math.asin(Math.min(0.98, radius / Math.max(0.001, d)));
+            const tangentY = d - (radius * radius) / Math.max(0.001, d);
+            const tangentX = radius * Math.cos(alpha);
+
+            const lineSegments = Math.max(14, Math.round(segments * 0.28));
+            const arcSegments = Math.max(28, Math.round(segments * 0.62));
+
+            curvePoints.push([sourceLat, sourceLng]);
+
+            for (let i = 1; i <= lineSegments; i++) {
+              const t = i / lineSegments;
+              const x = -tangentX * t;
+              const y = tangentY * t;
+              const lat = sourceLat + y;
+              const lng = sourceLng + x / cosLatSafe;
+              curvePoints.push([lat, lng]);
+            }
+
+            for (let i = 1; i <= arcSegments; i++) {
+              const t = i / arcSegments;
+              const angle = (Math.PI + alpha) - t * (Math.PI + 2 * alpha);
+              const x = radius * Math.cos(angle);
+              const y = d + radius * Math.sin(angle);
+              const lat = sourceLat + y;
+              const lng = sourceLng + x / cosLatSafe;
+              curvePoints.push([lat, lng]);
+            }
+
+            for (let i = 1; i <= lineSegments; i++) {
+              const t = i / lineSegments;
+              const x = tangentX * (1 - t);
+              const y = tangentY * (1 - t);
+              const lat = sourceLat + y;
+              const lng = sourceLng + x / cosLatSafe;
               curvePoints.push([lat, lng]);
             }
           } else {
@@ -799,19 +833,7 @@ const MapComponent = ({ countryTrafficData, filterId }: Record<string, any>) => 
             destinationCoordinates[1],
           ];
 
-          const pointsForLine = sameCoordinates
-            ? (() => {
-                const smoothed = chaikinSmooth(curvePoints, 2)
-                if (smoothed.length > 0) {
-                  smoothed[0] = [sourceCoordinates[0], sourceCoordinates[1]]
-                  smoothed[smoothed.length - 1] = [
-                    destinationCoordinates[0],
-                    destinationCoordinates[1],
-                  ]
-                }
-                return smoothed
-              })()
-            : curvePoints
+          const pointsForLine = curvePoints
 
           const targetAnimationDurationMs = 1000
           const sameCoordinatesFrameDelayMs = 16
@@ -839,8 +861,8 @@ const MapComponent = ({ countryTrafficData, filterId }: Record<string, any>) => 
               weight: 3,
               opacity: 0.8,
               className: 'traffic-flow-line',
-              lineCap: 'round',
-              lineJoin: 'round',
+              lineCap: sameCoordinates ? 'butt' : 'round',
+              lineJoin: sameCoordinates ? 'miter' : 'round',
               smoothFactor: 0,
               animationStartDelayMs,
               animationFrameDelayMs,
