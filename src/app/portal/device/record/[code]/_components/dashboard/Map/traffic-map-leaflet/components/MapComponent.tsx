@@ -63,6 +63,7 @@ const MapComponent = ({ countryTrafficData, filterId }: Record<string, any>) => 
   const trafficLayersRef: any = useRef(new Set());
   const drawSessionRef: any = useRef(0);
   const drawTimeoutsRef: any = useRef(new Set());
+  const markerUsageRef = useRef<Record<string, { marker: any; count: number }>>({});
 
   const clearConnectionLayers = useCallback((mapInstance: any) => {
     if (!mapInstance) return;
@@ -106,7 +107,43 @@ const MapComponent = ({ countryTrafficData, filterId }: Record<string, any>) => 
     });
 
     connectionElements.current = {};
+    markerUsageRef.current = {};
   }, []);
+
+  const acquireMarker = useCallback(
+    (markerKey: string, createMarker: () => any) => {
+      const existing = markerUsageRef.current[markerKey];
+      if (existing?.marker && map?.hasLayer?.(existing.marker)) {
+        existing.count += 1;
+        return existing.marker;
+      }
+
+      const marker = createMarker();
+      markerUsageRef.current[markerKey] = { marker, count: 1 };
+      return marker;
+    },
+    [map],
+  );
+
+  const releaseMarker = useCallback(
+    (markerKey?: string | null) => {
+      if (!markerKey) return;
+      const entry = markerUsageRef.current[markerKey];
+      if (!entry) return;
+
+      entry.count -= 1;
+      if (entry.count > 0) return;
+
+      if (entry.marker && map?.hasLayer?.(entry.marker)) {
+        map.removeLayer(entry.marker);
+      }
+      if (entry.marker) {
+        trafficLayersRef.current.delete(entry.marker);
+      }
+      delete markerUsageRef.current[markerKey];
+    },
+    [map],
+  );
 
   const trackTrafficLayer = useCallback((layer: any) => {
     if (!layer) return;
@@ -647,12 +684,14 @@ const MapComponent = ({ countryTrafficData, filterId }: Record<string, any>) => 
         const hasSource = conn.source_country && conn.source_country.country && conn.source_country.country !== "No IP Info";
         const hasDest = conn.destination_country && conn.destination_country.country && conn.destination_country.country !== "No IP Info";
 
-        let sourceCoordinates = null;
-        let destinationCoordinates = null;
+        let sourceCoordinates: [number, number] | null = null;
+        let destinationCoordinates: [number, number] | null = null;
         let sourceLabel = conn.sourceIsNoIpInfo ? 'Ocean (No IP Info)' : conn.sourceLocation;
         let destLabel = conn.destIsNoIpInfo ? 'Ocean (No IP Info)' : conn.destinationLocation;
         let sourceMarker = null;
         let destMarker = null;
+        let sourceMarkerKey: string | null = null;
+        let destMarkerKey: string | null = null;
 
         // Always assign coordinates, even for ocean-to-ocean
         if (hasSource) {
@@ -662,24 +701,27 @@ const MapComponent = ({ countryTrafficData, filterId }: Record<string, any>) => 
         } else {
           if (drawSessionRef.current !== drawSession) return;
           sourceCoordinates = OCEAN_SOURCE_COORDINATE;
-          sourceMarker = L.marker(sourceCoordinates, {
-            icon: L.divIcon({
-              className: 'source-dot ocean-dot',
-              html: `<div class="dot" style="background:${ORANGE}; width:8px; height:8px;"></div>`,
-              iconSize: [8, 8],
-              iconAnchor: [4, 4],
-            }),
-          })
-            .addTo(map)
-            .bindTooltip(
-              `<div style="text-align: center;">
-                <strong>Source (Ocean)</strong><br/>
-                <span style="color: #000;">${conn.source_ip}</span><br/>
-                No IP Info<br/>
-                ${conn.trafficLevel > 1024 ? (conn.trafficLevel / 1024).toFixed(2) + ' KB' : conn.trafficLevel + ' bytes'} <br/>
-              </div>`,
-              {direction: 'top', className: 'custom-tooltip' }
-            );
+          sourceMarkerKey = `source:${conn.source_ip ?? ''}`;
+          sourceMarker = acquireMarker(sourceMarkerKey, () =>
+            L.marker(sourceCoordinates as [number, number], {
+              icon: L.divIcon({
+                className: 'source-dot ocean-dot',
+                html: `<div class="traffic-pulse-marker" style="--pulse-color:${ORANGE}"></div>`,
+                iconSize: [24, 24],
+                iconAnchor: [12, 12],
+              }),
+            })
+              .addTo(map)
+              .bindTooltip(
+                `<div style="text-align: center;">
+                  <strong>Source (Ocean)</strong><br/>
+                  <span style="color: #000;">${conn.source_ip}</span><br/>
+                  No IP Info<br/>
+                  ${conn.trafficLevel > 1024 ? (conn.trafficLevel / 1024).toFixed(2) + ' KB' : conn.trafficLevel + ' bytes'} <br/>
+                </div>`,
+                {direction: 'top', className: 'custom-tooltip' }
+              )
+          );
           trackTrafficLayer(sourceMarker);
         }
 
@@ -690,47 +732,56 @@ const MapComponent = ({ countryTrafficData, filterId }: Record<string, any>) => 
         } else {
           if (drawSessionRef.current !== drawSession) return;
           destinationCoordinates = OCEAN_DEST_COORDINATE;
-          destMarker = L.marker(destinationCoordinates, {
-            icon: L.divIcon({
-              className: 'destination-dot ocean-dot dot-animated',
-              html: `<div class="dot" style="background:${ORANGE}; width:8px; height:8px;"></div>`,
-              iconSize: [8, 8],
-              iconAnchor: [4, 4],
-            }),
-          })
-            .addTo(map)
-            .bindTooltip(
-              `<div style="text-align: center;">
-                <strong>Destination (Ocean)</strong><br/>
-                <span style="color: #000;"> ${conn.destination_ip}</span><br/>
-                No IP Info<br/>
-                ${conn.trafficLevel > 1024 ? (conn.trafficLevel / 1024).toFixed(2) + ' KB' : conn.trafficLevel + ' bytes'} <br/>
-              </div>`,
-              { direction: 'top', className: 'custom-tooltip' }
-            );
+          destMarkerKey = `destination:${conn.destination_ip ?? ''}`;
+          destMarker = acquireMarker(destMarkerKey, () =>
+            L.marker(destinationCoordinates as [number, number], {
+              icon: L.divIcon({
+                className: 'destination-dot ocean-dot',
+                html: `<div class="traffic-pulse-marker" style="--pulse-color:${ORANGE}"></div>`,
+                iconSize: [24, 24],
+                iconAnchor: [12, 12],
+              }),
+            })
+              .addTo(map)
+              .bindTooltip(
+                `<div style="text-align: center;">
+                  <strong>Destination (Ocean)</strong><br/>
+                  <span style="color: #000;"> ${conn.destination_ip}</span><br/>
+                  No IP Info<br/>
+                  ${conn.trafficLevel > 1024 ? (conn.trafficLevel / 1024).toFixed(2) + ' KB' : conn.trafficLevel + ' bytes'} <br/>
+                </div>`,
+                { direction: 'top', className: 'custom-tooltip' }
+              )
+          );
           trackTrafficLayer(destMarker);
         }
 
         // Draw markers for countries and ocean
         if (hasSource && sourceCoordinates && !sourceMarker) {
           if (drawSessionRef.current !== drawSession) return;
-          sourceMarker = createSourceMarker(
-            map,
-            sourceCoordinates,
-            sourceLabel,
-            conn.trafficLevel,
-            conn.source_ip
+          sourceMarkerKey = `source:${conn.source_ip ?? ''}`;
+          sourceMarker = acquireMarker(sourceMarkerKey, () =>
+            createSourceMarker(
+              map,
+              sourceCoordinates,
+              sourceLabel,
+              conn.trafficLevel,
+              conn.source_ip
+            )
           );
           trackTrafficLayer(sourceMarker);
         }
         if (hasDest && destinationCoordinates && !destMarker) {
           if (drawSessionRef.current !== drawSession) return;
-          destMarker = createDestinationMarker(
-            map,
-            destinationCoordinates,
-            destLabel,
-            conn.trafficLevel,
-            conn.destination_ip
+          destMarkerKey = `destination:${conn.destination_ip ?? ''}`;
+          destMarker = acquireMarker(destMarkerKey, () =>
+            createDestinationMarker(
+              map,
+              destinationCoordinates,
+              destLabel,
+              conn.trafficLevel,
+              conn.destination_ip
+            )
           );
           trackTrafficLayer(destMarker);
         }
@@ -789,8 +840,8 @@ const MapComponent = ({ countryTrafficData, filterId }: Record<string, any>) => 
             const tangentY = d - (radius * radius) / Math.max(0.001, d);
             const tangentX = radius * Math.cos(alpha);
 
-            const lineSegments = Math.max(14, Math.round(segments * 0.28));
-            const arcSegments = Math.max(28, Math.round(segments * 0.62));
+            const lineSegments = Math.min(220, Math.max(60, Math.round(segments * 1.1)));
+            const arcSegments = Math.min(520, Math.max(160, Math.round(segments * 3.6)));
 
             curvePoints.push([sourceLat, sourceLng]);
 
@@ -887,8 +938,8 @@ const MapComponent = ({ countryTrafficData, filterId }: Record<string, any>) => 
               weight: 3,
               opacity: 0.8,
               className: 'traffic-flow-line',
-              lineCap: sameCoordinates ? 'butt' : 'round',
-              lineJoin: sameCoordinates ? 'miter' : 'round',
+              lineCap: 'round',
+              lineJoin: 'round',
               smoothFactor: 0,
               animationStartDelayMs,
               animationFrameDelayMs,
@@ -896,12 +947,9 @@ const MapComponent = ({ countryTrafficData, filterId }: Record<string, any>) => 
               onAnimationEnd: () => {
                 const removeElements = () => {
                   if (flowLine && map.hasLayer(flowLine)) map.removeLayer(flowLine);
-                  if (sourceMarker && map.hasLayer(sourceMarker)) map.removeLayer(sourceMarker);
-                  if (destMarker && map.hasLayer(destMarker)) map.removeLayer(destMarker);
-
                   if (flowLine) trafficLayersRef.current.delete(flowLine);
-                  if (sourceMarker) trafficLayersRef.current.delete(sourceMarker);
-                  if (destMarker) trafficLayersRef.current.delete(destMarker);
+                  releaseMarker(sourceMarkerKey);
+                  releaseMarker(destMarkerKey);
 
                   const arr = connectionElements.current[key];
                   if (arr) {
@@ -956,7 +1004,7 @@ const MapComponent = ({ countryTrafficData, filterId }: Record<string, any>) => 
     };
 
     loadAllConnections();
-  }, [map, isLoading, processIpData, filterId, trackTrafficLayer, scheduleTimeout, clearAllCountryHighlights, hasAnyTrafficLayers]);
+  }, [map, isLoading, processIpData, filterId, trackTrafficLayer, scheduleTimeout, clearAllCountryHighlights, hasAnyTrafficLayers, acquireMarker, releaseMarker]);
 
 
   //   .traffic-flow-line {
@@ -968,38 +1016,56 @@ return (
     <>
       <style>
         {`
-          .source-dot .dot, .destination-dot .dot {
+          .source-dot.leaflet-div-icon,
+          .destination-dot.leaflet-div-icon {
+            background: transparent;
+            border: none;
+          }
+
+          .traffic-pulse-marker {
+            position: relative;
+            width: 24px;
+            height: 24px;
+          }
+
+          .traffic-pulse-marker::before {
+            content: '';
+            position: absolute;
+            left: 50%;
+            top: 50%;
             width: 8px;
             height: 8px;
-            border-radius: 50%;
+            border-radius: 9999px;
+            background: var(--pulse-color, rgba(255, 165, 0, 1));
+            transform: translate(-50%, -50%);
+            box-shadow: 0 0 0 2px rgba(255, 165, 0, 0.18), 0 0 10px rgba(255, 165, 0, 0.35);
+          }
+
+          .traffic-pulse-marker::after {
+            content: '';
             position: absolute;
-            animation: emphasize-dot 1.5s infinite;
+            left: 50%;
+            top: 50%;
+            width: 8px;
+            height: 8px;
+            border-radius: 9999px;
+            border: 2px solid rgba(255, 165, 0, 0.55);
+            transform: translate(-50%, -50%);
+            animation: traffic-marker-pulse 1.6s ease-out infinite;
           }
-          .ocean-dot .dot {
-            width: 8px !important;
-            height: 8px !important;
-            animation: emphasize-dot-ocean 1.5s infinite;
-          }
-          @keyframes emphasize-dot {
+
+          @keyframes traffic-marker-pulse {
             0% {
-              box-shadow: 0 0 0 0 rgba(255, 165, 0, 0.5), 0 0 0 0 rgba(255, 165, 0, 0.3);
+              transform: translate(-50%, -50%) scale(1);
+              opacity: 0.85;
             }
             70% {
-              box-shadow: 0 0 0 2px rgba(255, 165, 0, 0), 0 0 0 4px rgba(255, 165, 0, 0);
+              transform: translate(-50%, -50%) scale(4.2);
+              opacity: 0;
             }
             100% {
-              box-shadow: 0 0 0 0 rgba(255, 165, 0, 0), 0 0 0 0 rgba(255, 165, 0, 0);
-            }
-          }
-          @keyframes emphasize-dot-ocean {
-            0% {
-              box-shadow: 0 0 0 0 rgba(255, 165, 0, 0.3);
-            }
-            70% {
-              box-shadow: 0 0 0 4px rgba(255, 165, 0, 0);
-            }
-            100% {
-              box-shadow: 0 0 0 0 rgba(255, 165, 0, 0);
+              transform: translate(-50%, -50%) scale(4.2);
+              opacity: 0;
             }
           }
         
