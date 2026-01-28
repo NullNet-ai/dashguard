@@ -86,7 +86,20 @@ export const deviceRuleRouter = createTRPCRouter({
             device_rules: pluck
           },
           advance_filters: _advance_filters?.length
-            ? _advance_filters as IAdvanceFilters[]
+            ? [
+              ..._advance_filters,
+              {
+                operator: 'and',
+                type: 'operator',
+              },
+              {
+                type: 'criteria',
+                field: 'device_configuration_id',
+                entity: 'device_filter_rules',
+                operator: 'equal',
+                values: [device_conf_id],
+              }
+            ] as IAdvanceFilters[]
             : createAdvancedFilter({
               device_configuration_id: device_conf_id,
               status: 'Active',

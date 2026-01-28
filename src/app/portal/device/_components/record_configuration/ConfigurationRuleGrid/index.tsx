@@ -13,6 +13,7 @@ import useFetchGridData from '~/hooks/useFetchGridData';
 import gridColumns from './_config/columns';
 import { defaultSorting } from './_config/sorting';
 import { api } from '~/trpc/react';
+import { ulid } from 'ulid';
 
 const ConfigurationRuleGrid = ({
   code,
@@ -32,6 +33,53 @@ const ConfigurationRuleGrid = ({
       `${pathname}` +
       `${searchTest?.toString() ? `?${searchTest?.toString()}` : ''}`,
     defaultSorting: defaultSorting,
+    hideDefaultAllTab: true,
+    defaultGridTabs: [
+      {
+        name: 'WAN',
+        current: true,
+        href: `${pathname}?filter_id=`,
+        default: true,
+        default_filter: [],
+        group_advance_filters: [],
+        advance_filters: [
+          {
+            type: 'criteria',
+            field: 'interface',
+            entity: 'device_filter_rules',
+            operator: 'equal',
+            values: ['wan'],
+            id: ulid(),
+            label: 'Interface',
+            default: true,
+          },
+        ],
+        hidden: false,
+        order: 0,
+      },
+      {
+        name: 'LAN',
+        current: false,
+        href: `${pathname}?filter_id=`,
+        default: true,
+        default_filter: [],
+        group_advance_filters: [],
+        advance_filters: [
+          {
+            type: 'criteria',
+            field: 'interface',
+            entity: 'device_filter_rules',
+            operator: 'equal',
+            values: ['lan'],
+            id: ulid(),
+            label: 'Interface',
+            default: true,
+          },
+        ],
+        hidden: false,
+        order: 1,
+      },
+    ],
   }), [pathname, searchTest, code]);
 
   const {
@@ -124,11 +172,11 @@ const ConfigurationRuleGrid = ({
   const { items = [], totalCount = 0 } = (grid_data || {}) as any;
 
   useEffect(() => {
-    if (record?.data?.id) {
+    if (record?.data?.id && !!grid_tabs?.[0]) {
       // @ts-expect-error - No type yet
-      fetchData({ device_id: record?.data?.id })
+      fetchData({ device_id: record?.data?.id, advance_filters: grid_tabs?.[0]?.advance_filters || [] })
     }
-  }, [record?.data?.id])
+  }, [record?.data?.id, !!grid_tabs?.[0]])
 
   return (
     <>
