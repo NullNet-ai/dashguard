@@ -18,6 +18,36 @@ import { generateOceanCoordinates } from '../functions/generateOceanCoordinates'
 import { getConnectionKey } from '../functions/getConnectionKey'
 import { createDestinationMarker, createSourceMarker, ORANGE } from '../functions/createMarker'
 
+const chaikinSmooth = (points: [number, number][], iterations: number) => {
+  let current = points
+  const steps = Math.max(0, Math.floor(iterations))
+
+  for (let k = 0; k < steps; k++) {
+    if (!Array.isArray(current) || current.length < 3) return current
+
+    const first = current[0]
+    if (!first) return current
+    const next: [number, number][] = [first]
+    for (let i = 0; i < current.length - 1; i++) {
+      const p1 = current[i]
+      const p2 = current[i + 1]
+      if (!p1 || !p2) continue
+      const [lat1, lng1] = p1
+      const [lat2, lng2] = p2
+
+      next.push(
+        [0.75 * lat1 + 0.25 * lat2, 0.75 * lng1 + 0.25 * lng2],
+        [0.25 * lat1 + 0.75 * lat2, 0.25 * lng1 + 0.75 * lng2],
+      )
+    }
+    const last = current[current.length - 1]
+    if (last) next.push(last)
+    current = next
+  }
+
+  return current
+}
+
 const MapComponent = ({ countryTrafficData, filterId }: Record<string, any>) => {
   const { ipData = [] } = countryTrafficData ?? {};
   const [map, setMap] = useState<any>(null);
@@ -686,7 +716,8 @@ const MapComponent = ({ countryTrafficData, filterId }: Record<string, any>) => 
         ) {
           if (drawSessionRef.current !== drawSession) return;
           const curvePoints: [number, number][] = [];
-          const segments = 50;
+          const zoom = typeof map?.getZoom === 'function' ? map.getZoom() : 2;
+          const segments = Math.min(180, Math.max(60, Math.round(zoom * 18)));
 
           const sourceLat = sourceCoordinates[0];
           const sourceLng = sourceCoordinates[1];
@@ -709,12 +740,15 @@ const MapComponent = ({ countryTrafficData, filterId }: Record<string, any>) => 
           let controlLng = midLng;
 
           if (sameCoordinates) {
-            variant = 2;
+            variant = Math.floor(Math.random() * 3);
             direction = 1;
 
-            const zoom = typeof map?.getZoom === 'function' ? map.getZoom() : 2;
-            const radiusDeg = Math.min(12, Math.max(2, 12 / Math.max(1, zoom)));
-            const sweepRad = Math.PI * 1.5;
+            const sizeFactor = variant === 0 ? 0.7 : variant === 1 ? 1 : 1.35;
+            const baseRadiusDeg = 12 / Math.max(1, zoom);
+            const radiusDeg = Math.min(16, Math.max(1.4, baseRadiusDeg * sizeFactor));
+
+            const sweepRad =
+              (variant === 0 ? Math.PI * 1.1 : variant === 1 ? Math.PI * 1.5 : Math.PI * 1.85);
             const centerAngle = Math.PI / 2;
             const startAngle = centerAngle - sweepRad / 2;
             const cosLat = Math.cos((sourceLat * Math.PI) / 180) || 1;
@@ -765,19 +799,49 @@ const MapComponent = ({ countryTrafficData, filterId }: Record<string, any>) => 
             destinationCoordinates[1],
           ];
 
+          const pointsForLine = sameCoordinates
+            ? (() => {
+                const smoothed = chaikinSmooth(curvePoints, 2)
+                if (smoothed.length > 0) {
+                  smoothed[0] = [sourceCoordinates[0], sourceCoordinates[1]]
+                  smoothed[smoothed.length - 1] = [
+                    destinationCoordinates[0],
+                    destinationCoordinates[1],
+                  ]
+                }
+                return smoothed
+              })()
+            : curvePoints
+
+          const targetAnimationDurationMs = 1000
+          const sameCoordinatesFrameDelayMs = 16
+          const sameCoordinatesFrames = Math.max(
+            1,
+            Math.round(targetAnimationDurationMs / sameCoordinatesFrameDelayMs),
+          )
+          const sameCoordinatesStep = Math.max(
+            1,
+            Math.ceil(pointsForLine.length / sameCoordinatesFrames),
+          )
+
           const animationStartDelayMs =
             variant * 200 + (direction === 1 ? 0 : 110) + Math.floor(Math.random() * 280);
-          const animationFrameDelayMs = 22 + Math.floor(Math.random() * 18);
-          const animationStep = 1 + Math.floor(Math.random() * 2);
+          const animationFrameDelayMs = sameCoordinates
+            ? sameCoordinatesFrameDelayMs
+            : 22 + Math.floor(Math.random() * 18);
+          const animationStep = sameCoordinates ? sameCoordinatesStep : 1 + Math.floor(Math.random() * 2);
 
           const flowLine: Record<string, any> = animateFlowLine(
             map,
-            curvePoints,
+            pointsForLine,
             {
               color: getTrafficColor(conn.trafficLevel),
               weight: 3,
               opacity: 0.8,
               className: 'traffic-flow-line',
+              lineCap: 'round',
+              lineJoin: 'round',
+              smoothFactor: 0,
               animationStartDelayMs,
               animationFrameDelayMs,
               animationStep,
