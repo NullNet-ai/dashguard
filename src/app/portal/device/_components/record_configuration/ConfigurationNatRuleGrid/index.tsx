@@ -33,53 +33,6 @@ const ConfigurationNatRuleGrid = ({
       `${pathname}` +
       `${searchTest?.toString() ? `?${searchTest?.toString()}` : ''}`,
     defaultSorting: defaultSorting,
-    hideDefaultAllTab: true,
-    defaultGridTabs: [
-      {
-        name: 'WAN',
-        current: true,
-        href: `${pathname}?filter_id=`,
-        default: true,
-        default_filter: [],
-        group_advance_filters: [],
-        advance_filters: [
-          {
-            type: 'criteria',
-            field: 'interface',
-            entity: 'device_nat_rules',
-            operator: 'equal',
-            values: ['wan'],
-            id: ulid(),
-            label: 'Interface',
-            default: true,
-          },
-        ],
-        hidden: false,
-        order: 0,
-      },
-      {
-        name: 'LAN',
-        current: false,
-        href: `${pathname}?filter_id=`,
-        default: true,
-        default_filter: [],
-        group_advance_filters: [],
-        advance_filters: [
-          {
-            type: 'criteria',
-            field: 'interface',
-            entity: 'device_nat_rules',
-            operator: 'equal',
-            values: ['lan'],
-            id: ulid(),
-            label: 'Interface',
-            default: true,
-          },
-        ],
-        hidden: false,
-        order: 1,
-      },
-    ],
   }), [pathname, searchTest, code]);
 
   const {
@@ -172,11 +125,11 @@ const ConfigurationNatRuleGrid = ({
   const { items = [], totalCount = 0 } = (grid_data || {}) as any;
 
   useEffect(() => {
-    if (record?.data?.id && !!grid_tabs?.[0]) {
+    if (record?.data?.id) {
       // @ts-expect-error - No type yet
-      fetchData({ device_id: record?.data?.id, advance_filters: grid_tabs?.[0]?.advance_filters || [] })
+      fetchData({ device_id: record?.data?.id })
     }
-  }, [record?.data?.id, !!grid_tabs?.[0]])
+  }, [record?.data?.id])
 
   return (
     <>
