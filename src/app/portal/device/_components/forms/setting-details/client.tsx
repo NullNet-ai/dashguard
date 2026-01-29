@@ -47,22 +47,31 @@ const SettingDetails = ({ params, defaultValues }: IFormProps) => {
           id: 'is_traffic_monitoring_enabled',
           formType: 'switch',
           name: 'is_traffic_monitoring_enabled',
-          label: 'Enable Traffic Monitoring',
+          label: '',
           placeholder: 'Enable Traffic Monitoring',
+          switchConfig: {
+            rightLabel: 'Enable Traffic Monitoring',
+          },
         },
         {
           id: 'is_config_monitoring_enabled',
           formType: 'switch',
           name: 'is_config_monitoring_enabled',
-          label: 'Enable Config Monitoring',
+          label: '',
           placeholder: 'Enable Config Monitoring',
+          switchConfig: {
+            rightLabel: 'Enable Config Monitoring',
+          },
         },
         {
           id: 'is_telemetry_monitoring_enabled',
           formType: 'switch',
           name: 'is_telemetry_monitoring_enabled',
-          label: 'Enable Telemetry Monitoring',
+          label: '',
           placeholder: 'Enable Telemetry Monitoring',
+          switchConfig: {
+            rightLabel: 'Enable Telemetry Monitoring',
+          },
         },
         // {
         //   id: 'is_remote_access_enabled',
