@@ -59,8 +59,10 @@ const calculateNeedlePoints = (containerWidth: number) => {
   const centerX = BASE_WIDTH / 2 * scale;
   const centerY = BASE_WIDTH / 2 * scale;
   
-  // Tip of needle (top center)
-  const tipY = 45 * scale;
+  const { outerRadius } = calculateRadius(clampedWidth);
+  const margin = 30 * scale;
+  const needleLength = Math.min(outerRadius - margin, centerY);
+  const tipY = centerY - needleLength;
   
   // Base of needle (at center, with width)
   const baseLeftX = 142 * scale;
@@ -253,10 +255,10 @@ const PieChartComponent = ({ defaultValues, interfaces }: IFormProps) => {
 
             <svg
               className="absolute transition-transform duration-[16ms] ease-linear"
-              height={size.width || 300}
-              style={{ transform: `rotate(${arrowRotation}deg)` }}
+              height={Math.min(size.width, 300) || 300}
+              style={{ transform: `rotate(${arrowRotation}deg)`, transformOrigin: '50% 50%' }}
               viewBox={needleProps.viewBox}
-              width={size.width || 300}
+              width={Math.min(size.width, 300) || 300}
             >
             <polygon fill="black" points={needleProps.points} />
             <circle 

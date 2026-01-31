@@ -6,6 +6,8 @@ import { getLastTimeStamp } from '~/app/portal/device/utils/timeRange'
 import {
   Card,
   CardContent,
+  CardHeader,
+  CardTitle,
 } from '~/components/ui/card'
 import {
   type ChartConfig,
@@ -305,23 +307,28 @@ const { refetch: refetchTimeUnitandResolution } = api.cachedFilter.fetchCachedFi
     }, [filterId])
 
   return (
-    <div className=" mx-auto max-w-[calc(100vw-39em)]">
-      <div className='sticky top-[29px] z-[50] bg-white'>
-        <div className="px-2">
+    <div className=" mx-auto w-full max-w-[calc(100vw-4em)] md:max-w-[calc(100vw-28em)] lg:max-w-[calc(100vw-38em)]">
+      <div className={`sticky top-[29px] z-[50] bg-white rounded-[8px] mb-1 ${loading ? "py-10" : ""}`}>
+        {/* <div className="px-2"> */}
           {/* <Filter params={params} type='traffic_graph_filter'  /> */}
           {/* <Search  params={{...params, router: 'packet', resolver: 'filterPackets' }} filter_type='traffic_graph_search' /> */}
-        </div>
+        {/* </div> */}
     {loading ? <Loader
       className="bg-primary text-primary"
       label="Fetching data..."
       size="md"
       variant="circularShadow"
-    /> : <Card> 
+    /> : <Card className="overflow-hidden"> 
       {/* <CardContent className="px-2 pt-4 sm:px-2 sm:pt-6"> */}
+      <CardHeader className={"flex flex-row items-center justify-between bg-slate-100"}>
+        <CardTitle className="text-md text-foreground">
+          <h3>Traffic Graph</h3>
+        </CardTitle>
+      </CardHeader>
       <CardContent>
         <ChartContainer
           ref={chartScrollRef}
-          className="aspect-auto h-full w-full overflow-x-auto"
+          className="h-[27em] 2xl:h-[28em] w-full py-4"
           config={chartConfig}
         >
 

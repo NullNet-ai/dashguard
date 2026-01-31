@@ -1,7 +1,7 @@
 'use client'
 
 import { useMemo, useRef } from 'react'
-import { Bar, BarChart, CartesianGrid, XAxis, YAxis } from 'recharts'
+import { Bar, BarChart, CartesianGrid, ResponsiveContainer, XAxis, YAxis } from 'recharts'
 
 import {
   ChartLegend,
@@ -55,12 +55,16 @@ const BarChartComponent = ({ filteredData }: { filteredData: Record<string, any>
       return ticks
     }, [yAxisMin, yAxisMax, number_of_ticks])
   return (
-    <BarChart data={filteredData} height={300} width={1870}>
-      <CartesianGrid vertical={false} />
+    <ResponsiveContainer width="100%" height={300}>
+      <BarChart data={filteredData} height={300} margin={{ top: 20, right: 30, bottom: 20, left: 30 }}>
+        <CartesianGrid vertical={false} />
       <XAxis
         axisLine={false}
         dataKey="bucket"
-        minTickGap={32}
+        interval="preserveStartEnd"
+        minTickGap={48}
+        padding={{ left: 20, right: 20 }}
+        allowDuplicatedCategory={false}
         tickFormatter={(value) => {
           const date = new Date(value)
           if (value.includes(':')) {
@@ -110,7 +114,8 @@ const BarChartComponent = ({ filteredData }: { filteredData: Record<string, any>
       <Bar dataKey="bandwidth" fill="var(--color-bandwidth)" />
       {/* <Bar dataKey="static_bandwidth" fill="var(--color-static_bandwidth)" /> */}
       <ChartLegend content={<ChartLegendContent />} />
-    </BarChart>
+      </BarChart>
+    </ResponsiveContainer>
   )
 }
 

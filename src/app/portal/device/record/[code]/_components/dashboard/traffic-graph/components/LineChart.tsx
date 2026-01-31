@@ -1,7 +1,7 @@
 'use client'
 
 import { useMemo, useRef } from 'react'
-import { CartesianGrid, Line, LineChart, XAxis, YAxis } from 'recharts'
+import { CartesianGrid, Line, LineChart, ResponsiveContainer, XAxis, YAxis } from 'recharts'
 
 import {
   ChartTooltip,
@@ -52,15 +52,21 @@ const LineChartComponent = ({ filteredData }: any) => {
       return ticks
     }, [yAxisMin, yAxisMax, number_of_ticks])
   return (
-    <LineChart
-      accessibilityLayer={true}
-      data={filteredData}
-      height={300} width={1870}
-    >
-      <CartesianGrid vertical={false} />
+    <ResponsiveContainer width="100%" height={300}>
+      <LineChart
+        accessibilityLayer={true}
+        data={filteredData}
+        height={300}
+        margin={{ top: 20, right: 30, bottom: 20, left: 30 }}
+      >
+        <CartesianGrid vertical={false} />
       <XAxis
         axisLine={false}
         dataKey="bucket"
+        interval="preserveStartEnd"
+        minTickGap={48}
+        padding={{ left: 20, right: 20 }}
+        allowDuplicatedCategory={false}
         tickFormatter={(value) => {
           const date = new Date(value)
           if (value.includes(':')) {
@@ -104,7 +110,8 @@ const LineChartComponent = ({ filteredData }: any) => {
         type="monotone"
       /> */}
 
-    </LineChart>
+      </LineChart>
+    </ResponsiveContainer>
   )
 }
 

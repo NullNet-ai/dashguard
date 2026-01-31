@@ -1,5 +1,5 @@
 import { useMemo, useRef } from 'react'
-import { Area, AreaChart, CartesianGrid, XAxis, YAxis } from 'recharts'
+import { Area, AreaChart, CartesianGrid, ResponsiveContainer, XAxis, YAxis } from 'recharts'
 
 import { ChartLegend, ChartLegendContent, ChartTooltip, ChartTooltipContent } from '~/components/ui/chart'
 
@@ -78,8 +78,9 @@ const AreaChartComponent = ({ filteredData }: { filteredData: Record<string, any
       return ticks
     }, [yAxisMin, yAxisMax, number_of_ticks])
   return (
+    <ResponsiveContainer width="100%" height={300}>
     <AreaChart data={filteredData}
-    height={300} width={1870}
+    height={300} margin={{ top: 20, right: 30, bottom: 20, left: 30 }}
     >
       <defs>
         <linearGradient id="fillBandwidth" x1="0" x2="0" y1="0" y2="1">
@@ -111,7 +112,10 @@ const AreaChartComponent = ({ filteredData }: { filteredData: Record<string, any
       <XAxis
         axisLine={false}
         dataKey="bucket"
-        minTickGap={32}
+        interval="preserveStartEnd"
+        minTickGap={48}
+        padding={{ left: 20, right: 20 }}
+        allowDuplicatedCategory={false}
         tickFormatter={(value) => {
           const date = new Date(value)
           if (value.includes(':')) {
@@ -173,6 +177,7 @@ const AreaChartComponent = ({ filteredData }: { filteredData: Record<string, any
       /> */}
       <ChartLegend content={<ChartLegendContent />} />
     </AreaChart>
+    </ResponsiveContainer>
   )
 }
 
