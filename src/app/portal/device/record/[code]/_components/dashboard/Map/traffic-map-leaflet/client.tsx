@@ -9,6 +9,7 @@ import { api } from '~/trpc/react'
 import MapComponent from './components/MapComponent'
 import { useSocketConnection } from '../../custom-hooks/useSocketConnection'
 import Filter from '../../timeline/Filter'
+import { Card, CardHeader, CardTitle } from '~/components/ui/card'
 
 /**
  * Formats IP data with country information, handling cases where country info is missing
@@ -567,10 +568,14 @@ export default function TrafficMaps({ params, defaultValues }: Record<string, an
   }, [filterId])
 
   return (
-    <div>
+    <Card className='overflow-hidden'>
       {/* <Filter params={params} type='map_filter' /> */}
       {/* <Search filter_type='map_search' params={{ ...params, router: 'packet', resolver: 'filterPackets' }} /> */}
-      <h1>Traffic Flow</h1>
+      <CardHeader className={"flex flex-row items-center justify-between bg-slate-100"}>
+        <CardTitle className="text-md text-foreground">
+          Traffic Flow
+        </CardTitle>
+      </CardHeader>
 
       {false ? (// isLoading ? (
         <div className='flex justify-center items-center h-64'>
@@ -580,7 +585,7 @@ export default function TrafficMaps({ params, defaultValues }: Record<string, an
           </div>
         </div>
       ) : (
-        <div className='relative z-[1]'>
+        <div className='relative z-[1] overflow-hidden'>
           { (
             <>
               <MapComponent
@@ -591,6 +596,6 @@ export default function TrafficMaps({ params, defaultValues }: Record<string, an
           )}
         </div>
       )}
-    </div>
+    </Card>
   )
 }

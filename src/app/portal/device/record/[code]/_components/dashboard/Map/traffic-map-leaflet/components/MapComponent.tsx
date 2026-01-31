@@ -64,6 +64,8 @@ const MapComponent = ({ countryTrafficData, filterId }: Record<string, any>) => 
   const drawSessionRef: any = useRef(0);
   const drawTimeoutsRef: any = useRef(new Set());
   const markerUsageRef = useRef<Record<string, { marker: any; count: number }>>({});
+  const resizeObserverRef: any = useRef(null);
+  const resizeHandlerRef: any = useRef(null);
 
   const clearConnectionLayers = useCallback((mapInstance: any) => {
     if (!mapInstance) return;
@@ -551,7 +553,7 @@ const MapComponent = ({ countryTrafficData, filterId }: Record<string, any>) => 
       const mapInstance: any = L.map('map', {
         center: [20, 0], // Center on equator
         zoom: 2,
-        minZoom: 2,
+        minZoom: 1,
         maxZoom: 8,
         zoomControl: false,
         worldCopyJump: false,
@@ -560,6 +562,18 @@ const MapComponent = ({ countryTrafficData, filterId }: Record<string, any>) => 
       });
       mapInstanceRef.current = mapInstance;
       
+      const mapEl = document.getElementById('map');
+      const onResize = () => {
+        try { mapInstance.invalidateSize(); } catch {}
+      };
+      if (mapEl && 'ResizeObserver' in window) {
+        const ro = new ResizeObserver(() => onResize());
+        ro.observe(mapEl);
+        resizeObserverRef.current = ro;
+      }
+      window.addEventListener('resize', onResize);
+      resizeHandlerRef.current = onResize;
+
       // Disable all zoom interactions
       mapInstance.scrollWheelZoom.disable();
       mapInstance.doubleClickZoom.disable();
@@ -645,6 +659,8 @@ const MapComponent = ({ countryTrafficData, filterId }: Record<string, any>) => 
         mapInstanceRef.current.remove();
         mapInstanceRef.current = null;
       }
+      if (resizeObserverRef.current?.disconnect) resizeObserverRef.current.disconnect();
+      if (resizeHandlerRef.current) window.removeEventListener('resize', resizeHandlerRef.current);
       if (svgDefsElement.current) {
         svgDefsElement.current.remove();
         svgDefsElement.current = null;
@@ -1169,7 +1185,7 @@ return (
           }
         `}
       </style>
-      <div id="map" style={{ height: '100vh', width: '100%' }} />
+      <div id="map" style={{ height: 'calc(-145px + 100vh)', width: '100%' }} />
       
       {isLoading && (
         <div className="loading-overlay">
