@@ -29,14 +29,21 @@ const BarChartComponent = ({ filteredData, interfaces }: { filteredData: Record<
 
   const number_of_ticks = 4; // Fixed to 4 ticks for Y-axis
 
+  const yDomain = useMemo(() => {
+    if (yAxisMax == null || yAxisMin == null) return ['auto', 'auto'];
+    if (yAxisMax === 0 && yAxisMin === 0) return [0, 1];
+    return [yAxisMin, yAxisMax];
+  }, [yAxisMin, yAxisMax]);
+
   const yticks = useMemo(() => {
-    if (!yAxisMax || !yAxisMin) return [];
+    if (yAxisMax == null || yAxisMin == null) return [];
+    if (yAxisMax === 0 && yAxisMin === 0) return [0];
     const ticks = [yAxisMin]; // Start from yAxisMin
     for (let i = 1; i < number_of_ticks; i++) {
       ticks.push(Math.round(yAxisMin + i * ((yAxisMax - yAxisMin) / (number_of_ticks - 1))));
     }
     return ticks;
-  }, [yAxisMin, yAxisMax]);
+  }, [yAxisMin, yAxisMax, number_of_ticks]);
 
   return (
     <ResponsiveContainer width="100%" height={300}>
@@ -69,7 +76,7 @@ const BarChartComponent = ({ filteredData, interfaces }: { filteredData: Record<
         <YAxis
           allowDataOverflow={true}
           axisLine={false}
-          domain={[yAxisMin || 'auto', yAxisMax || 'auto']} // Dynamically adjust the domain
+          domain={yDomain}
           tickCount={number_of_ticks}
           tickFormatter={(value) => formatNumber(value)} // Format all values dynamically
           tickLine={false}
