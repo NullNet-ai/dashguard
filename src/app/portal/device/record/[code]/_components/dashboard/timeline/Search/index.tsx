@@ -10,7 +10,7 @@ import GridProvider from '~/components/platform/Grid/Provider'
 export default function Search({params, filter_type} : {params: any, filter_type: string}) {
   return (
     <GraphSearchProvider params={params} filter_type={filter_type}>
-      <div className="flex w-full flex-col justify-start  gap-x-2 mt-4 mb-4">
+      <div className="flex w-full flex-col justify-start  gap-x-2">
         {/* <div className="relative flex flex-1 flex-row gap-x-2">
           <div className="my-2 h-[40px] w-full md:my-0">
             <View />

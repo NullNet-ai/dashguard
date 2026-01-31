@@ -317,12 +317,12 @@ export default function GridVirtualizerFixed(props: any) {
     <>
       <div
         ref={parentRef}
-        className="List custom-scrollbar mt-10"
+        className="List custom-scrollbar mt-2 rounded-[8px] bg-slate-50 border-none shadow !shadow-slate-200"
         style={{
-          height: 500,
-          width: `1110px`,
+          height: '100%',
+          paddingBottom: 4,
+          width: `100%`,
           overflow: 'auto',
-          border: '1px solid #ddd',
         }}
       >
         <div
@@ -377,12 +377,12 @@ export default function GridVirtualizerFixed(props: any) {
                                     '/unknown-flag.svg'
                                     ? (
                                         <div
-                                          className="flex size-4 items-center justify-center"
+                                          className="flex h-[15px] w-[30px] items-center justify-center"
                                           style={{
                                             backgroundColor: '#efefef',
                                           }}
                                         >
-                                          <FlagIcon className="size-2" />
+                                          <FlagIcon className="size-2.5" />
                                         </div>
                                       )
                                     : (
