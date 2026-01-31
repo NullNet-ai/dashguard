@@ -873,7 +873,8 @@ export const packetRouter = createTRPCRouter({
       const { account } = ctx.session
       const { contact } = account
 
-      const [__filter = [], search = []]: any = await Promise.all(['filter', 'search'].map(async type => await ctx.redisClient.getCachedData(`timeline_${type}_${contact.id}`)))
+      let [__filter = [], search = []]: any = await Promise.all(['filter', 'search'].map(async type => await ctx.redisClient.getCachedData(`timeline_${type}_${contact.id}`)))
+      search = search ?? []
 
       const findFilter = Array.isArray(__filter) ? __filter?.find((item: any) => item?.id === filter_id) : undefined
 
