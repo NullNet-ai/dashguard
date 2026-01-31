@@ -54,6 +54,7 @@ export default {
   			},
   			primary: {
   				DEFAULT: 'hsl(var(--primary))',
+  				highlight: 'hsl(var(--primary-highlight))',
   				foreground: 'hsl(var(--primary-foreground))'
   			},
   			danger: {

@@ -44,7 +44,7 @@ const TabMenu = ({
     <DropdownMenu data-test-id={testIDFormatter(`${entity}-tab-menu`)}>
       <DropdownMenuTrigger asChild>
         <div
-          className="opacity-1 flex cursor-pointer items-center gap-2 py-1.5 pr-[2px] text-left text-sm group-hover:opacity-100 lg:opacity-0"
+          className="opacity-1 flex cursor-pointer items-center gap-2 py-1.5 pr-[4px] text-left text-sm group-hover:opacity-100 lg:opacity-0"
           data-test-id={testIDFormatter(`${entity}-tab-menu-trigger`)}
           onClick={(e) => e.stopPropagation()}
         >

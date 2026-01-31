@@ -29,6 +29,7 @@ import { capitalize } from 'lodash';
 import { testIDFormatter } from '~/utils/formatter';
 import CreateButtonTabs from './components/CreateButtonInTabs';
 import RecordDetails from '~/components/application-layout/Header/RecordDetails';
+import { Separator } from '~/components/ui/separator';
 
 interface Tab {
   id: string;
@@ -480,10 +481,12 @@ const InnerEnhanceTabItems: React.FC<DraggableTabsProps & { hasNewButton?: boole
           }}
         >
           {/* Visible Tabs */}
-          <div className="flex gap-x-1 overflow-hidden">
+          <div className="flex overflow-hidden mt-1 items-center">
             {visibleTabs.map((tab, index) => {
               const tabName = tab?.name ==='new' ? capitalize(tab?.name) : tab.label ?? tab?.name
+              const isLastTab = index === visibleTabs.length - 1;
               return (
+                <React.Fragment key={tab.id + index}>
                 <div
                   key={tab.id}
                   draggable={!tab.default}
@@ -497,8 +500,9 @@ const InnerEnhanceTabItems: React.FC<DraggableTabsProps & { hasNewButton?: boole
                   )}
                   className={cn(
                     `group relative flex h-[36px] cursor-pointer select-none items-center whitespace-nowrap rounded-md border-gray-200 px-2 text-sm font-medium text-gray-700 transition-all duration-200`,
-                    { 'text-primary': tab?.current },
+                    { 'text-primary-highlight border-primary-highlight border-b-[3px]': tab?.current },
                     { 'pr-0': !tab?.default },
+                    { 'rounded-t-md rounded-b-none border-b-0 border-l border-r border-t-[3px] px-5': tab?.default },
                   )}
                   style={{ minWidth: tab?.name ==='new' ? '55px' : '88px', maxWidth: tab?.name ==='new' ? '55px' : '200px' }}
                 >
@@ -510,9 +514,6 @@ const InnerEnhanceTabItems: React.FC<DraggableTabsProps & { hasNewButton?: boole
                             ? capitalize(tab?.name)
                             : (tab.label ?? tab?.name)}
                         </span>
-                        {index !== visibleTabs.length - 1 && (
-                          <span className="absolute right-0 h-[50%] w-[1px] bg-default/20" />
-                        )}
                         {!tab.default && (
                           <TabMenu
                             current={tab?.current}
@@ -539,6 +540,13 @@ const InnerEnhanceTabItems: React.FC<DraggableTabsProps & { hasNewButton?: boole
                     </TooltipContent>
                   </Tooltip>
                 </div>
+                {!isLastTab && !tab?.default && (
+                  <Separator
+                    orientation="vertical"
+                    className="h-6"
+                  />
+                )}
+                </React.Fragment>
               );
             })}
           </div>
