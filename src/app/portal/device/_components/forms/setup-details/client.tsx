@@ -150,9 +150,9 @@ const SetupDetails: React.FC<{ identifier: string }> = ({
       customRender={() => (
         <div className="space-y-4">
           <div className="space-y-1">
-            <div className="text-base font-semibold text-slate-900">
+            {/* <div className="text-base font-semibold text-slate-900">
               Download and install the WallGuard Package on pfSense
-            </div>
+            </div> */}
             <div className="text-sm text-slate-600">
               Follow these steps to install and set up the WallGuard agent on your pfSense system.
             </div>
