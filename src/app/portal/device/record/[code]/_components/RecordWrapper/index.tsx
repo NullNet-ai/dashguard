@@ -24,7 +24,7 @@ const Wrapper = ({
       }}
     >
       <RecordWrapperProvider>
-        <section className='mt-0 h-[calc(100vh-85px)]'>
+        <section className='mt-0 h-[calc(100vh-40px)]'>
           <ResizablePanelGroup direction="horizontal" className="flex gap-2 p-2">
             <RecordContainer>{record_summary}</RecordContainer>
             <ResizablePanel
@@ -33,7 +33,13 @@ const Wrapper = ({
               className="flex flex-col gap-2 min-h-60 flex-grow-[6] bg-transparent"
             >
               <HeaderTabs tabs={tabs} />
-              <MainContent>{record}</MainContent>
+              <MainContent
+                style={{ 
+                  height: 'calc(100vh - 110px)' 
+                }}
+              >
+                {record}
+              </MainContent>
             </ResizablePanel>
           </ResizablePanelGroup>
         </section>

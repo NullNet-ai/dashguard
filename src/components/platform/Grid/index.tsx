@@ -26,7 +26,9 @@ function MainServer({
   isLoading,
   hideCreateNewFilter,
   defaultGrouping,
-  current_tab_id
+  current_tab_id,
+  gridParentClass = '',
+  gridRecordClass = '',
 }: IPropsGrid) {
   const screenType = useScreenType();
   const isDesktop = screenType
@@ -54,12 +56,13 @@ function MainServer({
       current_tab_id={current_tab_id}
     >
       {isDesktop ? (
-        <GridScrollView parentType={parentType} className="">
+        <GridScrollView parentType={parentType} className={gridParentClass}>
           <GridDesktop
             isLoading={isLoading}
             parentType={parentType}
             gridKey={gridKey}
             grid_tabs={grid_tabs}
+            gridRecordClass={gridRecordClass}
           />
         </GridScrollView>
       ) : (

@@ -368,6 +368,8 @@ export interface IPropsGrid {
   isLoading?: boolean;
   defaultGrouping?: IGroupBy[];
   current_tab_id?: string;
+  gridParentClass?: string;
+  gridRecordClass?: string;
 }
 
 export interface IExpandedRow {

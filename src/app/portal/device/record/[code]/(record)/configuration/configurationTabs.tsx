@@ -119,7 +119,7 @@ export default async function DashboardTabs() {
       <div className="">
         <StateTab
           defaultValue="configuration_rules"
-          // orientation="horizontal"
+          orientation="vertical"
           rotateText={true}
           persistKey={`configuration_rule-${identifier}`}
           tabs={tabs}

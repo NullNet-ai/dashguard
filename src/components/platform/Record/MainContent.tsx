@@ -13,6 +13,7 @@ const MainContent = ({
   children,
   className,
   application,
+  style,
   ...props
 }: MainContentProps) => {
   const { open } = useSidebar();
@@ -32,6 +33,8 @@ const MainContent = ({
     height: "calc(100vh - 160px)",
   };
 
+  const mergedStyle = { ...customStyle, ...(style ?? {}) };
+
 
   return (
     <section
@@ -39,7 +42,7 @@ const MainContent = ({
         "main-content max-h-full space-y-2 overflow-auto overflow-x-auto rounded-t-[2px] rounded-b-[8px]",
         className,
       )}
-      style={customStyle}
+      style={mergedStyle}
       {...props}
     >
       {children}

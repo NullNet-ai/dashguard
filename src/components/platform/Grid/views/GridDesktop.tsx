@@ -16,19 +16,20 @@ interface IProps {
   parentType?: string;
   grid_tabs?: any[];
   isLoading?: boolean;
+  gridRecordClass?: string;
 }
-function GridDesktop({ parentType, gridKey, grid_tabs, isLoading }: IProps) {
+function GridDesktop({ parentType, gridKey, grid_tabs, isLoading, gridRecordClass }: IProps) {
 
   const { state } = useGrid()
 
   const { showPagination = true } = state?.config ?? {}
 
   return (
-    <Card className="col-span-full border-0 shadow-none">
+    <Card className='col-span-full border-0 shadow-none'>
       <CardHeader>
         <Header gridKey={gridKey} grid_tabs={grid_tabs}/>
       </CardHeader>
-      <ScrollContainer parentType={parentType}>
+      <ScrollContainer parentType={parentType} gridRecordClass={gridRecordClass}>
         <GridDesktopContainer isLoading={isLoading} parentType={parentType} />
         {/* <ScrollBar orientation="horizontal" /> */}
       </ScrollContainer>
