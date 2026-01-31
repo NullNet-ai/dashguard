@@ -584,7 +584,7 @@ export default function TrafficMaps({ params, defaultValues }: Record<string, an
           { (
             <>
               <MapComponent
-                countryTrafficData={mapData.countryTrafficData}
+                countryTrafficData={defaultValues.is_device_online ? mapData.countryTrafficData : { ipData: [] }}
                 filterId={filterId}
               />
             </>
