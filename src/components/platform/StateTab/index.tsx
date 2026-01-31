@@ -72,7 +72,7 @@ function StateTabList({
   }, [tabs, activeTab, shouldCollapse]);
 
   const TabsTriggerWrapper = orientation === 'vertical' ? Card : React.Fragment;
-  const tabsTriggerWrapperProps = orientation === 'vertical' ? { className: 'border-none shadow-none' } : {};
+  const tabsTriggerWrapperProps = orientation === 'vertical' ? { className: 'border-none shadow-none overflow-hidden' } : {};
 
   // Reusable function to render tab triggers
   const renderTabTriggers = () => {
