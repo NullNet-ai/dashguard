@@ -52,6 +52,18 @@ export const searchRouter = createTRPCRouter({
 
           }
         })
+      } else if (entity === 'device') {
+        _advance_filters = _advance_filters.map(e => {
+          if (e.field === 'is_device_authorized') {
+            return {
+              ...e,
+              parse_as: 'text',
+            }
+          }
+          return {
+            ...e,
+          }
+        })
       }
 
       const query = ctx.dnaClient.searchSuggestions({
@@ -93,6 +105,8 @@ export const searchRouter = createTRPCRouter({
       addCommonGridJoins(query, entity);
 
       const { data: items } = await query.execute();
+      
+      console.log("$$$ ~ items:", items)
 
       // Calculate total number of pages
       const suggestions = searchSuggestionTransformer(items, searchable_fields);
