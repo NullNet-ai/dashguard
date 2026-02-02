@@ -1,10 +1,10 @@
 'use client';
 import React, {
-  type PropsWithChildren,
   useContext,
   useEffect,
   useMemo,
   useState,
+  type PropsWithChildren,
 } from 'react';
 
 import { api } from '~/trpc/react';
@@ -12,6 +12,7 @@ import { api } from '~/trpc/react';
 import { UpdateReportFilter } from '../Action/UpdateReportFilter';
 import { GridContext } from '../Provider';
 
+import { useRouter } from 'next/navigation';
 import {
   type IAction,
   type ICreateContext,
@@ -25,7 +26,7 @@ import {
   removeSearchItems,
 } from './utils/removeSearchItems';
 import { resolveSearchItem } from './utils/resolveSearchItem';
-import { useRouter } from 'next/navigation';
+import { useQuery } from '@tanstack/react-query';
 
 export const SearchGridContext = React.createContext<ICreateContext>({});
 
@@ -55,6 +56,11 @@ export default function GridSearchProvider({ children }: IProps) {
     gridState?.advanceFilter || [],
   );
   const [open, setOpen] = useState(false);
+
+  const { router: searchRouter = 'search', resolver = 'searchSuggestions' } =
+    searchSuggestionConfig ?? {};
+  // @ts-expect-error - TS doesn't know that `api` is a global variable that is defined in the `trpc` package
+  const searchMutation = api?.[searchRouter]?.[resolver].useMutation();
 
   const advanceFilterItems = useMemo(() => {
     const advanceFilter = searchItems.map(
@@ -111,11 +117,13 @@ export default function GridSearchProvider({ children }: IProps) {
     search_params: ISearchParams,
     options: Record<string, any>,
   ) => {
-    const { router = 'search', resolver = 'searchSuggestions' } =
-    searchSuggestionConfig ?? {};
-    // @ts-expect-error - TS doesn't know that `api` is a global variable that is defined in the `trpc` package
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-call, no-unsafe-optional-chaining
-    const { data } = api?.[router]?.[resolver].useQuery(search_params, options);
+    const data = useQuery({
+      queryKey: ['search', _query], // cache per searchText
+      queryFn: () => searchMutation.mutateAsync(search_params),
+      ...options,
+      enabled: Boolean(_query),
+    });
+
     return data;
   };
 
@@ -124,15 +132,14 @@ export default function GridSearchProvider({ children }: IProps) {
     search_params: ISearchParams,
     options: Record<string, any>,
   ) => {
-    const { router = 'grid', resolver = 'items' } =
-    searchConfig ?? {};
+    const { router = 'grid', resolver = 'items' } = searchConfig ?? {};
     // @ts-expect-error - TS doesn't know that `api` is a global variable that is defined in the `trpc` package
     // eslint-disable-next-line @typescript-eslint/no-unsafe-call, no-unsafe-optional-chaining
     const { data } = api?.[router]?.[resolver].useQuery(search_params, options);
     return data;
   };
 
-  const handleAddSearchItem = async (filterItem: ISearchItemResult, args?: any) => {
+  const handleAddSearchItem = async (filterItem: ISearchItemResult) => {
     // eslint-disable-next-line no-unused-vars
     const { count: _, parse_as, ...filter_item } = filterItem ?? {};
     const advanceFilter = searchItems.map(({ entity, ...rest }) => ({
@@ -143,9 +150,8 @@ export default function GridSearchProvider({ children }: IProps) {
 
     const updateSearchItems = resolveSearchItem({
       advanceFilter,
-      filter_item: {...filter_item, ...args},
+      filter_item,
     });
-
     setSearchItems(updateSearchItems);
     const updatedFilterUrl = await UpdateReportFilter({
       filters: updateSearchItems,
@@ -185,7 +191,10 @@ export default function GridSearchProvider({ children }: IProps) {
   const handleClearSearchItems = async () => {
     setQuery('');
 
-    const defaultFilters = gridState?.defaultAdvanceFilter || [];
+    const defaultFilters = gridState?.advanceFilter?.length
+      ? gridState?.advanceFilter
+      : gridState?.defaultAdvanceFilter || [];
+
     const updatedSearchItems = clearAllSearchItems(defaultFilters);
     setSearchItems(updatedSearchItems);
 
@@ -243,7 +252,7 @@ export default function GridSearchProvider({ children }: IProps) {
     handleAddSearchItem,
     handleRemoveSearchItem,
     handleClearSearchItems,
-    handleOldSearchQuery
+    handleOldSearchQuery,
   } as IAction;
 
   return (

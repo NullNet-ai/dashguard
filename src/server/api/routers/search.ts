@@ -26,7 +26,7 @@ export const searchRouter = createTRPCRouter({
   searchSuggestions: privateProcedure
     // Define input using zod for validation
     .input(ZodSearchSuggestions)
-    .query(async ({ input, ctx }) => {
+    .mutation(async ({ input, ctx }) => {
       let {
         advance_filters: _advance_filters = [],
         entity,

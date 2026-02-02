@@ -76,7 +76,7 @@ export default function SearchDialog() {
     return null;
   }
 
-  const data = handleSearchQuery!(
+  const result = handleSearchQuery!(
     {
       entity,
       current: 0,
@@ -102,6 +102,7 @@ export default function SearchDialog() {
     },
   );
 
+  const { data, isError = false, refetch } = result ?? {}
   const { items } = data ?? {};
   const handleOpenDialog = () => {
     setOpenDialog(true);
