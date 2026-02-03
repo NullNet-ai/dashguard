@@ -13,4 +13,5 @@ export default [
   "device_filter_rules",
   "device_nat_rules",
   "aliases",
+  "versions",
 ];

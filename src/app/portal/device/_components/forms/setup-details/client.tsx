@@ -7,6 +7,14 @@ import { FormBuilder } from '~/components/platform/FormBuilder';
 import { Button } from '~/components/ui/button';
 import { api } from '~/trpc/react';
 
+const toControlChannelUrl = (remoteAccessUrl?: string) => {
+  if (!remoteAccessUrl) return '<control_channel_url>';
+  const withoutScheme = remoteAccessUrl
+    .replace(/^https?:\/\//, '')
+    .replace(/\/+$/, '');
+  return `${withoutScheme}:50051`;
+};
+
 const CodeRow = ({
   value,
   variant = 'slate',
@@ -65,6 +73,7 @@ const SetupDetails: React.FC<{ identifier: string }> = ({
     data: device,
     refetch,
   } = api.device.fetchDeviceInfo.useQuery({ code: identifier! });
+  const { data: version } = api.device.fetchLatestVersion.useQuery();
   const fetchInstallationCodeByDeviceIdMutation = api.device.fetchInstallationCodeByDeviceId.useMutation();
   const createInstallationCodeMutation = api.device.createInstallationCode.useMutation();
 
@@ -139,6 +148,8 @@ const SetupDetails: React.FC<{ identifier: string }> = ({
   }, [device?.device_name && device?.device_type]);
 
   const joinCode = installationKey || '<installation-code>';
+  const wallguardDownloadUrl = version?.latest_version || '<wallguard_download_url>';
+  const controlChannelUrl = toControlChannelUrl(process.env.NEXT_PUBLIC_REMOTE_ACCESS_URL);
 
   return (
     <FormBuilder
@@ -163,9 +174,9 @@ const SetupDetails: React.FC<{ identifier: string }> = ({
               <div className="text-sm font-medium text-slate-900">1. Download the package</div>
               <CodeRow
                 variant="amber"
-                value={`curl -o wallguard.pkg -L <wallguard_download_url>`}
+                value={`curl -o wallguard.pkg -L ${wallguardDownloadUrl}`}
               />
-              <div className="space-y-1 text-xs text-slate-500">
+              {/* <div className="space-y-1 text-xs text-slate-500">
                 <div>Make sure the package version points to the latest available WallGuard agent.</div>
                 <div className="break-all">
                   Example value of wallguard_download_url: <a
@@ -188,7 +199,7 @@ const SetupDetails: React.FC<{ identifier: string }> = ({
                     https://github.com/NullNet-ai/wallguard/releases
                   </a>
                 </div>
-              </div>
+              </div> */}
             </div>
 
             <div className="space-y-2">
@@ -205,11 +216,11 @@ const SetupDetails: React.FC<{ identifier: string }> = ({
               <div className="text-sm font-medium text-slate-900">4. Start the WallGuard Agent</div>
               <CodeRow
                 variant="slate"
-                value="wallguard-cli start --control-channel-url=<control_channel_url> --platform=pfsense"
+                value={`wallguard-cli start --control-channel-url=${controlChannelUrl} --platform=pfsense`}
               />
-              <div className="text-xs text-slate-500">
+              {/* <div className="text-xs text-slate-500">
                 Example value of control_channel_url: wallguard-proxy.nullnet.dnaqa.net:50051
-              </div>
+              </div> */}
             </div>
 
             <div className="space-y-2">

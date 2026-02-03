@@ -224,6 +224,24 @@ export const deviceRouter = createTRPCRouter({
       }
     }),
   // Project Requests
+  fetchLatestVersion: privateProcedure.query(async ({ ctx }) => {
+    const response = await ctx.dnaClient
+      .findAll({
+        entity: 'versions',
+        token: ctx.token.value,
+        query: {
+          pluck: ['latest_version'],
+          order: {
+            limit: 1,
+            by_field: 'created_date',
+            by_direction: EOrderDirection.DESC,
+          },
+        },
+      })
+      .execute()
+
+    return response?.data?.[0] ?? null
+  }),
   fetchDeviceInfo: privateProcedure
     .input(
       z.object({
