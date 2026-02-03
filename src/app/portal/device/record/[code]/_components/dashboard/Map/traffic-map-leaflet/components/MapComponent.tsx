@@ -629,26 +629,62 @@ const MapComponent = ({ countryTrafficData, filterId }: Record<string, any>) => 
       setIsLoading(false);
     };
     
-    // Add legend to map
     const addLegend = (mapInstance: any) => {
-      // @ts-expect-error - No type yet
-      const legend = L.control({ position: 'bottomright' });
+      const legend = (L as any).control({ position: 'bottomright' });
       legend.onAdd = function () {
         const div = L.DomUtil.create('div', 'info legend');
         div.innerHTML = `
-        <div style="background: white; padding: 10px; border-radius: 5px; box-shadow: 0 1px 5px rgba(0,0,0,0.4);">
-          <strong>Traffic Level</strong><br>
-          <div><span style="display:inline-block; width:15px; height:15px; background:rgba(255, 0, 0, 0.7); border-radius:50%;"></span> High > 8000 KB</div>
-          <div><span style="display:inline-block; width:15px; height:15px; background:rgba(255, 165, 0, 0.7); border-radius:50%;"></span> Medium > 2000 - 8000 KB </div>
-          <div><span style="display:inline-block; width:15px; height:15px; background:rgba(0, 128, 0, 0.7); border-radius:50%;"></span> Low < 2000 KB</div>
-          <strong>IP</strong><br>
-          <div><span style="display:inline-block; width:15px; height:15px; background:#00BFFF; border-radius:50%;"></span> Source IP</div>
-          <div><span style="display:inline-block; width:15px; height:15px; background:rgba(255, 165, 0, 0.7); border-radius:50%;"></span> Destination IP</div>
-        </div>
-      `;
-      return div;
+          <div style="background: white; padding: 0; border-radius: 5px; box-shadow: 0 1px 5px rgba(0,0,0,0.4); overflow: hidden; transition: width 200ms ease;">
+            <div class="legend-header" style="display:flex; align-items:center; justify-content:space-between; gap:8px; padding:10px; cursor:pointer; user-select:none;">
+              <strong style="font-weight:600;">Legend</strong>
+              <span class="legend-arrow" style="display:inline-flex; width:14px; height:14px; transition: transform 200ms ease; transform: rotate(180deg); align-items:center; justify-content:center;">
+                <svg viewBox="0 0 24 24" width="14" height="14" aria-hidden="true">
+                  <path d="M6 9l6 6 6-6" stroke="#333" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+              </span>
+            </div>
+            <div class="legend-body" style="padding:10px; border-top:1px solid #eee; transition:max-height 200ms ease, opacity 200ms ease; max-height:1000px; opacity:1; overflow:hidden;">
+              <div style="margin-bottom:8px;"><strong>Traffic Level</strong></div>
+              <div style="margin-bottom:4px;"><span style="display:inline-block; width:15px; height:15px; background:rgba(255, 0, 0, 0.7); border-radius:50%; vertical-align:middle; margin-right:6px;"></span> High > 8000 KB</div>
+              <div style="margin-bottom:4px;"><span style="display:inline-block; width:15px; height:15px; background:rgba(255, 165, 0, 0.7); border-radius:50%; vertical-align:middle; margin-right:6px;"></span> Medium > 2000 - 8000 KB </div>
+              <div style="margin-bottom:8px;"><span style="display:inline-block; width:15px; height:15px; background:rgba(0, 128, 0, 0.7); border-radius:50%; vertical-align:middle; margin-right:6px;"></span> Low < 2000 KB</div>
+            </div>
+          </div>
+        `;
+        return div;
       };
       legend.addTo(mapInstance);
+      const container = legend.getContainer();
+      const panel = container?.firstElementChild as HTMLElement | null;
+      const header = container?.querySelector('.legend-header') as HTMLElement | null;
+      const body = container?.querySelector('.legend-body') as HTMLElement | null;
+      const arrow = container?.querySelector('.legend-arrow') as HTMLElement | null;
+      let expanded = true;
+      if (body) body.style.maxHeight = body.scrollHeight + 'px';
+      if (header) {
+        L.DomEvent.on(header, 'click', (e: any) => {
+          L.DomEvent.stop(e);
+          expanded = !expanded;
+          if (body) {
+            if (expanded) {
+              body.style.opacity = '1';
+              body.style.padding = '10px';
+              if (panel) panel.style.width = 'auto';
+              requestAnimationFrame(() => {
+                body.style.maxHeight = body.scrollHeight + 'px';
+              });
+            } else {
+              body.style.maxHeight = '0px';
+              body.style.opacity = '0';
+              body.style.padding = '0';
+              if (panel) panel.style.width = 'min-content';
+            }
+          }
+          if (arrow) {
+            arrow.style.transform = expanded ? 'rotate(180deg)' : 'rotate(0deg)';
+          }
+        });
+      }
     };
     
     initializeMap().catch(console.error);
@@ -1032,6 +1068,10 @@ return (
     <>
       <style>
         {`
+          path.leaflet-interactive:focus {
+            outline: none !important;
+          }
+
           .source-dot.leaflet-div-icon,
           .destination-dot.leaflet-div-icon {
             background: transparent;
