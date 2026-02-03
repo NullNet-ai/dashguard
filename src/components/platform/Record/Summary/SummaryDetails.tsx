@@ -81,7 +81,7 @@ function SummaryFieldRow({
     >
       {displayKey && (
         <span
-          className="whitespace-nowrap text-slate-400"
+          className="whitespace-nowrap text-slate-500"
           data-test-id={`${baseTestId}-label`}
         >
           {displayKey}&nbsp;

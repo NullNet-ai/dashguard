@@ -39,14 +39,14 @@ export default function SystemDates({
     <div data-test-id={testId}>
       <div className="flex flex-col gap-1 text-sm" data-test-id={`${testId}-container`}>
         <div className="flex justify-between gap-2" data-test-id={`${testId}-created`}>
-          <span className="text-slate-400 whitespace-nowrap">Created </span>
+          <span className="text-slate-500 whitespace-nowrap">Created </span>
           <span className='break-all' data-test-id={`${testId}-created-details`}>
             {created_date} {removeSeconds(created_time)}{created_by_first_name && ", "}
             {createdByName}
           </span>
         </div>
         <div className='flex justify-between gap-2' data-test-id={`${testId}-modified`}>
-          <span className="text-slate-400 whitespace-nowrap">Modified </span>
+          <span className="text-slate-500 whitespace-nowrap">Modified </span>
           <span className='break-all' data-test-id={`${testId}-modified-details`}>
             {updated_date} {removeSeconds(updated_time)}{updated_by_first_name && ", "}
             {updatedByName}

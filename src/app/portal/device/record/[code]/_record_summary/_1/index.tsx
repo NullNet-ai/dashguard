@@ -34,13 +34,21 @@ const RecordShellSummary = ({
   const deviceData = useMemo(() => {
     if (!data) return {}
     
+    const interfacesArr = Array.isArray(data?.interfaces) ? data.interfaces : []
+    const namedInterfaces = interfacesArr.reduce((acc: Record<string, string>, curr: any) => {
+      const name = typeof curr?.name === 'string' ? curr.name.toLowerCase() : ''
+      if (name) acc[name] = curr?.address ?? 'None'
+      return acc
+    }, {})
+
     return {
       ...data,
       type: data?.model,
       grouping: data?.grouping_name,
       version: data?.device_version,
-      interfaces: data?.interfaces || [],
-      device_category: data?.device_category || 'None'
+      interfaces: interfacesArr,
+      device_category: data?.device_category || 'None',
+      ...namedInterfaces,
     }
   }, [data])
 
@@ -55,6 +63,11 @@ const RecordShellSummary = ({
         {
           header_title: "Device Details",
           items: [
+            {
+              key: "Name",
+              value: "device_name",
+              truncated: () => ({ string_limit: 35, path: ['value'] })
+            },
             {
               key: "Type",
               value: "device_type",
@@ -71,11 +84,6 @@ const RecordShellSummary = ({
               customValue: (data: any) => <RecordDeviceLastHeartbeat device_id={data?.id} />
             },
             {
-              key: "Instance",
-              value: "device_name",
-              truncated: () => ({ string_limit: 35, path: ['value'] })
-            },
-            {
               key: "Host Name",
               value: "hostname",
               truncated: () => ({ string_limit: 35, path: ['value'] })
@@ -85,35 +93,23 @@ const RecordShellSummary = ({
               value: "version",
               truncated: () => ({ string_limit: 35, path: ['value'] })
             },
-            {
-              key: "Interfaces",
-              value: "interfaces",
-              customValue: (data: any) => {
-                const interfaceData = data?.interfaces || [];
-                return (
-                  <div className="pl-4">
-                    {Array.isArray(interfaceData) && interfaceData.length > 0 ? (
-                      interfaceData.map((interfaceObj: { name: string; address: string }, index: number) => (
-                        <div key={index} className="mb-1">
-                          <span className="text-slate-400">
-                            {interfaceObj.name?.toUpperCase() || 'Unknown'}
-                            {':'}
-                            {' '}
-                          </span>
-                          <span>
-                            {interfaceObj.address || 'None'}
-                          </span>
-                        </div>
-                      ))
-                    ) : typeof interfaceData === 'string' ? (
-                      interfaceData
-                    ) : 'None'}
-                  </div>
-                );
-              }
-            }
           ]
-        }
+        },
+        {
+          header_title: "Interfaces",
+          items: [
+            {
+              key: "WAN",
+              value: "wan",
+              truncated: () => ({ string_limit: 35, path: ['value'] })
+            },
+            {
+              key: "LAN",
+              value: "lan",
+              truncated: () => ({ string_limit: 35, path: ['value'] })
+            },
+          ]
+        },
       ]}
     />
   )

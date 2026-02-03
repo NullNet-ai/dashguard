@@ -218,18 +218,25 @@ export default function AppSideBar(config: ISideBarProps) {
         </SidebarHeader>
       )}
       <SidebarContent>
-        <div className="px-1">
-          <StateTab
-            tabs={tabItems}
-            variant='underline'
-            size="md"
-            className={cn(
-              "w-full",
-              !open && "flex"
-            )}
-            defaultValue="menu"
-            persistKey="sidebar-tabs" // Changed to match the expected key in StateTab component
-          />
+        <div className="px-1 mt-4">
+          {mainMenuConfig?.map((item, index) => {
+            return (
+              <Fragment key={index}>
+                {!item?.groups?.length
+                  ? (
+                    <Menu item={item} screenType={screen || screenType} />
+                  )
+                  : (
+                    <GroupMenu
+                      title={item?.groupTitle || ''}
+                      groups={item.groups}
+                      screenType={screen || screenType || ''}
+                    />
+                  )}
+                {item?.separator && <Separator className="my-2" />}
+              </Fragment>
+            )
+          })}
         </div>
       </SidebarContent>
       {footerComponent && (
