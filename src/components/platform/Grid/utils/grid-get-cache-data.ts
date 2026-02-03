@@ -32,6 +32,7 @@ interface IGridCacheData {
   application?: string;
   identifier?: string;
   defaultGridTabs?: any[];
+  defaultAllTabName?: string;
   pathname?: string;
   defaultSorting?: SortingState;
   additionalFilters?: ISearchItem[];

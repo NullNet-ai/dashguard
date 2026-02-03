@@ -31,6 +31,7 @@ const ConfigurationAliasGrid = ({
       `${pathname}` +
       `${searchTest?.toString() ? `?${searchTest?.toString()}` : ''}`,
     defaultSorting: defaultSorting,
+    defaultAllTabName: 'All Aliases',
   };
 
   const {

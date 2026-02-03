@@ -38,7 +38,7 @@ const SummaryConfig = {
   show_summary: true,
   components: [
     {
-      label: "Device Type",
+      label: "Device Details",
       component: <Summary />,
     },
   ],

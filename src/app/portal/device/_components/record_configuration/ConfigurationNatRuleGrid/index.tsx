@@ -33,6 +33,7 @@ const ConfigurationNatRuleGrid = ({
       `${pathname}` +
       `${searchTest?.toString() ? `?${searchTest?.toString()}` : ''}`,
     defaultSorting: defaultSorting,
+    defaultAllTabName: 'All Nat Rules',
   }), [pathname, searchTest, code]);
 
   const {
@@ -142,7 +143,7 @@ const ConfigurationNatRuleGrid = ({
         {...gridProps}
         gridParentClass="max-w-[calc(100vw-39em)] mx-auto"
         gridRecordClass="h-[calc(100vh-19.1em)]"
-        gridKey="configuration_rule_grid"
+        gridKey="nat_rule"
         totalCount={totalCount || 0}
         parentType="record"
         data={items}

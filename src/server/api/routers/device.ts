@@ -16,6 +16,14 @@ interface IDeviceAccountSetupResponse {
     devices: {
       id: string;
       code: string;
+      device_category?: string;
+      address_id?: string;
+    };
+    addresses?: {
+      city?: string;
+      country?: string;
+      state?: string;
+      country_code?: string;
     };
     account_organizations: {
       id: string;
@@ -56,7 +64,8 @@ export const deviceRouter = createTRPCRouter({
               },
             ],
             pluck_object: {
-              devices: ['id', 'code', 'device_category'],
+              devices: ['id', 'code', 'device_category', 'address_id'],
+              addresses: ['city', 'country', 'state', 'country_code'],
               account_organizations: [
                 'id',
                 'email',
@@ -77,6 +86,19 @@ export const deviceRouter = createTRPCRouter({
             from: {
               entity: 'devices',
               field: 'id',
+            },
+          },
+        })
+        .join({
+          type: 'left',
+          field_relation: {
+            to: {
+              entity: 'addresses',
+              field: 'id',
+            },
+            from: {
+              entity: 'devices',
+              field: 'address_id',
             },
           },
         })

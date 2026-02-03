@@ -255,6 +255,7 @@ export const gridRouter = createTRPCRouter({
                   ? EOrderDirection.DESC
                   : EOrderDirection.ASC
                 : EOrderDirection.DESC,
+              is_case_sensitive_sorting: true,
           },
           multiple_sort:
             sorting?.length && sorting?.length > 1
@@ -1112,6 +1113,7 @@ export const gridRouter = createTRPCRouter({
         application: z.string().optional(),
         identifier: z.string().optional(),
         defaultGridTabs: z.array(z.any()).optional(),
+        defaultAllTabName: z.string().optional(),
         pathname: z.string().optional(),
         defaultSorting: z.array(z.any()).optional(),
         additionalFilters: z.array(z.any()).optional(),
@@ -1153,6 +1155,7 @@ export const gridRouter = createTRPCRouter({
           defaultGrouping: input.defaultGrouping,
           gridEntity: input.gridEntity,
           defaultAdvanceFilter: input.defaultAdvanceFilter ?? [],
+          defaultAllTabName: input.defaultAllTabName,
           hideDefaultAllTab: input.hideDefaultAllTab,
         });
         await ctx.redisClient.cacheData(_tabMenuId, defaultTab);

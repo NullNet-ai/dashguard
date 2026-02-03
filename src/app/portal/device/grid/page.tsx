@@ -96,6 +96,7 @@ export default function Page() {
           id: 'code',
         },
         // paginationType: 'default',
+        enableRowSelection: false,
         enableAutoCreate: true,
         defaultShownColumns: ['created_date', 'updated_date'],
         hideColumnsOnMobile: TO_HIDE_COLUMNS_WHEN_MOBILE,

@@ -1382,7 +1382,7 @@ export const packetRouter = createTRPCRouter({
       }
     }, { concurrency: 100 })
 
-    _res = _res.filter(e => e.source_country?.country !== 'No IP Info' || e.destination_country?.country !== 'No IP Info')
+    _res = _res.filter(e => e.source_country?.country !== 'No IP Info' && e.destination_country?.country !== 'No IP Info')
 
     // Asummed only filtering Country
     if (findFilter && Object.keys(findFilter).length) {

@@ -28,6 +28,7 @@ export const SetIdTab = ({
   defaultGrouping,
   gridEntity,
   defaultAdvanceFilter,
+  defaultAllTabName,
   hideDefaultAllTab = false,
 }: {
   mainEntity: string;
@@ -38,6 +39,7 @@ export const SetIdTab = ({
   defaultGrouping?: any[];
   gridEntity?: string;
   defaultAdvanceFilter?: ISearchItem[];
+  defaultAllTabName?: string;
   hideDefaultAllTab?: boolean;
 }) => {
   const modified_entity = tabName[mainEntity] || mainEntity;
@@ -66,7 +68,7 @@ export const SetIdTab = ({
     ...(!hideDefaultAllTab
       ? [
           {
-            name: `All ${pluralize(modified_entity)}`,
+            name: defaultAllTabName ?? `All ${pluralize(modified_entity)}`,
             current: true,
             href: href ? href : `/portal/${mainEntity}/grid?filter_id=`,
             default: true,

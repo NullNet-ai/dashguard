@@ -16,14 +16,18 @@ const Summary = ({ form_key }: { form_key: string }) => {
   });
 
   const deviceData = record?.data?.[0];
-  const accountOrg = deviceData?.account_organizations;
+  const locationLabel = useMemo(() => {
+    const address = Array.isArray(deviceData?.addresses)
+      ? deviceData?.addresses?.[0]
+      : deviceData?.addresses;
+    const city = address?.city;
+    const country = address?.country;
 
-  const memoizedAppId = useMemo(() => {
-    if (accountOrg?.email) {
-      return accountOrg?.email;
-    }
+    if (city && country) return `${city}, ${country}`;
+    if (city) return city;
+    if (country) return country;
     return 'None';
-  }, [accountOrg?.email]);
+  }, [deviceData?.addresses]);
 
   useRefetchRecord({
     refetch,
@@ -38,8 +42,11 @@ const Summary = ({ form_key }: { form_key: string }) => {
     <div>
       <p className="mb-[8px] no-underline text-[#334155]">
         <strong>Category: </strong>
-        {/* @ts-expect-error - No type yet */}
         &nbsp; {deviceData?.devices?.device_category || 'None'}
+      </p>
+      <p className="mb-[8px] no-underline text-[#334155]">
+        <strong>Location: </strong>
+        &nbsp; {locationLabel}
       </p>
     </div>
   );

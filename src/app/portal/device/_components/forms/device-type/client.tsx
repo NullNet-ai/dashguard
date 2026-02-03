@@ -41,7 +41,7 @@ export default function DeviceType({
       }}
       myParent={params.shell_type}
       formProps={params}
-      formLabel="Device Type"
+      formLabel="Device Details"
       handleSubmit={handleSave}
       formKey="deviceType"
       formSchema={FormSchema}

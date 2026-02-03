@@ -20,6 +20,7 @@ const FormSchema = z.object({
 
 export default function DeviceLocation({ params, defaultValues }: IFormProps) {
   const toast = useToast();
+  const utils = api.useUtils();
 
   const updateDeviceCategory = api.device.updateDeviceCategory.useMutation();
 
@@ -115,6 +116,7 @@ export default function DeviceLocation({ params, defaultValues }: IFormProps) {
         address_country_code:
           countryCitiesData?.[data.address_country]?.code ?? undefined,
       });
+      await utils.device.getAccountSetUpDetailsByDeviceCode.invalidate();
     } catch (error) {
       toast.error('Failed to update device location');
     }
