@@ -7,7 +7,7 @@ import {
   getGridCacheData,
 } from '~/components/platform/Grid/utils/grid-get-cache-data';
 import { gridDataResolver } from '~/components/platform/Grid/utils/gridDataResolver';
-import { Card, CardHeader } from '~/components/ui/card';
+import { Card, CardHeader, CardTitle } from '~/components/ui/card';
 import { Label } from '~/components/ui/label';
 import useFetchGridData from '~/hooks/useFetchGridData';
 import { defaultSorting } from './_config/sorting';
@@ -125,7 +125,9 @@ const ConfigurationAliasGrid = ({
   return (
     <Card className="overflow-hidden max-w-[calc(100vw-38.4em)] h-[calc(100vh-7em)]">
       <CardHeader className="flex w-full flex-1 items-center justify-between bg-slate-100">
-        Aliases
+        <CardTitle className="text-md text-foreground">
+          Aliases
+        </CardTitle>
       </CardHeader>
       <Grid
         {...gridProps}
