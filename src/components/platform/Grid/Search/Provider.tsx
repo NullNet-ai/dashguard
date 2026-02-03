@@ -245,6 +245,7 @@ export default function GridSearchProvider({ children }: IProps) {
     query: _query,
     advanceFilterItems,
   } as IState;
+  // @ts-expect-error - No type yet
   const actions = {
     handleQuery,
     handleOpen,

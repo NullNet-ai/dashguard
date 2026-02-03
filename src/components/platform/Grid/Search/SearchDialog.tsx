@@ -102,6 +102,7 @@ export default function SearchDialog() {
     },
   );
 
+  // @ts-expect-error - No type yet
   const { data, isError = false, refetch } = result ?? {}
   const { items } = data ?? {};
   const handleOpenDialog = () => {
