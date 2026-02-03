@@ -371,25 +371,29 @@ export const deviceRouter = createTRPCRouter({
       }
       // Update Address
       else {
-        await ctx.dnaClient.update(address_id, {
-          entity: 'addresses',
-          token: ctx.token.value,
-          mutation: {
-            params: address,
-          },
-        });
+        await ctx.dnaClient
+          .update(address_id, {
+            entity: 'addresses',
+            token: ctx.token.value,
+            mutation: {
+              params: address,
+            },
+          })
+          .execute();
       }
 
-      return await ctx.dnaClient.update(id, {
-        entity: 'devices',
-        token: ctx.token.value,
-        mutation: {
-          params: { 
-            device_category,
-            address_id,
+      return await ctx.dnaClient
+        .update(id, {
+          entity: 'devices',
+          token: ctx.token.value,
+          mutation: {
+            params: {
+              device_category,
+              address_id,
+            },
           },
-        },
-      });
+        })
+        .execute();
     }),
   fetchInstallationCodeByDeviceId: privateProcedure
     .input(
@@ -628,13 +632,15 @@ export const deviceRouter = createTRPCRouter({
     .mutation(async ({ input, ctx }) => {
       const { id, device_name, device_type } = input;
 
-      return await ctx.dnaClient.update(id, {
-        entity: 'devices',
-        token: ctx.token.value,
-        mutation: {
-          params: { device_name, device_type },
-        },
-      });
+      return await ctx.dnaClient
+        .update(id, {
+          entity: 'devices',
+          token: ctx.token.value,
+          mutation: {
+            params: { device_name, device_type },
+          },
+        })
+        .execute();
     }),
     fetchInstallationCodeByDeviceCode: privateProcedure
     .input(
