@@ -64,6 +64,7 @@ const MapComponent = ({ countryTrafficData, filterId }: Record<string, any>) => 
   const drawSessionRef: any = useRef(0);
   const drawTimeoutsRef: any = useRef(new Set());
   const markerUsageRef = useRef<Record<string, { marker: any; count: number }>>({});
+  const latestActiveCountriesRef = useRef<Set<string>>(new Set());
   const resizeObserverRef: any = useRef(null);
   const resizeHandlerRef: any = useRef(null);
 
@@ -166,6 +167,20 @@ const MapComponent = ({ countryTrafficData, filterId }: Record<string, any>) => 
     return timeoutId;
   }, []);
 
+  const normalizeCountryKey = useCallback((rawCountry: any) => {
+    if (typeof rawCountry !== 'string') return null;
+    let current = rawCountry.trim();
+    if (!current) return null;
+
+    for (let i = 0; i < 5; i++) {
+      const next = COUNTRY_ALIASES[current] || current;
+      if (next === current) break;
+      current = next;
+    }
+
+    return current;
+  }, []);
+
   const clearAllCountryHighlights = useCallback((mapInstance: any) => {
     if (!mapInstance) return;
 
@@ -177,6 +192,42 @@ const MapComponent = ({ countryTrafficData, filterId }: Record<string, any>) => 
 
     countryHighlights.current = {};
   }, []);
+
+  const getInFlightCountries = useCallback((mapInstance: any) => {
+    const inFlight = new Set<string>();
+    if (!mapInstance) return inFlight;
+
+    Object.values(connectionElements.current).forEach((value: any) => {
+      const items = Array.isArray(value) ? value : value ? [value] : [];
+      items.forEach((item: any) => {
+        const flowLine = item?.flowLine;
+        if (!flowLine || !mapInstance?.hasLayer?.(flowLine)) return;
+        const sourceCountryKey = item?.sourceCountryKey;
+        const destCountryKey = item?.destCountryKey;
+        if (typeof sourceCountryKey === 'string' && sourceCountryKey) inFlight.add(sourceCountryKey);
+        if (typeof destCountryKey === 'string' && destCountryKey) inFlight.add(destCountryKey);
+      });
+    });
+
+    return inFlight;
+  }, []);
+
+  const pruneCountryHighlights = useCallback(
+    (mapInstance: any, activeCountries: Set<string>) => {
+      if (!mapInstance) return;
+
+      const inFlightCountries = getInFlightCountries(mapInstance);
+
+      Object.keys(countryHighlights.current).forEach((countryKey) => {
+        if (activeCountries.has(countryKey)) return;
+        if (inFlightCountries.has(countryKey)) return;
+        const { highlight, label } = countryHighlights.current[countryKey] || {};
+        if (highlight && mapInstance.hasLayer(highlight)) mapInstance.removeLayer(highlight);
+        if (label && mapInstance.hasLayer(label)) mapInstance.removeLayer(label);
+      });
+    },
+    [getInFlightCountries],
+  );
 
   const hasAnyTrafficLayers = useCallback((mapInstance: any, excludeLayers?: Set<any>) => {
     if (!mapInstance || typeof mapInstance.eachLayer !== 'function') return false;
@@ -731,6 +782,20 @@ const MapComponent = ({ countryTrafficData, filterId }: Record<string, any>) => 
         currentDataPoints = updateDataPoints(currentDataPoints, conn, removedIpCache);
       }
 
+      const activeCountries = new Set<string>();
+      currentDataPoints.forEach((conn: Record<string, any>) => {
+        const sourceCountry = conn?.source_country?.country;
+        const destCountry = conn?.destination_country?.country;
+
+        const normalizedSource = normalizeCountryKey(sourceCountry);
+        if (normalizedSource && normalizedSource !== 'No IP Info') activeCountries.add(normalizedSource);
+
+        const normalizedDest = normalizeCountryKey(destCountry);
+        if (normalizedDest && normalizedDest !== 'No IP Info') activeCountries.add(normalizedDest);
+      });
+      latestActiveCountriesRef.current = activeCountries;
+      pruneCountryHighlights(map, activeCountries);
+
       currentDataPoints.forEach((conn: Record<string, any>) => {
         if (drawSessionRef.current !== drawSession) return;
         const hasSource = conn.source_country && conn.source_country.country && conn.source_country.country !== "No IP Info";
@@ -744,12 +809,16 @@ const MapComponent = ({ countryTrafficData, filterId }: Record<string, any>) => 
         let destMarker = null;
         let sourceMarkerKey: string | null = null;
         let destMarkerKey: string | null = null;
+        let sourceCountryKey: string | null = null;
+        let destCountryKey: string | null = null;
 
         // Always assign coordinates, even for ocean-to-ocean
         if (hasSource) {
           if (drawSessionRef.current !== drawSession) return;
-          const aliasSource = COUNTRY_ALIASES[conn.source_country.country] || conn.source_country.country;
-          sourceCoordinates = normalizeLatLng(highlightCountry(map, aliasSource));
+          const resolvedSourceCountryKey =
+            normalizeCountryKey(conn.source_country.country) || String(conn.source_country.country).trim();
+          sourceCountryKey = resolvedSourceCountryKey;
+          sourceCoordinates = normalizeLatLng(highlightCountry(map, resolvedSourceCountryKey));
         } else {
           if (drawSessionRef.current !== drawSession) return;
           sourceCoordinates = OCEAN_SOURCE_COORDINATE;
@@ -779,8 +848,10 @@ const MapComponent = ({ countryTrafficData, filterId }: Record<string, any>) => 
 
         if (hasDest) {
           if (drawSessionRef.current !== drawSession) return;
-          const aliasDest = COUNTRY_ALIASES[conn.destination_country.country] || conn.destination_country.country;
-          destinationCoordinates = normalizeLatLng(highlightCountry(map, aliasDest));
+          const resolvedDestCountryKey =
+            normalizeCountryKey(conn.destination_country.country) || String(conn.destination_country.country).trim();
+          destCountryKey = resolvedDestCountryKey;
+          destinationCoordinates = normalizeLatLng(highlightCountry(map, resolvedDestCountryKey));
         } else {
           if (drawSessionRef.current !== drawSession) return;
           destinationCoordinates = OCEAN_DEST_COORDINATE;
@@ -1010,6 +1081,8 @@ const MapComponent = ({ countryTrafficData, filterId }: Record<string, any>) => 
                     if (arr.length === 0) delete connectionElements.current[key];
                   }
 
+                  pruneCountryHighlights(map, latestActiveCountriesRef.current);
+
                   if (!hasAnyTrafficLayers(map)) {
                     clearAllCountryHighlights(map);
                   }
@@ -1048,6 +1121,8 @@ const MapComponent = ({ countryTrafficData, filterId }: Record<string, any>) => 
             destMarker,
             flowLine,
             createdAt: Date.now(),
+            sourceCountryKey,
+            destCountryKey,
           };
           connectionElements.current[key].push(lineObj);
         }
@@ -1056,7 +1131,7 @@ const MapComponent = ({ countryTrafficData, filterId }: Record<string, any>) => 
     };
 
     loadAllConnections();
-  }, [map, isLoading, processIpData, filterId, trackTrafficLayer, scheduleTimeout, clearAllCountryHighlights, hasAnyTrafficLayers, acquireMarker, releaseMarker]);
+  }, [map, isLoading, processIpData, filterId, trackTrafficLayer, scheduleTimeout, clearAllCountryHighlights, pruneCountryHighlights, normalizeCountryKey, hasAnyTrafficLayers, acquireMarker, releaseMarker]);
 
 
   //   .traffic-flow-line {

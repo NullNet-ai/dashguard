@@ -4,7 +4,7 @@ import { useMemo } from 'react';
 import { api } from '~/trpc/react';
 import useRefetchRecord from '../hooks/useFetchMainRecord';
 
-const Summary = ({ form_key }: { form_key: string }) => {
+const SetupSummary = ({ form_key }: { form_key: string }) => {
   const pathName = usePathname();
   const [, , , _, identifier] = pathName.split('/');
   const {
@@ -13,6 +13,38 @@ const Summary = ({ form_key }: { form_key: string }) => {
     error,
   } = api.device.getAccountSetUpDetailsByDeviceCode.useQuery({
     device_code: identifier!
+  });
+
+  const deviceData = record?.data?.[0];
+
+  useRefetchRecord({
+    refetch,
+    form_key,
+  });
+
+  if (error) {
+    return <div>Error: {error.message}</div>;
+  }
+
+  return (
+    <div>
+      <p className="mb-[8px] no-underline text-[#334155]">
+        <strong>Category: </strong>
+        &nbsp; {deviceData?.devices?.device_category || 'None'}
+      </p>
+    </div>
+  );
+};
+
+const DeviceLocationSummary = ({ form_key }: { form_key: string }) => {
+  const pathName = usePathname();
+  const [, , , _, identifier] = pathName.split('/');
+  const {
+    data: record,
+    refetch,
+    error,
+  } = api.device.getAccountSetUpDetailsByDeviceCode.useQuery({
+    device_code: identifier!,
   });
 
   const deviceData = record?.data?.[0];
@@ -41,10 +73,6 @@ const Summary = ({ form_key }: { form_key: string }) => {
   return (
     <div>
       <p className="mb-[8px] no-underline text-[#334155]">
-        <strong>Category: </strong>
-        &nbsp; {deviceData?.devices?.device_category || 'None'}
-      </p>
-      <p className="mb-[8px] no-underline text-[#334155]">
         <strong>Location: </strong>
         &nbsp; {locationLabel}
       </p>
@@ -57,8 +85,12 @@ const SummaryConfig = {
   required: true,
   components: [
     {
-      label: 'Setup',
-      component: <Summary form_key={'basicDetails'} />,
+      label: 'Device Category',
+      component: <SetupSummary form_key={'deviceCategoryForm'} />,
+    },
+    {
+      label: 'Device Location',
+      component: <DeviceLocationSummary form_key={'deviceLocationForm'} />,
     },
   ],
 };

@@ -5,6 +5,11 @@ import { useEffect, useMemo, useState } from 'react';
 import Grid from '~/components/platform/Grid';
 import { getGridCacheData } from '~/components/platform/Grid/utils/grid-get-cache-data';
 import { gridDataResolver } from '~/components/platform/Grid/utils/gridDataResolver';
+import { handleArchive } from '~/components/platform/Grid/DefaultRow/Actions';
+import { DefaultRowActions } from '~/components/platform/Grid/types';
+import { Button } from '~/components/ui/button';
+import { Dialog, DialogContent, DialogFooter } from '~/components/ui/dialog';
+import { Separator } from '~/components/ui/separator';
 import useFetchGridData from '~/hooks/useFetchGridData';
 import { useToast } from '~/context/ToastProvider';
 import { useRouter } from 'next/navigation';
@@ -13,6 +18,7 @@ import CustomCreateButton from '../_components/custom_create_button';
 import gridColumns, { TO_HIDE_COLUMNS_WHEN_MOBILE } from './_config/columns';
 import defaultSorting from './_config/sorting';
 import AuthorizeDeviceAction from './_components/AuthorizeDeviceAction';
+import { ArchiveX } from 'lucide-react';
 
 export default function Page() {
   const router = useRouter();
@@ -80,6 +86,66 @@ export default function Page() {
     fetchData(gridParams);
   }, [gridParams]);
 
+  const OnlineDeviceArchiveDialog = ({
+    row,
+    config,
+    open,
+    setOpen,
+  }: DefaultRowActions) => {
+    if (!row?.original?.is_device_online) return null;
+
+    const handleClose = () => {
+      setOpen && setOpen(false);
+    };
+
+    return (
+      <Dialog
+        open={!!open}
+        onOpenChange={(nextOpen) => {
+          setOpen && setOpen(nextOpen);
+        }}
+      >
+        <DialogContent className="w-5/6 bg-white md:w-3/6">
+          <div className="mb-2 text-sm">
+            <ArchiveX
+              size={35}
+              className="rounded-full border border-red-300 bg-red-100 p-2 text-destructive"
+            />
+          </div>
+          <div className="flex flex-1 gap-2 py-4 font-bold">Archive Record</div>
+          <div className="flex flex-1 gap-2">
+            Are you sure you want to archive this record? Archiving will move the record to an inactive state, and it will no longer be available on the active list. Note: this device is currently online.
+          </div>
+          <Separator className="my-2" />
+          <DialogFooter className="py-2">
+            <Button
+              onClick={handleClose}
+              className="mr-2"
+              variant="ghost"
+              color="primary"
+            >
+              Cancel
+            </Button>
+            <Button
+              onClick={() => {
+                if (config?.archiveCustomAction) {
+                  config?.archiveCustomAction(row.original);
+                } else {
+                  handleArchive({ row, config });
+                }
+                handleClose();
+              }}
+              variant="destructive"
+              className="mr-2"
+            >
+              Archive
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+    );
+  };
+
   return (
     <Grid
       {...gridProps}
@@ -100,6 +166,7 @@ export default function Page() {
         enableAutoCreate: true,
         defaultShownColumns: ['created_date', 'updated_date'],
         hideColumnsOnMobile: TO_HIDE_COLUMNS_WHEN_MOBILE,
+        archiveDialogCustomComponent: OnlineDeviceArchiveDialog,
         searchConfig: {
           router: 'grid',
           resolver: 'items',

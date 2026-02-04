@@ -86,7 +86,7 @@ const ConfigurationAliasGrid = ({
     'updated_date',
     // 'disabled',
     // 'interface',
-    'order',
+    // 'order',
     // New columns
     'type',
     'name',

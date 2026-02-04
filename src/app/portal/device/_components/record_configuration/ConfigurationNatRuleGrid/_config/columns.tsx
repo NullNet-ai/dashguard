@@ -36,13 +36,6 @@ const gridColumns = [
     },
   },
   {
-    header: 'Action',
-    accessorKey: 'policy',
-    search_config: {
-      operator: 'like',
-    },
-  },
-  {
     header: 'Priority Order',
     accessorKey: 'order',
     search_config: {

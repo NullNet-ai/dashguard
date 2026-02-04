@@ -46,9 +46,10 @@ const gridColumns = [
   {
     header: 'Values',
     accessorKey: 'value',
-    search_config: {
-      operator: 'like',
-    },
+    // search_config: {
+    //   operator: 'like',
+    // },
+    isSearchable: false,
     cell: ({ row }) => {
       const value = row?.original?.value
       return (

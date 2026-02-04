@@ -76,8 +76,12 @@ export const deviceAliasRouter = createTRPCRouter({
           query: {
             track_total_records: true,
             pluck,
-            pluck_object:{
-              device_aliases: pluck
+            pluck_group_object: {
+              ip_aliases: ['ip'],
+            },
+            pluck_object: {
+              aliases: pluck,
+              ip_aliases: ['ip'],
             },
             advance_filters: _advance_filters?.length
               ? _advance_filters as IAdvanceFilters[]
@@ -100,20 +104,33 @@ export const deviceAliasRouter = createTRPCRouter({
             // : [],
           },
         })
-        .execute()
+        .join({
+          type: 'left',
+          field_relation: {
+            to: {
+              entity: 'ip_aliases',
+              field: 'alias_id',
+            },
+            from: {
+              entity,
+              field: 'id',
+            },
+          },
+        }).execute()
 
       const { total_count: totalCount = 1, data: items }
       = device_aliases
 
       const formatted_items = items?.map((item: Record<string, any>) => {
         const {
-          [pluralize(input?.entity)]: entity_data,
+          [input?.entity]: entity_data,
           ...rest
         } = item
 
         return {
           ...entity_data,
           ...rest,
+          value: rest.ip_aliases?.ips?.join(' '),
           created_by: 'Wallguard Client',
           updated_by: 'Wallguard Client',
         }

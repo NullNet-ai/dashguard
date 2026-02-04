@@ -20,6 +20,51 @@ import { formatSorting } from '~/server/utils/formatSorting';
 import ZodSearchSuggestions from '~/server/zodSchema/grid/searchSuggestions';
 import { searchSuggestionTransformer } from '~/components/platform/Grid/Search/utils/searchSuggestionTransformer';
 import { formatPhoneNumber } from '~/utils/formatter';
+const protocolValueToLabel = {
+  'inet/any': 'IPv4/*',
+  'inet/tcp': 'IPv4/TCP',
+  'inet/tcp/udp': 'IPv4/TCP/UDP',
+  'inet6/any': 'IPv6/*',
+  'inet6/tcp': 'IPv6/TCP',
+  'inet6/tcp/udp': 'IPv6/TCP/UDP',
+  'inet46/any': 'IPv4+6/*',
+  'inet46/tcp': 'IPv4+6/TCP',
+  'inet46/tcp/udp': 'IPv4+6/TCP/UDP',
+} as const;
+const protocolLabelToValue = Object.entries(protocolValueToLabel).reduce(
+  (acc, [value, label]) => {
+    acc[label.toLowerCase()] = value;
+    return acc;
+  },
+  {} as Record<string, string>,
+);
+const resolveProtocolFilterValue = (value: unknown) => {
+  if (typeof value !== 'string') return value;
+  const key = value.trim().toLowerCase();
+  if (!key) return value;
+
+  const exact = protocolLabelToValue[key];
+  if (exact) return exact;
+
+  if (key.includes('ipv4+6') || key.includes('ipv4+ipv6') || key.includes('ipv46')) {
+    return 'inet46';
+  }
+  if (key.includes('ipv6')) return 'inet6';
+  if (key.includes('ipv4')) return 'inet';
+
+  return value;
+};
+const resolveProtocolDisplayValue = (value: unknown) => {
+  if (typeof value !== 'string') return value;
+  const key = value.trim().toLowerCase();
+  if (!key) return value;
+  const exact = (protocolValueToLabel as Record<string, string>)[key];
+  if (exact) return exact;
+  if (key === 'inet46') return 'IPv4+6';
+  if (key === 'inet6') return 'IPv6';
+  if (key === 'inet') return 'IPv4';
+  return value;
+};
 const entity = '';
 export const searchRouter = createTRPCRouter({
   ...createDefineRoutes(entity),
@@ -41,28 +86,70 @@ export const searchRouter = createTRPCRouter({
       };
       if (entity === 'device_filter_rules' || entity === 'device_nat_rules') {
         _advance_filters = _advance_filters.map(e => {
+          let updatedFilter = e
           if (e.field === 'order' || e.field === 'disabled') {
-            return {
+            updatedFilter = {
               ...e,
               parse_as: 'text',
             }
           }
-          return {
-            ...e,
-
+          if (e.field === 'protocol') {
+            updatedFilter = {
+              ...e,
+              values: e.values?.map(resolveProtocolFilterValue)
+            }
           }
+          else if (e.field === 'disabled') {
+            updatedFilter = {
+              ...updatedFilter,
+              values: updatedFilter.values?.map(v => {
+                if ('enabled'.toLowerCase().includes(v.toLowerCase())) {
+                  return 'true'
+                } else if ('disabled'.toLowerCase().includes(v.toLowerCase())) {
+                  return 'false'
+                }
+                return v
+              }),
+            }
+          }
+          return updatedFilter
         })
       } else if (entity === 'device') {
         _advance_filters = _advance_filters.map(e => {
-          if (e.field === 'is_device_authorized') {
-            return {
+          let updatedFilter = e
+          if (e.field === 'is_device_authorized' || e.field === 'is_device_online') {
+            updatedFilter = {
               ...e,
               parse_as: 'text',
             }
           }
-          return {
-            ...e,
+          if (e.field === 'is_device_authorized') {
+            updatedFilter = {
+              ...updatedFilter,
+              values: updatedFilter.values?.map(v => {
+                if ('authorized'.toLowerCase().includes(v.toLowerCase())) {
+                  return true
+                } else if ('unauthorized'.toLowerCase().includes(v.toLowerCase())) {
+                  return false
+                }
+                return v
+              }),
+            }
           }
+          else if (e.field === 'is_device_online') {
+            updatedFilter = {
+              ...updatedFilter,
+              values: updatedFilter.values?.map(v => {
+                if ('online'.toLowerCase().includes(v.toLowerCase())) {
+                  return true
+                } else if ('offline'.toLowerCase().includes(v.toLowerCase())) {
+                  return false
+                }
+                return v
+              }),
+            }
+          }
+          return updatedFilter
         })
       }
 
@@ -109,7 +196,37 @@ export const searchRouter = createTRPCRouter({
       console.log("$$$ ~ items:", items)
 
       // Calculate total number of pages
-      const suggestions = searchSuggestionTransformer(items, searchable_fields);
+      let suggestions = searchSuggestionTransformer(items, searchable_fields)
+      // @ts-expect-error - No type yet
+      suggestions = suggestions.map((e) => {
+        let updatedSuggestion = e
+        if (e.field === 'is_device_authorized') {
+          updatedSuggestion = {
+            ...e,
+            display_value: e.values?.[0] === 'true' ? 'Authorized' : 'Unauthorized'
+          }
+        } else if (e.field === 'is_device_online') {
+          updatedSuggestion = {
+            ...e,
+            display_value: e.values?.[0] === 'true' ? 'Online' : 'Offline'
+          }
+        } else if (e.field === 'protocol') {
+          const displayValue = Array.isArray(e.values)
+            ? e.values.map(resolveProtocolDisplayValue).join(', ')
+            : e.display_value
+          updatedSuggestion = {
+            ...e,
+            display_value: displayValue,
+          }
+        } else if (e.field === 'disabled') {
+          updatedSuggestion = {
+            ...e,
+            display_value: e.values?.[0] === 'true' ? 'Enabled' : 'Disabled'
+          }
+        }
+        return updatedSuggestion
+      });
+      
       return { items: suggestions };
     }),
   contactSearch: privateProcedure
