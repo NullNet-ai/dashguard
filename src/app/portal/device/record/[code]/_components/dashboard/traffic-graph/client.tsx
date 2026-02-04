@@ -328,7 +328,7 @@ const { refetch: refetchTimeUnitandResolution } = api.cachedFilter.fetchCachedFi
       <CardContent>
         <ChartContainer
           ref={chartScrollRef}
-          className="h-[27em] 2xl:h-[28em] w-full py-4"
+          className="h-[27em] w-full py-4"
           config={chartConfig}
         >
 

@@ -120,6 +120,7 @@ export default function SideDrawer() {
           tabs={tabs}
           variant="underline"
           size="sm"
+          tablistClassName='w-full'
         />
       </div>
     </div>

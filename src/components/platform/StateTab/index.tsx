@@ -96,6 +96,7 @@ function StateTabList({
             // Improved centering for collapsed sidebar (desktop only)
             shouldCollapse &&
               'mx-auto flex flex-1 items-center justify-center',
+              'w-full'
           )}
         >
           {tab.icon && (

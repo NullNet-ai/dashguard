@@ -45,7 +45,7 @@ const CodeRow = ({
   }, [value]);
 
   return (
-    <div className={`flex w-1/2 items-center justify-between gap-3 rounded-md border px-3 py-2 ${styles}`}>
+    <div className={`flex items-center justify-between gap-3 rounded-md border px-3 py-2 ${styles}`}>
       <pre className="m-0 flex-1 overflow-x-auto whitespace-pre-wrap break-all text-sm leading-5">
         <code>{value}</code>
       </pre>

@@ -116,11 +116,11 @@ export const FilterGroup = ({ form, groupIndex, filter_type, onRemoveFilter, onU
   const hasManyFilters = criteriaFilters?.length > 1
 
   return (
-    <div className="space-y-4 rounded-lg bg-gray-50 p-4 mt-[8px]">
+    <div className="space-y-4 rounded-lg bg-gray-50 pl-3 pb-3 pr-2 pt-2">
       <Form {...form}>
         <fieldset
           aria-disabled={isMapFilterGroupLocked}
-          className={`space-y-4 ${isMapFilterGroupLocked ? 'pointer-events-none opacity-50' : ''}`}
+          className={` ${isMapFilterGroupLocked ? 'pointer-events-none opacity-50' : ''}`}
         >
           {fields?.[groupIndex]?.filters?.map((field: any, index: number) => {
             const criteriaIndex

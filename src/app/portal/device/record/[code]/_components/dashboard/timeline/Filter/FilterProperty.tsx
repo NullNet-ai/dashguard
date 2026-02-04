@@ -39,21 +39,21 @@ export default function FilterProperty({ filter, filter_type }: { filter: any, f
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild = { true }>
-        <Button size = "icon" variant = "ghost">
+        <Button variant="ghost" className="!px-0 !bg-transparent">
           <MoreVertical className="h-4 w-4" />
         </Button>
       </DropdownMenuTrigger>
-      <DropdownMenuContent align="end" className="w-48">
+      <DropdownMenuContent align="start" className="w-max">
         <DropdownMenuItem onClick={handleOpenSideDrawer}>
-          <Grid className="mr-2 h-4 w-4" />
+          <Grid className="mr-2 h-4 w-4" color="#a0aec0" />
           {"Manage Filter"}
         </DropdownMenuItem>
         <DropdownMenuItem onClick={() => actions?.handleDuplicateTab({ ...filter, name: `${filter.name} copy` })}>
-          <Copy className="mr-2 h-4 w-4" />
+          <Copy className="mr-2 h-4 w-4" color="#a0aec0" />
           {"Duplicate Filter"}
         </DropdownMenuItem>
         <DropdownMenuItem onClick={() => actions?.handleDelete({ id: filter.id })}>
-          <Trash2 className="mr-2 h-4 w-4 text-red-500" />
+          <Trash2 className="mr-2 h-4 w-4" color="#a0aec0" />
           {"Delete Filter"}
         </DropdownMenuItem>
       </DropdownMenuContent>

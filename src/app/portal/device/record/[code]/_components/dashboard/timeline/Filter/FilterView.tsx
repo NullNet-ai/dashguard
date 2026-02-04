@@ -92,7 +92,7 @@ const FilterView = () => {
               <Fragment key={tab.id}>
                 <Button
                   aria-selected={isActive}
-                  className="flex items-center justify-between rounded-md px-2 py-0 pr-2 text-sm"
+                  className={`flex items-center justify-between rounded-md gap-2 !pl-2 py-0 text-sm ${tab?.label !== 'Live Data' ? '!pr-1' : ''}`}
                   role="tab"
                   variant="secondary"
                   onClick={(e) => {
@@ -110,12 +110,13 @@ const FilterView = () => {
               </Fragment>
             )
           })}
-          <button
+          <Button
+            variant="ghost"
             className="flex min-w-8 items-center justify-between rounded-md px-3 py-0 pr-1 text-sm"
             onClick={handleOpenSideDrawer}
           >
             <PlusCircleIcon className="h-5 w-5 mr-2 text-primary" />
-          </button>
+          </Button>
         </div>
       </div>
     </div>

@@ -24,7 +24,7 @@ const Wrapper = ({
       }}
     >
       <RecordWrapperProvider>
-        <section className='mt-0 h-[calc(100vh-40px)]'>
+        <section className='mt-0 h-[calc(100vh-42px)]'>
           <ResizablePanelGroup direction="horizontal" className="flex gap-2 p-2">
             <RecordContainer>{record_summary}</RecordContainer>
             <ResizablePanel
