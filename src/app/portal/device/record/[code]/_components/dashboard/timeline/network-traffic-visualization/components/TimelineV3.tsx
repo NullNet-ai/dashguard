@@ -73,6 +73,9 @@ export default function GridVirtualizerFixed(props: any) {
               style={{ height: virtualRow.size }}
             >
 
+              <TooltipProvider>
+                <Tooltip delayDuration={0}>
+                  <TooltipTrigger>
               <div className="flex items-center gap-2 pl-1 text-xs bg-slate-50 border-y border-slate-100">
                 {flowData?.[rowIndex]?.flag ? (
                   flowData[rowIndex].flag === '/unknown-flag.svg' ? (
@@ -98,6 +101,28 @@ export default function GridVirtualizerFixed(props: any) {
                   {truncateIP(flowData?.[rowIndex]?.source_ip || '')}
                 </span>
               </div>
+              </TooltipTrigger>
+                                          <TooltipContent side="top">
+                                            <div className="text-sm">
+                                              <div>
+                                                <strong>Country:</strong>{' '}
+                                                {flowData?.[virtualRow.index]?.name}
+                                              </div>
+                                              <div>
+                                                <strong>Source IP:</strong>{' '}
+                                                {flowData?.[virtualRow.index]?.source_ip}
+                                              </div>
+                                              {flowData?.[virtualRow.index]?.active &&
+                                                flowData?.[virtualRow.index]?.lastBandwidth && (
+                                                  <div>
+                                                    <strong>New Bandwidth:</strong>{' '}
+                                                    {flowData?.[virtualRow.index]?.lastBandwidth}
+                                                  </div>
+                                                )}
+                                            </div>
+                                          </TooltipContent>
+                                        </Tooltip>
+                                      </TooltipProvider>
 
 
               {Array(COLUMN_COUNT)
