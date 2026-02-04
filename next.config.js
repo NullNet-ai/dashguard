@@ -57,37 +57,37 @@ const config = {
       },
     ],
   },
-  webpack: (config, { isServer }) => {
-    if (!isServer) {
-      // Fallback for Node.js modules that can't run in the browser
-      config.resolve.fallback = {
-        ...config.resolve.fallback,
-        child_process: false,
-        fs: false,
-        net: false,
-        tls: false,
-        dns: false,
-        http: false,
-        https: false,
-        path: false,
-        os: false,
-        crypto: false,
-        stream: false,
-        querystring: false,
-        worker_threads: false,
-        util: false,
-        url: false,
-        buffer: false,
-        events: false,
-        assert: false,
-        constants: false,
-        module: false,
-        punycode: false,
-        zlib: false,
-      };
-    }
-    return config;
-  },
+  // webpack: (config, { isServer }) => {
+  //   if (!isServer) {
+  //     // Fallback for Node.js modules that can't run in the browser
+  //     config.resolve.fallback = {
+  //       ...config.resolve.fallback,
+  //       child_process: false,
+  //       fs: false,
+  //       net: false,
+  //       tls: false,
+  //       dns: false,
+  //       http: false,
+  //       https: false,
+  //       path: false,
+  //       os: false,
+  //       crypto: false,
+  //       stream: false,
+  //       querystring: false,
+  //       worker_threads: false,
+  //       util: false,
+  //       url: false,
+  //       buffer: false,
+  //       events: false,
+  //       assert: false,
+  //       constants: false,
+  //       module: false,
+  //       punycode: false,
+  //       zlib: false,
+  //     };
+  //   }
+  //   return config;
+  // },
 };
 
 export default config;

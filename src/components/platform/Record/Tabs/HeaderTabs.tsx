@@ -1,5 +1,5 @@
 import { type PropsWithChildren } from "react";
-import { headers, type UnsafeUnwrappedHeaders } from "next/headers";
+import { headers } from "next/headers";
 import { type ITabs } from "../types";
 import TabItems from "./TabItems";
 
@@ -7,8 +7,8 @@ interface headerTabType extends PropsWithChildren {
   tabs: ITabs[];
 }
 
-const HeaderTabs = ({ tabs }: headerTabType) => {
-  const headerList = (headers() as unknown as UnsafeUnwrappedHeaders);
+const HeaderTabs = async ({ tabs }: headerTabType) => {
+  const headerList = await headers();
   const pathname = headerList.get("x-pathname") || "";
   const [, , mainEntity, , identifier, tabName] = pathname.split("/");
 

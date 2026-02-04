@@ -1,11 +1,11 @@
 import { Fragment } from 'react';
 import RecordSummary from '~/components/platform/Record/Summary/RecordSummary';
 import BasicRecordContent from './components/basic_content';
-import { headers, type UnsafeUnwrappedHeaders } from 'next/headers';
+import { headers } from 'next/headers';
 import NotFound from '~/app/not-found';
 import RecordContactBadge from '../_components/RecordContactBadge';
-export default function Page() {
-  const headerList = (headers() as unknown as UnsafeUnwrappedHeaders);
+export default async function Page() {
+  const headerList = await headers();
   const pathname = headerList.get('x-pathname') || '';
   const [, , main_entity, , identifier] = pathname.split('/');
 

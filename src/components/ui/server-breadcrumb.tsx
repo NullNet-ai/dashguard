@@ -1,4 +1,4 @@
-import { headers, type UnsafeUnwrappedHeaders } from 'next/headers';
+import { headers } from 'next/headers';
 import { Breadcrumb, type BreadcrumbItem } from './breadcrumb'
 
 // Re-implement the generateBreadcrumbItems function for server component
@@ -28,14 +28,14 @@ interface ServerBreadcrumbProps {
   customPath?: string
 }
 
-export function ServerBreadcrumb({ 
+export async function ServerBreadcrumb({ 
   className, 
   separator, 
   items,
   customPath
 }: ServerBreadcrumbProps) {
   // Get the current path from headers
-  const headersList = (headers() as unknown as UnsafeUnwrappedHeaders)
+  const headersList = await headers()
   const path = customPath || headersList.get('x-pathname') || ''
   
   // Generate breadcrumb items on the server
