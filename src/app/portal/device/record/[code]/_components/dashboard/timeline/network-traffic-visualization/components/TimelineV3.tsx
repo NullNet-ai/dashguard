@@ -66,61 +66,63 @@ export default function GridVirtualizerFixed(props: any) {
           return (
             <div
               key={virtualRow.key}
-              className="grid grid-cols-[180px_repeat(60,minmax(0,1fr))]"
-              style={{ height: virtualRow.size }}
+              className="grid"
+              style={{ 
+                height: virtualRow.size ,
+                gridTemplateColumns: `180px repeat(${COLUMN_COUNT}, minmax(0, 1fr))`,
+              }}
             >
 
               <TooltipProvider>
                 <Tooltip delayDuration={0}>
                   <TooltipTrigger>
-              <div className="flex items-center gap-2 pl-1 text-xs bg-slate-50 border-y border-slate-100">
-                {flowData?.[rowIndex]?.flag ? (
-                  flowData[rowIndex].flag === '/unknown-flag.svg' ? (
-                    <div className="flex h-[15px] min-w-[30px] items-center justify-center bg-[#efefef]">
-                      <FlagIcon className="size-2.5" />
+                    <div className="flex items-center gap-2 pl-1 text-xs bg-slate-50 border-y border-slate-100">
+                      {flowData?.[rowIndex]?.flag ? (
+                        flowData[rowIndex].flag === '/unknown-flag.svg' ? (
+                          <div className="flex h-[15px] min-w-[30px] items-center justify-center bg-[#efefef]">
+                            <FlagIcon className="size-2.5" />
+                          </div>
+                        ) : (
+                          <img
+                            src={flowData[rowIndex].flag}
+                            alt="Flag"
+                            className="h-[15px] min-w-[30px]"
+                          />
+                        )
+                      ) : null}
+
+                      <span
+                        className={
+                          flowData?.[rowIndex]?.active || flowData?.[rowIndex]?.isNew
+                            ? 'text-red-600'
+                            : 'text-black'
+                        }
+                      >
+                        {truncateIP(flowData?.[rowIndex]?.source_ip || '')}
+                      </span>
                     </div>
-                  ) : (
-                    <img
-                      src={flowData[rowIndex].flag}
-                      alt="Flag"
-                      className="h-[15px] min-w-[30px]"
-                    />
-                  )
-                ) : null}
-
-                <span
-                  className={
-                    flowData?.[rowIndex]?.active || flowData?.[rowIndex]?.isNew
-                      ? 'text-red-600'
-                      : 'text-black'
-                  }
-                >
-                  {truncateIP(flowData?.[rowIndex]?.source_ip || '')}
-                </span>
-              </div>
-              </TooltipTrigger>
-                                          <TooltipContent side="top">
-                                            <div className="text-sm">
-                                              <div>
-                                                <strong>Country:</strong>{' '}
-                                                {flowData?.[virtualRow.index]?.name}
-                                              </div>
-                                              <div>
-                                                <strong>Source IP:</strong>{' '}
-                                                {flowData?.[virtualRow.index]?.source_ip}
-                                              </div>
-                                              {flowData?.[virtualRow.index]?.active &&
-                                                flowData?.[virtualRow.index]?.lastBandwidth && (
-                                                  <div>
-                                                    <strong>New Bandwidth:</strong>{' '}
-                                                    {flowData?.[virtualRow.index]?.lastBandwidth}
-                                                  </div>
-                                                )}
-                                            </div>
-                                          </TooltipContent>
-                                        </Tooltip>
-                                      </TooltipProvider>
-
+                    </TooltipTrigger>
+                    <TooltipContent side="top">
+                      <div className="text-sm">
+                        <div>
+                          <strong>Country:</strong>{' '}
+                          {flowData?.[virtualRow.index]?.name}
+                        </div>
+                        <div>
+                          <strong>Source IP:</strong>{' '}
+                          {flowData?.[virtualRow.index]?.source_ip}
+                        </div>
+                        {flowData?.[virtualRow.index]?.active &&
+                          flowData?.[virtualRow.index]?.lastBandwidth && (
+                            <div>
+                              <strong>New Bandwidth:</strong>{' '}
+                              {flowData?.[virtualRow.index]?.lastBandwidth}
+                            </div>
+                          )}
+                      </div>
+                    </TooltipContent>
+                  </Tooltip>
+                </TooltipProvider>
 
               {Array(COLUMN_COUNT)
                 .fill(0)
@@ -131,14 +133,13 @@ export default function GridVirtualizerFixed(props: any) {
                   return (
                     <div
                       key={colIndex}
-                      className="border-y border-slate-100 flex items-center justify-center"
+                      className="border-y border-slate-100 flex items-center justify-center w-full"
                     >
                       <Tooltip delayDuration={0}>
-                        <TooltipTrigger>
+                        <TooltipTrigger className="w-full">
                           <div
-                            className="shrink-0"
+                            className="shrink-0 w-full"
                             style={{
-                              width: BW_SIZE,
                               height: BW_SIZE,
                               backgroundColor: getColorForValue(
                                 bw,
