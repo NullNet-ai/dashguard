@@ -158,7 +158,7 @@ export function generateTimeSeriesData(
       pad(currentDate.getHours()) + ':' +
       pad(currentDate.getMinutes()) + ':' +
       pad(currentDate.getSeconds());
-    timeSeriesArray.push({
+    timeSeriesArray.push({ 
       time: formattedDate,
       bandwidth: bucketMap[formattedDate] !== undefined ? bucketMap[formattedDate] : "0"
     });
@@ -166,5 +166,8 @@ export function generateTimeSeriesData(
     currentDate = new Date(currentDate.getTime() + intervalMs);
   }
 
+  if (time_unit === 'hour') {
+    return timeSeriesArray.slice(-26)
+  } 
   return timeSeriesArray;
 }
