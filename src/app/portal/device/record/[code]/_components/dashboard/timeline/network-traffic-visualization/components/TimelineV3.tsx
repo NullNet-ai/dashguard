@@ -8,7 +8,6 @@ import {
 } from '~/components/ui/tooltip';
 import { FlagIcon } from '@heroicons/react/20/solid';
 
-const COLUMN_COUNT = 60;
 const BW_SIZE = 18;
 
 function truncateIP(ip: string, maxLength = 23) {
@@ -69,7 +68,7 @@ export default function GridVirtualizerFixed(props: any) {
               className="grid"
               style={{ 
                 height: virtualRow.size ,
-                gridTemplateColumns: `180px repeat(${COLUMN_COUNT}, minmax(0, 1fr))`,
+                gridTemplateColumns: `180px repeat(${formatted[0].length}, minmax(0, 1fr))`,
               }}
             >
 
@@ -124,7 +123,7 @@ export default function GridVirtualizerFixed(props: any) {
                   </Tooltip>
                 </TooltipProvider>
 
-              {Array(COLUMN_COUNT)
+              {Array(formatted[0].length)
                 .fill(0)
                 .map((_, colIndex) => {
                   const cell = rowData[colIndex];

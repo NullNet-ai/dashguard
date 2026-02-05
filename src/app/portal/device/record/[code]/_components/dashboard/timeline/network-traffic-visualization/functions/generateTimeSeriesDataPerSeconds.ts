@@ -167,7 +167,7 @@ export function generateTimeSeriesData(
   }
 
   if (time_unit === 'hour') {
-    return timeSeriesArray.slice(-26)
+    return timeSeriesArray.slice(-24)
   } 
   return timeSeriesArray;
 }
