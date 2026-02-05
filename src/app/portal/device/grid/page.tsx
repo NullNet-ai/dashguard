@@ -113,8 +113,14 @@ export default function Page() {
             />
           </div>
           <div className="flex flex-1 gap-2 py-4 font-bold">Archive Record</div>
-          <div className="flex flex-1 gap-2">
-            Are you sure you want to archive this record? Archiving will move the record to an inactive state, and it will no longer be available on the active list. Note: this device is currently online.
+          <div className="flex flex-1 flex-col gap-2">
+            <div>
+              Are you sure you want to archive this record? Archiving will move the record to an inactive state, and it will no longer be available on the active list.
+            </div>
+            <div>
+              <span className="font-bold">Note:</span> This device is currently
+              online.
+            </div>
           </div>
           <Separator className="my-2" />
           <DialogFooter className="py-2">

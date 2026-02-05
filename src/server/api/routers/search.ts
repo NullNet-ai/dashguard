@@ -104,9 +104,9 @@ export const searchRouter = createTRPCRouter({
               ...updatedFilter,
               values: updatedFilter.values?.map(v => {
                 if ('enabled'.toLowerCase().includes(v.toLowerCase())) {
-                  return 'true'
-                } else if ('disabled'.toLowerCase().includes(v.toLowerCase())) {
                   return 'false'
+                } else if ('disabled'.toLowerCase().includes(v.toLowerCase())) {
+                  return 'true'
                 }
                 return v
               }),
@@ -221,7 +221,7 @@ export const searchRouter = createTRPCRouter({
         } else if (e.field === 'disabled') {
           updatedSuggestion = {
             ...e,
-            display_value: e.values?.[0] === 'true' ? 'Enabled' : 'Disabled'
+            display_value: e.values?.[0] === 'true' ? 'Disabled' : 'Enabled'
           }
         }
         return updatedSuggestion

@@ -868,7 +868,7 @@ export const packetRouter = createTRPCRouter({
 
     const filterConnections = async (starts_at: number) => {
       // const limit = 100000
-      const limit = 20 //1000
+      const limit = 25 //1000
 
       const { account } = ctx.session
       const { contact } = account

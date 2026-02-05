@@ -282,7 +282,7 @@ export default function NetworkFlowProvider({ children, params }: IProps) {
     })
 
     // @ts-expect-error - No type yet
-    setNewBandwidth([...realNewBandwidths, ...updated_new_bandwidth].slice(0, 20))
+    setNewBandwidth([...realNewBandwidths, ...updated_new_bandwidth].slice(0, 25))
     clearIsNewAfterDelay(
       // @ts-expect-error - No type yet
       (realNewBandwidths || []).map((e: any) => e?.source_ip).filter(Boolean),
@@ -361,7 +361,7 @@ export default function NetworkFlowProvider({ children, params }: IProps) {
           await fetchUniqueSourceIP(); // Trigger fetchUniqueSourceIP directly after fetchTimeUnitandResolution
         
           // Fetch bandwidth data
-          fetchBandwidth(0, 20); // Trigger fetchBandwidth
+          fetchBandwidth(0, 25); // Trigger fetchBandwidth
         } catch (error) {
           console.error('Error during handleRefresh:', error); // Log the error for debugging
         } finally {
@@ -434,13 +434,13 @@ export default function NetworkFlowProvider({ children, params }: IProps) {
 
     if (areIpsSame) return
 
-    setCurrentIndex(prevIndex => prevIndex + 20)
+    setCurrentIndex(prevIndex => prevIndex + 25)
     setNewBandwidth([])
     //  filterId !== '01JNQ9WPA2JWNTC27YCTCYC1FE' && fetchBandwidth(0, 20)
     setIsQueueEnabled(false)
     taskQueueRef.current = []
     void (async () => {
-      await fetchBandwidth(0, 20, true)
+      await fetchBandwidth(0, 25, true)
       setIsQueueEnabled(true)
       startQueueServiceRef.current?.()
     })()

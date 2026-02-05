@@ -58,7 +58,7 @@ export default function GridVirtualizerFixed(props: any) {
     <TooltipProvider>
       <div
         ref={parentRef}
-        className="rounded-md border border-slate-100 h-[402px] overflow-hidden"
+        className="rounded-md border border-slate-100 h-[502px] overflow-hidden"
         style={{ willChange: 'transform' }}
       >
         {rowVirtualizer.getVirtualItems().map((virtualRow) => {
