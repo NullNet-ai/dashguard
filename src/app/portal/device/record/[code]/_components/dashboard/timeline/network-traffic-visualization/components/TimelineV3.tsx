@@ -33,7 +33,7 @@ export default function GridVirtualizerFixed(props: any) {
   const rowVirtualizer = useVirtualizer({
     count: formatted?.length ?? 0,
     getScrollElement: () => parentRef.current,
-    estimateSize: () => 20,
+    estimateSize: () => 25,
     overscan: 5, // slightly higher = smoother fast scroll
   });
 
