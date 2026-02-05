@@ -37,19 +37,17 @@ export default function GridVirtualizerFixed(props: any) {
     overscan: 5, // slightly higher = smoother fast scroll
   });
 
-  const rowMeta = useMemo(() => {
-    return (formatted ?? []).map((row: any[]) => {
-      let maxBandwidth = 0;
-      let lastValueIndex: number | null = null;
+  const maxBandwidth = useMemo(() => {
+    let maxBandwidth = 0;
 
+    for (const row of formatted ?? []) {
       for (let i = 0; i < row.length; i++) {
         const bw = Number(row[i]?.bandwidth) || 0;
         if (bw > maxBandwidth) maxBandwidth = bw;
-        if (bw > 0) lastValueIndex = i;
       }
+    }
 
-      return { maxBandwidth, lastValueIndex };
-    });
+    return maxBandwidth;
   }, [formatted]);
 
   if (!formatted?.length) return null;
@@ -58,13 +56,12 @@ export default function GridVirtualizerFixed(props: any) {
     <TooltipProvider>
       <div
         ref={parentRef}
-        className="rounded-md border border-slate-100 h-[502px] overflow-hidden"
+        className="rounded-md border border-slate-100 h-[602px] overflow-hidden"
         style={{ willChange: 'transform' }}
       >
         {rowVirtualizer.getVirtualItems().map((virtualRow) => {
           const rowIndex = virtualRow.index;
           const rowData = formatted[rowIndex] ?? [];
-          const meta = rowMeta[rowIndex];
 
           return (
             <div
@@ -145,7 +142,7 @@ export default function GridVirtualizerFixed(props: any) {
                               height: BW_SIZE,
                               backgroundColor: getColorForValue(
                                 bw,
-                                meta.maxBandwidth,
+                                maxBandwidth,
                               ),
                             }}
                           />
