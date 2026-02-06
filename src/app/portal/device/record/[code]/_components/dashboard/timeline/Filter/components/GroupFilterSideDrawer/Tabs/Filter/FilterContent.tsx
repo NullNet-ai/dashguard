@@ -91,7 +91,7 @@ export default function FilterContent({ filter_type }: { filter_type: string }) 
         onClick = { handleAddFilterGroup }
       >
         <Plus className="h-4 w-4" />
-        Add Group Filter
+        Add Filter
       </Button>
     </div>
   )
