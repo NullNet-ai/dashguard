@@ -168,6 +168,10 @@ const ConfigurationAliasGrid = ({
               sorting: gridCachedData?.sorts?.sorting,
             },
           },
+          searchSuggestionConfig: {
+            router: 'search',
+            resolver: 'aliasSearch',
+          },
           customTabDefaults: {
             defaultSorting,
             defaultAdvanceFilter: [],

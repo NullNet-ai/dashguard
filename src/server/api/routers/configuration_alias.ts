@@ -130,7 +130,6 @@ export const deviceAliasRouter = createTRPCRouter({
         return {
           ...entity_data,
           ...rest,
-          value: rest.ip_aliases?.ips?.join(' '),
           created_by: 'Wallguard Client',
           updated_by: 'Wallguard Client',
         }

@@ -137,6 +137,7 @@ const FilterProvider = ({ children, params, type }: any) => {
   const handleDelete = async ({ id }: { id: string }) => {
     setFilters(prev => prev.filter(item => item.id !== id))
     await removeFilter(id, type)
+    eventEmitter.emit(`${type}_id`, filters?.[0]?.id)
   }
 
   const duplicateFilter = api.cachedFilter.duplicateFilter.useMutation()

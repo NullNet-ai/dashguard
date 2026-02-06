@@ -45,13 +45,14 @@ const gridColumns = [
   },
   {
     header: 'Values',
-    accessorKey: 'value',
-    // search_config: {
-    //   operator: 'like',
-    // },
-    isSearchable: false,
+    accessorKey: 'ip',
+    search_config: {
+      operator: 'like',
+      parse_as: 'text',
+      entity: 'ip_aliases'
+    },
     cell: ({ row }) => {
-      const value = row?.original?.value
+      const value = row?.original?.ip_aliases?.ips?.join(' ')
       return (
         <span>
           {value?.split(' ').join(', ')}

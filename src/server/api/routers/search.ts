@@ -229,6 +229,84 @@ export const searchRouter = createTRPCRouter({
       
       return { items: suggestions };
     }),
+  aliasSearch: privateProcedure
+    .input(ZodSearchSuggestions)
+    .mutation(async ({ input, ctx }) => {
+      const {
+        advance_filters: _advance_filters = [],
+        entity,
+        sorting,
+        group_advance_filters: _group_advance_filters = [],
+        searchable_fields = [],
+      } = input;
+
+      const pluck_object = {
+        ...addCommonGridPluckObject(),
+        aliases: input.pluck,
+        ip_aliases: ['ip'],
+      };
+
+      const query = ctx.dnaClient
+        .searchSuggestions({
+          entity,
+          token: ctx.token.value,
+          query: {
+            pluck: input.pluck,
+            track_total_records: true,
+            pluck_group_object: {
+              ip_aliases: ['ip'],
+            },
+            pluck_object,
+            advance_filters: [...(_advance_filters as IAdvanceFilters[])],
+            group_advance_filters: _group_advance_filters as IGroupAdvanceFilters<
+              string | number
+            >[],
+            order: {
+              starts_at:
+                (input.current || 0) === 0
+                  ? 0
+                  : (input.current || 1) * (input.limit || 100) -
+                    (input.limit || 100),
+              limit: input.limit || 1,
+              by_field:
+                input?.sorting?.length === 1 ? input.sorting[0]?.id : 'code',
+              by_direction:
+                input?.sorting?.length === 1
+                  ? input.sorting[0]?.desc
+                    ? EOrderDirection.DESC
+                    : EOrderDirection.ASC
+                  : EOrderDirection.DESC,
+            },
+            multiple_sort:
+              sorting?.length && sorting?.length > 1
+                // @ts-expect-error - No type yet
+                ? formatSorting(sorting)
+                : [],
+            concatenate_fields: [...addCommonGridConcatenates(input?.entity)],
+          },
+        })
+        .join({
+          type: 'left',
+          field_relation: {
+            to: {
+              entity: 'ip_aliases',
+              field: 'alias_id',
+            },
+            from: {
+              entity: 'aliases',
+              field: 'id',
+            },
+          },
+        });
+
+      addCommonGridJoins(query, entity);
+
+      const { data: items } = await query.execute();
+
+      const suggestions = searchSuggestionTransformer(items, searchable_fields);
+
+      return { items: suggestions };
+    }),
   contactSearch: privateProcedure
     // Define input using zod for validation
     .input(ZodSearchSuggestions)

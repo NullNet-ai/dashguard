@@ -48,6 +48,8 @@ export default function NetworkFlowProvider({ children, params }: IProps) {
   const startQueueServiceRef = useRef<(() => void) | null>(null)
   const currentIndexRef = useRef(0)
   const uniqueSourceIpsRef = useRef<string[]>([])
+  const filterGenerationRef = useRef(0)
+  const activeFilterIdRef = useRef(filterId)
 
   const router = useRouter()
 
@@ -122,7 +124,12 @@ export default function NetworkFlowProvider({ children, params }: IProps) {
   }, [startQueueService])
 
   const enqueueTask = useCallback((task: () => Promise<void>) => {
-    taskQueueRef.current.push(task)
+    const generationAtEnqueue = filterGenerationRef.current
+    taskQueueRef.current.push(async () => {
+      if (isUnmountedRef.current) return
+      if (generationAtEnqueue !== filterGenerationRef.current) return
+      await task()
+    })
     if (isQueueEnabled) startQueueServiceRef.current?.()
   }, [isQueueEnabled])
 
@@ -131,10 +138,16 @@ export default function NetworkFlowProvider({ children, params }: IProps) {
   }, [current_index])
 
   useEffect(() => {
+    activeFilterIdRef.current = filterId
+  }, [filterId])
+
+  useEffect(() => {
     uniqueSourceIpsRef.current = unique_source_ips
   }, [unique_source_ips])
 
   const fetchBandwidth = useCallback(async (startIndex: number, add_data_count: number, isInitial = false) => {  
+    const generationAtStart = filterGenerationRef.current
+    const filterIdAtStart = activeFilterIdRef.current
     const getBandwidthParams = {
       device_id: params?.id || '',
       time_range: getLastTimeStamp({ count: time_count, unit: time_unit, add_remaining_time: true }) as any,
@@ -146,6 +159,9 @@ export default function NetworkFlowProvider({ children, params }: IProps) {
     const _bandwidth: any = await getBandwidthActions.mutateAsync(getBandwidthParams);
     
     if (!_bandwidth) return; // Exit early if no bandwidth data is returned
+    if (isUnmountedRef.current) return
+    if (generationAtStart !== filterGenerationRef.current) return
+    if (filterIdAtStart !== activeFilterIdRef.current) return
     
     if (startIndex === 0) {
       // If it's the first batch, replace the data
@@ -212,6 +228,8 @@ export default function NetworkFlowProvider({ children, params }: IProps) {
   
 
   const fetchMoreDataInternal = useCallback(async () => {
+    const generationAtStart = filterGenerationRef.current
+    const filterIdAtStart = activeFilterIdRef.current
     console.debug('[pooling] fetchMoreData')
     if(!filterId && filterId === '01JNQ9WPA2JWNTC27YCTCYC1FE') return
     const ips = uniqueSourceIpsRef.current
@@ -224,13 +242,18 @@ export default function NetworkFlowProvider({ children, params }: IProps) {
     const addCount = 2
     if (startIndex + addCount > ips.length) return
 
+    await fetchBandwidth(startIndex, addCount)
+    if (isUnmountedRef.current) return
+    if (generationAtStart !== filterGenerationRef.current) return
+    if (filterIdAtStart !== activeFilterIdRef.current) return
+
     setCurrentIndex(startIndex + addCount)
     currentIndexRef.current = startIndex + addCount
-
-    await fetchBandwidth(startIndex, addCount)
   }, [fetchBandwidth, filterId])
   
   const fetchMoreDataInternalV2 = useCallback(async () => {
+    const generationAtStart = filterGenerationRef.current
+    const filterIdAtStart = activeFilterIdRef.current
     console.debug('[pooling] fetchMoreDataV2')
     if(!filterId && filterId === '01JNQ9WPA2JWNTC27YCTCYC1FE') return
     const ips = uniqueSourceIpsRef.current
@@ -246,6 +269,9 @@ export default function NetworkFlowProvider({ children, params }: IProps) {
     time_range: tr, // trV2
     filter_id: filterId,
   });
+    if (isUnmountedRef.current) return
+    if (generationAtStart !== filterGenerationRef.current) return
+    if (filterIdAtStart !== activeFilterIdRef.current) return
     // Get Connections
     const getBandwidthParams = {
       device_id: params?.id || '',
@@ -254,6 +280,9 @@ export default function NetworkFlowProvider({ children, params }: IProps) {
       source_ips: data, // uniq([...data, ...ips]).slice(20)
     }
     const _bandwidth: any = await getBandwidthActions.mutateAsync(getBandwidthParams);
+    if (isUnmountedRef.current) return
+    if (generationAtStart !== filterGenerationRef.current) return
+    if (filterIdAtStart !== activeFilterIdRef.current) return
 
     // setNewBandwidth(_bandwidth?.data?.map((item: Record<string, any>) => {
     //   return { ...item, time_unit, time_count, resolution, time_range };
@@ -308,7 +337,17 @@ export default function NetworkFlowProvider({ children, params }: IProps) {
     if (!eventEmitter) return
 
     const setFID = (data: any) => {
+      console.log('@@@ setFID', data)
       if (typeof data !== 'string') return
+      if (data === activeFilterIdRef.current) return
+      filterGenerationRef.current += 1
+      setIsQueueEnabled(false)
+      taskQueueRef.current = []
+      setLoading(true)
+      setTime(null)
+      setNewBandwidth([])
+      setCurrentIndex(0)
+      currentIndexRef.current = 0
       setFilterID(data)
     }
     const setSBy = (data: any) => {
@@ -383,11 +422,15 @@ export default function NetworkFlowProvider({ children, params }: IProps) {
   useEffect(() => {
     if (!filterId) return
 
+    const generationAtStart = filterGenerationRef.current
     setLoading(true)
     const fetchTimeUnitandResolution = async () => {
       const {
         data: time_unit_resolution,
       } = await refetchTimeUnitandResolution()
+        console.log("🚀 ~ fetchTimeUnitandResolution ~ time_unit_resolution:", time_unit_resolution)
+      if (isUnmountedRef.current) return
+      if (generationAtStart !== filterGenerationRef.current) return
       
       const { time, resolution = '1s' } = time_unit_resolution || {}
       const { time_count = 1, time_unit = 'hour' } = time || {}
@@ -406,12 +449,15 @@ export default function NetworkFlowProvider({ children, params }: IProps) {
     if (!time_count || !time_unit || !resolution) return
     if (!filterId) return
 
+    const generationAtStart = filterGenerationRef.current
     const fetchUniqueSourceIP = async () => {
       const data = await getUniqueSourceActions.mutateAsync({
         device_id: params?.id || '',
         time_range: getLastTimeStamp({ count: time_count, unit: time_unit, add_remaining_time: true }) as any,
         filter_id: filterId,
       })
+      if (isUnmountedRef.current) return
+      if (generationAtStart !== filterGenerationRef.current) return
 
       setUniqueSourceIP(data as string[])
       setCurrentIndex(0)
@@ -420,7 +466,10 @@ export default function NetworkFlowProvider({ children, params }: IProps) {
       setLoading(false)
     }
 
-    setTimeout(() => fetchUniqueSourceIP(), 1000) // delay to wait for the searchBy to be set in redis
+    const timeoutId = window.setTimeout(() => fetchUniqueSourceIP(), 1000) // delay to wait for the searchBy to be set in redis
+    return () => {
+      window.clearTimeout(timeoutId)
+    }
   }, [filterId, time_count, time_unit, resolution, (searchBy ?? [])?.length])
 
   useEffect(() => {
@@ -434,6 +483,7 @@ export default function NetworkFlowProvider({ children, params }: IProps) {
 
     if (areIpsSame) return
 
+    const generationAtStart = filterGenerationRef.current
     setCurrentIndex(prevIndex => prevIndex + 25)
     setNewBandwidth([])
     //  filterId !== '01JNQ9WPA2JWNTC27YCTCYC1FE' && fetchBandwidth(0, 20)
@@ -441,6 +491,8 @@ export default function NetworkFlowProvider({ children, params }: IProps) {
     taskQueueRef.current = []
     void (async () => {
       await fetchBandwidth(0, 25, true)
+      if (isUnmountedRef.current) return
+      if (generationAtStart !== filterGenerationRef.current) return
       setIsQueueEnabled(true)
       startQueueServiceRef.current?.()
     })()
