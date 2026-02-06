@@ -53,12 +53,11 @@ export default function SideDrawer() {
               ✓ Update Filter
             </Button>
             <Button
-              variant="default"
-              className="bg-blue-600 text-white hover:bg-blue-700"
+              variant="secondary"
               onClick={actions.handleCreateNewFilter}
               loading={createFilterLoading}
             >
-              ✓ Create as New Filter
+              ✓ Apply as New Filter
             </Button>
           </>
         ) : (
@@ -68,7 +67,7 @@ export default function SideDrawer() {
             onClick={actions.handleCreateNewFilter}
             loading={createFilterLoading}
           >
-            ✓ Create New Filter
+            ✓ Apply Filter
           </Button>
         )}
       </div>

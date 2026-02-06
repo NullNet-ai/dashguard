@@ -4,6 +4,7 @@ import { Fragment, useContext, useState, useEffect } from 'react'
 
 import { useSideDrawer } from '~/components/platform/SideDrawer'
 import { Button } from '~/components/ui/button'
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '~/components/ui/tooltip'
 
 import { columns as configColumns, } from './components/GroupFilterSideDrawer/config'
 import { ManageFilterProvider } from './components/GroupFilterSideDrawer/Provider'
@@ -67,7 +68,7 @@ const FilterView = () => {
   const handleOpenSideDrawer = () => {
     openSideDrawer({
       // title: 'Manage Filter',
-      header: <h1>Manage Filter</h1>,
+      header: <h1>New Filter</h1>,
       sideDrawerWidth: '1000px',
       body: {
         component: () => (
@@ -83,6 +84,7 @@ const FilterView = () => {
   return (
     <div className="flex flex-col gap-4 sticky">
       <div className="flex">
+        <TooltipProvider>
         <div className="h-[36px] justify-between flex gap-x-2">
           {filters.map((tab) => {
             const isActive = activeLabel === tab.id
@@ -90,34 +92,49 @@ const FilterView = () => {
 
             return (
               <Fragment key={tab.id}>
-                <Button
-                  aria-selected={isActive}
-                  className={`flex items-center justify-between rounded-md gap-2 !pl-2 py-0 text-sm ${tab?.label !== 'Live Data' ? '!pr-1' : ''}`}
-                  role="tab"
-                  variant="secondary"
-                  onClick={(e) => {
-                    e.preventDefault()
-                    handleTabClick(tab.id)
-                    setFilterQuery?.(tab?.id ?? {})
-                    _setRefetchTrigger?.((prev: number) => prev + 1)
-                  }}
-                >
-                  <span className={`${isActive ? 'text-primary' : 'text-gray-600'}`}>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <Button
+                      aria-selected={isActive}
+                      className={`flex items-center justify-between rounded-md gap-2 !pl-2 py-0 text-sm ${tab?.label !== 'Live Data' ? '!pr-1' : ''}`}
+                      role="tab"
+                      variant="secondary"
+                      onClick={(e) => {
+                        e.preventDefault()
+                        handleTabClick(tab.id)
+                        setFilterQuery?.(tab?.id ?? {})
+                        _setRefetchTrigger?.((prev: number) => prev + 1)
+                      }}
+                    >
+                      <span className={`${isActive ? 'text-primary' : 'text-gray-600'}`}>
+                        {tab.label}
+                      </span>
+                      {tab?.label !== 'Live Data' && <FilterProperty filter={tab} filter_type={filter_type as string} />}
+                    </Button>
+                  </TooltipTrigger>
+                  <TooltipContent>
                     {tab.label}
-                  </span>
-                  {tab?.label !== 'Live Data' && <FilterProperty filter={tab} filter_type={filter_type as string} />}
-                </Button>
+                  </TooltipContent>
+                </Tooltip>
               </Fragment>
             )
           })}
-          <Button
-            variant="ghost"
-            className="flex min-w-8 items-center justify-between rounded-md px-3 py-0 pr-1 text-sm"
-            onClick={handleOpenSideDrawer}
-          >
-            <PlusCircleIcon className="h-5 w-5 mr-2 text-primary" />
-          </Button>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Button
+                variant="ghost"
+                className="flex min-w-8 items-center justify-between rounded-md px-3 py-0 pr-1 text-sm"
+                onClick={handleOpenSideDrawer}
+              >
+                <PlusCircleIcon className="h-5 w-5 mr-2 text-primary" />
+              </Button>
+            </TooltipTrigger>
+            <TooltipContent>
+              New Filter
+            </TooltipContent>
+          </Tooltip>
         </div>
+        </TooltipProvider>
       </div>
     </div>
   )
