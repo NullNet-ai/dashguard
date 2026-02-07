@@ -65,16 +65,17 @@ const SideUserInfo = ({
             />
             <AvatarFallback className="rounded-lg">{initials}</AvatarFallback>
           </Avatar>
-          <div
-            className={cn(
-              `grid flex-1 text-left text-sm leading-tight`,
-              `${(open && !mobile) || (openMobile && mobile) || (open && !openMobile && !mobile) ? '' : 'hidden'}`,
-            )}
-          >
-            <span className="truncate font-semibold">{user_name}</span>
-            <span className="truncate text-xs">{email}</span>
-            <span className="truncate text-xs">{organization}</span>
-          </div>
+          {((open && mobile) || openMobile || (open && !openMobile)) && (
+            <div
+              className={cn(
+                `grid flex-1 text-left text-sm leading-tight`,
+              )}
+            >
+              <span className="truncate font-semibold">{user_name}</span>
+              <span className="truncate text-xs">{email}</span>
+              <span className="truncate text-xs">{organization}</span>
+            </div>
+          )}
         </div>
       </DropdownMenuTrigger>
       {!!other_organizations?.length && (
