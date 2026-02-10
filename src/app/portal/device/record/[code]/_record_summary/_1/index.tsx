@@ -89,7 +89,7 @@ const RecordShellSummary = ({
               truncated: () => ({ string_limit: 35, path: ['value'] })
             },
             {
-              key: "Version",
+              key: "Wallguard Version",
               value: "version",
               truncated: () => ({ string_limit: 35, path: ['value'] })
             },
