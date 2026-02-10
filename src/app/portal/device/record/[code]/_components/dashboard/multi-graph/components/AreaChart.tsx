@@ -1,4 +1,4 @@
-import { useMemo, useRef } from 'react';
+import { useMemo } from 'react';
 import { Area, AreaChart, CartesianGrid, ResponsiveContainer, XAxis, YAxis } from 'recharts';
 
 import { ChartLegend, ChartLegendContent, ChartTooltip, ChartTooltipContent } from '~/components/ui/chart';
@@ -12,20 +12,7 @@ const AreaChartComponent = ({ filteredData, interfaces }: any) => {
     return Number.isFinite(numericValue) ? formatBytes(numericValue) : String(value ?? '')
   }
   const sorted = sortInterface(interfaces);
-
-  // Store the previous yAxisMax value
-  const previousYAxisMaxRef = useRef<number | null>(null);
-
-  // Dynamically calculate the Y-axis domain
-  const { yAxisMax: calculatedYAxisMax, yAxisMin } = useMemo(() => modifyAxis(filteredData), [filteredData]);
-
-  // Update the Y-axis max only if the new value is greater than the previous value
-  const yAxisMax = useMemo(() => {
-    if (previousYAxisMaxRef.current === null || calculatedYAxisMax > previousYAxisMaxRef.current) {
-      previousYAxisMaxRef.current = calculatedYAxisMax;
-    }
-    return previousYAxisMaxRef.current;
-  }, [calculatedYAxisMax]);
+  const { yAxisMax, yAxisMin } = modifyAxis(filteredData);
 
   const number_of_ticks = useMemo(() => {
     return yAxisMax >= 100000 ? 10 : 5;

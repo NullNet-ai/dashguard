@@ -1,23 +1,27 @@
-import { useMemo, useRef } from 'react'
+import { useMemo } from 'react'
 import { Area, AreaChart, CartesianGrid, ResponsiveContainer, XAxis, YAxis } from 'recharts'
 
 import { ChartLegend, ChartLegendContent, ChartTooltip, ChartTooltipContent } from '~/components/ui/chart'
 import { formatBytes as formatBytesTooltip } from '../../pie-chart/function/formatBytes'
 
-export const modifyAxis = (chartData:any) => {
-  
-  const maxBandwidth = Math.max(
-    ...(chartData ?? [])?.map((item: any) => item?.bandwidth ?? 0)
-  )
+export const modifyAxis = (chartData: any) => {
+  const bandwidthValues = (chartData ?? [])
+    .map((item: any) => Number(item?.bandwidth ?? 0))
+    .filter((value: number) => Number.isFinite(value))
 
-  const minBandwidth = Math.min(
-    ...(chartData ?? [])?.map((item: any) => item?.bandwidth ?? Infinity)
-  )
+  if (bandwidthValues.length === 0) {
+    return { yAxisMax: 0, yAxisMin: 0 }
+  }
 
-  const yAxisMax = Math.ceil(maxBandwidth * 1.25)
-  const yAxisMin = Math.floor(minBandwidth * 0.9)
+  const minBandwidth = Math.min(...bandwidthValues)
+  const maxBandwidth = Math.max(...bandwidthValues)
 
-  
+  const range = maxBandwidth - minBandwidth
+  const padding = range === 0 ? maxBandwidth * 0.25 : range * 0.25
+
+  const yAxisMax = Math.ceil(maxBandwidth + padding)
+  const yAxisMin = Math.floor(Math.max(0, minBandwidth - padding))
+
   return { yAxisMax, yAxisMin }
 }
 
@@ -34,6 +38,7 @@ export const formatNumber = (num: number) => {
   return formatBytes(+num)
 }
 const AreaChartComponent = ({ filteredData }: { filteredData: Record<string, any>[] }) => {
+  console.log("🚀 ~ AreaChartComponent ~ filteredData:", filteredData)
   const formatTooltipValue = (value: unknown) => {
     const numericValue = typeof value === 'number' ? value : Number(value)
     return Number.isFinite(numericValue)
@@ -41,24 +46,10 @@ const AreaChartComponent = ({ filteredData }: { filteredData: Record<string, any
       : String(value ?? '')
   }
 
-  
-
-  const previousYAxisMaxRef = useRef<number | null>(null)
-
-  const { yAxisMax: calculatedYAxisMax, yAxisMin } = useMemo(
+  const { yAxisMax, yAxisMin } = useMemo(
     () => modifyAxis(filteredData),
     [filteredData],
   )
-
-  const yAxisMax = useMemo(() => {
-    if (
-      previousYAxisMaxRef.current === null ||
-      calculatedYAxisMax > previousYAxisMaxRef.current
-    ) {
-      previousYAxisMaxRef.current = calculatedYAxisMax
-    }
-    return previousYAxisMaxRef.current
-  }, [calculatedYAxisMax])
   
     const number_of_ticks = useMemo(() => {
       return yAxisMax >= 100000 ? 10 : 5
@@ -75,10 +66,11 @@ const AreaChartComponent = ({ filteredData }: { filteredData: Record<string, any
       if (yAxisMax == null || yAxisMin == null) return []
       if (yAxisMax === 0 && yAxisMin === 0) return [0]
       const ticks = [yAxisMin]
+      const range = yAxisMax - yAxisMin
       for (let i = 1; i < number_of_ticks; i++) {
         ticks.push(
           Math.round(
-            yAxisMin + i * ((yAxisMax - yAxisMin) / (number_of_ticks - 1)),
+            yAxisMin + i * (range / (number_of_ticks - 1)),
           ),
         )
       }

@@ -9,7 +9,7 @@ import {
   ChartTooltipContent,
 } from '~/components/ui/chart'
 import { formatNumber, modifyAxis } from './LineChart';
-import { useMemo, useRef } from 'react';
+import { useMemo } from 'react';
 import { graphColors } from './graph-color';
 import { formatBytes } from '../../pie-chart/function/formatBytes'
 
@@ -18,19 +18,7 @@ const BarChartComponent = ({ filteredData, interfaces }: { filteredData: Record<
     const numericValue = typeof value === 'number' ? value : Number(value)
     return Number.isFinite(numericValue) ? formatBytes(numericValue) : String(value ?? '')
   }
-  // Store the previous yAxisMax value
-  const previousYAxisMaxRef = useRef<number | null>(null);
-
-  // Dynamically calculate the Y-axis domain
-  const { yAxisMax: calculatedYAxisMax, yAxisMin } = useMemo(() => modifyAxis(filteredData), [filteredData]);
-
-  // Update the Y-axis max only if the new value is greater than the previous value
-  const yAxisMax = useMemo(() => {
-    if (previousYAxisMaxRef.current === null || calculatedYAxisMax > previousYAxisMaxRef.current) {
-      previousYAxisMaxRef.current = calculatedYAxisMax;
-    }
-    return previousYAxisMaxRef.current;
-  }, [calculatedYAxisMax]);
+  const { yAxisMax, yAxisMin } = useMemo(() => modifyAxis(filteredData), [filteredData]);
 
   const number_of_ticks = 4; // Fixed to 4 ticks for Y-axis
 

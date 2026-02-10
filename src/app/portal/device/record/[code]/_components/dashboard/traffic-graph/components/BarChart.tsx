@@ -1,6 +1,6 @@
 'use client'
 
-import { useMemo, useRef } from 'react'
+import { useMemo } from 'react'
 import { Bar, BarChart, CartesianGrid, ResponsiveContainer, XAxis, YAxis } from 'recharts'
 
 import {
@@ -17,22 +17,11 @@ const BarChartComponent = ({ filteredData }: { filteredData: Record<string, any>
     const numericValue = typeof value === 'number' ? value : Number(value)
     return Number.isFinite(numericValue) ? formatBytes(numericValue) : String(value ?? '')
   }
-  const previousYAxisMaxRef = useRef<number | null>(null)
 
-  const { yAxisMax: calculatedYAxisMax, yAxisMin } = useMemo(
+  const { yAxisMax, yAxisMin } = useMemo(
     () => modifyAxis(filteredData),
     [filteredData],
   )
-
-  const yAxisMax = useMemo(() => {
-    if (
-      previousYAxisMaxRef.current === null ||
-      calculatedYAxisMax > previousYAxisMaxRef.current
-    ) {
-      previousYAxisMaxRef.current = calculatedYAxisMax
-    }
-    return previousYAxisMaxRef.current
-  }, [calculatedYAxisMax])
     
   
     const number_of_ticks = useMemo(() => {

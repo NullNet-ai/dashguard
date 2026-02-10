@@ -1,6 +1,6 @@
 'use client'
 
-import { useMemo, useRef } from 'react';
+import { useMemo } from 'react';
 import { CartesianGrid, Line, LineChart, ResponsiveContainer, XAxis, YAxis } from 'recharts';
 
 import {
@@ -11,8 +11,24 @@ import { graphColors } from './graph-color';
 import { formatBytes as formatBytesTooltip } from '../../pie-chart/function/formatBytes'
 
 export const modifyAxis = (data: any[]) => {
-  const yAxisMax = Math.max(...data.map((d) => Math.max(...Object.values(d).filter((v) => typeof v === 'number'))));
-  const yAxisMin = Math.min(...data.map((d) => Math.min(...Object.values(d).filter((v) => typeof v === 'number'))));
+  const numericValues = (data ?? [])
+    .flatMap((d) => Object.values(d).filter((v) => typeof v === 'number'))
+    .map((v) => Number(v))
+    .filter((v) => Number.isFinite(v))
+
+  if (numericValues.length === 0) {
+    return { yAxisMax: 0, yAxisMin: 0 };
+  }
+
+  const minValue = Math.min(...numericValues)
+  const maxValue = Math.max(...numericValues)
+
+  const range = maxValue - minValue
+  const padding = range === 0 ? maxValue * 0.25 : range * 0.25
+
+  const yAxisMax = Math.ceil(maxValue + padding)
+  const yAxisMin = Math.floor(Math.max(0, minValue - padding))
+
   return { yAxisMax, yAxisMin };
 };
 
@@ -36,19 +52,7 @@ const LineChartComponent = ({ filteredData, interfaces }: any) => {
       ? formatBytesTooltip(numericValue)
       : String(value ?? '')
   }
-  // Store the previous yAxisMax value
-  const previousYAxisMaxRef = useRef<number | null>(null);
-
-  // Dynamically calculate the Y-axis domain
-  const { yAxisMax: calculatedYAxisMax, yAxisMin } = useMemo(() => modifyAxis(filteredData || []), [filteredData]);
-
-  // Update the Y-axis max only if the new value is greater than the previous value
-  const yAxisMax = useMemo(() => {
-    if (previousYAxisMaxRef.current === null || calculatedYAxisMax > previousYAxisMaxRef.current) {
-      previousYAxisMaxRef.current = calculatedYAxisMax;
-    }
-    return previousYAxisMaxRef.current;
-  }, [calculatedYAxisMax]);
+  const { yAxisMax, yAxisMin } = useMemo(() => modifyAxis(filteredData || []), [filteredData]);
 
   const number_of_ticks = useMemo(() => {
     return yAxisMax >= 100000 ? 10 : 5;
