@@ -25,6 +25,9 @@ const gridColumns = [
     enableColumnFilter: false,
     enableSorting: true,
     enableResizing: false,
+    sort_config: {
+      type: 'boolean',
+    },
     cell: ({ row }) => {
       const authorized = row?.original?.is_device_authorized ?? false;
       return <AuthorizationCell authorized={authorized} />;
@@ -55,6 +58,9 @@ const gridColumns = [
     header: 'Connection Status',
     accessorKey: 'is_device_online',
     enableSorting: true,
+    sort_config: {
+      type: 'boolean',
+    },
     cell: ({ row }) => (
       <GridDeviceOnlineBadge online={row.original.is_device_online} />
     ),
