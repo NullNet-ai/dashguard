@@ -4,8 +4,13 @@ import { Area, AreaChart, CartesianGrid, ResponsiveContainer, XAxis, YAxis } fro
 import { ChartLegend, ChartLegendContent, ChartTooltip, ChartTooltipContent } from '~/components/ui/chart';
 import { formatNumber, modifyAxis } from './LineChart';
 import { graphColors, sortInterface } from './graph-color';
+import { formatBytes } from '../../pie-chart/function/formatBytes'
 
 const AreaChartComponent = ({ filteredData, interfaces }: any) => {
+  const formatTooltipValue = (value: unknown) => {
+    const numericValue = typeof value === 'number' ? value : Number(value)
+    return Number.isFinite(numericValue) ? formatBytes(numericValue) : String(value ?? '')
+  }
   const sorted = sortInterface(interfaces);
 
   // Store the previous yAxisMax value
@@ -100,6 +105,7 @@ const AreaChartComponent = ({ filteredData, interfaces }: any) => {
           content={
             <ChartTooltipContent
               indicator="dot"
+              valueFormatter={formatTooltipValue}
               labelFormatter={(value) => {
                 if (value.includes(':')) {
                   return value; // Display time directly if it includes ':'

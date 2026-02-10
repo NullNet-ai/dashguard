@@ -10,8 +10,13 @@ import {
   ChartTooltipContent,
 } from '~/components/ui/chart'
 import { formatNumber, modifyAxis } from './AreaChart'
+import { formatBytes } from '../../pie-chart/function/formatBytes'
 
 const BarChartComponent = ({ filteredData }: { filteredData: Record<string, any>[] }) => {
+  const formatTooltipValue = (value: unknown) => {
+    const numericValue = typeof value === 'number' ? value : Number(value)
+    return Number.isFinite(numericValue) ? formatBytes(numericValue) : String(value ?? '')
+  }
   const previousYAxisMaxRef = useRef<number | null>(null)
 
   const { yAxisMax: calculatedYAxisMax, yAxisMin } = useMemo(
@@ -97,6 +102,7 @@ const BarChartComponent = ({ filteredData }: { filteredData: Record<string, any>
           (
             <ChartTooltipContent
               indicator="dot"
+              valueFormatter={formatTooltipValue}
               labelFormatter={(value) => {
                 if (value.includes(':')) {
                   return value; // Display time directly if it includes ':'

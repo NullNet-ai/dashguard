@@ -11,8 +11,13 @@ import {
 import { formatNumber, modifyAxis } from './LineChart';
 import { useMemo, useRef } from 'react';
 import { graphColors } from './graph-color';
+import { formatBytes } from '../../pie-chart/function/formatBytes'
 
 const BarChartComponent = ({ filteredData, interfaces }: { filteredData: Record<string, any>[], interfaces: any }) => {
+  const formatTooltipValue = (value: unknown) => {
+    const numericValue = typeof value === 'number' ? value : Number(value)
+    return Number.isFinite(numericValue) ? formatBytes(numericValue) : String(value ?? '')
+  }
   // Store the previous yAxisMax value
   const previousYAxisMaxRef = useRef<number | null>(null);
 
@@ -92,6 +97,7 @@ const BarChartComponent = ({ filteredData, interfaces }: { filteredData: Record<
           content={
             <ChartTooltipContent
               indicator="dot"
+              valueFormatter={formatTooltipValue}
               labelFormatter={(value) => {
                 if (value.includes(':')) {
                   return value; // Display time directly if it includes ':'

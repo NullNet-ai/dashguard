@@ -8,8 +8,13 @@ import {
   ChartTooltipContent,
 } from '~/components/ui/chart'
 import { formatNumber, modifyAxis } from './AreaChart'
+import { formatBytes } from '../../pie-chart/function/formatBytes'
 
 const LineChartComponent = ({ filteredData }: any) => {
+  const formatTooltipValue = (value: unknown) => {
+    const numericValue = typeof value === 'number' ? value : Number(value)
+    return Number.isFinite(numericValue) ? formatBytes(numericValue) : String(value ?? '')
+  }
   const previousYAxisMaxRef = useRef<number | null>(null)
 
   const { yAxisMax: calculatedYAxisMax, yAxisMin } = useMemo(
@@ -94,7 +99,7 @@ const LineChartComponent = ({ filteredData }: any) => {
         allowDecimals={false}
         scale="linear"
       />
-      <ChartTooltip content={<ChartTooltipContent />} cursor={false} />
+      <ChartTooltip content={<ChartTooltipContent valueFormatter={formatTooltipValue} />} cursor={false} />
       <Line
         dataKey="bandwidth"
         dot={false}

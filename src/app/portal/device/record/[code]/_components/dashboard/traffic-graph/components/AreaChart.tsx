@@ -2,6 +2,7 @@ import { useMemo, useRef } from 'react'
 import { Area, AreaChart, CartesianGrid, ResponsiveContainer, XAxis, YAxis } from 'recharts'
 
 import { ChartLegend, ChartLegendContent, ChartTooltip, ChartTooltipContent } from '~/components/ui/chart'
+import { formatBytes as formatBytesTooltip } from '../../pie-chart/function/formatBytes'
 
 export const modifyAxis = (chartData:any) => {
   
@@ -33,6 +34,12 @@ export const formatNumber = (num: number) => {
   return formatBytes(+num)
 }
 const AreaChartComponent = ({ filteredData }: { filteredData: Record<string, any>[] }) => {
+  const formatTooltipValue = (value: unknown) => {
+    const numericValue = typeof value === 'number' ? value : Number(value)
+    return Number.isFinite(numericValue)
+      ? formatBytesTooltip(numericValue)
+      : String(value ?? '')
+  }
 
   
 
@@ -147,6 +154,7 @@ const AreaChartComponent = ({ filteredData }: { filteredData: Record<string, any
         content={(
           <ChartTooltipContent
             indicator="dot"
+            valueFormatter={formatTooltipValue}
             labelFormatter={(value) => {
               if (value.includes(':')) {
                 return value; // Display time directly if it includes ':'

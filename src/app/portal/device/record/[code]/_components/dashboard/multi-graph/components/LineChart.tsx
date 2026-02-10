@@ -8,6 +8,7 @@ import {
   ChartTooltipContent,
 } from '~/components/ui/chart';
 import { graphColors } from './graph-color';
+import { formatBytes as formatBytesTooltip } from '../../pie-chart/function/formatBytes'
 
 export const modifyAxis = (data: any[]) => {
   const yAxisMax = Math.max(...data.map((d) => Math.max(...Object.values(d).filter((v) => typeof v === 'number'))));
@@ -29,6 +30,12 @@ export const formatNumber = (num: number) => {
 };
 
 const LineChartComponent = ({ filteredData, interfaces }: any) => {
+  const formatTooltipValue = (value: unknown) => {
+    const numericValue = typeof value === 'number' ? value : Number(value)
+    return Number.isFinite(numericValue)
+      ? formatBytesTooltip(numericValue)
+      : String(value ?? '')
+  }
   // Store the previous yAxisMax value
   const previousYAxisMaxRef = useRef<number | null>(null);
 
@@ -109,6 +116,7 @@ const LineChartComponent = ({ filteredData, interfaces }: any) => {
           content={
             <ChartTooltipContent
               indicator="dot"
+              valueFormatter={formatTooltipValue}
               labelFormatter={(value) => {
                 if (value.includes(':')) {
                   return value; // Display time directly if it includes ':'
