@@ -113,6 +113,7 @@ const ConfigurationAliasGrid = ({
 
   const { fetchData, data: grid_data } = useFetchGridData({
     ...gridParams,
+    // @ts-expect-error - No type yet
     device_id: record?.data?.id
   }, {
     resolver: 'mainGrid',
@@ -169,6 +170,7 @@ const ConfigurationAliasGrid = ({
               pluck: _pluck,
               group_advance_filters: filters?.groupAdvanceFilters,
               sorting: gridCachedData?.sorts?.sorting,
+              // @ts-expect-error - No type yet
               device_id: record?.data?.id
             },
           },
