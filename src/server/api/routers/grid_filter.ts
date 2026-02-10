@@ -24,6 +24,7 @@ const filterCriteriaSchema = z.object({
 const sortSchema = z.object({
   id: z.string(),
   desc: z.boolean(),
+  type: z.string().optional(),
   sort_key: z.string().optional(),
   is_case_sensitive_sorting: z.boolean().optional(),
 });
@@ -34,6 +35,7 @@ const groupSchema = z.object({
   value: z.string(),
   desc: z.boolean(),
   is_case_sensitive_sorting: z.boolean().optional(),
+  type: z.string().optional(),
 });
 
 const columnSchema = z.object({

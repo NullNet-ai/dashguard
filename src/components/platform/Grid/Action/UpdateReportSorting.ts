@@ -13,6 +13,7 @@ export async function UpdateReportSorting({
   sorting: {
     id: string;
     desc: boolean;
+    type?: string;
     sort_key?: string;
     is_case_sensitive_sorting?: boolean;
   }[];

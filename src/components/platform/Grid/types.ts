@@ -61,6 +61,7 @@ export type CustomColumnDef<TData> = ColumnDef<TData> & {
   sortKey?: string | Array<string>;
   sort_config?: {
     is_case_sensitive_sorting?: boolean;
+    type?: string;
   };
   data_type?: string;
   search_config?: {

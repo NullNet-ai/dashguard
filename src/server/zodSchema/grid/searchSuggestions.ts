@@ -33,6 +33,7 @@ export const ZodSearchSuggestions = z.object({
       z.object({
         id: z.string(),
         desc: z.boolean(),
+        type: z.string().optional(),
         sort_key: z.string().optional(),
         is_case_sensitive_sorting: z.boolean().optional(),
       }),

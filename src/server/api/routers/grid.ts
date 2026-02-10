@@ -248,7 +248,7 @@ export const gridRouter = createTRPCRouter({
                   (input.limit || 100),
             limit: input.limit || 1,
             by_field:
-              input?.sorting?.length === 1 ? input.sorting[0]?.id : 'code',
+              input?.sorting?.length === 1 ? input.sorting[0]?.type === 'boolean' ? 'code' : input.sorting[0]?.id : 'code',
             by_direction:
               input?.sorting?.length === 1
                 ? input.sorting[0]?.desc
@@ -666,6 +666,7 @@ export const gridRouter = createTRPCRouter({
           z.object({
             id: z.string(),
             desc: z.boolean(),
+            type: z.string().optional(),
             sort_key: z.string().optional(),
             is_case_sensitive_sorting: z.boolean().optional(),
           }),
@@ -943,6 +944,7 @@ export const gridRouter = createTRPCRouter({
         desc: typeof item.desc === 'boolean' ? item.desc : false,
         sort_key: item.field,
         is_case_sensitive_sorting: item.is_case_sensitive_sorting ?? false,
+        type: item.type,
       }));
       const currentTab = filterDetails ? filterDetails : defaultFilter;
 
@@ -1046,6 +1048,7 @@ export const gridRouter = createTRPCRouter({
             field: z.string(),
             desc: z.boolean(),
             is_case_sensitive_sorting: z.boolean().optional(),
+            type: z.string().optional(),
           }),
         ),
         gridKey: z.string().optional(),

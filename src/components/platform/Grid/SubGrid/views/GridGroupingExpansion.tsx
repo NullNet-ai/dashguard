@@ -127,6 +127,7 @@ const GridGroupingExpansion = (props: IGridGroupingExpansionProps) => {
         {
           id: groupSort?.value,
           desc: groupSort?.desc,
+          type: groupSort?.type,
           sort_key: groupSort?.field,
           is_case_sensitive_sorting:
             groupSort?.is_case_sensitive_sorting ?? false,
