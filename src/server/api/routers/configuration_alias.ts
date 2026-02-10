@@ -84,7 +84,29 @@ export const deviceAliasRouter = createTRPCRouter({
               ip_aliases: ['ip'],
             },
             advance_filters: _advance_filters?.length
-              ? _advance_filters as IAdvanceFilters[]
+              ? [
+                ..._advance_filters.map(e => {
+                  if (!e.entity) {
+                    return {
+                      ...e,
+                      entity: 'aliases',
+                    }
+                  }
+                  return e
+                }),
+                {
+                  operator: 'and',
+                  type: 'operator',
+                  default: true,
+                },
+                {
+                  type: 'criteria',
+                  field: 'device_configuration_id',
+                  entity: 'aliases',
+                  operator: EOperator.EQUAL,
+                  values: [device_conf_id],
+                },
+              ] as IAdvanceFilters[]
               : createAdvancedFilter({
                 device_configuration_id: device_conf_id,
                 status: 'Active',

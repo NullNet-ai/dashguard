@@ -1,4 +1,4 @@
-// import z from "zod";
+import { z } from 'zod';
 import {
   createTRPCRouter,
   privateProcedure,
@@ -12,6 +12,7 @@ import {
 } from '~/server/utils/queryBuilder';
 import pluralize from 'pluralize';
 import {
+  EOperator,
   EOrderDirection,
   IAdvanceFilters,
   IGroupAdvanceFilters,
@@ -230,7 +231,11 @@ export const searchRouter = createTRPCRouter({
       return { items: suggestions };
     }),
   aliasSearch: privateProcedure
-    .input(ZodSearchSuggestions)
+    .input(
+      ZodSearchSuggestions.extend({
+        device_id: z.string(),
+      }),
+    )
     .mutation(async ({ input, ctx }) => {
       const {
         advance_filters: _advance_filters = [],
@@ -238,6 +243,7 @@ export const searchRouter = createTRPCRouter({
         sorting,
         group_advance_filters: _group_advance_filters = [],
         searchable_fields = [],
+        device_id,
       } = input;
 
       const pluck_object = {
@@ -245,6 +251,42 @@ export const searchRouter = createTRPCRouter({
         aliases: input.pluck,
         ip_aliases: ['ip'],
       };
+
+      const device_configuration = await ctx.dnaClient.findAll({
+        entity: 'device_configurations',
+        token: ctx.token.value,
+        query: {
+          pluck: ['id', 'created_date', 'timestamp'],
+          advance_filters: [
+            {
+              type: 'criteria',
+              field: 'device_id',
+              entity: 'device_configurations',
+              operator: EOperator.EQUAL,
+              values: [device_id],
+            },
+          ],
+          order: {
+            limit: 1,
+            by_field: 'timestamp',
+            by_direction: EOrderDirection.DESC,
+            is_case_sensitive_sorting: true,
+          },
+          // multiple_sort: [
+          //   {
+          //     by_field: 'created_date',
+          //     by_direction: EOrderDirection.DESC,
+          //   },
+          //   {
+          //     by_field: 'created_time',
+          //     by_direction: EOrderDirection.DESC,
+          //   },
+          // ],
+        },
+
+      }).execute()
+
+      const device_conf_id = device_configuration?.data?.[0]?.id as string
 
       const query = ctx.dnaClient
         .searchSuggestions({
@@ -257,7 +299,29 @@ export const searchRouter = createTRPCRouter({
               ip_aliases: ['ip'],
             },
             pluck_object,
-            advance_filters: [...(_advance_filters as IAdvanceFilters[])],
+            advance_filters: [
+              ..._advance_filters.map(e => {
+                if (!e.entity) {
+                  return {
+                    ...e,
+                    entity: 'aliases',
+                  }
+                }
+                return e
+              }),
+              {
+                operator: 'and',
+                type: 'operator',
+                default: true,
+              },
+              {
+                type: 'criteria',
+                field: 'device_configuration_id',
+                entity: 'aliases',
+                operator: EOperator.EQUAL,
+                values: [device_conf_id],
+              },
+            ] as IAdvanceFilters[],
             group_advance_filters: _group_advance_filters as IGroupAdvanceFilters<
               string | number
             >[],

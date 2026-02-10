@@ -111,7 +111,10 @@ const ConfigurationAliasGrid = ({
     },
   });
 
-  const { fetchData, data: grid_data } = useFetchGridData(gridParams, {
+  const { fetchData, data: grid_data } = useFetchGridData({
+    ...gridParams,
+    device_id: record?.data?.id
+  }, {
     resolver: 'mainGrid',
     router: 'deviceAlias',
   });
@@ -166,6 +169,7 @@ const ConfigurationAliasGrid = ({
               pluck: _pluck,
               group_advance_filters: filters?.groupAdvanceFilters,
               sorting: gridCachedData?.sorts?.sorting,
+              device_id: record?.data?.id
             },
           },
           searchSuggestionConfig: {
