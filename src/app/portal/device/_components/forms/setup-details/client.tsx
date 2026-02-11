@@ -208,15 +208,15 @@ const SetupDetails: React.FC<{ identifier: string }> = ({
             </div>
 
             <div className="space-y-2">
-              <div className="text-sm font-medium text-slate-900">3. Verify the installation</div>
-              <CodeRow variant="green" value="wallguard-cli version" />
+              <div className="text-sm font-medium text-slate-900">3. Start the WallGuard Agent</div>
+              <CodeRow variant="green" value={`wallguard-cli start --control-channel-url=${controlChannelUrl} --platform=pfsense`} />
             </div>
 
             <div className="space-y-2">
-              <div className="text-sm font-medium text-slate-900">4. Start the WallGuard Agent</div>
+              <div className="text-sm font-medium text-slate-900">4. Verify the installation</div>
               <CodeRow
                 variant="slate"
-                value={`wallguard-cli start --control-channel-url=${controlChannelUrl} --platform=pfsense`}
+                value='wallguard-cli version'
               />
               {/* <div className="text-xs text-slate-500">
                 Example value of control_channel_url: wallguard-proxy.nullnet.dnaqa.net:50051
