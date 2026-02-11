@@ -16,7 +16,7 @@ import { animateFlowLine } from '../functions/animateFlowLine'
 import { updateDataPoints } from '../functions/updateDataPoints'
 import { generateOceanCoordinates } from '../functions/generateOceanCoordinates'
 import { getConnectionKey } from '../functions/getConnectionKey'
-import { createDestinationMarker, createSourceMarker, ORANGE } from '../functions/createMarker'
+import { createSourceDestinationMarker, ORANGE } from '../functions/createMarker'
 
 const chaikinSmooth = (points: [number, number][], iterations: number) => {
   let current = points
@@ -695,9 +695,9 @@ const MapComponent = ({ countryTrafficData, filterId }: Record<string, any>) => 
               </span>
             </div>
             <div class="legend-body" style="padding:10px; border-top:1px solid #eee; transition:max-height 200ms ease, opacity 200ms ease; max-height:1000px; opacity:1; overflow:hidden;">
-              <div style="margin-bottom:8px;"><strong>Traffic Level</strong></div>
-              <div style="margin-bottom:4px;"><span style="display:inline-block; width:15px; height:15px; background:rgba(255, 0, 0, 0.7); border-radius:50%; vertical-align:middle; margin-right:6px;"></span> High > 8000 KB</div>
-              <div style="margin-bottom:4px;"><span style="display:inline-block; width:15px; height:15px; background:rgba(255, 165, 0, 0.7); border-radius:50%; vertical-align:middle; margin-right:6px;"></span> Medium > 2000 - 8000 KB </div>
+              <div style="margin-bottom:8px;"><strong>Traffic Intensity</strong></div>
+              <div style="margin-bottom:4px;"><span style="display:inline-block; width:15px; height:15px; background:rgba(255, 0, 0, 0.7); border-radius:50%; vertical-align:middle; margin-right:6px;"></span> Heavy > 8000 KB</div>
+              <div style="margin-bottom:4px;"><span style="display:inline-block; width:15px; height:15px; background:rgba(255, 165, 0, 0.7); border-radius:50%; vertical-align:middle; margin-right:6px;"></span> Busy > 2000 - 8000 KB </div>
               <div style="margin-bottom:8px;"><span style="display:inline-block; width:15px; height:15px; background:rgba(0, 128, 0, 0.7); border-radius:50%; vertical-align:middle; margin-right:6px;"></span> Low < 2000 KB</div>
             </div>
           </div>
@@ -880,29 +880,35 @@ const MapComponent = ({ countryTrafficData, filterId }: Record<string, any>) => 
         }
 
         // Draw markers for countries and ocean
+
         if (hasSource && sourceCoordinates && !sourceMarker) {
           if (drawSessionRef.current !== drawSession) return;
           sourceMarkerKey = `source:${conn.source_ip ?? ''}`;
           sourceMarker = acquireMarker(sourceMarkerKey, () =>
-            createSourceMarker(
+            createSourceDestinationMarker(
               map,
               sourceCoordinates,
               sourceLabel,
+              destLabel,
               conn.trafficLevel,
-              conn.source_ip
+              conn.source_ip,
+              conn.destination_ip
             )
           );
           trackTrafficLayer(sourceMarker);
         }
+
         if (hasDest && destinationCoordinates && !destMarker) {
           if (drawSessionRef.current !== drawSession) return;
           destMarkerKey = `destination:${conn.destination_ip ?? ''}`;
           destMarker = acquireMarker(destMarkerKey, () =>
-            createDestinationMarker(
+            createSourceDestinationMarker(
               map,
               destinationCoordinates,
+              sourceLabel,
               destLabel,
               conn.trafficLevel,
+              conn.source_ip,
               conn.destination_ip
             )
           );
@@ -1215,7 +1221,7 @@ return (
             font-size: 12px;
             color: #333;
             box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
-            max-width: 200px;
+            min-width: max-content;
           }
 
           .custom-tooltip strong {
