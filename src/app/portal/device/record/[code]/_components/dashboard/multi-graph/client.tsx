@@ -175,6 +175,8 @@ const InteractiveGraph = ({
     },[socket, filteredData, orgID, defaultValues?.id])
     
   useEffect(() => {
+    if (!interfaces?.length) return
+
     isUnmountedRef.current = false
     taskQueueRef.current = []
 
