@@ -10,7 +10,7 @@ import { FlagIcon } from '@heroicons/react/20/solid';
 
 const BW_SIZE = 18;
 
-function truncateIP(ip: string, maxLength = 23) {
+function truncateIP(ip: string, maxLength = 25) {
   if (!ip || ip.length <= maxLength) return ip;
   return ip.slice(0, maxLength - 3) + '...';
 }
@@ -55,7 +55,7 @@ export default function GridVirtualizerFixed(props: any) {
     <TooltipProvider>
       <div
         ref={parentRef}
-        className="rounded-md border border-slate-100 h-[602px] overflow-hidden"
+        className="rounded-md  h-[602px] overflow-hidden"
         style={{ willChange: 'transform' }}
       >
         {rowVirtualizer.getVirtualItems().map((virtualRow) => {
@@ -68,14 +68,14 @@ export default function GridVirtualizerFixed(props: any) {
               className="grid"
               style={{ 
                 height: virtualRow.size ,
-                gridTemplateColumns: `180px repeat(${formatted[0].length}, minmax(0, 1fr))`,
+                gridTemplateColumns: `250px repeat(${formatted[0].length}, minmax(0, 1fr))`,
               }}
             >
 
               <TooltipProvider>
                 <Tooltip delayDuration={0}>
                   <TooltipTrigger>
-                    <div className="flex items-center gap-2 pl-1 text-xs bg-slate-50 border-y border-slate-100">
+                    <div className="flex items-center gap-2 pl-1.5 py-1 text-xs border-y border-slate-100">
                       {flowData?.[rowIndex]?.flag ? (
                         flowData[rowIndex].flag === '/unknown-flag.svg' ? (
                           <div className="flex h-[15px] min-w-[30px] items-center justify-center bg-[#efefef]">
