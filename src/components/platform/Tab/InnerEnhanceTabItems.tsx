@@ -504,7 +504,7 @@ const InnerEnhanceTabItems: React.FC<DraggableTabsProps & { hasNewButton?: boole
                     { 'pr-0': !tab?.default },
                     { 'rounded-t-md rounded-b-none border-b-0 border-l border-r border-t-[3px] px-5': tab?.default },
                   )}
-                  style={{ minWidth: tab?.name ==='new' ? '55px' : '88px', maxWidth: tab?.name ==='new' ? '55px' : '200px' }}
+                  style={{ minWidth: tab?.name ==='new' ? '55px' : '88px' }}
                 >
                   <Tooltip>
                     <TooltipTrigger asChild>
