@@ -283,7 +283,7 @@ export default function TrafficMaps({ params, defaultValues }: Record<string, an
   const [token, setToken] = useState<string | null>(null)
   const [org_acc_id, setOrgAccountID] = useState<string | null>(null)
   const channel_name = 'live_map'
-  const {socket} = useSocketConnection({channel_name, token})
+  const {socket, isConnected} = useSocketConnection({channel_name, token})
   const getAccount = api.organizationAccount.getAccountID.useMutation()
   const taskQueueRef = useRef<Array<() => Promise<void>>>([])
   const isQueueWorkerRunningRef = useRef(false)
@@ -572,8 +572,11 @@ export default function TrafficMaps({ params, defaultValues }: Record<string, an
       {/* <Filter params={params} type='map_filter' /> */}
       {/* <Search filter_type='map_search' params={{ ...params, router: 'packet', resolver: 'filterPackets' }} /> */}
       <CardHeader className={"flex flex-row items-center justify-between bg-slate-100"}>
-        <CardTitle className="text-md text-foreground">
-          Traffic Flow
+        <CardTitle className="flex gap-3 items-center text-md text-foreground">
+          Traffic Flow 
+          {defaultValues.is_device_online && isConnected && (
+            <div className="flex gap-1 items-center leading-[0] text-[10px] text-success"><div className="size-1.5 rounded-full bg-success" /> LIVE</div>
+          )}
         </CardTitle>
       </CardHeader>
 

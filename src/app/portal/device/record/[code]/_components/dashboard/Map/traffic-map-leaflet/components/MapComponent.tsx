@@ -796,7 +796,8 @@ const MapComponent = ({ countryTrafficData, filterId }: Record<string, any>) => 
       latestActiveCountriesRef.current = activeCountries;
       pruneCountryHighlights(map, activeCountries);
 
-      currentDataPoints.forEach((conn: Record<string, any>) => {
+      currentDataPoints.forEach((conn: Record<string, any>, index: number) => {
+        scheduleTimeout(() => {
         if (drawSessionRef.current !== drawSession) return;
         const hasSource = conn.source_country && conn.source_country.country && conn.source_country.country !== "No IP Info";
         const hasDest = conn.destination_country && conn.destination_country.country && conn.destination_country.country !== "No IP Info";
@@ -1132,6 +1133,7 @@ const MapComponent = ({ countryTrafficData, filterId }: Record<string, any>) => 
           };
           connectionElements.current[key].push(lineObj);
         }
+      }, index * 2000);
       });
 
     };

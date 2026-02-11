@@ -1,5 +1,6 @@
 import L from "leaflet";
 import countryList from "~/components/platform/AddressAutoComplete/countryCodes";
+import { getTrafficColor } from './getTrafficColor'
 
 export const ORANGE = 'rgba(255, 165, 0, 1)';
 
@@ -105,13 +106,8 @@ export const createSourceDestinationMarker = (
   const marker = L.marker(coordinates, { icon: divIcon }).addTo(mapInstance);
 
   const kb = trafficLevel > 1024 ? (trafficLevel / 1024).toFixed(2) + ' KB' : trafficLevel + ' bytes';
-  const kbNum = trafficLevel / 1024;
-  const intensity = kbNum > 8000 ? 'Heavy' : kbNum > 2000 ? 'Busy' : 'Low';
-  const intensityColor = intensity === 'Heavy'
-    ? 'rgba(255, 0, 0, 0.7)'
-    : intensity === 'Busy'
-    ? 'rgba(255, 165, 0, 0.7)'
-    : 'rgba(0, 128, 0, 0.7)';
+  const intensity = trafficLevel > 8000 ? 'Heavy' : trafficLevel > 2000 ? 'Busy' : 'Low';
+  const intensityColor = getTrafficColor(trafficLevel);
 
 
   const sourceCountryCode = getCountry(sourceCountryName);
@@ -121,7 +117,6 @@ export const createSourceDestinationMarker = (
     `<div style="display: grid; gap: 6px;">
       <div style="display:flex; align-items:center; gap:8px; padding-bottom: 6px; border-bottom: 1px solid rgb(238, 238, 238)">
         ${sourceFlagUrl ? `<img src="${sourceFlagUrl}" height="12" alt="${sourceCountryName}" style="height: 12px; border: none; display: inline-block; vertical-align: middle;">` : ''}
-        <span style="color:${intensityColor};">●</span>
         <span style="font-weight:600;color: #000;">${sourceCountryName}</span>
         <span style="opacity:0.8;">→</span>
         <span style="font-weight:600;color: #000;">${destinationCountryName}</span>
