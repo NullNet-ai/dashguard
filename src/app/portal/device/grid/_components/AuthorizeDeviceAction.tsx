@@ -58,7 +58,7 @@ export default function AuthorizeDeviceAction(
           {code}
         </h1>
       ),
-      sideDrawerWidth: '500px',
+      sideDrawerWidth: '1000px',
       body: {
         component: () => (
           type === 'remote_access' ? (
@@ -90,7 +90,7 @@ export default function AuthorizeDeviceAction(
           </TooltipContent>
         </TooltipTrigger>
       </Tooltip>}
-      {!is_device_authorized && <Tooltip delayDuration={0}>
+      {/* {!is_device_authorized && <Tooltip delayDuration={0}>
         <TooltipTrigger>
           <Button
             disabled={disabled}
@@ -105,7 +105,7 @@ export default function AuthorizeDeviceAction(
             </div>
           </TooltipContent>
         </TooltipTrigger>
-      </Tooltip>}
+      </Tooltip>} */}
     </TooltipProvider>
   )
 }

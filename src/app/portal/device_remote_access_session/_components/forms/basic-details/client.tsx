@@ -1,7 +1,7 @@
 'use client'
 
 import { z } from 'zod'
-import { useCallback, useEffect, useRef, useState } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 
 import { FormBuilder } from '~/components/platform/FormBuilder'
 import { type IHandleSubmit } from '~/components/platform/FormBuilder/types'
@@ -13,23 +13,18 @@ import { type IFormProps } from '../types'
 const FormSchema = z.object({
   device_id: z.string({ message: 'Device is required' }).min(1, { message: 'Device is required' }),
   remote_access_type: z.string({ message: 'Connection Type is required' }).min(1, { message: 'Connection Type is required' }),
-  device_service_id: z.string().optional(),
-}).superRefine((data, ctx) => {
-  if (data.remote_access_type !== 'ui') return
-  if (data.device_service_id && data.device_service_id.trim().length > 0) return
-
-  ctx.addIssue({
-    code: z.ZodIssueCode.custom,
-    path: ['device_service_id'],
-    message: 'Service is required',
-  })
+  device_service_id: z.string({ message: 'Service is required' }).min(1, { message: 'Service is required' }),
 })
 
 export default function RemoteAccessDetails(props: IFormProps) {
   // @ts-expect-error - No type yet
-  const { record_data, deviceId, deviceCode } = props ?? {}
+  const { record_data, deviceId, deviceCode, selectedTab } = props ?? {}
+  const [selectedDeviceId, setSelectedDeviceId] = useState<string | undefined>(
+    record_data?.device_id ?? undefined,
+  )
+  const hideRemoteAccessTypeField = selectedTab === 'ui' || selectedTab === 'ssh' || selectedTab === 'tty'
   const [remoteAccessType, setRemoteAccessType] = useState<string | undefined>(
-    record_data?.remote_access_type,
+    hideRemoteAccessTypeField ? selectedTab : record_data?.remote_access_type,
   )
   const toast = useToast()
   const createUpdate = api.deviceRemoteAccessSession.createUpdateDeviceRemoteAccessSessions.useMutation()
@@ -38,16 +33,35 @@ export default function RemoteAccessDetails(props: IFormProps) {
     limit: 100,
     device_code: deviceCode,
   })
+
+  const effectiveDeviceId = deviceId || (deviceCode && devices?.[0]?.value) || selectedDeviceId
   const { data: deviceServices } = api.deviceRemoteAccessSession.fetchDeviceServices.useQuery(
     {
       limit: 100,
       device_code: deviceCode,
-      device_id: deviceId,
+      device_id: effectiveDeviceId,
     },
     {
       refetchInterval: 60_000,
+      enabled: !!effectiveDeviceId,
     },
   )
+
+  const filteredDeviceServices = useMemo(() => {
+    const services = Array.isArray(deviceServices) ? deviceServices : []
+
+    if (remoteAccessType === 'ssh') {
+      return services.filter((e: any) => e.item?.protocol === 'ssh')
+    } else if (remoteAccessType === 'tty') {
+      return services.filter((e: any) => e.item?.protocol === 'tty')
+    }
+
+    if (remoteAccessType === 'ui') {
+      return services.filter((e: any) => e.item?.protocol === 'http' || e.item?.protocol === 'https')
+    }
+
+    return services
+  }, [deviceServices, remoteAccessType])
 
   const handleSave = async ({
     data,
@@ -71,8 +85,8 @@ export default function RemoteAccessDetails(props: IFormProps) {
 
         if (remote_access?.includes(remote_access_type)) {
           const wsUrl = {
-            ssh: `wss://${remote_access_session}.${process.env.NEXT_PUBLIC_REMOTE_ACCESS_URL?.replace('https://', '')}/wallguard/gateway/ssh`,
-            tty: `wss://${remote_access_session}.${process.env.NEXT_PUBLIC_REMOTE_ACCESS_URL?.replace('https://', '')}/wallguard/gateway/tty`,
+            ssh: `wss://${remote_access_session}.${process.env.NEXT_PUBLIC_REMOTE_ACCESS_API_URL?.replace('https://', '')}/wallguard/gateway/ssh`,
+            tty: `wss://${remote_access_session}.${process.env.NEXT_PUBLIC_REMOTE_ACCESS_API_URL?.replace('https://', '')}/wallguard/gateway/tty`,
           }[remote_access_type]
 
           const sessionKey = `terminal_session_${Date.now()}_${Math.random().toString(36)
@@ -140,39 +154,36 @@ export default function RemoteAccessDetails(props: IFormProps) {
   }, [])
 
   const handleDataChange = useCallback((values: any) => {
-    const nextRemoteAccessType = values?.remote_access_type
-    setRemoteAccessType(nextRemoteAccessType)
-
-    if (nextRemoteAccessType !== 'ui') {
-      clearSelectedDeviceService()
+    const nextRemoteAccessType = values?.remote_access_type ?? (hideRemoteAccessTypeField ? selectedTab : undefined)
+    if (nextRemoteAccessType !== undefined) {
+      setRemoteAccessType(nextRemoteAccessType)
     }
-  }, [clearSelectedDeviceService])
+
+    if (!deviceId && !deviceCode) {
+      setSelectedDeviceId(values?.device_id)
+    }
+  }, [deviceCode, deviceId, hideRemoteAccessTypeField, selectedTab])
 
   const prevDeviceKeyRef = useRef<string | undefined>(undefined)
 
   useEffect(() => {
-    const currentDeviceKey = `${deviceCode ?? ''}:${deviceId ?? ''}`
+    const currentDeviceKey = `${deviceCode ?? ''}:${effectiveDeviceId ?? ''}`
     const prevDeviceKey = prevDeviceKeyRef.current
     prevDeviceKeyRef.current = currentDeviceKey
 
     if (prevDeviceKey !== undefined && prevDeviceKey !== currentDeviceKey) {
       clearSelectedDeviceService()
     }
-  }, [clearSelectedDeviceService, deviceCode, deviceId])
+  }, [clearSelectedDeviceService, deviceCode, effectiveDeviceId])
 
   useEffect(() => {
     if (!formRef.current) return
-
-    if (remoteAccessType !== 'ui') {
-      clearSelectedDeviceService()
-      return
-    }
 
     const selectedServiceId = formRef.current?.getValues?.('device_service_id')
     if (!selectedServiceId) return
 
     const allowedServiceIds = new Set(
-      (Array.isArray(deviceServices) ? deviceServices : [])
+      filteredDeviceServices
         .map((opt: any) => opt?.value)
         .filter(Boolean),
     )
@@ -180,17 +191,25 @@ export default function RemoteAccessDetails(props: IFormProps) {
     if (!allowedServiceIds.has(selectedServiceId)) {
       clearSelectedDeviceService()
     }
-  }, [clearSelectedDeviceService, deviceServices, remoteAccessType])
+  }, [clearSelectedDeviceService, filteredDeviceServices, remoteAccessType])
+
+  const defaultValues = useMemo(() => {
+    if (!hideRemoteAccessTypeField) return record_data
+    return {
+      ...(record_data ?? {}),
+      remote_access_type: selectedTab,
+    }
+  }, [hideRemoteAccessTypeField, record_data, selectedTab])
 
   return (
     <FormBuilder
       customDesign={{
         formClassName: 'grid !grid-cols-2 gap-4',
       }}
-      defaultValues={record_data}
+      defaultValues={defaultValues}
       onFormChange={handleFormChange}
       onDataChange={handleDataChange}
-      fields={[
+      fields={([
         {
           id: '',
           formType: 'space',
@@ -211,7 +230,6 @@ export default function RemoteAccessDetails(props: IFormProps) {
           fieldClassName: '',
           fieldStyle: {},
         },
-        // @ts-expect-error - No type yet
         ...((deviceId || deviceCode) ?
         [] : [{
           id: 'device_id',
@@ -231,7 +249,8 @@ export default function RemoteAccessDetails(props: IFormProps) {
         }]),
         {
           id: 'remote_access_type',
-          // @ts-expect-error - No type yet
+        ...(hideRemoteAccessTypeField ? [] : [{
+          id: 'remote_access_type',
           formType: 'select',
           name: 'remote_access_type',
           label: 'Connection Type',
@@ -245,13 +264,11 @@ export default function RemoteAccessDetails(props: IFormProps) {
             gridColumn: '1 / span 2',
             gridRow: '3 / span 1',
           },
-        },
-        // @ts-expect-error - No type yet
-        ...(remoteAccessType === 'ui' ?
-        [{
-          id: 'device_service_id',
-          formType: 'select',
+        }]),
+          formType: 'select' as any,
           name: 'device_service_id',
+          label: 'Service',
+          description: 'Field Description',
           label: 'Service',
           description: 'Field Description',
           placeholder: 'Enter value...',
@@ -261,26 +278,17 @@ export default function RemoteAccessDetails(props: IFormProps) {
           selectSearchable: true,
           fieldStyle: {
             gridColumn: '1 / span 2',
-            gridRow: '4 / span 1',
+            gridRow: hideRemoteAccessTypeField ? '3 / span 1' : '4 / span 1',
           },
-        }] : []),
-      ]}
+        }
+      ] as any)}
       formKey="formlabel"
       formLabel="Remote Access"
       formProps={record_data}
       formSchema={(deviceId || deviceCode)
         ? z.object({
           remote_access_type: z.string({ message: 'Connection Type is required' }).min(1, { message: 'Connection Type is required' }),
-          device_service_id: z.string().optional(),
-        }).superRefine((data, ctx) => {
-          if (data.remote_access_type !== 'ui') return
-          if (data.device_service_id && data.device_service_id.trim().length > 0) return
-
-          ctx.addIssue({
-            code: z.ZodIssueCode.custom,
-            path: ['device_service_id'],
-            message: 'Service is required',
-          })
+          device_service_id: z.string({ message: 'Service is required' }).min(1, { message: 'Service is required' }),
         })
         : FormSchema}
       handleSubmit={handleSave}
@@ -301,7 +309,7 @@ export default function RemoteAccessDetails(props: IFormProps) {
             value: 'ui',
           },
         ],
-        device_service_id: deviceServices ?? [],
+        device_service_id: filteredDeviceServices,
       }}
       formSaveButtonTitle='Connect'
     />

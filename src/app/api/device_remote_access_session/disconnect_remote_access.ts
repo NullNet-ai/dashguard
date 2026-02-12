@@ -1,13 +1,19 @@
 import axios from 'axios'
 
-export async function disconnectRemoteAccess({ remote_access_session, token }: { remote_access_session: string, token: string }) {
-  await axios.delete(`${process.env.REMOTE_ACCESS_URL}/wallguard/api/v1/remote_access`, {
+export async function disconnectRemoteAccess({ remote_access_session, token, tunnel_type }: { remote_access_session: string, token: string, tunnel_type: string }) {
+  let route
+  if (tunnel_type === 'ssh') {
+    route = 'ssh_session'
+  } else if (tunnel_type === 'tty') {
+    route = 'tty_session'
+  }
+  await axios.delete(`${process.env.REMOTE_ACCESS_API_URL}/wallguard/api/v1/${route}`, {
     headers: {
       'Content-Type': 'application/json',
       'Authorization': `Bearer ${token}`,
     },
     data: {
-      session: remote_access_session,
+      session_id: remote_access_session,
     },
   })  
     .then((response) => {

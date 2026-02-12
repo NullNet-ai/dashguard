@@ -10,11 +10,12 @@ const handleChangeStatus = (
   handleLoadingStateChange?: (itemName: string, isLoading: boolean) => void,
   sideDrawerActions?: any,
 ) => {
+  console.log("🚀 ~ handleChangeStatus ~ recordId:", recordId)
   const label = status === 'remote_access' ? 'Remote Access' : status
   handleLoadingStateChange?.(label, true)
   try {
     sideDrawerActions?.openSideDrawer?.({
-      sideDrawerWidth: '500px',
+      sideDrawerWidth: '1000px',
       body: {
         component: DeviceRemoteAccessGrid,
         componentProps:   {
