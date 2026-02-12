@@ -14,4 +14,8 @@ export default [
   "device_nat_rules",
   "aliases",
   "versions",
+  "device_tunnel",
+  "device_tunnels",
+  "device_ssh_sessions",
+  "device_tty_sessions",
 ];

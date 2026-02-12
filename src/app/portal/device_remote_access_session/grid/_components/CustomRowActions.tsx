@@ -8,19 +8,19 @@ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '~/comp
 
 export const CustomRowActions = ({ row }: { row: any }) => {
   const { original } = row
-  const { id, device_id, remote_access_type, remote_access_status, remote_access_session } = original ?? {}
+  const { id, device_id, session_status, remote_access_session, tunnel_type } = original ?? {}
   const disconnectRemoteAccess = api.deviceRemoteAccessSession.disconnectDeviceRemoteAccess.useMutation()
   const createUpdate = api.deviceRemoteAccessSession.createUpdateDeviceRemoteAccessSessions.useMutation()
 
   const remote_access = ['ssh', 'tty']
 
   const handleOpenSideDrawer = async () => {
-      if(remote_access?.includes(remote_access_type?.toLowerCase())) {
+      if(remote_access?.includes(tunnel_type?.toLowerCase())) {
         // @ts-expect-error - No type yet
         const wsUrl = {
-          ssh: `wss://${remote_access_session}.${process.env.NEXT_PUBLIC_REMOTE_ACCESS_URL?.replace('https://', '')}/wallguard/gateway/ssh`,
-          tty: `wss://${remote_access_session}.${process.env.NEXT_PUBLIC_REMOTE_ACCESS_URL?.replace('https://', '')}/wallguard/gateway/tty`,
-        }[remote_access_type]
+          ssh: `wss://${remote_access_session}.${process.env.NEXT_PUBLIC_REMOTE_ACCESS_API_URL?.replace('https://', '')}/wallguard/gateway/ssh`,
+          tty: `wss://${remote_access_session}.${process.env.NEXT_PUBLIC_REMOTE_ACCESS_API_URL?.replace('https://', '')}/wallguard/gateway/tty`,
+        }[tunnel_type]
         const sessionKey = `terminal_session_${Date.now()}_${Math.random().toString(36)
           .substring(2, 9)}`
         localStorage.setItem(sessionKey, wsUrl)
@@ -36,7 +36,8 @@ export const CustomRowActions = ({ row }: { row: any }) => {
 
   const handleDisconnect = async () => {
     await disconnectRemoteAccess.mutateAsync({
-      remote_access_session
+      remote_access_session,
+      tunnel_type,
     }).then(() => {
       toast.success('Disconnected successfully')
       window.location.reload()
@@ -48,9 +49,9 @@ export const CustomRowActions = ({ row }: { row: any }) => {
       )
   }
 
-  const reconnect_status = ['timeout', 'disconnected', 'inactive', 'closed', 'terminated']
+  const reconnect_status = ['terminated']
 
-  const disabled = reconnect_status?.includes(remote_access_status?.toLowerCase())
+  const disabled = reconnect_status?.includes(session_status?.toLowerCase())
 
   return (
     <div className="flex gap-2">

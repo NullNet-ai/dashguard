@@ -1,21 +1,72 @@
 'use client';
 
 import { usePathname, useSearchParams } from 'next/navigation';
-import { useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
 import Grid from '~/components/platform/Grid';
+import StateTab from '~/components/platform/StateTab';
 import { getGridCacheData } from '~/components/platform/Grid/utils/grid-get-cache-data';
 import { gridDataResolver } from '~/components/platform/Grid/utils/gridDataResolver';
 import useFetchGridData from '~/hooks/useFetchGridData';
 
 import { defaultSorting } from '~/app/portal/device_remote_access_session/grid/_config/sorting';
-import gridColumns from '~/app/portal/device_remote_access_session/grid/_config/columns';
+import uiGridColumns, {
+  sshGridColumns,
+  ttyGridColumns,
+} from '~/app/portal/device_remote_access_session/grid/_config/columns';
 import { CustomNewButton } from '~/app/portal/device_remote_access_session/grid/_components/CustomNewButton';
 import { CustomRowActions } from '~/app/portal/device_remote_access_session/grid/_components/CustomRowActions';
 
+const UI_PLUCK = [
+  'id',
+  'categories',
+  'code',
+  'status',
+  'created_date',
+  'created_time',
+  'created_by',
+  'updated_date',
+  'updated_time',
+  'updated_by',
+  'device_id',
+  'tunnel_type',
+] as string[];
+
+const SSH_PLUCK = [
+  'id',
+  'categories',
+  'code',
+  'status',
+  'created_date',
+  'created_time',
+  'created_by',
+  'updated_date',
+  'updated_time',
+  'updated_by',
+  'device_tunnel_id',
+  'session_status',
+  'device_id',
+] as string[];
+
+const TTY_PLUCK = [
+  'id',
+  'categories',
+  'code',
+  'status',
+  'created_date',
+  'created_time',
+  'created_by',
+  'updated_date',
+  'updated_time',
+  'updated_by',
+  'device_tunnel_id',
+  'session_status',
+  'device_id',
+] as string[];
+
 // @ts-expect-error  - No type yet
 export default function DeviceRemoteAccessGrid(props) {
-  const { deviceId, deviceCode } = props
+  const { deviceId, deviceCode } = props;
   const pathname = usePathname();
   const searchParams = useSearchParams();
 
@@ -24,150 +75,295 @@ export default function DeviceRemoteAccessGrid(props) {
     return `${pathname ?? ''}${search ? `?${search}` : ''}`;
   }, [pathname, searchParams]);
 
-  const [, , ] = (pathname ?? '').split('/');
-  let main_entity = 'device_remote_access_session'
+  const [, ,] = (pathname ?? '').split('/');
+  const main_entity = 'device_remote_access_session';
 
-  const [gridCacheData, setGridCacheData] = useState<Record<string, any>>({});
-
-  useEffect(() => {
-    if (!main_entity) return;
-    getGridCacheData({
-      pathname: fullPathname,
-      defaultSorting: defaultSorting,
-      entity: main_entity,
-      application: 'grid',
-    }).then((data) => {
-      setGridCacheData(data ?? {});
-    });
-  }, [fullPathname, main_entity]);
-
-  const _pluck = [
-    'id',
-    'categories',
-    'code',
-    'status',
-    'remote_access_type',
-    'remote_access_category',
-    'remote_access_session',
-    'remote_access_status',
-    'created_date',
-    'created_time',
-    'created_by',
-    'updated_date',
-    'updated_time',
-    'updated_by',
-    'device_id',
-  ];
-
-  const { gridParams, gridProps } = useMemo(() => {
-    return gridDataResolver({
-      entity: main_entity || 'device_remote_access_session',
-      pluck: _pluck,
-      gridCacheData: gridCacheData as any,
-      defaults: {
-        defaultSorting,
-      },
-    });
-  }, [gridCacheData, main_entity]);
-
-  const gridParamsWithDeviceFilter = useMemo(() => {
-
-    const currentAdvanceFilters = Array.isArray((gridParams as any)?.advance_filters)
-      ? ((gridParams as any).advance_filters as any[])
-      : [];
-
-    const advanceFiltersWithoutDeviceId = currentAdvanceFilters.filter((f) => {
-      return !(f?.type === 'criteria' && f?.field === 'device_id');
-    });
-
-    const shouldAddAndOperator =
-      advanceFiltersWithoutDeviceId.length > 0
-      && advanceFiltersWithoutDeviceId[advanceFiltersWithoutDeviceId.length - 1]?.type !== 'operator';
-
-    const deviceFilter = {
-      type: 'criteria',
-      operator: 'equal',
-      field: 'device_id',
-      values: [deviceId],
-    };
-
-    return {
-      ...gridParams,
-      advance_filters: [
-        ...advanceFiltersWithoutDeviceId,
-        ...(shouldAddAndOperator ? [{ type: 'operator', operator: 'and' }] : []),
-        deviceFilter,
-      ],
-      device_code: deviceCode,
-    } as any;
-  }, [gridParams, deviceId, deviceCode]);
-
-  const { fetchData, data: grid_data, isLoading } = useFetchGridData(
-    gridParamsWithDeviceFilter,
-    {
-      router: 'deviceRemoteAccessSession',
-      resolver: 'mainGrid',
+  const makeDeviceScopedGridKey = useCallback(
+    (baseKey: string) => {
+      if (!deviceId) return baseKey;
+      return `${baseKey}_${deviceId}`;
     },
+    [deviceId],
   );
 
-  const { items = [], totalCount = 0 } = (grid_data || {}) as any;
+  const gridBaseConfig = useMemo(() => {
+    return {
+      title: 'Remote Access',
+      defaultValues: {
+        entity_prefix: 'RA',
+      },
+      disableDefaultAction: true,
+      enableRowClick: false,
+      customRowAction: CustomRowActions,
+      searchSuggestionConfig: {
+        router: 'search',
+        resolver: 'deviceRemoteAccessSessionSearch',
+      },
+    } as const;
+  }, []);
 
-  useEffect(() => {
-    fetchData(gridParamsWithDeviceFilter);
-  }, [gridParamsWithDeviceFilter]);
+  const useDeviceScopedGridData = ({
+    gridKey,
+    entity,
+    pluck,
+    defaultAllTabName,
+  }: {
+    gridKey: string;
+    entity: string;
+    pluck: string[];
+    defaultAllTabName: string;
+  }) => {
+    const [gridCacheData, setGridCacheData] = useState<Record<string, any>>({});
+
+    useEffect(() => {
+      getGridCacheData({
+        gridKey,
+        entity: main_entity,
+        pathname: fullPathname,
+        defaultSorting,
+        gridEntity: entity,
+        defaultAllTabName,
+      }).then((data) => {
+        setGridCacheData(data ?? {});
+      });
+    }, [defaultAllTabName, entity, fullPathname, gridKey]);
+
+    const { gridParams, gridProps } = useMemo(() => {
+      return gridDataResolver({
+        entity,
+        pluck,
+        gridCacheData: gridCacheData as any,
+        defaults: {
+          defaultSorting,
+        },
+      });
+    }, [entity, gridCacheData, pluck]);
+
+    const applyDeviceFilter = useCallback(
+      (params: any) => {
+        const currentAdvanceFilters = Array.isArray(params?.advance_filters)
+          ? (params.advance_filters as any[])
+          : [];
+
+        const advanceFiltersWithoutDeviceId = currentAdvanceFilters.filter((f) => {
+          return !(f?.type === 'criteria' && f?.field === 'device_id');
+        });
+
+        if (!deviceId) {
+          return {
+            ...params,
+            advance_filters: advanceFiltersWithoutDeviceId,
+            device_code: deviceCode,
+          } as any;
+        }
+
+        const shouldAddAndOperator =
+          advanceFiltersWithoutDeviceId.length > 0
+          && advanceFiltersWithoutDeviceId[advanceFiltersWithoutDeviceId.length - 1]?.type !== 'operator';
+
+        const deviceFilter = {
+          type: 'criteria',
+          operator: 'equal',
+          field: 'device_id',
+          entity,
+          values: [deviceId],
+        };
+
+        return {
+          ...params,
+          advance_filters: [
+            ...advanceFiltersWithoutDeviceId,
+            ...(shouldAddAndOperator ? [{ type: 'operator', operator: 'and' }] : []),
+            deviceFilter,
+          ],
+          device_code: deviceCode,
+        } as any;
+      },
+      [deviceCode, deviceId],
+    );
+
+    const gridParamsWithDeviceFilter = useMemo(() => {
+      return applyDeviceFilter(gridParams);
+    }, [applyDeviceFilter, gridParams]);
+
+    const { fetchData, data: grid_data, isLoading } = useFetchGridData(
+      gridParamsWithDeviceFilter,
+      {
+        router: 'deviceRemoteAccessSession',
+        resolver: 'mainGrid',
+      },
+    );
+
+    const lastFetchedArgsRef = useRef<string>('');
+    useEffect(() => {
+      const nextArgsKey = JSON.stringify(gridParamsWithDeviceFilter ?? {});
+      if (lastFetchedArgsRef.current === nextArgsKey) return;
+      lastFetchedArgsRef.current = nextArgsKey;
+      fetchData(gridParamsWithDeviceFilter);
+    }, [gridParamsWithDeviceFilter]);
+
+    const { items = [], totalCount = 0 } = (grid_data || {}) as any;
+
+    return {
+      gridProps,
+      gridCacheData,
+      gridParamsWithDeviceFilter,
+      applyDeviceFilter,
+      fetchData,
+      isLoading,
+      items,
+      totalCount,
+    };
+  };
+
+  const uiGridKey = useMemo(() => makeDeviceScopedGridKey('device_remote_access_ui'), [makeDeviceScopedGridKey]);
+  const sshGridKey = useMemo(() => makeDeviceScopedGridKey('device_remote_access_ssh'), [makeDeviceScopedGridKey]);
+  const ttyGridKey = useMemo(() => makeDeviceScopedGridKey('device_remote_access_tty'), [makeDeviceScopedGridKey]);
+
+  const uiGrid = useDeviceScopedGridData({
+    gridKey: uiGridKey,
+    entity: 'device_tunnels',
+    defaultAllTabName: 'All UI',
+    pluck: UI_PLUCK,
+  });
+
+  const sshGrid = useDeviceScopedGridData({
+    gridKey: sshGridKey,
+    entity: 'device_ssh_sessions',
+    defaultAllTabName: 'All SSH',
+    pluck: SSH_PLUCK,
+  });
+
+  const ttyGrid = useDeviceScopedGridData({
+    gridKey: ttyGridKey,
+    entity: 'device_tty_sessions',
+    defaultAllTabName: 'All TTY',
+    pluck: TTY_PLUCK,
+  });
+
 
   return (
-    <Grid
-      {...gridProps}
-      config={{
-        entity: main_entity!,
-        title: 'Remote Access',
-        columns: [
-          {
-            header: 'ID',
-            accessorKey: 'code',
-            search_config: {
-              entity: 'device_remote_access_sessions',
-              operator: 'like',
+    <div className="space-y-2">
+      <div>
+        <StateTab
+          defaultValue="ui"
+          orientation="vertical"
+          rotateText={true}
+          persistKey={`device-remote-access-session-device-grid-tabs${deviceId ? `-${deviceId}` : ''}`}
+          tabs={[
+            {
+              id: 'ui',
+              label: 'UI',
+              content: (
+                <Grid
+                  {...uiGrid.gridProps}
+                  gridKey={uiGridKey}
+                  config={{
+                    ...gridBaseConfig,
+                    columns: uiGridColumns,
+                    entity: 'device_tunnels',
+                    columnsOrder: uiGrid.gridCacheData?.columns,
+                    searchConfig: {
+                      router: 'deviceRemoteAccessSession',
+                      resolver: 'mainGrid',
+                      query_params: {
+                        entity: 'device_tunnels',
+                        pluck: UI_PLUCK,
+                      },
+                    },
+                    onFetchRecords: (params: any) => uiGrid.fetchData(uiGrid.applyDeviceFilter(params)),
+                  }}
+                  customCreateButton={
+                    <CustomNewButton
+                      deviceId={deviceId}
+                      deviceCode={deviceCode}
+                      selectedTab="ui"
+                    />
+                  }
+                  data={uiGrid.items}
+                  defaultSorting={defaultSorting}
+                  isLoading={uiGrid.isLoading}
+                  totalCount={uiGrid.totalCount || 0}
+                />
+              ),
             },
-          },
-          {
-            header: 'Type',
-            accessorKey: 'device_remote_access_type',
-            sortKey: 'device_remote_access_sessions.remote_access_type',
-            search_config: {
-              entity: 'device_remote_access_sessions',
-              operator: 'like',
-              field: 'remote_access_type',
+            {
+              id: 'ssh',
+              label: 'SSH',
+              content: (
+                <Grid
+                  {...sshGrid.gridProps}
+                  gridKey={sshGridKey}
+                  config={{
+                    ...gridBaseConfig,
+                    columns: sshGridColumns,
+                    entity: 'device_ssh_sessions',
+                    columnsOrder: sshGrid.gridCacheData?.columns,
+                    searchConfig: {
+                      router: 'deviceRemoteAccessSession',
+                      resolver: 'mainGrid',
+                      query_params: {
+                        entity: 'device_ssh_sessions',
+                        pluck: SSH_PLUCK,
+                      },
+                    },
+                    onFetchRecords: (params: any) => sshGrid.fetchData(sshGrid.applyDeviceFilter(params)),
+                  }}
+                  customCreateButton={
+                    <CustomNewButton
+                      deviceId={deviceId}
+                      deviceCode={deviceCode}
+                      selectedTab="ssh"
+                    />
+                  }
+                  data={sshGrid.items}
+                  defaultSorting={defaultSorting}
+                  isLoading={sshGrid.isLoading}
+                  totalCount={sshGrid.totalCount || 0}
+                />
+              ),
             },
-          },
-        ],
-        columnsOrder: gridCacheData?.columns,
-        defaultValues: {
-          entity_prefix: 'RA',
-        },
-        disableDefaultAction: true,
-        enableRowClick: false,
-        customRowAction: CustomRowActions,
-        searchConfig: {
-          router: 'deviceRemoteAccessSession',
-          resolver: 'mainGrid',
-          query_params: {
-            entity: main_entity!,
-            pluck: _pluck,
-          },
-        },
-        searchSuggestionConfig: {
-          router: 'search',
-          resolver: 'deviceRemoteAccessSessionSearch',
-        },
-        onFetchRecords: fetchData,
-      }}
-      customCreateButton={<CustomNewButton deviceId={deviceId} deviceCode={deviceCode} />}
-      data={items}
-      defaultSorting={defaultSorting}
-      isLoading={isLoading}
-      totalCount={totalCount || 0}
-    />
+            {
+              id: 'tty',
+              label: 'TTY',
+              content: (
+                <Grid
+                  {...ttyGrid.gridProps}
+                  gridKey={ttyGridKey}
+                  config={{
+                    ...gridBaseConfig,
+                    columns: ttyGridColumns,
+                    entity: 'device_tty_sessions',
+                    columnsOrder: ttyGrid.gridCacheData?.columns,
+                    searchConfig: {
+                      router: 'deviceRemoteAccessSession',
+                      resolver: 'mainGrid',
+                      query_params: {
+                        entity: 'device_tty_sessions',
+                        pluck: TTY_PLUCK,
+                      },
+                    },
+                    onFetchRecords: (params: any) => ttyGrid.fetchData(ttyGrid.applyDeviceFilter(params)),
+                  }}
+                  customCreateButton={
+                    <CustomNewButton
+                      deviceId={deviceId}
+                      deviceCode={deviceCode}
+                      selectedTab="tty"
+                    />
+                  }
+                  data={ttyGrid.items}
+                  defaultSorting={defaultSorting}
+                  isLoading={ttyGrid.isLoading}
+                  totalCount={ttyGrid.totalCount || 0}
+                />
+              ),
+            },
+          ]}
+          variant="underline"
+          size="sm"
+        />
+      </div>
+    </div>
   );
 }

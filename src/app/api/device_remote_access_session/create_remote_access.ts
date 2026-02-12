@@ -1,21 +1,32 @@
 import axios from 'axios'
 
-export async function createRemoteAccess({ device_id, ra_type, token, instanceId, device_service_id }: { device_id: string, ra_type: string, token: string, instanceId: string, device_service_id?: string }) {
-  let params = {
+export async function createRemoteAccessSession({ device_id, ra_type, token, instanceId, tunnel_id }: { device_id: string, ra_type: string, token: string, instanceId: string, tunnel_id?: string }) {
+  const params = {
     device_id,
-    session_type: ra_type,
     instance_id: instanceId,
+    tunnel_id,
+    username: 'root'
   }
-  if (ra_type === 'ui') {
-    params = {
-      ...params,
-      // @ts-expect-error - No type yet
-      data: {
-        service_id: device_service_id
-    }
-    }
+  let route
+  if (ra_type === 'ssh') {
+    route = 'ssh_session'
+  } else if (ra_type === 'tty') {
+    route = 'tty_session'
   }
-  return axios.post(`${process.env.REMOTE_ACCESS_URL}/wallguard/api/v1/remote_access`, params, {
+  return axios.post(`${process.env.REMOTE_ACCESS_API_URL}/wallguard/api/v1/${route}`, params, {
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': `Bearer ${token}`,
+    },
+  })
+}
+
+export async function createRemoteAccessTunnel({ device_id, token, device_service_id }: { device_id: string, token: string, device_service_id?: string }) {
+  const params = {
+    device_id,
+    service_id: device_service_id
+  }
+  return axios.post(`${process.env.REMOTE_ACCESS_API_URL}/wallguard/api/v1/tunnel`, params, {
     headers: {
       'Content-Type': 'application/json',
       'Authorization': `Bearer ${token}`,

@@ -2,35 +2,43 @@
 
 import { type ColumnDef } from '@tanstack/react-table'
 
-import StatusCell from '~/components/ui/status-cell'
-import { formatString } from '~/server/utils/formatString'
-
-const gridColumns = [
+const uiGridColumns = [
   {
     header: 'ID',
     accessorKey: 'code',
     search_config: {
-      entity: 'device_remote_access_sessions',
+      entity: 'device_tunnels',
       operator: 'like',
-    },
-  },
-  {
-    header: 'Category',
-    accessorKey: 'categories',
-    search_config: {
-      entity: 'device_remote_access_sessions',
-      operator: 'like',
-      parse_as: "text"
     },
   },
   {
     header: 'Type',
-    accessorKey: 'device_remote_access_type',
-    sortKey: 'device_remote_access_sessions.remote_access_type',
+    accessorKey: 'tunnel_type',
+    sortKey: 'tunnel_type',
     search_config: {
-      entity: 'device_remote_access_sessions',
+      entity: 'device_tunnels',
       operator: 'like',
-      field: 'remote_access_type',
+      field: 'tunnel_type',
+    },
+  },
+  {
+    header: 'Address',
+    accessorKey: 'address',
+    sortKey: 'device_services.address',
+    search_config: {
+      entity: 'device_services',
+      operator: 'like',
+      field: 'address',
+    },
+  },
+  {
+    header: 'Port',
+    accessorKey: 'port',
+    sortKey: 'device_services.port',
+    search_config: {
+      entity: 'device_services',
+      operator: 'like',
+      field: 'port',
     },
   },
   {
@@ -46,14 +54,16 @@ const gridColumns = [
 
   {
     header: 'Status',
-    accessorKey: 'remote_access_status',
-    cell: ({ row }) => {
-      const value = row?.original?.remote_access_status
-      return <StatusCell value={formatString(value)} />
-    },
+    accessorKey: 'session_status',
+    sortKey: 'device_ssh_sessions.session_status',
+    // cell: ({ row }) => {
+    //   const value = row?.original?.remote_access_status
+    //   return <StatusCell value={formatString(value)} />
+    // },
     search_config: {
-      entity: 'device_remote_access_sessions',
-      operator: 'like'
+      entity: 'device_ssh_sessions',
+      operator: 'like',
+      field: 'session_status',
     },
   },
   {
@@ -106,7 +116,205 @@ const gridColumns = [
   },
 ] as ColumnDef<any>[]
 
-export default gridColumns
+export const sshGridColumns = [
+  {
+    header: 'ID',
+    accessorKey: 'code',
+    search_config: {
+      entity: 'device_ssh_sessions',
+      operator: 'like',
+    },
+  },
+  {
+    header: 'Type',
+    accessorKey: 'tunnel_type',
+    sortKey: 'device_tunnels.tunnel_type',
+    search_config: {
+      entity: 'device_tunnels',
+      operator: 'like',
+      field: 'tunnel_type',
+    },
+  },
+  {
+    header: 'Address',
+    accessorKey: 'address',
+    sortKey: 'device_services.address',
+    search_config: {
+      entity: 'device_services',
+      operator: 'like',
+      field: 'address',
+    },
+  },
+  {
+    header: 'Port',
+    accessorKey: 'port',
+    sortKey: 'device_services.port',
+    search_config: {
+      entity: 'device_services',
+      operator: 'like',
+      field: 'port',
+    },
+  },
+  {
+    header: 'Device',
+    accessorKey: 'device_name',
+    sortKey: 'devices.device_name',
+    search_config: {
+      operator: 'like',
+      entity: 'devices',
+      field: 'device_name',
+    },
+  },
+  {
+    header: 'Status',
+    accessorKey: 'session_status',
+    sortKey: 'device_ssh_sessions.session_status',
+    search_config: {
+      entity: 'device_ssh_sessions',
+      operator: 'like',
+      field: 'session_status',
+    },
+  },
+  {
+    header: 'Updated Date',
+    accessorKey: 'updated_date',
+    cell: ({ row }) => {
+      const date = row?.original?.updated_date
+      const time = row?.original?.updated_time
+      return (
+        <div className="flex items-center gap-x-2">
+          <div>{date}</div>
+          <div>{time}</div>
+        </div>
+      )
+    },
+  },
+  {
+    header: 'Updated By',
+    accessorKey: 'updated_by',
+    sortKey: 'contacts.contact_updated_by',
+  },
+  {
+    header: 'Created Date',
+    accessorKey: 'created_date',
+    cell: ({ row }) => {
+      const date = row?.original?.created_date
+      const time = row?.original?.created_time
+      return (
+        <div className="flex items-center gap-x-2">
+          <div>{date}</div>
+          <div>{time}</div>
+        </div>
+      )
+    },
+  },
+  {
+    header: 'Created By',
+    accessorKey: 'created_by',
+    sortKey: 'contacts.contact_created_by',
+  },
+] as ColumnDef<any>[]
+
+export const ttyGridColumns = [
+  {
+    header: 'ID',
+    accessorKey: 'code',
+    search_config: {
+      entity: 'device_tty_sessions',
+      operator: 'like',
+    },
+  },
+  {
+    header: 'Type',
+    accessorKey: 'tunnel_type',
+    sortKey: 'device_tunnels.tunnel_type',
+    search_config: {
+      entity: 'device_tunnels',
+      operator: 'like',
+      field: 'tunnel_type',
+    },
+  },
+  {
+    header: 'Address',
+    accessorKey: 'address',
+    sortKey: 'device_services.address',
+    search_config: {
+      entity: 'device_services',
+      operator: 'like',
+      field: 'address',
+    },
+  },
+  {
+    header: 'Port',
+    accessorKey: 'port',
+    sortKey: 'device_services.port',
+    search_config: {
+      entity: 'device_services',
+      operator: 'like',
+      field: 'port',
+    },
+  },
+  {
+    header: 'Device',
+    accessorKey: 'device_name',
+    sortKey: 'devices.device_name',
+    search_config: {
+      operator: 'like',
+      entity: 'devices',
+      field: 'device_name',
+    },
+  },
+  {
+    header: 'Status',
+    accessorKey: 'session_status',
+    sortKey: 'device_tty_sessions.session_status',
+    search_config: {
+      entity: 'device_tty_sessions',
+      operator: 'like',
+      field: 'session_status',
+    },
+  },
+  {
+    header: 'Updated Date',
+    accessorKey: 'updated_date',
+    cell: ({ row }) => {
+      const date = row?.original?.updated_date
+      const time = row?.original?.updated_time
+      return (
+        <div className="flex items-center gap-x-2">
+          <div>{date}</div>
+          <div>{time}</div>
+        </div>
+      )
+    },
+  },
+  {
+    header: 'Updated By',
+    accessorKey: 'updated_by',
+    sortKey: 'contacts.contact_updated_by',
+  },
+  {
+    header: 'Created Date',
+    accessorKey: 'created_date',
+    cell: ({ row }) => {
+      const date = row?.original?.created_date
+      const time = row?.original?.created_time
+      return (
+        <div className="flex items-center gap-x-2">
+          <div>{date}</div>
+          <div>{time}</div>
+        </div>
+      )
+    },
+  },
+  {
+    header: 'Created By',
+    accessorKey: 'created_by',
+    sortKey: 'contacts.contact_created_by',
+  },
+] as ColumnDef<any>[]
+
+export default uiGridColumns
 
 // ? You can add columns to hide when mobile view as per your requirement just copy the respective accessorKey from the gridColumns
 export const TO_HIDE_COLUMNS_WHEN_MOBILE = []

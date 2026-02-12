@@ -7,7 +7,7 @@ import { Button } from "~/components/ui/button";
 
 // @ts-expect-error - No type yet
 export const CustomNewButton = (props) => {
-  const { deviceId, deviceCode } = props
+  const { deviceId, deviceCode, selectedTab } = props
   const { actions } = useSideDrawer();
 
   const config = {
@@ -15,7 +15,7 @@ export const CustomNewButton = (props) => {
     sideDrawerWidth: '760px',
     body: {
       // @ts-expect-error - No type yet
-      component: () => <BasicDetails deviceId={deviceId} deviceCode={deviceCode} />,
+      component: () => <BasicDetails deviceId={deviceId} deviceCode={deviceCode} selectedTab={selectedTab} />,
       componentProps: {
         entity: 'device_remote_access_session',
         actions,
