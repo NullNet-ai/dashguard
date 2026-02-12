@@ -269,7 +269,9 @@ export default function RemoteAccessDetails(props: IFormProps) {
           name: 'device_service_id',
           label: 'Service',
           description: 'Field Description',
+          // @ts-expect-error - No type yet
           label: 'Service',
+          // @ts-expect-error - No type yet
           description: 'Field Description',
           placeholder: 'Enter value...',
           fieldClassName: '',

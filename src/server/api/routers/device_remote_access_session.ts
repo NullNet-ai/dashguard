@@ -548,6 +548,7 @@ export const deviceRemoteAccessSessionRouter = createTRPCRouter({
 
 
       if (!tunnel_id) {
+        // @ts-expect-error - No type yet
         const createRemoteAccessTunnelResponse = await createRemoteAccessTunnel({ device_id, ra_type, token, instanceId , device_service_id })
         const {
           data: {
@@ -562,6 +563,7 @@ export const deviceRemoteAccessSessionRouter = createTRPCRouter({
       }
 
       if (remote_access_type === 'ssh' || remote_access_type === 'tty') {
+        // @ts-expect-error - No type yet
         const createRemoteAccessResponse = await createRemoteAccessSession({ device_id, ra_type, token, instanceId , device_service_id, tunnel_id })
         const {
           data: {
