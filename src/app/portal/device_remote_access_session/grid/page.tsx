@@ -95,6 +95,7 @@ export default async function Page() {
         'updated_by',
         'device_tunnel_id',
         'session_status',
+        'device_id',
       ],
     }),
     buildGridData({
@@ -114,6 +115,7 @@ export default async function Page() {
         'updated_by',
         'device_tunnel_id',
         'session_status',
+        'device_id',
       ],
     }),
   ]);
