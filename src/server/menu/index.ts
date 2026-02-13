@@ -15,7 +15,7 @@ const menu = [
   // dashboard,
   device,
   device_remote_access_session,
-  settings,
+  // settings,
   // organization,
   // location,
   // calendar,

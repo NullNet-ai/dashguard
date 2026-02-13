@@ -1,13 +1,7 @@
 {
   "order": [
-    "dashboard",
-    "contact",
-    "accounts",
-    "organization",
     "device",
-    "calendar",
-    "timeline",
-    "location",
+    "remote_access",
     "settings"
   ]
 }
