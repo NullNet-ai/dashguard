@@ -66,6 +66,204 @@ const resolveProtocolDisplayValue = (value: unknown) => {
   if (key === 'inet') return 'IPv4';
   return value;
 };
+
+const buildDeviceRemoteAccessSessionSuggestions = async ({
+  ctx,
+  input,
+  baseEntity,
+}: {
+  ctx: any;
+  input: z.infer<typeof ZodSearchSuggestions>;
+  baseEntity: 'device_tunnels' | 'device_ssh_sessions' | 'device_tty_sessions';
+}) => {
+  const tunnelEntity = 'device_tunnels';
+  let {
+    advance_filters: _advance_filters = [],
+    sorting,
+    group_advance_filters: _group_advance_filters = [],
+    searchable_fields = [],
+  } = input;
+
+  if (baseEntity === tunnelEntity) {
+    const existingFilters = _advance_filters as IAdvanceFilters[];
+    const hasTunnelTypeFilter = existingFilters.some((filter) => {
+      return filter?.type === 'criteria' && filter?.field === 'tunnel_type';
+    });
+
+    if (!hasTunnelTypeFilter) {
+      const nextFilters: IAdvanceFilters[] = [...existingFilters];
+      const lastFilter = nextFilters[nextFilters.length - 1];
+
+      if (nextFilters.length > 0 && lastFilter?.type !== 'operator') {
+        nextFilters.push({
+          type: 'operator',
+          operator: EOperator.AND,
+        } as IAdvanceFilters);
+      }
+
+      nextFilters.push({
+        type: 'criteria',
+        field: 'tunnel_type',
+        entity: baseEntity,
+        operator: EOperator.EQUAL,
+        values: ['https', 'http'],
+      } as IAdvanceFilters);
+
+      _advance_filters = nextFilters;
+    }
+  }
+
+  const pluck_object: Record<string, any> = {
+    ...addCommonGridPluckObject(),
+    devices: ['device_name', 'id'],
+    device_services: ['address', 'port'],
+    [baseEntity]: input.pluck,
+  };
+
+  if (baseEntity === tunnelEntity) {
+    pluck_object.device_ssh_sessions = ['id', 'session_status'];
+    pluck_object.device_tty_sessions = ['id', 'session_status'];
+  } else {
+    pluck_object.device_tunnels = ['id', 'tunnel_type', 'device_id', 'service_id'];
+  }
+
+  const query = ctx.dnaClient.searchSuggestions({
+    entity: baseEntity,
+    token: ctx.token.value,
+    query: {
+      pluck: input.pluck,
+      track_total_records: true,
+      pluck_object,
+      advance_filters: [...(_advance_filters as IAdvanceFilters[])],
+      group_advance_filters: _group_advance_filters as IGroupAdvanceFilters<string | number>[],
+      order: {
+        starts_at:
+          (input.current || 0) === 0
+            ? 0
+            : (input.current || 1) * (input.limit || 100) - (input.limit || 100),
+        limit: input.limit || 1,
+        by_field: input?.sorting?.length === 1 ? input.sorting[0]?.id : 'code',
+        by_direction:
+          input?.sorting?.length === 1
+            ? input.sorting[0]?.desc
+              ? EOrderDirection.DESC
+              : EOrderDirection.ASC
+            : EOrderDirection.DESC,
+      },
+      multiple_sort:
+        sorting?.length && sorting?.length > 1
+          // @ts-expect-error - No type yet
+          ? formatSorting(sorting)
+          : [],
+      concatenate_fields: [...addCommonGridConcatenates(baseEntity)],
+    },
+  });
+
+  if (baseEntity === tunnelEntity) {
+    query
+      .join({
+        type: 'left',
+        field_relation: {
+          to: {
+            entity: 'devices',
+            field: 'id',
+          },
+          from: {
+            entity: tunnelEntity,
+            field: 'device_id',
+          },
+        },
+      })
+      .join({
+        type: 'left',
+        field_relation: {
+          to: {
+            entity: 'device_services',
+            field: 'id',
+          },
+          from: {
+            entity: tunnelEntity,
+            field: 'service_id',
+          },
+        },
+      })
+      .join({
+        type: 'left',
+        field_relation: {
+          to: {
+            entity: 'device_ssh_sessions',
+            field: 'device_tunnel_id',
+          },
+          from: {
+            entity: tunnelEntity,
+            field: 'id',
+          },
+        },
+      })
+      .join({
+        type: 'left',
+        field_relation: {
+          to: {
+            entity: 'device_tty_sessions',
+            field: 'device_tunnel_id',
+          },
+          from: {
+            entity: tunnelEntity,
+            field: 'id',
+          },
+        },
+      });
+  }
+
+  if (baseEntity === 'device_ssh_sessions' || baseEntity === 'device_tty_sessions') {
+    query
+      .join({
+        type: 'left',
+        field_relation: {
+          to: {
+            entity: 'devices',
+            field: 'id',
+          },
+          from: {
+            entity: baseEntity,
+            field: 'device_id',
+          },
+        },
+      })
+      .join({
+        type: 'left',
+        field_relation: {
+          to: {
+            entity: tunnelEntity,
+            field: 'id',
+          },
+          from: {
+            entity: baseEntity,
+            field: 'device_tunnel_id',
+          },
+        },
+      })
+      .nestedJoin({
+        type: 'left',
+        field_relation: {
+          to: {
+            entity: 'device_services',
+            field: 'id',
+          },
+          from: {
+            entity: tunnelEntity,
+            field: 'service_id',
+          },
+        },
+      });
+  }
+
+  addCommonGridJoins(query, baseEntity);
+
+  const { data: items } = await query.execute();
+  const suggestions = searchSuggestionTransformer(items, searchable_fields);
+  return { items: suggestions };
+};
 const entity = '';
 export const searchRouter = createTRPCRouter({
   ...createDefineRoutes(entity),
@@ -651,5 +849,68 @@ export const searchRouter = createTRPCRouter({
       // Calculate total number of pages
       const suggestions = searchSuggestionTransformer(items, searchable_fields);
       return { items: suggestions };
+    }),
+  // Project Level
+  deviceRemoteAccessSessionSearch: privateProcedure
+    .input(ZodSearchSuggestions)
+    .mutation(async ({ input, ctx }) => {
+      const resolvedEntity = (input?.entity ?? 'device_tunnels') as
+        | 'device_tunnels'
+        | 'device_ssh_sessions'
+        | 'device_tty_sessions';
+
+      if (
+        resolvedEntity !== 'device_tunnels'
+        && resolvedEntity !== 'device_ssh_sessions'
+        && resolvedEntity !== 'device_tty_sessions'
+      ) {
+        return buildDeviceRemoteAccessSessionSuggestions({
+          ctx,
+          input,
+          baseEntity: 'device_tunnels',
+        });
+      }
+
+      return buildDeviceRemoteAccessSessionSuggestions({
+        ctx,
+        input,
+        baseEntity: resolvedEntity,
+      });
+    }),
+  deviceRemoteAccessSessionUiSearch: privateProcedure
+    .input(ZodSearchSuggestions)
+    .mutation(async ({ input, ctx }) => {
+      return buildDeviceRemoteAccessSessionSuggestions({
+        ctx,
+        input: {
+          ...input,
+          entity: 'device_tunnels',
+        },
+        baseEntity: 'device_tunnels',
+      });
+    }),
+  deviceRemoteAccessSessionSshSearch: privateProcedure
+    .input(ZodSearchSuggestions)
+    .mutation(async ({ input, ctx }) => {
+      return buildDeviceRemoteAccessSessionSuggestions({
+        ctx,
+        input: {
+          ...input,
+          entity: 'device_ssh_sessions',
+        },
+        baseEntity: 'device_ssh_sessions',
+      });
+    }),
+  deviceRemoteAccessSessionTtySearch: privateProcedure
+    .input(ZodSearchSuggestions)
+    .mutation(async ({ input, ctx }) => {
+      return buildDeviceRemoteAccessSessionSuggestions({
+        ctx,
+        input: {
+          ...input,
+          entity: 'device_tty_sessions',
+        },
+        baseEntity: 'device_tty_sessions',
+      });
     }),
 });

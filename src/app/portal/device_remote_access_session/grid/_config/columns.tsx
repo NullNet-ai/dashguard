@@ -29,6 +29,7 @@ const uiGridColumns = [
       entity: 'device_services',
       operator: 'like',
       field: 'address',
+      parse_as: "text",
     },
   },
   {
@@ -39,6 +40,7 @@ const uiGridColumns = [
       entity: 'device_services',
       operator: 'like',
       field: 'port',
+      parse_as: "text",
     },
   },
   {
@@ -143,6 +145,7 @@ export const sshGridColumns = [
       entity: 'device_services',
       operator: 'like',
       field: 'address',
+      parse_as: "text",
     },
   },
   {
@@ -153,6 +156,7 @@ export const sshGridColumns = [
       entity: 'device_services',
       operator: 'like',
       field: 'port',
+      parse_as: "text",
     },
   },
   {
@@ -242,6 +246,7 @@ export const ttyGridColumns = [
       entity: 'device_services',
       operator: 'like',
       field: 'address',
+      parse_as: "text",
     },
   },
   {
@@ -252,6 +257,7 @@ export const ttyGridColumns = [
       entity: 'device_services',
       operator: 'like',
       field: 'port',
+      parse_as: "text",
     },
   },
   {

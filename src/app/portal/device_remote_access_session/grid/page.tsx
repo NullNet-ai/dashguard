@@ -140,10 +140,6 @@ export default async function Page() {
     disableDefaultAction: true,
     enableRowClick: false,
     customRowAction: CustomRowActions,
-    searchSuggestionConfig: {
-      router: 'search',
-      resolver: 'deviceRemoteAccessSessionSearch',
-    },
   } as const;
 
   const tabs = [
@@ -159,6 +155,10 @@ export default async function Page() {
               ...gridBaseConfig,
               columns: uiGridColumns,
               entity: 'device_tunnels',
+              searchSuggestionConfig: {
+                router: 'search',
+                resolver: 'deviceRemoteAccessSessionUiSearch',
+              },
               searchConfig: {
                 router: 'deviceRemoteAccessSession',
                 resolver: 'mainGrid',
@@ -201,6 +201,10 @@ export default async function Page() {
               ...gridBaseConfig,
               columns: sshGridColumns,
               entity: 'device_ssh_sessions',
+              searchSuggestionConfig: {
+                router: 'search',
+                resolver: 'deviceRemoteAccessSessionSshSearch',
+              },
               searchConfig: {
                 router: 'deviceRemoteAccessSession',
                 resolver: 'mainGrid',
@@ -243,6 +247,10 @@ export default async function Page() {
               ...gridBaseConfig,
               columns: ttyGridColumns,
               entity: 'device_tty_sessions',
+              searchSuggestionConfig: {
+                router: 'search',
+                resolver: 'deviceRemoteAccessSessionTtySearch',
+              },
               searchConfig: {
                 router: 'deviceRemoteAccessSession',
                 resolver: 'mainGrid',
