@@ -1,6 +1,7 @@
 'use client'
 
 import { type ColumnDef } from '@tanstack/react-table'
+import { GridSessionStatusBadge } from '~/app/portal/device/grid/GridDeviceOnlineBadge'
 
 const uiGridColumns = [
   {
@@ -58,10 +59,10 @@ const uiGridColumns = [
     header: 'Status',
     accessorKey: 'session_status',
     sortKey: 'device_ssh_sessions.session_status',
-    // cell: ({ row }) => {
-    //   const value = row?.original?.remote_access_status
-    //   return <StatusCell value={formatString(value)} />
-    // },
+    cell: ({ row }) => {
+      const value = row?.original?.session_status
+      return <GridSessionStatusBadge status={value} />
+    },
     search_config: {
       entity: 'device_ssh_sessions',
       operator: 'like',
@@ -173,6 +174,10 @@ export const sshGridColumns = [
     header: 'Status',
     accessorKey: 'session_status',
     sortKey: 'device_ssh_sessions.session_status',
+    cell: ({ row }) => {
+      const value = row?.original?.session_status
+      return <GridSessionStatusBadge status={value} />
+    },
     search_config: {
       entity: 'device_ssh_sessions',
       operator: 'like',
@@ -274,6 +279,10 @@ export const ttyGridColumns = [
     header: 'Status',
     accessorKey: 'session_status',
     sortKey: 'device_tty_sessions.session_status',
+    cell: ({ row }) => {
+      const value = row?.original?.session_status
+      return <GridSessionStatusBadge status={value} />
+    },
     search_config: {
       entity: 'device_tty_sessions',
       operator: 'like',
