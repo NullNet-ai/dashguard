@@ -1133,7 +1133,7 @@ const MapComponent = ({ countryTrafficData, filterId }: Record<string, any>) => 
           };
           connectionElements.current[key].push(lineObj);
         }
-      }, index * 2000);
+      }, index * 5000);
       });
 
     };

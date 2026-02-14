@@ -80,6 +80,7 @@ export default function AppSideBar(config: ISideBarProps) {
   const { width } = useWindowSize()
   const screen = useScreenType() || screenType
   const isMobile = screen !== 'lg' && screen !== 'xl' && screen !== '2xl'
+  const mobileView = (open && isMobile) || openMobile || (open && !openMobile)
 
   if (screenType !== screen && screen) {
     Cookies.set('screen-type', `${screen}`, { expires: 7 })
@@ -278,22 +279,18 @@ export default function AppSideBar(config: ISideBarProps) {
                   onClick={() => handleLogout()}
                   data-test-id="sdnavmenu-ftr-logout-btn"
                   className={cn(
-                    `h-8 w-full text-destructive hover:bg-secondary hover:text-destructive`, `${open && !isMobile ? 'justify-start' : 'justify-center'}`, `${openMobile ? 'justify-start px-2' : ''}`,
+                    `h-8 w-full text-destructive hover:bg-secondary hover:text-destructive`, `${mobileView ? 'justify-start' : 'justify-center'}`, `${openMobile ? 'justify-start px-2' : ''}`,
                   )}
                 >
                   <ArrowLeftStartOnRectangleIcon
                     className="mr-2 ms-3 h-5 w-5"
                   />
-                  {(open && !isMobile)
-                    || (openMobile && isMobile)
-                    || (open && !openMobile && !isMobile)
-                    ? (
+                  {mobileView && (
                       <p>Logout</p>
-                    )
-                    : null}
+                    )}
                 </Button>
                 <footer className="mt-1 grid h-10 w-full place-items-center text-nowrap bg-muted text-[10px] text-muted-foreground/70">
-                  {(open && !isMobile) || (openMobile && isMobile)
+                  {mobileView
                     ? (
                       <span>
                         &copy;
