@@ -204,7 +204,7 @@ const SetupDetails: React.FC<{ identifier: string }> = ({
 
             <div className="space-y-2">
               <div className="text-sm font-medium text-slate-900">2. Install the package</div>
-              <CodeRow variant="blue" value="pkg install wallguard.pkg" />
+              <CodeRow variant="blue" value="pkg add wallguard.pkg" />
             </div>
 
             <div className="space-y-2">
