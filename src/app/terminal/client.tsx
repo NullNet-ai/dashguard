@@ -12,22 +12,32 @@ export default function WebTerminal() {
   const [socket, setSocket] = useState<WebSocket | null>(null) // Track WebSocket instance
   const [isReconnecting, setIsReconnecting] = useState(false)
   const [isConnectionClosed, setIsConnectionClosed] = useState(false) // Track WebSocket connection status
+  const [connectionEndReason, setConnectionEndReason] = useState<'unexpected_end' | 'session_expired' | null>(null)
+  const [deviceId, setDeviceId] = useState('')
   const createUpdate = api.deviceRemoteAccessSession.createUpdateDeviceRemoteAccessSessions.useMutation()
 
-  const device_id = localStorage.getItem('device_id')
+  useEffect(() => {
+    setDeviceId(localStorage.getItem('device_id') || '')
+  }, [])
 
-  const { data: devices, refetch } = api.deviceRemoteAccessSession.fetchDevices.useQuery({
-    limit: 100,
-    device_id: device_id || ""
-  })
+  const { data: lastHeartbeat, isLoading: isLastHeartbeatLoading } =
+    api.deviceHeartbeat.getLastHeartbeat.useQuery(
+      { device_id: deviceId },
+      { enabled: Boolean(deviceId), refetchInterval: 1000 },
+    )
 
   const handleReconnect = async () => {
+    setIsConnectionClosed(false)
+    setConnectionEndReason(null)
+    setIsReconnecting(true)
+    initializeWebSocket()
+    return
     setIsReconnecting(true)
 
     const remote_access_type = localStorage.getItem('current_terminal_session_type')
 
     const res = await createUpdate.mutateAsync({
-      device_id: device_id || '',
+      device_id: deviceId || '',
       // @ts-expect-error - No type yet
       remote_access_type,
       // @ts-expect-error - No type yet
@@ -49,7 +59,7 @@ export default function WebTerminal() {
     }
   }
 
-  const initializeWebSocket = (wsUrl: string) => {
+  const initializeWebSocket = (wsUrl?: string) => {
     const currentSessionKey = localStorage.getItem('current_terminal_session')
     if (!currentSessionKey && !wsUrl) {
       console.error('No active terminal session found')
@@ -66,21 +76,30 @@ export default function WebTerminal() {
     }
 
     try {
+      socket?.close()
+      // @ts-expect-error - No type yet
       const newSocket = new WebSocket(websocketUrl || wsUrl)
 
       newSocket.onopen = () => {
         instance?.write('\x1b[32mConnected to terminal server\x1b[0m\r\n')
         setIsConnectionClosed(false) // Reset connection status when connected
+        setConnectionEndReason(null)
+        setIsReconnecting(false)
       }
 
       newSocket.onerror = (error) => {
         console.error('WebSocket error:', error)
-        instance?.write(`\x1b[31mConnection error: ${websocketUrl}\x1b[0m\r\n`)
+        instance?.write('\x1b[31mYour session has expired. Please start a new session to keep going.\x1b[0m\r\n')
+        setConnectionEndReason('session_expired')
+        setIsConnectionClosed(true)
+        setIsReconnecting(false)
       }
 
       newSocket.onclose = () => {
         instance?.write('\x1b[33mConnection closed\x1b[0m\r\n')
         setIsConnectionClosed(true) // Set connection status to closed dynamically
+        setConnectionEndReason((prev) => (prev === 'session_expired' ? prev : 'unexpected_end'))
+        setIsReconnecting(false)
         // localStorage.removeItem('current_terminal_session')
       }
 
@@ -91,13 +110,13 @@ export default function WebTerminal() {
     } catch (error: any) {
       console.error('Error connecting to WebSocket:', error)
       instance?.write(`\x1b[31mError: ${error.message}\x1b[0m\r\n`)
+      setIsReconnecting(false)
     }
   }
 
   useEffect(() => {
     if (!instance) return
 
-    // @ts-expect-error - No type yet
     initializeWebSocket()
 
     return () => {
@@ -124,9 +143,22 @@ export default function WebTerminal() {
     }
   }, [ref, instance])
 
-  const isDeviceQueryLoaded = devices !== undefined
-  const isDeviceOfflineOrMissing = isDeviceQueryLoaded && (!devices?.length || !devices?.[0]?.is_device_online)
+  
+  const lastHeartbeatTimestamp = lastHeartbeat?.data?.[0]?.timestamp
+  
+  const lastHeartbeatMs = lastHeartbeatTimestamp ? new Date(lastHeartbeatTimestamp).getTime() : NaN
+  const isDeviceOfflineOrMissing =
+    Boolean(deviceId) &&
+    !isLastHeartbeatLoading && !lastHeartbeatMs
+
   const shouldShowPopup = isConnectionClosed || isDeviceOfflineOrMissing
+  const shouldShowReconnectButton = connectionEndReason !== 'session_expired'
+  const popupMessage =
+    connectionEndReason === 'session_expired'
+      ? 'Your session has expired. Please start a new session to keep going.'
+      : isDeviceOfflineOrMissing
+        ? 'The connection was closed. Please restart pfSense or the WallGuard agent, then try connecting again.'
+        : 'The connection ended unexpectedly. Please reconnect to continue.'
 
   useEffect(() => {
     if (!shouldShowPopup) return
@@ -140,21 +172,17 @@ export default function WebTerminal() {
       {shouldShowPopup ? (
         <div className="absolute inset-0 flex flex-col justify-center items-center bg-gray-800/95">
           <p className="text-white text-lg mb-4">
-            {isDeviceOfflineOrMissing
-              ? `The remote session has been terminated. Please log in to Proxmox and restart pfSense to bring it back online before attempting to reconnect.`
-              : 'Connection is closed. Please log in to Proxmox and restart pfSense to bring it back online before attempting to reconnect.'}
+            {popupMessage}
           </p>
-          <button
-            onClick={handleReconnect}
-            className={
-              isReconnecting || isDeviceOfflineOrMissing
-                ? 'px-4 py-2 bg-gray-500 text-white rounded hover:bg-gray-600'
-                : 'px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600'
-            }
-            disabled={isReconnecting || isDeviceOfflineOrMissing}
-          >
-            {isReconnecting ? 'Reconnecting...' : 'Reconnect'}
-          </button>
+          {shouldShowReconnectButton ? (
+            <button
+              onClick={handleReconnect}
+              className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
+              disabled={isReconnecting}
+            >
+              {isReconnecting ? 'Reconnecting...' : 'Reconnect'}
+            </button>
+          ) : null}
         </div>
       ) : null}
     </div>

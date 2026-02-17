@@ -1,6 +1,7 @@
 
 "use client"
 import { PlusIcon } from "@heroicons/react/20/solid";
+import { useEffect } from 'react';
 import BasicDetails from "~/app/portal/device_remote_access_session/_components/forms/basic-details/client";
 import { useSideDrawer } from "~/components/platform/SideDrawer";
 import { Button } from "~/components/ui/button";
@@ -28,6 +29,12 @@ export const CustomNewButton = (props) => {
       // Do things here
     },
   };
+
+  useEffect(() => {
+    return () => {
+      actions.closeSideDrawer();
+    }
+  }, [])
 
   const handleOpenSideDrawer = async () => {
     actions.openSideDrawer(config as any);
