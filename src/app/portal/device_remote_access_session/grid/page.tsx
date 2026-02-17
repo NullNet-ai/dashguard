@@ -140,6 +140,7 @@ export default async function Page() {
     disableDefaultAction: true,
     enableRowClick: false,
     customRowAction: CustomRowActions,
+    enableRowSelection: false,
   } as const;
 
   const tabs = [
