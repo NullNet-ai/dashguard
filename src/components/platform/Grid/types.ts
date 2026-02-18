@@ -371,6 +371,7 @@ export interface IPropsGrid {
   current_tab_id?: string;
   gridParentClass?: string;
   gridRecordClass?: string;
+  withVerticalTabs?: boolean;
 }
 
 export interface IExpandedRow {

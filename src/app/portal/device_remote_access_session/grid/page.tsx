@@ -151,6 +151,7 @@ export default async function Page() {
         <Suspense fallback={fallback}>
           <Grid
             {...uiGrid.gridProps}
+            withVerticalTabs
             gridKey="device_remote_access_ui"
             config={{
               ...gridBaseConfig,
@@ -197,6 +198,7 @@ export default async function Page() {
         <Suspense fallback={fallback}>
           <Grid
             {...sshGrid.gridProps}
+            withVerticalTabs
             gridKey="device_remote_access_ssh"
             config={{
               ...gridBaseConfig,
@@ -243,6 +245,7 @@ export default async function Page() {
         <Suspense fallback={fallback}>
           <Grid
             {...ttyGrid.gridProps}
+            withVerticalTabs
             gridKey="device_remote_access_tty"
             config={{
               ...gridBaseConfig,

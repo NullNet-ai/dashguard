@@ -11,21 +11,26 @@ import { cn } from '~/lib/utils'
 import ScrollContainer from '../common/GridScrollContainer'
 import GridDesktopContainer from '../common/GridDesktopContainer'
 import { useGrid } from '../Provider'
+import { useSidebar } from '~/components/ui/sidebar'
 interface IProps {
   gridKey?: string;
   parentType?: string;
   grid_tabs?: any[];
   isLoading?: boolean;
   gridRecordClass?: string;
+  withVerticalTabs?: boolean;
 }
-function GridDesktop({ parentType, gridKey, grid_tabs, isLoading, gridRecordClass }: IProps) {
+function GridDesktop({ parentType, gridKey, grid_tabs, isLoading, gridRecordClass, withVerticalTabs }: IProps) {
 
   const { state } = useGrid()
+  const { open: sidebarOpen } = useSidebar();
 
   const { showPagination = true } = state?.config ?? {}
+  
+  const cardClass = withVerticalTabs ? sidebarOpen ? 'max-w-[calc(100vw-18rem)]' : 'max-w-[calc(100vw-7rem)]' : 'w-full'
 
   return (
-    <Card className='col-span-full border-0 shadow-none'>
+    <Card className={cn('col-span-full border-0 shadow-none', cardClass)}>
       <CardHeader>
         <Header gridKey={gridKey} grid_tabs={grid_tabs}/>
       </CardHeader>

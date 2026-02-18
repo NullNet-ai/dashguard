@@ -29,6 +29,7 @@ function MainServer({
   current_tab_id,
   gridParentClass = '',
   gridRecordClass = '',
+  withVerticalTabs = false,
 }: IPropsGrid) {
   const screenType = useScreenType();
   const isDesktop = screenType
@@ -63,6 +64,7 @@ function MainServer({
             gridKey={gridKey}
             grid_tabs={grid_tabs}
             gridRecordClass={gridRecordClass}
+            withVerticalTabs={withVerticalTabs}
           />
         </GridScrollView>
       ) : (
