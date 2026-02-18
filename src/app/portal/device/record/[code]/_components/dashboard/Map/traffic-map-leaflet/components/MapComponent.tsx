@@ -822,7 +822,7 @@ const MapComponent = ({ countryTrafficData, filterId }: Record<string, any>) => 
         } else {
           if (drawSessionRef.current !== drawSession) return;
           sourceCoordinates = OCEAN_SOURCE_COORDINATE;
-          sourceMarkerKey = `source:${conn.source_ip ?? ''}`;
+          sourceMarkerKey = `source:${conn.source_ip ?? ''}:${conn.destination_ip ?? ''}`;
           sourceMarker = acquireMarker(sourceMarkerKey, () =>
             L.marker(sourceCoordinates as [number, number], {
               icon: L.divIcon({
@@ -855,7 +855,7 @@ const MapComponent = ({ countryTrafficData, filterId }: Record<string, any>) => 
         } else {
           if (drawSessionRef.current !== drawSession) return;
           destinationCoordinates = OCEAN_DEST_COORDINATE;
-          destMarkerKey = `destination:${conn.destination_ip ?? ''}`;
+          destMarkerKey = `destination:${conn.destination_ip ?? ''}:${conn.source_ip ?? ''}`;
           destMarker = acquireMarker(destMarkerKey, () =>
             L.marker(destinationCoordinates as [number, number], {
               icon: L.divIcon({
