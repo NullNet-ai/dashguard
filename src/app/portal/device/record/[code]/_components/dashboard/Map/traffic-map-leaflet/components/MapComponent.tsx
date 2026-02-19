@@ -898,22 +898,22 @@ const MapComponent = ({ countryTrafficData, filterId }: Record<string, any>) => 
           trackTrafficLayer(sourceMarker);
         }
 
-        if (hasDest && destinationCoordinates && !destMarker) {
-          if (drawSessionRef.current !== drawSession) return;
-          destMarkerKey = `destination:${conn.destination_ip ?? ''}:${conn.source_ip ?? ''}`;
-          destMarker = acquireMarker(destMarkerKey, () =>
-            createSourceDestinationMarker(
-              map,
-              destinationCoordinates,
-              sourceLabel,
-              destLabel,
-              conn.trafficLevel,
-              conn.source_ip,
-              conn.destination_ip
-            )
-          );
-          trackTrafficLayer(destMarker);
-        }
+        // if (hasDest && destinationCoordinates && !destMarker) {
+        //   if (drawSessionRef.current !== drawSession) return;
+        //   destMarkerKey = `destination:${conn.destination_ip ?? ''}:${conn.source_ip ?? ''}`;
+        //   destMarker = acquireMarker(destMarkerKey, () =>
+        //     createSourceDestinationMarker(
+        //       map,
+        //       destinationCoordinates,
+        //       sourceLabel,
+        //       destLabel,
+        //       conn.trafficLevel,
+        //       conn.source_ip,
+        //       conn.destination_ip
+        //     )
+        //   );
+        //   trackTrafficLayer(destMarker);
+        // }
 
         // Always draw the curve line if both coordinates are present (including ocean-to-ocean)
         if (
