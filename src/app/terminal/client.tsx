@@ -14,16 +14,74 @@ export default function WebTerminal() {
   const [isConnectionClosed, setIsConnectionClosed] = useState(false) // Track WebSocket connection status
   const [connectionEndReason, setConnectionEndReason] = useState<'unexpected_end' | 'session_expired' | null>(null)
   const [deviceId, setDeviceId] = useState('')
+  const [terminalSessionType, setTerminalSessionType] = useState<'ssh' | 'tty' | null>(null)
+  const [terminalSessionToken, setTerminalSessionToken] = useState('')
   const createUpdate = api.deviceRemoteAccessSession.createUpdateDeviceRemoteAccessSessions.useMutation()
 
   useEffect(() => {
     setDeviceId(localStorage.getItem('device_id') || '')
+
+    const currentSessionKey = localStorage.getItem('current_terminal_session')
+    if (!currentSessionKey) {
+      setTerminalSessionType(null)
+      setTerminalSessionToken('')
+      return
+    }
+    const websocketUrl = localStorage.getItem(currentSessionKey)
+    if (!websocketUrl) {
+      setTerminalSessionType(null)
+      setTerminalSessionToken('')
+      return
+    }
+    try {
+      const url = new URL(websocketUrl)
+      const sessionToken = url.hostname.split('.')[0] || ''
+      setTerminalSessionToken(sessionToken.toUpperCase())
+
+      const storedSessionType = localStorage.getItem('current_terminal_session_type')
+      if (storedSessionType === 'ssh' || storedSessionType === 'tty') {
+        setTerminalSessionType(storedSessionType)
+      } else if (url.pathname.includes('/ssh')) {
+        setTerminalSessionType('ssh')
+      } else if (url.pathname.includes('/tty')) {
+        setTerminalSessionType('tty')
+      } else {
+        setTerminalSessionType(null)
+      }
+    } catch {
+      setTerminalSessionToken('')
+      setTerminalSessionType(null)
+    }
   }, [])
 
   const { data: lastHeartbeat, isLoading: isLastHeartbeatLoading } =
     api.deviceHeartbeat.getLastHeartbeat.useQuery(
       { device_id: deviceId },
       { enabled: Boolean(deviceId), refetchInterval: 1000 },
+    )
+
+  const remoteAccessSessionQueryInput =
+    terminalSessionType && terminalSessionToken
+      ? {
+          remote_access_type: terminalSessionType,
+          remote_access_session: terminalSessionToken,
+        }
+      : {
+          remote_access_type: 'ssh' as const,
+          remote_access_session: '',
+        }
+
+  const { data: remoteAccessSessionStatus } =
+    api.deviceRemoteAccessSession.getRemoteAccessSessionStatus.useQuery(
+      remoteAccessSessionQueryInput,
+      {
+        enabled: Boolean(terminalSessionType && terminalSessionToken && connectionEndReason !== 'session_expired'),
+        refetchInterval: (data) => {
+          const status = String(data?.session_status || '').toLowerCase()
+          if (status === 'terminated' || status === 'expired') return false
+          return 2000
+        },
+      },
     )
 
   const handleReconnect = async () => {
@@ -151,10 +209,15 @@ export default function WebTerminal() {
     Boolean(deviceId) &&
     !isLastHeartbeatLoading && !lastHeartbeatMs
 
-  const shouldShowPopup = isConnectionClosed || isDeviceOfflineOrMissing
-  const shouldShowReconnectButton = connectionEndReason !== 'session_expired'
+  const isSessionTerminated =
+    String(remoteAccessSessionStatus?.session_status || '').toLowerCase() === 'terminated'
+
+  const shouldShowPopup = isSessionTerminated || isConnectionClosed || isDeviceOfflineOrMissing
+  const shouldShowReconnectButton = !isSessionTerminated && connectionEndReason !== 'session_expired'
   const popupMessage =
-    connectionEndReason === 'session_expired'
+    isSessionTerminated
+      ? 'Your session has terminated. Please start a new session to keep going.'
+      : connectionEndReason === 'session_expired'
       ? 'Your session has expired. Please start a new session to keep going.'
       : isDeviceOfflineOrMissing
         ? 'The connection was closed. Please restart pfSense or the WallGuard agent, then try connecting again.'

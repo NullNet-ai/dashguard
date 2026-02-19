@@ -160,6 +160,40 @@ export const deviceRemoteAccessSessionRouter = createTRPCRouter({
       return uniqBy(res_data, 'label')
     }
     ),
+  getRemoteAccessSessionStatus: privateProcedure
+    .input(
+      z.object({
+        remote_access_type: z.enum(['ssh', 'tty']),
+        remote_access_session: z.string(),
+      }),
+    )
+    .query(async ({ input, ctx }) => {
+      const baseEntity =
+        input.remote_access_type === 'ssh'
+          ? 'device_ssh_sessions'
+          : 'device_tty_sessions'
+
+      const res = await ctx.dnaClient
+        .findAll({
+          entity: baseEntity,
+          token: ctx.token.value,
+          query: {
+            pluck: ['id', 'session_status'],
+            advance_filters: createAdvancedFilter({ id: input.remote_access_session }),
+            order: {
+              limit: 1,
+              by_field: 'created_date',
+              by_direction: EOrderDirection.DESC,
+            },
+          },
+        })
+        .execute()
+
+      return {
+        success: true,
+        session_status: res?.data?.[0]?.session_status ?? null,
+      }
+    }),
   mainGrid: privateProcedure
   // Define input using zod for validation
     .input(ZodItems.merge(z.object({ device_code: z.string().optional() })))
