@@ -262,9 +262,9 @@ export default function RemoteAccessDetails(props: IFormProps) {
           id: 'device_id',
           formType: 'select',
           name: 'device_id',
-          label: 'Devices',
+          label: 'Target Device',
           description: 'Field Description',
-          placeholder: 'Enter value...',
+          placeholder: 'Select a target device...',
           fieldClassName: '',
           readonly: !!record_data?.device_id || false,
           required: true,
@@ -300,7 +300,7 @@ export default function RemoteAccessDetails(props: IFormProps) {
           label: 'Service',
           // @ts-expect-error - No type yet
           description: 'Field Description',
-          placeholder: 'Enter value...',
+          placeholder: 'Select a service...',
           fieldClassName: '',
           readonly: false,
           required: true,
@@ -340,7 +340,7 @@ export default function RemoteAccessDetails(props: IFormProps) {
         ],
         device_service_id: filteredDeviceServices,
       }}
-      formSaveButtonTitle='Connect'
+      formSaveButtonTitle='Start Session'
     />
   )
 }
