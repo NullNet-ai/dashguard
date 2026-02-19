@@ -137,10 +137,19 @@ export default async function Page() {
     defaultValues: {
       entity_prefix: 'RA',
     },
-    disableDefaultAction: true,
     enableRowClick: false,
     customRowAction: CustomRowActions,
     enableRowSelection: false,
+    rowActions: {
+      edit: {
+        state: {
+          hidden: {
+            match_condition: 'match_any',
+            conditions: [{ accessor: '', value: [null] }],
+          },
+        },
+      },
+    },
   } as const;
 
   const tabs = [
