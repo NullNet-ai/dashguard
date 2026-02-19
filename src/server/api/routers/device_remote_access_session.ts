@@ -256,7 +256,7 @@ export const deviceRemoteAccessSessionRouter = createTRPCRouter({
         pluck = [],
         sorting = [],
         // @ts-expect-error - No type yet
-        is_case_sensitive_sorting = 'false',
+        is_case_sensitive_sorting = 'true',
         device_code,
       } = input
       const baseEntity = input?.entity || 'device_tunnels'
@@ -364,6 +364,25 @@ export const deviceRemoteAccessSessionRouter = createTRPCRouter({
 
       console.log('$$$ [device_remote_access_session] - mainGrid - _advance_filters', _advance_filters)
 
+      const isCaseSensitiveSorting = is_case_sensitive_sorting === 'true'
+      const singleSort = sorting?.length === 1 ? sorting[0] : undefined
+      const singleSortKey = (singleSort as any)?.sort_key ?? (singleSort as any)?.id
+      const resolvedOrderByField =
+        sorting?.length === 1
+          ? singleSort?.type === 'boolean'
+            ? 'code'
+            : typeof singleSortKey === 'string' && singleSortKey.includes('.')
+              ? singleSortKey
+              : singleSortKey || 'code'
+          : 'code'
+
+      const resolvedOrderByDirection =
+        sorting?.length === 1
+          ? singleSort?.desc
+            ? EOrderDirection.DESC
+            : EOrderDirection.ASC
+          : EOrderDirection.DESC
+
       const query = ctx.dnaClient.findAll({
         entity: baseEntity,
         token: ctx.token.value,
@@ -380,13 +399,18 @@ export const deviceRemoteAccessSessionRouter = createTRPCRouter({
                 : (input.current || 1) * (input.limit || 100)
                   - (input.limit || 100),
             limit: input.limit || 1,
-            by_field: 'code',
-            by_direction: EOrderDirection.DESC,
+            by_field: resolvedOrderByField,
+            by_direction: resolvedOrderByDirection,
+            is_case_sensitive_sorting: isCaseSensitiveSorting,
           },
-          // multiple_sort:
-          //   sorting?.length
-          //     ? formatSorting(sorting, entity, is_case_sensitive_sorting)
-          //     : [],
+          multiple_sort:
+            sorting?.length && sorting?.length > 1
+              ? formatSorting(
+                  sorting as any,
+                  baseEntity,
+                  isCaseSensitiveSorting ? 'true' : '',
+                )
+              : [],
             date_format: 'YYYY/mm/dd' as EDateFormats,
             concatenate_fields: [
             {

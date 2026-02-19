@@ -248,7 +248,11 @@ export const gridRouter = createTRPCRouter({
                   (input.limit || 100),
             limit: input.limit || 1,
             by_field:
-              input?.sorting?.length === 1 ? input.sorting[0]?.type === 'boolean' ? 'code' : input.sorting[0]?.id : 'code',
+              input?.sorting?.length === 1
+                ? input.sorting[0]?.type === 'boolean'
+                  ? 'code'
+                  : (input.sorting[0] as any)?.sort_key ?? input.sorting[0]?.id
+                : 'code',
             by_direction:
               input?.sorting?.length === 1
                 ? input.sorting[0]?.desc

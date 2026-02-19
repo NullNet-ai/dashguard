@@ -76,8 +76,8 @@ export default function WebTerminal() {
       remoteAccessSessionQueryInput,
       {
         enabled: Boolean(terminalSessionType && terminalSessionToken && connectionEndReason !== 'session_expired'),
-        refetchInterval: (data) => {
-          const status = String(data?.session_status || '').toLowerCase()
+        refetchInterval: (query) => {
+          const status = String((query.state.data as any)?.session_status || '').toLowerCase()
           if (status === 'terminated' || status === 'expired') return false
           return 2000
         },
