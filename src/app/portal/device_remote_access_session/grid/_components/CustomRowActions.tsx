@@ -49,41 +49,48 @@ export const CustomRowActions = ({ row }: { row: any }) => {
       )
   }
 
-  const reconnect_status = ['terminated']
-
-  const disabled = reconnect_status?.includes(session_status?.toLowerCase())
-
-  if (['terminated', 'expired'].includes(session_status?.toLowerCase())) {
-    return <>-</>
-  }
+  const disabled = ['terminated', 'expired'].includes(session_status?.toLowerCase())
   
   return (
-    <div className="flex gap-2">
+    <div className="flex gap-0">
       <TooltipProvider >
-          <Tooltip delayDuration={0}>
-            <TooltipTrigger>
-            <Button disabled={disabled} variant="ghost" onClick={() => handleOpenSideDrawer()}>
-            <PlugZapIcon className='h-4 w-4 text-success' />
+        {disabled ? (
+          <Button disabled={disabled} variant="ghost" onClick={() => handleOpenSideDrawer()}>
+            <PlugZapIcon className="h-4 w-4 text-muted-foreground" />
           </Button>
+        ) : (
+          <Tooltip delayDuration={0}>
+            <TooltipTrigger asChild>
+              <Button disabled={disabled} variant="ghost" onClick={() => handleOpenSideDrawer()}>
+                <PlugZapIcon className="h-4 w-4 text-success" />
+              </Button>
+            </TooltipTrigger>
             <TooltipContent side="left">
               <div className="text-sm">
-                <span className='text-justify'>{'Reconnect'}</span>
+                <span className="text-justify">{'Reconnect'}</span>
               </div>
             </TooltipContent>
-          </TooltipTrigger>
-        </Tooltip>
-        <Tooltip delayDuration={0}>
-          <TooltipTrigger>
+          </Tooltip>
+        )}
+
+        {disabled ? (
           <Button disabled={disabled} variant="ghost" onClick={() => handleDisconnect()}>
-            <UnplugIcon className='h-4 w-4 text-danger' />
+            <UnplugIcon className="h-4 w-4 text-muted-foreground" />
           </Button>
-          <TooltipContent side="left">
-            <div className="text-sm">
-              <span className='text-justify'>{'Disconnect'}</span>
-            </div>
-          </TooltipContent>
-        </TooltipTrigger>
-      </Tooltip>
+        ) : (
+          <Tooltip delayDuration={0}>
+            <TooltipTrigger asChild>
+              <Button disabled={disabled} variant="ghost" onClick={() => handleDisconnect()}>
+                <UnplugIcon className="h-4 w-4 text-danger" />
+              </Button>
+            </TooltipTrigger>
+            <TooltipContent side="left">
+              <div className="text-sm">
+                <span className="text-justify">{'Disconnect'}</span>
+              </div>
+            </TooltipContent>
+          </Tooltip>
+        )}
       </TooltipProvider>
     </div>
   )
