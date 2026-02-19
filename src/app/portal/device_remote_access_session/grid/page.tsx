@@ -140,17 +140,8 @@ export default async function Page() {
     enableRowClick: false,
     customRowAction: CustomRowActions,
     enableRowSelection: false,
-    rowActions: {
-      edit: {
-        state: {
-          hidden: {
-            match_condition: 'match_any',
-            conditions: [{ accessor: '', value: [null] }],
-          },
-        },
-      },
-    },
-  } as const;
+    disableDefaultAction: true,
+  };
 
   const tabs = [
     {
