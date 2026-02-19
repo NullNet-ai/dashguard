@@ -72,7 +72,7 @@ function StateTabList({
   }, [tabs, activeTab, shouldCollapse]);
 
   const TabsTriggerWrapper = orientation === 'vertical' ? Card : React.Fragment;
-  const tabsTriggerWrapperProps = orientation === 'vertical' ? { className: 'border-none shadow-none overflow-hidden' } : {};
+  const tabsTriggerWrapperProps = orientation === 'vertical' ? { className: 'border-none shadow-none' } : {};
 
   // Reusable function to render tab triggers
   const renderTabTriggers = () => {
@@ -165,7 +165,7 @@ function StateTabList({
           position={position}
           className={cn(
             orientation === 'horizontal' && 'mb-4',
-            orientation === 'vertical' && 'h-auto min-w-fit flex-col gap-2',
+            orientation === 'vertical' && 'h-auto min-w-fit flex-col',
             // Improved centering for collapsed sidebar (desktop only)
             shouldCollapse && 'w-full items-center justify-center',
             tablistClassName,
