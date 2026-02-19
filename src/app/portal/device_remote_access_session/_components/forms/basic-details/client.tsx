@@ -2,6 +2,7 @@
 
 import { z } from 'zod'
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import Image from 'next/image'
 
 import { FormBuilder } from '~/components/platform/FormBuilder'
 import { type IHandleSubmit } from '~/components/platform/FormBuilder/types'
@@ -340,6 +341,15 @@ export default function RemoteAccessDetails(props: IFormProps) {
         ],
         device_service_id: filteredDeviceServices,
       }}
+      formSaveIcon={(
+        <Image
+          src="/remote_access.png"
+          alt=""
+          width={16}
+          height={16}
+          className="h-4 w-4 brightness-0 invert"
+        />
+      )}
       formSaveButtonTitle='Start Session'
     />
   )
