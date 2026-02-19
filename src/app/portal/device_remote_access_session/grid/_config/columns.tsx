@@ -13,16 +13,6 @@ const uiGridColumns = [
     },
   },
   {
-    header: 'Type',
-    accessorKey: 'tunnel_type',
-    sortKey: 'tunnel_type',
-    search_config: {
-      entity: 'device_tunnels',
-      operator: 'like',
-      field: 'tunnel_type',
-    },
-  },
-  {
     header: 'Address',
     accessorKey: 'address',
     sortKey: 'device_services.address',
@@ -129,16 +119,6 @@ export const sshGridColumns = [
     },
   },
   {
-    header: 'Type',
-    accessorKey: 'tunnel_type',
-    sortKey: 'device_tunnels.tunnel_type',
-    search_config: {
-      entity: 'device_tunnels',
-      operator: 'like',
-      field: 'tunnel_type',
-    },
-  },
-  {
     header: 'Address',
     accessorKey: 'address',
     sortKey: 'device_services.address',
@@ -231,16 +211,6 @@ export const ttyGridColumns = [
     search_config: {
       entity: 'device_tty_sessions',
       operator: 'like',
-    },
-  },
-  {
-    header: 'Type',
-    accessorKey: 'tunnel_type',
-    sortKey: 'device_tunnels.tunnel_type',
-    search_config: {
-      entity: 'device_tunnels',
-      operator: 'like',
-      field: 'tunnel_type',
     },
   },
   {
