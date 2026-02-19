@@ -578,7 +578,7 @@ export const deviceRemoteAccessSessionRouter = createTRPCRouter({
           // type: formatString(remote_access_type),
           address: device_services?.address,
           port: device_services?.port,
-          device_name: formatString(devices?.device_name),
+          device_name: devices?.device_name,
           created_by: !!created_by?.first_name || !!created_by?.last_name
             ? `${created_by?.first_name} ${created_by?.last_name}`
             : null,
