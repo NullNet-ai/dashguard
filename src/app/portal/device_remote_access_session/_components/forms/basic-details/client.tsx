@@ -47,6 +47,29 @@ export default function RemoteAccessDetails(props: IFormProps) {
     },
   )
 
+  const { data: deviceTunnels } = api.deviceRemoteAccessSession.fetchDeviceTunnels.useQuery(
+    {
+      limit: 500,
+      device_code: deviceCode,
+      device_id: effectiveDeviceId,
+      tunnel_types: ['http', 'https'],
+      status: 'Active',
+    },
+    {
+      refetchInterval: 60_000,
+      enabled: !!effectiveDeviceId,
+    },
+  )
+
+  const uiTunnelServiceIds = useMemo(() => {
+    const tunnels = Array.isArray(deviceTunnels) ? deviceTunnels : []
+    return new Set(
+      tunnels
+        .map((t: any) => t?.service_id)
+        .filter(Boolean),
+    )
+  }, [deviceTunnels])
+
   const filteredDeviceServices = useMemo(() => {
     const services = Array.isArray(deviceServices) ? deviceServices : []
 
@@ -57,11 +80,15 @@ export default function RemoteAccessDetails(props: IFormProps) {
     }
 
     if (remoteAccessType === 'ui') {
-      return services.filter((e: any) => e.item?.protocol === 'http' || e.item?.protocol === 'https')
+      return services.filter((e: any) => {
+        const protocol = e.item?.protocol
+        if (protocol !== 'http' && protocol !== 'https') return false
+        return !uiTunnelServiceIds.has(e.item?.id)
+      })
     }
 
     return services
-  }, [deviceServices, remoteAccessType])
+  }, [deviceServices, remoteAccessType, uiTunnelServiceIds])
 
   const handleSave = async ({
     data,

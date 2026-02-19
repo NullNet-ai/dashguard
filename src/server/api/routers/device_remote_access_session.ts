@@ -54,6 +54,58 @@ export const deviceRemoteAccessSessionRouter = createTRPCRouter({
       return res_data
     }
     ),
+  fetchDeviceTunnels: privateProcedure
+    .input(
+      z.object({
+        device_id: z.string(),
+        device_code: z.string().optional(),
+        limit: z.number().optional(),
+        tunnel_types: z.array(z.string()).optional(),
+        status: z.string().optional(),
+      }),
+    )
+    .query(async ({ input, ctx }) => {
+      const { limit, device_id, device_code, tunnel_types, status = 'Active' } = input
+
+      let realDeviceId = device_id
+      if (device_code) {
+        const device = await ctx.dnaClient
+          .findAll({
+            entity: 'devices',
+            token: ctx.token.value,
+            query: {
+              pluck: ['id'],
+              advance_filters: createAdvancedFilter({ code: device_code }),
+            },
+          })
+          .execute()
+        realDeviceId = device?.data?.[0]?.id || ''
+      }
+
+      const res = await ctx.dnaClient
+        .findAll({
+          entity: 'device_tunnels',
+          token: ctx.token.value,
+          query: {
+            pluck: ['id', 'service_id', 'tunnel_type', 'status', 'device_id'],
+            advance_filters: createAdvancedFilter({
+              device_id: realDeviceId,
+              ...(status ? { status } : {}),
+            }),
+            order: {
+              limit: limit || 200,
+              by_field: 'created_date',
+              by_direction: EOrderDirection.DESC,
+            },
+          },
+        })
+        .execute()
+
+      const tunnels = Array.isArray(res?.data) ? res.data : []
+      if (!Array.isArray(tunnel_types) || tunnel_types.length === 0) return tunnels
+
+      return tunnels.filter((t: Record<string, any>) => tunnel_types.includes(t?.tunnel_type))
+    }),
   fetchDeviceRemoteAccess: privateProcedure
     .input(
       z.object({
