@@ -52,6 +52,18 @@ export default function GroupAdvFilter({ group, groupIndex, handleUpdateGroupOpe
                 <GroupAdvOperator group={group} groupIndex={groupIndex} handleUpdateGroupOperator={handleUpdateGroupOperator} />
               )}
             </div>
+          </div>
+
+          <FilterGroup
+            filter_type={ filter_type }
+            form={ form }
+            groupIndex={ groupIndex }
+            key={groupIndex}
+            onRemoveFilter = { (index) => handleRemoveFilter(groupIndex, index) }
+            onUpdateJunctionOperator= {
+              handleUpdateJunctionOperator as any
+            }
+          />
 
             <div className="flex items-center gap-2">
 
@@ -68,20 +80,6 @@ export default function GroupAdvFilter({ group, groupIndex, handleUpdateGroupOpe
                   </Button> */}
                 </>
             </div>
-          </div>
-
-          <FilterGroup
-            filter_type={ filter_type }
-            form={ form }
-            groupIndex={ groupIndex }
-            key={groupIndex}
-            onRemoveFilter = { (index) => handleRemoveFilter(groupIndex, index) }
-
-            onUpdateJunctionOperator= {
-              handleUpdateJunctionOperator as any
-            }
-
-          />
         </div>
       </div>
     </div>

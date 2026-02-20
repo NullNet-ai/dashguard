@@ -90,7 +90,7 @@ const ComboBox = React.forwardRef<HTMLDivElement, ComboBoxProps>(
           value={inputValue}
           onChange={handleInputChange}
           placeholder={inputPlaceholder}
-          className="border-0 rounded-l-none focus-visible:ring-0 shadow-none rounded-r-md"
+          className="border-0 rounded-md focus-visible:ring-0 shadow-none rounded-r-md"
           readOnly={readonly}
         />
         <Select value={selectValue} onValueChange={handleSelectChange} disabled={disabled || readonly}  >

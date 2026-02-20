@@ -139,11 +139,11 @@ export const FilterGroup = ({ form, groupIndex, filter_type, onRemoveFilter, onU
 
             return (
               <div
-                className="grid grid-cols-[1fr_1fr_2fr_auto] items-start gap-2"
                 key={field.id}
+                className={`grid grid-cols-[1fr_1fr_2fr_auto] items-end gap-1 ${index > 0 ? 'grid-cols-[auto_1fr_1fr_2fr_auto]' : 'grid-cols-[1fr_1fr_2fr_auto]'}`}
               >
-                {(((groupIndex == 1 && index == 0)) || (index > 0 && (!default_filter_last_operation))) && field.type === 'operator' && (
-                  <div className="col-span-4 mt-[7px]">
+
+                {index > 0 && fields?.[groupIndex]?.filters?.[index - 1].type === 'operator' && (
                     <Select
                       disabled = { true }
                       value = {
@@ -153,7 +153,7 @@ export const FilterGroup = ({ form, groupIndex, filter_type, onRemoveFilter, onU
                       }
                       onValueChange = { (operator) => onUpdateJunctionOperator(index - 1, operator)}
                     >
-                      <SelectTrigger className="w-[100px] border-gray-200 bg-white">
+                      <SelectTrigger className="h-9 border-gray-200 bg-white">
                         <SelectValue placeholder="AND" />
                       </SelectTrigger>
                       <SelectContent className="z-[9999]">
@@ -161,7 +161,6 @@ export const FilterGroup = ({ form, groupIndex, filter_type, onRemoveFilter, onU
                         <SelectItem value="or">OR</SelectItem>
                       </SelectContent>
                     </Select>
-                  </div>
                 )}
 
                 {required_fields?.includes(field?.field)
