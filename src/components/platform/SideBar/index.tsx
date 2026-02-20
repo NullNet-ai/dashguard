@@ -49,6 +49,39 @@ import {
   TooltipTrigger,
 } from '~/components/ui/tooltip'
 
+const isImageIcon = (icon?: string) => {
+  if (!icon) return false
+  const lower = icon.toLowerCase()
+  return (
+    lower.startsWith('/') &&
+    (lower.endsWith('.png') ||
+      lower.endsWith('.svg') ||
+      lower.endsWith('.jpg') ||
+      lower.endsWith('.jpeg') ||
+      lower.endsWith('.webp') ||
+      lower.endsWith('.gif'))
+  )
+}
+
+const ImageMaskIcon = ({
+  src,
+  className,
+}: {
+  src: string
+  className?: string
+}) => {
+  return (
+    <span
+      aria-hidden={true}
+      style={{ WebkitMaskImage: `url(${src})`, maskImage: `url(${src})` }}
+      className={cn(
+        'inline-block bg-current [-webkit-mask-repeat:no-repeat] [-webkit-mask-position:center] [-webkit-mask-size:contain] [mask-repeat:no-repeat] [mask-position:center] [mask-size:contain]',
+        className,
+      )}
+    />
+  )
+}
+
 export default function AppSideBar(config: ISideBarProps) {
   const {
     headerComponent,
@@ -322,6 +355,7 @@ export default function AppSideBar(config: ISideBarProps) {
                       // @ts-expect-error - TS doesn't know about dynamic imports
                       // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, import/namespace
                       const ICON = _ICON?.[item?.icon] ?? ChevronUpDownIcon
+                      const iconIsImage = isImageIcon(item?.icon)
                       return (
                         <DropdownMenuItem
                           key={index}
@@ -329,7 +363,11 @@ export default function AppSideBar(config: ISideBarProps) {
                             'sdnavmenu-ftr-' + item.title?.split('').join(''),
                           )}
                         >
-                          <ICON className="mr-2 h-5 w-5" />
+                          {iconIsImage ? (
+                            <ImageMaskIcon src={item.icon ?? ''} className="mr-2 h-5 w-5" />
+                          ) : (
+                            <ICON className="mr-2 h-5 w-5" />
+                          )}
                           {item.title}
                         </DropdownMenuItem>
                       )

@@ -40,6 +40,39 @@ interface IProps {
   screenType: string;
 }
 
+const isImageIcon = (icon?: string) => {
+  if (!icon) return false;
+  const lower = icon.toLowerCase();
+  return (
+    lower.startsWith("/") &&
+    (lower.endsWith(".png") ||
+      lower.endsWith(".svg") ||
+      lower.endsWith(".jpg") ||
+      lower.endsWith(".jpeg") ||
+      lower.endsWith(".webp") ||
+      lower.endsWith(".gif"))
+  );
+};
+
+const ImageMaskIcon = ({
+  src,
+  className,
+}: {
+  src: string;
+  className?: string;
+}) => {
+  return (
+    <span
+      aria-hidden={true}
+      style={{ WebkitMaskImage: `url(${src})`, maskImage: `url(${src})` }}
+      className={cn(
+        'inline-block bg-current [-webkit-mask-repeat:no-repeat] [-webkit-mask-position:center] [-webkit-mask-size:contain] [mask-repeat:no-repeat] [mask-position:center] [mask-size:contain]',
+        className,
+      )}
+    />
+  );
+};
+
 export default function GroupMenu({ groups, screenType }: IProps) {
   // State to track favorites for each submenu item
 
@@ -94,6 +127,7 @@ export default function GroupMenu({ groups, screenType }: IProps) {
       {groups?.map((item, index) => {
         // @ts-expect-error - TS doesn't know about dynamic imports
         const ICON = _ICON?.[item?.icon] ?? ChevronUpDownIcon;
+        const iconIsImage = isImageIcon(item?.icon);
         return (
           <SidebarMenu key={index} className={isMobile ? "px-2" : ""}>
             <Collapsible
@@ -128,7 +162,17 @@ export default function GroupMenu({ groups, screenType }: IProps) {
                       >
                         <div className='relative flex gap-2'>
                           {item.icon && (
-                            <ICON className={`!size-6 text-slate-400 ${open ? 'mr-1' : 'mr-0'}`} />
+                            iconIsImage ? (
+                              <ImageMaskIcon
+                                src={item.icon ?? ""}
+                                className={cn('h-6 w-6 text-slate-400', {
+                                  'mr-1': open,
+                                  'mr-0': !open,
+                                })}
+                              />
+                            ) : (
+                              <ICON className={`!size-6 text-slate-400 ${open ? 'mr-1' : 'mr-0'}`} />
+                            )
                           )}
                           {(open &&
                             (sType === "sm" || sType === "md" || sType === "xs")) ||

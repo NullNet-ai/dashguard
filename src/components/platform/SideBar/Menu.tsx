@@ -33,6 +33,39 @@ interface IProps {
   screenType?: string;
 }
 
+const isImageIcon = (icon?: string) => {
+  if (!icon) return false;
+  const lower = icon.toLowerCase();
+  return (
+    lower.startsWith('/') &&
+    (lower.endsWith('.png') ||
+      lower.endsWith('.svg') ||
+      lower.endsWith('.jpg') ||
+      lower.endsWith('.jpeg') ||
+      lower.endsWith('.webp') ||
+      lower.endsWith('.gif'))
+  );
+};
+
+const ImageMaskIcon = ({
+  src,
+  className,
+}: {
+  src: string;
+  className?: string;
+}) => {
+  return (
+    <span
+      aria-hidden={true}
+      style={{ WebkitMaskImage: `url(${src})`, maskImage: `url(${src})` }}
+      className={cn(
+        'inline-block bg-current [-webkit-mask-repeat:no-repeat] [-webkit-mask-position:center] [-webkit-mask-size:contain] [mask-repeat:no-repeat] [mask-position:center] [mask-size:contain]',
+        className,
+      )}
+    />
+  );
+};
+
 export default function Menu({ item, screenType }: IProps) {
   const pathname = usePathname();
   // eslint-disable-next-line no-unsafe-optional-chaining
@@ -56,6 +89,7 @@ export default function Menu({ item, screenType }: IProps) {
       ? // eslint-disable-next-line import/namespace
         _ICON[item.icon as keyof typeof _ICON]
       : ChevronUpDownIcon;
+  const iconIsImage = isImageIcon(item?.icon);
 
   const isActive = useMemo(() => {
     // eslint-disable-next-line no-unsafe-optional-chaining
@@ -100,7 +134,14 @@ export default function Menu({ item, screenType }: IProps) {
             <>
               <CollapsibleTrigger asChild={true}>
                 <SidebarMenuButton tooltip={!isMobile ? item.title : undefined}>
-                  <ICON className="mr-1 !size-6" />
+                  {iconIsImage ? (
+                    <ImageMaskIcon
+                      src={item.icon ?? ''}
+                      className="mr-1 h-6 w-6 text-slate-400"
+                    />
+                  ) : (
+                    <ICON className="mr-1 !size-6" />
+                  )}
                   <span>{item.title}</span>
                   <Link
                     href={'#'}
@@ -188,11 +229,22 @@ export default function Menu({ item, screenType }: IProps) {
                       `sdnavmenu-itm-${item.title}-btn`,
                     )}
                   >
-                    <ICON className={cn('mr-1 !size-6 text-slate-400', {
-                        'text-primary': isActive,
-                        'mr-0': !open,
-                      })}
-                    />
+                    {iconIsImage ? (
+                      <ImageMaskIcon
+                        src={item.icon ?? ''}
+                        className={cn('mr-1 h-6 w-6 text-slate-400', {
+                          'text-primary': isActive,
+                          'mr-0': !open,
+                        })}
+                      />
+                    ) : (
+                      <ICON
+                        className={cn('mr-1 !size-6 text-slate-400', {
+                          'text-primary': isActive,
+                          'mr-0': !open,
+                        })}
+                      />
+                    )}
                     {(open || openMobile) && (
                       <span className={`font-medium text-md leading-6`}>{displayText}</span>
                     )}

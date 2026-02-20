@@ -26,6 +26,39 @@ interface IProps {
   index: number;
 }
 
+const isImageIcon = (icon?: string) => {
+  if (!icon) return false;
+  const lower = icon.toLowerCase();
+  return (
+    lower.startsWith('/') &&
+    (lower.endsWith('.png') ||
+      lower.endsWith('.svg') ||
+      lower.endsWith('.jpg') ||
+      lower.endsWith('.jpeg') ||
+      lower.endsWith('.webp') ||
+      lower.endsWith('.gif'))
+  );
+};
+
+const ImageMaskIcon = ({
+  src,
+  className,
+}: {
+  src: string;
+  className?: string;
+}) => {
+  return (
+    <span
+      aria-hidden={true}
+      style={{ WebkitMaskImage: `url(${src})`, maskImage: `url(${src})` }}
+      className={cn(
+        'inline-block bg-current [-webkit-mask-repeat:no-repeat] [-webkit-mask-position:center] [-webkit-mask-size:contain] [mask-repeat:no-repeat] [mask-position:center] [mask-size:contain]',
+        className,
+      )}
+    />
+  );
+};
+
 function GroupSubMenu(props: IProps) {
   const { subItem, index, item } = props ?? {};
 
@@ -38,6 +71,7 @@ function GroupSubMenu(props: IProps) {
   const refs = useRef<any[]>([]);
   const [favorites, setFavorites] = useState<{ [key: string]: boolean }>({});
 
+  const iconIsImage = isImageIcon(subItem?.icon);
   const SUB_ICON =
     // @ts-expect-error - TS doesn't know about dynamic imports
     _ICON?.[subItem?.icon] ?? ChevronUpDownIcon;
@@ -119,13 +153,22 @@ function GroupSubMenu(props: IProps) {
               }}
             >
               {subItem?.icon && (
-                <SUB_ICON
-                  className={cn('mr-1 !size-6 text-slate-400',
-                    {
+                iconIsImage ? (
+                  <ImageMaskIcon
+                    src={subItem.icon ?? ''}
+                    className={cn('mr-1 h-6 w-6 text-slate-400', {
                       'text-primary': isActive,
-                    }
-                  )}
-                />
+                    })}
+                  />
+                ) : (
+                  <SUB_ICON
+                    className={cn('mr-1 !size-6 text-slate-400',
+                      {
+                        'text-primary': isActive,
+                      }
+                    )}
+                  />
+                )
               )}
               {((open && (sType === 'sm' || sType === 'md' || sType === 'xs')) ||
                 openMobile ||
