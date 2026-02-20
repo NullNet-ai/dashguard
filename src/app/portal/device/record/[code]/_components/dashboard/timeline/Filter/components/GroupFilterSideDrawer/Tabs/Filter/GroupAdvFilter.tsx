@@ -55,20 +55,18 @@ export default function GroupAdvFilter({ group, groupIndex, handleUpdateGroupOpe
 
             <div className="flex items-center gap-2">
 
-              {groupIndex > 0 && (
                 <>
                   <FilterGroupActions
                     onAppendFilter={() => handleAppendFilter(groupIndex) }
                   />
-                  <Button
+                  {/* <Button
                     size = "sm"
                     variant = "ghost"
                     onClick = { () => handleRemoveFilterGroup(groupIndex)}
                   >
                     <Trash2 className="h-4 w-4 text-red-600" />
-                  </Button>
+                  </Button> */}
                 </>
-              )}
             </div>
           </div>
 
