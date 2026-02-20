@@ -35,6 +35,7 @@ export default function FilterContent({ filter_type }: { filter_type: string }) 
       default_group_item: {
         ...filterGroups[0],
         filters: [
+          // @ts-expect-error - No type yet
           ...filterGroups[0]?.filters,
           ...(filterGroups.slice(1)[0]?.filters || []),
         ]
