@@ -19,13 +19,12 @@ const FormSchema = z.object({
 
 export default function RemoteAccessDetails(props: IFormProps) {
   // @ts-expect-error - No type yet
-  const { record_data, deviceId, deviceCode, selectedTab } = props ?? {}
+  const { record_data, deviceId, deviceCode } = props ?? {}
   const [selectedDeviceId, setSelectedDeviceId] = useState<string | undefined>(
     record_data?.device_id ?? undefined,
   )
-  const hideRemoteAccessTypeField = selectedTab === 'ui' || selectedTab === 'ssh' || selectedTab === 'tty'
   const [remoteAccessType, setRemoteAccessType] = useState<string | undefined>(
-    hideRemoteAccessTypeField ? selectedTab : record_data?.remote_access_type,
+    record_data?.remote_access_type,
   )
   const toast = useToast()
   const createUpdate = api.deviceRemoteAccessSession.createUpdateDeviceRemoteAccessSessions.useMutation()
@@ -84,7 +83,7 @@ export default function RemoteAccessDetails(props: IFormProps) {
       return services.filter((e: any) => {
         const protocol = e.item?.protocol
         if (protocol !== 'http' && protocol !== 'https') return false
-        return !uiTunnelServiceIds.has(e.item?.id)
+        return true
       })
     }
 
@@ -182,7 +181,7 @@ export default function RemoteAccessDetails(props: IFormProps) {
   }, [])
 
   const handleDataChange = useCallback((values: any) => {
-    const nextRemoteAccessType = values?.remote_access_type ?? (hideRemoteAccessTypeField ? selectedTab : undefined)
+    const nextRemoteAccessType = values?.remote_access_type
     if (nextRemoteAccessType !== undefined) {
       setRemoteAccessType(nextRemoteAccessType)
     }
@@ -190,7 +189,7 @@ export default function RemoteAccessDetails(props: IFormProps) {
     if (!deviceId && !deviceCode) {
       setSelectedDeviceId(values?.device_id)
     }
-  }, [deviceCode, deviceId, hideRemoteAccessTypeField, selectedTab])
+  }, [deviceCode, deviceId])
 
   const prevDeviceKeyRef = useRef<string | undefined>(undefined)
 
@@ -221,13 +220,7 @@ export default function RemoteAccessDetails(props: IFormProps) {
     }
   }, [clearSelectedDeviceService, filteredDeviceServices, remoteAccessType])
 
-  const defaultValues = useMemo(() => {
-    if (!hideRemoteAccessTypeField) return record_data
-    return {
-      ...(record_data ?? {}),
-      remote_access_type: selectedTab,
-    }
-  }, [hideRemoteAccessTypeField, record_data, selectedTab])
+  const defaultValues = useMemo(() => record_data, [record_data])
 
   return (
     <FormBuilder
@@ -277,8 +270,6 @@ export default function RemoteAccessDetails(props: IFormProps) {
         }]),
         {
           id: 'remote_access_type',
-        ...(hideRemoteAccessTypeField ? [] : [{
-          id: 'remote_access_type',
           formType: 'select',
           name: 'remote_access_type',
           label: 'Connection Type',
@@ -290,16 +281,14 @@ export default function RemoteAccessDetails(props: IFormProps) {
           selectSearchable: true,
           fieldStyle: {
             gridColumn: '1 / span 2',
-            gridRow: '3 / span 1',
+            gridRow: (deviceId || deviceCode) ? '2 / span 1' : '3 / span 1',
           },
-        }]),
+        },
+        {
+          id: 'device_service_id',
           formType: 'select' as any,
           name: 'device_service_id',
           label: 'Service',
-          description: 'Field Description',
-          // @ts-expect-error - No type yet
-          label: 'Service',
-          // @ts-expect-error - No type yet
           description: 'Field Description',
           placeholder: 'Select a service...',
           fieldClassName: '',
@@ -308,7 +297,7 @@ export default function RemoteAccessDetails(props: IFormProps) {
           selectSearchable: true,
           fieldStyle: {
             gridColumn: '1 / span 2',
-            gridRow: hideRemoteAccessTypeField ? '3 / span 1' : '4 / span 1',
+            gridRow: (deviceId || deviceCode) ? '3 / span 1' : '4 / span 1',
           },
         }
       ] as any)}

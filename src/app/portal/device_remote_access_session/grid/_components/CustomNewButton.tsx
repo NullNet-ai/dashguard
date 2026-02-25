@@ -1,14 +1,13 @@
 
 "use client"
 import { PlusIcon } from "@heroicons/react/20/solid";
-import { useEffect } from 'react';
 import BasicDetails from "~/app/portal/device_remote_access_session/_components/forms/basic-details/client";
 import { useSideDrawer } from "~/components/platform/SideDrawer";
 import { Button } from "~/components/ui/button";
 
 // @ts-expect-error - No type yet
 export const CustomNewButton = (props) => {
-  const { deviceId, deviceCode, selectedTab } = props
+  const { deviceId, deviceCode } = props
   const { actions } = useSideDrawer();
 
   const config = {
@@ -16,7 +15,7 @@ export const CustomNewButton = (props) => {
     sideDrawerWidth: '760px',
     body: {
       // @ts-expect-error - No type yet
-      component: () => <BasicDetails deviceId={deviceId} deviceCode={deviceCode} selectedTab={selectedTab} />,
+      component: () => <BasicDetails deviceId={deviceId} deviceCode={deviceCode} />,
       componentProps: {
         entity: 'device_remote_access_session',
         actions,
@@ -29,12 +28,6 @@ export const CustomNewButton = (props) => {
       // Do things here
     },
   };
-
-  useEffect(() => {
-    return () => {
-      actions.closeSideDrawer();
-    }
-  }, [])
 
   const handleOpenSideDrawer = async () => {
     actions.openSideDrawer(config as any);

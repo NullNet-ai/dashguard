@@ -13,6 +13,17 @@ const uiGridColumns = [
     },
   },
   {
+    header: 'Type',
+    accessorKey: 'tunnel_type',
+    sortKey: 'device_tunnels.tunnel_type',
+    search_config: {
+      operator: 'like',
+      entity: 'device_tunnels',
+      field: 'tunnel_type',
+    },
+  },
+
+  {
     header: 'Address',
     accessorKey: 'address',
     sortKey: 'device_services.address',
@@ -47,16 +58,44 @@ const uiGridColumns = [
 
   {
     header: 'Status',
-    accessorKey: 'session_status',
-    sortKey: 'device_ssh_sessions.session_status',
+    accessorKey: 'tunnel_status',
+    sortKey: 'device_tunnels.tunnel_status',
     cell: ({ row }) => {
-      const value = row?.original?.session_status
+      const value = row?.original?.tunnel_status
       return <GridSessionStatusBadge status={value} />
     },
     search_config: {
-      entity: 'device_ssh_sessions',
+      entity: 'device_tunnels',
       operator: 'like',
-      field: 'session_status',
+      field: 'tunnel_status',
+    },
+  },
+  {
+    header: 'Last Accessed',
+    accessorKey: 'last_accessed',
+    sortKey: 'device_tunnels.last_accessed',
+    cell: ({ row }) => {
+      const raw = row?.original?.last_accessed
+      const seconds = typeof raw === 'string' || typeof raw === 'number' ? Number(raw) : NaN
+      if (!Number.isFinite(seconds) || seconds <= 0) return null
+
+      const pad = (value: number) => String(value).padStart(2, '0')
+      const dateObj = new Date(seconds * 1000)
+      const date = `${dateObj.getFullYear()}/${pad(dateObj.getMonth() + 1)}/${pad(dateObj.getDate())}`
+      const time = `${pad(dateObj.getHours())}:${pad(dateObj.getMinutes())}:${pad(dateObj.getSeconds())}`
+
+      return (
+        <div className="flex items-center gap-x-2">
+          <div>{date}</div>
+          <div>{time}</div>
+        </div>
+      )
+    },
+    search_config: {
+      entity: 'device_tunnels',
+      operator: 'like',
+      field: 'last_accessed',
+      parse_as: "text",
     },
   },
   {

@@ -8,7 +8,7 @@ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '~/comp
 
 export const CustomRowActions = ({ row }: { row: any }) => {
   const { original } = row
-  const { id, device_id, session_status, remote_access_session, tunnel_type } = original ?? {}
+  const { id, device_id, tunnel_status, remote_access_session, tunnel_type } = original ?? {}
   const disconnectRemoteAccess = api.deviceRemoteAccessSession.disconnectDeviceRemoteAccess.useMutation()
   const createUpdate = api.deviceRemoteAccessSession.createUpdateDeviceRemoteAccessSessions.useMutation()
 
@@ -49,7 +49,7 @@ export const CustomRowActions = ({ row }: { row: any }) => {
       )
   }
 
-  const disabled = ['terminated', 'expired'].includes(session_status?.toLowerCase())
+  const disabled = ['terminated', 'expired'].includes(tunnel_status?.toLowerCase())
   
   return (
     <div className="flex gap-0">

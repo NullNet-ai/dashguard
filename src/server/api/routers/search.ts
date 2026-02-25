@@ -84,48 +84,12 @@ const buildDeviceRemoteAccessSessionSuggestions = async ({
     searchable_fields = [],
   } = input;
 
-  if (baseEntity === tunnelEntity) {
-    const existingFilters = _advance_filters as IAdvanceFilters[];
-    const hasTunnelTypeFilter = existingFilters.some((filter) => {
-      return filter?.type === 'criteria' && filter?.field === 'tunnel_type';
-    });
-
-    if (!hasTunnelTypeFilter) {
-      const nextFilters: IAdvanceFilters[] = [...existingFilters];
-      const lastFilter = nextFilters[nextFilters.length - 1];
-
-      if (nextFilters.length > 0 && lastFilter?.type !== 'operator') {
-        nextFilters.push({
-          type: 'operator',
-          operator: EOperator.AND,
-        } as IAdvanceFilters);
-      }
-
-      nextFilters.push({
-        type: 'criteria',
-        field: 'tunnel_type',
-        entity: baseEntity,
-        operator: EOperator.EQUAL,
-        values: ['https', 'http'],
-      } as IAdvanceFilters);
-
-      _advance_filters = nextFilters;
-    }
-  }
-
   const pluck_object: Record<string, any> = {
     ...addCommonGridPluckObject(),
     devices: ['device_name', 'id'],
     device_services: ['address', 'port'],
     [baseEntity]: input.pluck,
   };
-
-  if (baseEntity === tunnelEntity) {
-    pluck_object.device_ssh_sessions = ['id', 'session_status'];
-    pluck_object.device_tty_sessions = ['id', 'session_status'];
-  } else {
-    pluck_object.device_tunnels = ['id', 'tunnel_type', 'device_id', 'service_id'];
-  }
 
   const query = ctx.dnaClient.searchSuggestions({
     entity: baseEntity,
@@ -187,32 +151,7 @@ const buildDeviceRemoteAccessSessionSuggestions = async ({
           },
         },
       })
-      .join({
-        type: 'left',
-        field_relation: {
-          to: {
-            entity: 'device_ssh_sessions',
-            field: 'device_tunnel_id',
-          },
-          from: {
-            entity: tunnelEntity,
-            field: 'id',
-          },
-        },
-      })
-      .join({
-        type: 'left',
-        field_relation: {
-          to: {
-            entity: 'device_tty_sessions',
-            field: 'device_tunnel_id',
-          },
-          from: {
-            entity: tunnelEntity,
-            field: 'id',
-          },
-        },
-      });
+      ;
   }
 
   if (baseEntity === 'device_ssh_sessions' || baseEntity === 'device_tty_sessions') {
