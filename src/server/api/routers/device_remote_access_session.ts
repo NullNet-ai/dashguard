@@ -259,8 +259,7 @@ export const deviceRemoteAccessSessionRouter = createTRPCRouter({
         is_case_sensitive_sorting = 'true',
         device_code,
       } = input
-      const baseEntity = input?.entity || 'device_tunnels'
-      const tunnelEntity = 'device_tunnels'
+      const baseEntity = 'device_tunnels'
       let { advance_filters: _advance_filters = [] } = input
 
       console.log('$$$ [device_remote_access_session] - mainGrid - _advance_filters 1st', _advance_filters)
@@ -322,44 +321,11 @@ export const deviceRemoteAccessSessionRouter = createTRPCRouter({
         }
       }
 
-      if (baseEntity === tunnelEntity) {
-        const existingFilters = _advance_filters as IAdvanceFilters[]
-        const hasTunnelTypeFilter = existingFilters.some((filter) => {
-          return filter?.type === 'criteria' && filter?.field === 'tunnel_type'
-        })
-
-        if (!hasTunnelTypeFilter) {
-          const nextFilters: IAdvanceFilters[] = [...existingFilters]
-          const lastFilter = nextFilters[nextFilters.length - 1]
-
-          if (nextFilters.length > 0 && lastFilter?.type !== 'operator') {
-            nextFilters.push({ type: 'operator', operator: EOperator.AND } as IAdvanceFilters)
-          }
-
-          nextFilters.push({
-            type: 'criteria',
-            field: 'tunnel_type',
-            entity: baseEntity,
-            operator: EOperator.EQUAL,
-            values: ['https', 'http'],
-          } as IAdvanceFilters)
-
-          _advance_filters = nextFilters
-        }
-      }
-
       const pluck_object: Record<string, any> = {
         ...addCommonGridPluckObject(),
         devices: ['device_name', 'id'],
         device_services: ['address', 'port'],
         [baseEntity]: pluck,
-      }
-
-      if (baseEntity === tunnelEntity) {
-        pluck_object.device_ssh_sessions = ['id', 'session_status']
-        pluck_object.device_tty_sessions = ['id', 'session_status']
-      } else {
-        pluck_object.device_tunnels = ['id', 'tunnel_type', 'device_id', 'service_id']
       }
 
       console.log('$$$ [device_remote_access_session] - mainGrid - _advance_filters', _advance_filters)
@@ -433,104 +399,33 @@ export const deviceRemoteAccessSessionRouter = createTRPCRouter({
       })
 
       if (pluck_object) {
-        if (baseEntity === tunnelEntity) {
-          query
-            .join({
-              type: 'left',
-              field_relation: {
-                to: {
-                  entity: 'devices',
-                  field: 'id',
-                },
-                from: {
-                  entity: tunnelEntity,
-                  field: 'device_id',
-                },
+        query
+          .join({
+            type: 'left',
+            field_relation: {
+              to: {
+                entity: 'devices',
+                field: 'id',
               },
-            })
-            .join({
-              type: 'left',
-              field_relation: {
-                to: {
-                  entity: 'device_services',
-                  field: 'id',
-                },
-                from: {
-                  entity: tunnelEntity,
-                  field: 'service_id',
-                },
+              from: {
+                entity: baseEntity,
+                field: 'device_id',
               },
-            })
-            .join({
-              type: 'left',
-              field_relation: {
-                to: {
-                  entity: 'device_ssh_sessions',
-                  field: 'device_tunnel_id',
-                },
-                from: {
-                  entity: tunnelEntity,
-                  field: 'id',
-                },
+            },
+          })
+          .join({
+            type: 'left',
+            field_relation: {
+              to: {
+                entity: 'device_services',
+                field: 'id',
               },
-            })
-            .join({
-              type: 'left',
-              field_relation: {
-                to: {
-                  entity: 'device_tty_sessions',
-                  field: 'device_tunnel_id',
-                },
-                from: {
-                  entity: tunnelEntity,
-                  field: 'id',
-                },
+              from: {
+                entity: baseEntity,
+                field: 'service_id',
               },
-            })
-        }
-
-        if (baseEntity === 'device_ssh_sessions' || baseEntity === 'device_tty_sessions') {
-          query
-            .join({
-              type: 'left',
-              field_relation: {
-                to: {
-                  entity: 'devices',
-                  field: 'id',
-                },
-                from: {
-                  entity: baseEntity,
-                  field: 'device_id',
-                },
-              },
-            })
-            .join({
-              type: 'left',
-              field_relation: {
-                to: {
-                  entity: tunnelEntity,
-                  field: 'id',
-                },
-                from: {
-                  entity: baseEntity,
-                  field: 'device_tunnel_id',
-                },
-              },
-            })
-            .nestedJoin({
-              type: 'left',
-              field_relation: {
-                to: {
-                  entity: 'device_services',
-                  field: 'id',
-                },
-                from: {
-                  entity: tunnelEntity,
-                  field: 'service_id',
-                },
-              },
-            })
-        }
+            },
+          })
       }
 
       addCommonGridJoins(query, baseEntity)
@@ -543,37 +438,20 @@ export const deviceRemoteAccessSessionRouter = createTRPCRouter({
           created_by,
           devices,
           device_services,
-          device_ssh_sessions,
-          device_tty_sessions,
-          device_tunnels,
           updated_by,
           ...rest
         } = item
 
-        const resolvedTunnelType =
-          baseEntity === tunnelEntity ? entity_data?.tunnel_type : device_tunnels?.tunnel_type
+        const resolvedTunnelType = entity_data?.tunnel_type
 
-        const resolvedSessionStatus =
-          baseEntity === 'device_ssh_sessions' || baseEntity === 'device_tty_sessions'
-            ? entity_data?.session_status
-            : entity_data?.status
 
         return {
           ...entity_data,
           ...rest,
           tunnel_type: resolvedTunnelType ?? entity_data?.tunnel_type,
-          remote_access_session: baseEntity === tunnelEntity
-            ? ((
-                {
-                  http: entity_data?.id,
-                  https: entity_data?.id,
-                  ssh: device_ssh_sessions?.id,
-                  tty: device_tty_sessions?.id,
-                } as Record<string, string | undefined>
-              )[resolvedTunnelType ?? ''])
-            : entity_data?.id,
+          remote_access_session: entity_data?.id,
           device_remote_access_type: entity_data?.remote_access_type,
-          session_status: resolvedSessionStatus,
+          tunnel_status: entity_data?.tunnel_status,
           // remote_access_category: formatString(remote_access_type),
           // type: formatString(remote_access_type),
           address: device_services?.address,
@@ -634,55 +512,20 @@ export const deviceRemoteAccessSessionRouter = createTRPCRouter({
 
       const ra_type = remote_access_type
         
-      const responseDeviceTunnels = await ctx.dnaClient
-        .findAll({
-          entity: 'device_tunnels',
-          token: ctx.token.value,
-          query: {
-            pluck: ['id'],
-            advance_filters: createAdvancedFilter({
-              ...(device_service_id ? { service_id: device_service_id } : {}),
-              status: 'Active',
-            }),
-            order: {
-              limit: 1,
-              by_field: 'created_date',
-              by_direction: EOrderDirection.DESC,
-            },
-          },
-        })
-        .execute();
-
-      let tunnel_id = responseDeviceTunnels?.data?.[0]?.id
+      let tunnel_id
       let session_token
 
+      // @ts-expect-error - No type yet
+      const createRemoteAccessTunnelResponse = await createRemoteAccessTunnel({ device_id, ra_type, token, instanceId , device_service_id })
+      const {
+        data: {
+          tunnel_id: newTunnelId
+        }
+      } = createRemoteAccessTunnelResponse
+      tunnel_id = newTunnelId
 
-      if (!tunnel_id) {
-        // @ts-expect-error - No type yet
-        const createRemoteAccessTunnelResponse = await createRemoteAccessTunnel({ device_id, ra_type, token, instanceId , device_service_id })
-        const {
-          data: {
-            tunnel_id: newTunnelId
-          }
-        } = createRemoteAccessTunnelResponse
-        tunnel_id = newTunnelId
-      }
+      session_token = tunnel_id
 
-      if (remote_access_type === 'ui') {
-        session_token = tunnel_id
-      }
-
-      if (remote_access_type === 'ssh' || remote_access_type === 'tty') {
-        // @ts-expect-error - No type yet
-        const createRemoteAccessResponse = await createRemoteAccessSession({ device_id, ra_type, token, instanceId , device_service_id, tunnel_id })
-        const {
-          data: {
-            session_id
-          }
-        } = createRemoteAccessResponse
-        session_token = session_id
-      }
-      
       return {
         success: true,
         data: [
@@ -696,27 +539,7 @@ export const deviceRemoteAccessSessionRouter = createTRPCRouter({
     .input(z.object({ remote_access_session: z.string(), tunnel_type: z.string() }))
     .mutation(async ({ input, ctx }) => {
       const { remote_access_session, tunnel_type } = input
-      
-      if (tunnel_type === 'http' || tunnel_type === 'https') {
-        const record = await ctx.dnaClient
-          .update(remote_access_session, {
-            entity: 'device_tunnels',
-            token: ctx.token.value,
-            mutation: {
-              params: {
-                status: 'Deleted',
-              },
-              pluck: ['id', 'status'],
-            },
-          })
-          .execute()
-
-        return {
-          success: true,
-          data: record?.data ?? [],
-        }
-      }
-
+ 
       const response = await disconnectRemoteAccess({
         remote_access_session,
         token: ctx.token.value,

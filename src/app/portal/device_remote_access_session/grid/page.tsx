@@ -2,7 +2,6 @@ import { headers } from 'next/headers';
 import { Suspense } from 'react';
 
 import Grid from '~/components/platform/Grid';
-import StateTab from '~/components/platform/StateTab';
 import { Loader } from '~/components/ui/loader';
 
 import { api } from '~/trpc/server';
@@ -11,7 +10,7 @@ import { defaultSorting } from './_config/sorting';
 import { getGridCacheData } from '~/components/platform/Grid/utils/grid-get-cache-data';
 import { gridDataResolver } from '~/components/platform/Grid/utils/gridDataResolver';
 import { CustomNewButton } from './_components/CustomNewButton';
-import uiGridColumns, { sshGridColumns, ttyGridColumns } from './_config/columns';
+import uiGridColumns from './_config/columns';
 import { CustomRowActions } from './_components/CustomRowActions';
 
 export default async function Page() {
@@ -54,71 +53,28 @@ export default async function Page() {
     return { gridProps, items, totalCount };
   };
 
-  const [
-    uiGrid,
-    sshGrid,
-    ttyGrid,
-  ] = await Promise.all([
-    buildGridData({
-      gridKey: 'device_remote_access_ui',
-      entity: 'device_tunnels',
-      defaultAllTabName: 'All UI',
-      pluck: [
-        'id',
-        'categories',
-        'code',
-        'status',
-        'created_date',
-        'created_time',
-        'created_by',
-        'updated_date',
-        'updated_time',
-        'updated_by',
-        'device_id',
-        'tunnel_type',
-      ],
-    }),
-    buildGridData({
-      gridKey: 'device_remote_access_ssh',
-      entity: 'device_ssh_sessions',
-      defaultAllTabName: 'All SSH',
-      pluck: [
-        'id',
-        'categories',
-        'code',
-        'status',
-        'created_date',
-        'created_time',
-        'created_by',
-        'updated_date',
-        'updated_time',
-        'updated_by',
-        'device_tunnel_id',
-        'session_status',
-        'device_id',
-      ],
-    }),
-    buildGridData({
-      gridKey: 'device_remote_access_tty',
-      entity: 'device_tty_sessions',
-      defaultAllTabName: 'All TTY',
-      pluck: [
-        'id',
-        'categories',
-        'code',
-        'status',
-        'created_date',
-        'created_time',
-        'created_by',
-        'updated_date',
-        'updated_time',
-        'updated_by',
-        'device_tunnel_id',
-        'session_status',
-        'device_id',
-      ],
-    }),
-  ]);
+  const mainGrid = await buildGridData({
+    gridKey: 'device_remote_access',
+    entity: 'device_tunnels',
+    defaultAllTabName: 'All Remote Access',
+    pluck: [
+      'id',
+      'categories',
+      'code',
+      'status',
+      'created_date',
+      'created_time',
+      'created_by',
+      'updated_date',
+      'updated_time',
+      'updated_by',
+      'device_id',
+      'service_id',
+      'tunnel_type',
+      'tunnel_status',
+      'last_accessed',
+    ],
+  });
 
   const fallback = (
     <div className="flex h-[500px] w-full items-center justify-center">
@@ -143,163 +99,51 @@ export default async function Page() {
     disableDefaultAction: true,
   };
 
-  const tabs = [
-    {
-      id: 'ui',
-      label: 'UI',
-      content: (
-        <Suspense fallback={fallback}>
-          <Grid
-            {...uiGrid.gridProps}
-            withVerticalTabs
-            gridKey="device_remote_access_ui"
-            config={{
-              ...gridBaseConfig,
-              columns: uiGridColumns,
-              entity: 'device_tunnels',
-              searchSuggestionConfig: {
-                router: 'search',
-                resolver: 'deviceRemoteAccessSessionUiSearch',
-              },
-              searchConfig: {
-                router: 'deviceRemoteAccessSession',
-                resolver: 'mainGrid',
-                query_params: {
-                  entity: 'device_tunnels',
-                  pluck: [
-                    'id',
-                    'categories',
-                    'code',
-                    'status',
-                    'created_date',
-                    'created_time',
-                    'created_by',
-                    'updated_date',
-                    'updated_time',
-                    'updated_by',
-                    'device_id',
-                    'tunnel_type',
-                  ],
-                },
-              },
-            }}
-            customCreateButton={<CustomNewButton selectedTab="ui" />}
-            data={uiGrid.items}
-            defaultSorting={defaultSorting}
-            totalCount={uiGrid.totalCount || 0}
-          />
-        </Suspense>
-      ),
-    },
-    {
-      id: 'ssh',
-      label: 'SSH',
-      content: (
-        <Suspense fallback={fallback}>
-          <Grid
-            {...sshGrid.gridProps}
-            withVerticalTabs
-            gridKey="device_remote_access_ssh"
-            config={{
-              ...gridBaseConfig,
-              columns: sshGridColumns,
-              entity: 'device_ssh_sessions',
-              searchSuggestionConfig: {
-                router: 'search',
-                resolver: 'deviceRemoteAccessSessionSshSearch',
-              },
-              searchConfig: {
-                router: 'deviceRemoteAccessSession',
-                resolver: 'mainGrid',
-                query_params: {
-                  entity: 'device_ssh_sessions',
-                  pluck: [
-                    'id',
-                    'categories',
-                    'code',
-                    'status',
-                    'created_date',
-                    'created_time',
-                    'created_by',
-                    'updated_date',
-                    'updated_time',
-                    'updated_by',
-                    'device_tunnel_id',
-                    'session_status',
-                  ],
-                },
-              },
-            }}
-            customCreateButton={<CustomNewButton selectedTab="ssh" />}
-            data={sshGrid.items}
-            defaultSorting={defaultSorting}
-            totalCount={sshGrid.totalCount || 0}
-          />
-        </Suspense>
-      ),
-    },
-    {
-      id: 'tty',
-      label: 'TTY',
-      content: (
-        <Suspense fallback={fallback}>
-          <Grid
-            {...ttyGrid.gridProps}
-            withVerticalTabs
-            gridKey="device_remote_access_tty"
-            config={{
-              ...gridBaseConfig,
-              columns: ttyGridColumns,
-              entity: 'device_tty_sessions',
-              searchSuggestionConfig: {
-                router: 'search',
-                resolver: 'deviceRemoteAccessSessionTtySearch',
-              },
-              searchConfig: {
-                router: 'deviceRemoteAccessSession',
-                resolver: 'mainGrid',
-                query_params: {
-                  entity: 'device_tty_sessions',
-                  pluck: [
-                    'id',
-                    'categories',
-                    'code',
-                    'status',
-                    'created_date',
-                    'created_time',
-                    'created_by',
-                    'updated_date',
-                    'updated_time',
-                    'updated_by',
-                    'device_tunnel_id',
-                    'session_status',
-                  ],
-                },
-              },
-            }}
-            customCreateButton={<CustomNewButton selectedTab="tty" />}
-            data={ttyGrid.items}
-            defaultSorting={defaultSorting}
-            totalCount={ttyGrid.totalCount || 0}
-          />
-        </Suspense>
-      ),
-    },
-  ];
-
   return (
     <div className="space-y-2">
-      <div>
-        <StateTab
-          defaultValue="ui"
-          orientation="vertical"
-          rotateText={true}
-          persistKey="device-remote-access-session-grid-tabs"
-          tabs={tabs}
-          variant="underline"
-          size="sm"
+      <Suspense fallback={fallback}>
+        <Grid
+          {...mainGrid.gridProps}
+          gridKey="device_remote_access"
+          config={{
+            ...gridBaseConfig,
+            columns: uiGridColumns,
+            entity: 'device_tunnels',
+            searchSuggestionConfig: {
+              router: 'search',
+              resolver: 'deviceRemoteAccessSessionSearch',
+            },
+            searchConfig: {
+              router: 'deviceRemoteAccessSession',
+              resolver: 'mainGrid',
+              query_params: {
+                entity: 'device_tunnels',
+                pluck: [
+                  'id',
+                  'categories',
+                  'code',
+                  'status',
+                  'created_date',
+                  'created_time',
+                  'created_by',
+                  'updated_date',
+                  'updated_time',
+                  'updated_by',
+                  'device_id',
+                  'service_id',
+                  'tunnel_type',
+                  'tunnel_status',
+                  'last_accessed',
+                ],
+              },
+            },
+          }}
+          customCreateButton={<CustomNewButton />}
+          data={mainGrid.items}
+          defaultSorting={defaultSorting}
+          totalCount={mainGrid.totalCount || 0}
         />
-      </div>
+      </Suspense>
     </div>
   );
 }
