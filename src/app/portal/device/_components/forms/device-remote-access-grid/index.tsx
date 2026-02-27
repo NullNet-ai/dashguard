@@ -12,6 +12,7 @@ import { defaultSorting } from '~/app/portal/device_remote_access_session/grid/_
 import uiGridColumns from '~/app/portal/device_remote_access_session/grid/_config/columns';
 import { CustomNewButton } from '~/app/portal/device_remote_access_session/grid/_components/CustomNewButton';
 import { CustomRowActions } from '~/app/portal/device_remote_access_session/grid/_components/CustomRowActions';
+import { ulid } from 'ulid';
 
 const PLUCK = [
   'id',
@@ -69,16 +70,49 @@ export default function DeviceRemoteAccessGrid(props) {
     } as const;
   }, []);
 
+  const defaultAdvanceFilter = useMemo(() => {
+    return [
+      {
+        entity: 'device_tunnels',
+        operator: 'equal',
+        type: 'criteria',
+        field: 'tunnel_status',
+        id: ulid(),
+        label: 'Tunnel Status',
+        values: ['idle'],
+        default: true,
+      },
+      {
+        entity: 'device_tunnels',
+        operator: 'or',
+        type: 'operator',
+        default: true,
+      },
+      {
+        entity: 'device_tunnels',
+        operator: 'equal',
+        type: 'criteria',
+        field: 'tunnel_status',
+        id: ulid(),
+        label: 'Tunnel Status',
+        values: ['active'],
+        default: true,
+      },
+    ];
+  }, []);
+
   const useDeviceScopedGridData = ({
     gridKey,
     entity,
     pluck,
     defaultAllTabName,
+    defaultAdvanceFilter,
   }: {
     gridKey: string;
     entity: string;
     pluck: string[];
     defaultAllTabName: string;
+    defaultAdvanceFilter: any[];
   }) => {
     const [gridCacheData, setGridCacheData] = useState<Record<string, any>>({});
 
@@ -90,10 +124,11 @@ export default function DeviceRemoteAccessGrid(props) {
         defaultSorting,
         gridEntity: entity,
         defaultAllTabName,
+        defaultAdvanceFilter,
       }).then((data) => {
         setGridCacheData(data ?? {});
       });
-    }, [defaultAllTabName, entity, fullPathname, gridKey]);
+    }, [defaultAdvanceFilter, defaultAllTabName, entity, fullPathname, gridKey]);
 
     const { gridParams, gridProps } = useMemo(() => {
       return gridDataResolver({
@@ -102,9 +137,10 @@ export default function DeviceRemoteAccessGrid(props) {
         gridCacheData: gridCacheData as any,
         defaults: {
           defaultSorting,
+          defaultAdvanceFilter,
         },
       });
-    }, [entity, gridCacheData, pluck]);
+    }, [defaultAdvanceFilter, entity, gridCacheData, pluck]);
 
     const applyDeviceFilter = useCallback(
       (params: any) => {
@@ -193,6 +229,7 @@ export default function DeviceRemoteAccessGrid(props) {
     entity: 'device_tunnels',
     defaultAllTabName: 'All Remote Access',
     pluck: PLUCK,
+    defaultAdvanceFilter,
   });
 
   return (
@@ -218,6 +255,7 @@ export default function DeviceRemoteAccessGrid(props) {
         customCreateButton={<CustomNewButton deviceId={deviceId} deviceCode={deviceCode} />}
         data={grid.items}
         defaultSorting={defaultSorting}
+        defaultAdvanceFilter={defaultAdvanceFilter}
         isLoading={grid.isLoading}
         totalCount={grid.totalCount || 0}
       />
