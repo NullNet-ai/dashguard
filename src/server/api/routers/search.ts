@@ -21,6 +21,7 @@ import { formatSorting } from '~/server/utils/formatSorting';
 import ZodSearchSuggestions from '~/server/zodSchema/grid/searchSuggestions';
 import { searchSuggestionTransformer } from '~/components/platform/Grid/Search/utils/searchSuggestionTransformer';
 import { formatPhoneNumber } from '~/utils/formatter';
+import { capitalize } from 'lodash';
 const protocolValueToLabel = {
   'inet/any': 'IPv4/*',
   'inet/tcp': 'IPv4/TCP',
@@ -207,6 +208,11 @@ const buildDeviceRemoteAccessSessionSuggestions = async ({
           updatedSuggestion = {
             ...e,
             display_value: e.values?.[0].toUpperCase(),
+          }
+        } else if (e.field === 'tunnel_status') {
+          updatedSuggestion = {
+            ...e,
+            display_value: capitalize(e.values?.[0]),
           }
         }
         return updatedSuggestion
