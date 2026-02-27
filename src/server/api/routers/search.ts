@@ -202,6 +202,7 @@ const buildDeviceRemoteAccessSessionSuggestions = async ({
 
   const { data: items } = await query.execute();
   let suggestions = searchSuggestionTransformer(items, searchable_fields);
+  // @ts-expect-error - No type yet
   suggestions = suggestions.map((e) => {
         let updatedSuggestion = e
         if (e.field === 'tunnel_type') {
