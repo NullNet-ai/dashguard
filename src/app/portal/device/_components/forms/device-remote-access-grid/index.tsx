@@ -244,6 +244,7 @@ export default function DeviceRemoteAccessGrid(props) {
           ...gridBaseConfig,
           columns: uiGridColumns,
           entity: 'device_tunnels',
+          enableRowSelection: false,
           columnsOrder: grid.gridCacheData?.columns,
           searchConfig: {
             router: 'deviceRemoteAccessSession',
