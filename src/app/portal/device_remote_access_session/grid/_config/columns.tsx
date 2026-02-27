@@ -87,7 +87,7 @@ const uiGridColumns = [
       return (
         <div className="flex items-center gap-x-2">
           <div>{date}</div>
-          <div>{time}</div>
+          {/* <div>{time}</div> */}
         </div>
       )
     },
@@ -107,7 +107,7 @@ const uiGridColumns = [
       return (
         <div className="flex items-center gap-x-2">
           <div>{date}</div>
-          <div>{time}</div>
+          {/* <div>{time}</div> */}
         </div>
       )
     },
@@ -131,7 +131,7 @@ const uiGridColumns = [
       return (
         <div className="flex items-center gap-x-2">
           <div>{date}</div>
-          <div>{time}</div>
+          {/* <div>{time}</div> */}
         </div>
       )
     },
