@@ -274,7 +274,7 @@ export default function RemoteAccessDetails(props: IFormProps) {
           name: 'remote_access_type',
           label: 'Connection Type',
           description: 'Field Description',
-          placeholder: 'Enter value...',
+          placeholder: 'Select connection type...',
           fieldClassName: '',
           readonly: false,
           required: true,
