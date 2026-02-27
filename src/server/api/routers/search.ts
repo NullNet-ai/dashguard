@@ -200,7 +200,17 @@ const buildDeviceRemoteAccessSessionSuggestions = async ({
   addCommonGridJoins(query, baseEntity);
 
   const { data: items } = await query.execute();
-  const suggestions = searchSuggestionTransformer(items, searchable_fields);
+  let suggestions = searchSuggestionTransformer(items, searchable_fields);
+  suggestions = suggestions.map((e) => {
+        let updatedSuggestion = e
+        if (e.field === 'tunnel_type') {
+          updatedSuggestion = {
+            ...e,
+            display_value: e.values?.[0].toUpperCase(),
+          }
+        }
+        return updatedSuggestion
+      });
   return { items: suggestions };
 };
 const entity = '';

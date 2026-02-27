@@ -448,7 +448,7 @@ export const deviceRemoteAccessSessionRouter = createTRPCRouter({
         return {
           ...entity_data,
           ...rest,
-          tunnel_type: resolvedTunnelType ?? entity_data?.tunnel_type,
+          tunnel_type: `${resolvedTunnelType ?? entity_data?.tunnel_type}`.toUpperCase(),
           remote_access_session: entity_data?.id,
           device_remote_access_type: entity_data?.remote_access_type,
           tunnel_status: entity_data?.tunnel_status,
