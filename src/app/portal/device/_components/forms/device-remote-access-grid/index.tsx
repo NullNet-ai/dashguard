@@ -62,6 +62,8 @@ export default function DeviceRemoteAccessGrid(props) {
       },
       disableDefaultAction: true,
       enableRowClick: false,
+      enableCreateCustomGridFilter: false,
+      enableManageCustomGridFilter: false,
       customRowAction: CustomRowActions,
       searchSuggestionConfig: {
         router: 'search',
@@ -237,6 +239,7 @@ export default function DeviceRemoteAccessGrid(props) {
       <Grid
         {...grid.gridProps}
         gridKey={gridKey}
+        hideCreateNewFilter
         config={{
           ...gridBaseConfig,
           columns: uiGridColumns,
