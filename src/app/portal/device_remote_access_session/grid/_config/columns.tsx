@@ -28,6 +28,10 @@ const uiGridColumns = [
       entity: 'device_tunnels',
       field: 'tunnel_type',
     },
+    cell: ({ row }) => {
+      const tunnel_type = row?.original?.tunnel_type ?? '';
+      return <div>{`${tunnel_type.toUpperCase()}`}</div>;
+    },
   },
 
   {

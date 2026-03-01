@@ -429,8 +429,30 @@ export const deviceRemoteAccessSessionRouter = createTRPCRouter({
       }
 
       addCommonGridJoins(query, baseEntity)
+
+      if (input.grouping?.length) {
+        query.groupBy({
+          query: {
+            fields: input.grouping,
+            has_count: true,
+          },
+        });
+      }
+
       const { total_count: totalCount = 1, data: items }
       = await query.execute()
+      
+      // Calculate total number of pages
+      const totalPages = Math.ceil(totalCount / limit)
+
+      if (input.grouping?.length) {
+        return {
+          totalCount,
+          items: items,
+          currentPage: 0,
+          totalPages,
+        };
+      }
 
       const formatted_items = items?.map((item: Record<string, any>) => {
         const {
@@ -448,7 +470,7 @@ export const deviceRemoteAccessSessionRouter = createTRPCRouter({
         return {
           ...entity_data,
           ...rest,
-          tunnel_type: `${resolvedTunnelType ?? entity_data?.tunnel_type}`.toUpperCase(),
+          tunnel_type: `${resolvedTunnelType ?? entity_data?.tunnel_type}`,
           remote_access_session: entity_data?.id,
           device_remote_access_type: entity_data?.remote_access_type,
           tunnel_status: entity_data?.tunnel_status,
@@ -466,8 +488,6 @@ export const deviceRemoteAccessSessionRouter = createTRPCRouter({
         }
       })
 
-      // Calculate total number of pages
-      const totalPages = Math.ceil(totalCount / limit)
       return {
         totalCount,
         items: formatted_items,
