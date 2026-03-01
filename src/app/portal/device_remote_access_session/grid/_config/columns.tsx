@@ -3,6 +3,13 @@
 import { type ColumnDef } from '@tanstack/react-table'
 import { GridSessionStatusBadge } from '~/app/portal/device/grid/GridDeviceOnlineBadge'
 
+const formatTimeWithoutSeconds = (value: unknown) => {
+  if (typeof value !== 'string') return value
+  const match = value.match(/^(\d{2}:\d{2})(?::\d{2})?$/)
+  if (!match) return value
+  return match[1]
+}
+
 const uiGridColumns = [
   {
     header: 'ID',
@@ -82,12 +89,12 @@ const uiGridColumns = [
       const pad = (value: number) => String(value).padStart(2, '0')
       const dateObj = new Date(seconds * 1000)
       const date = `${dateObj.getFullYear()}/${pad(dateObj.getMonth() + 1)}/${pad(dateObj.getDate())}`
-      const time = `${pad(dateObj.getHours())}:${pad(dateObj.getMinutes())}:${pad(dateObj.getSeconds())}`
+      const time = `${pad(dateObj.getHours())}:${pad(dateObj.getMinutes())}`
 
       return (
         <div className="flex items-center gap-x-2">
           <div>{date}</div>
-          {/* <div>{time}</div> */}
+          <div>{time}</div>
         </div>
       )
     },
@@ -107,7 +114,7 @@ const uiGridColumns = [
       return (
         <div className="flex items-center gap-x-2">
           <div>{date}</div>
-          {/* <div>{time}</div> */}
+          <div>{formatTimeWithoutSeconds(time)}</div>
         </div>
       )
     },
@@ -131,7 +138,7 @@ const uiGridColumns = [
       return (
         <div className="flex items-center gap-x-2">
           <div>{date}</div>
-          {/* <div>{time}</div> */}
+          <div>{formatTimeWithoutSeconds(time)}</div>
         </div>
       )
     },
@@ -212,7 +219,7 @@ export const sshGridColumns = [
       return (
         <div className="flex items-center gap-x-2">
           <div>{date}</div>
-          <div>{time}</div>
+          <div>{formatTimeWithoutSeconds(time)}</div>
         </div>
       )
     },
@@ -231,7 +238,7 @@ export const sshGridColumns = [
       return (
         <div className="flex items-center gap-x-2">
           <div>{date}</div>
-          <div>{time}</div>
+          <div>{formatTimeWithoutSeconds(time)}</div>
         </div>
       )
     },
@@ -307,7 +314,7 @@ export const ttyGridColumns = [
       return (
         <div className="flex items-center gap-x-2">
           <div>{date}</div>
-          <div>{time}</div>
+          <div>{formatTimeWithoutSeconds(time)}</div>
         </div>
       )
     },
@@ -326,7 +333,7 @@ export const ttyGridColumns = [
       return (
         <div className="flex items-center gap-x-2">
           <div>{date}</div>
-          <div>{time}</div>
+          <div>{formatTimeWithoutSeconds(time)}</div>
         </div>
       )
     },
