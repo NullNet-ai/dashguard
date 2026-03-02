@@ -2,7 +2,7 @@
 jsx-a11y/no-static-element-interactions */
 'use client'
 
-import { XMarkIcon } from '@heroicons/react/24/outline'
+import { ArrowLeftIcon, XMarkIcon } from '@heroicons/react/24/outline'
 import { PinIcon, PinOffIcon } from 'lucide-react'
 import { Separator } from '@radix-ui/react-select'
 import React, { useState, useRef, useEffect, createElement } from 'react'
@@ -20,8 +20,8 @@ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '~/comp
 
 export const SideDrawerView: React.FC = () => {
   const { state, actions } = useSideDrawer()
-  const { closeSideDrawer, togglePinSideDrawer, saveCurrentState, setwidth } = actions
-  const { config, isOpen, isPinned } = state
+  const { closeSideDrawer, goBackSideDrawer, togglePinSideDrawer, saveCurrentState, setwidth } = actions
+  const { config, isOpen, isPinned, canGoBack } = state
   const { isBannerPresent, state: sidebarState } = useSidebar()
   
   const isMobile = useMediaQuery({ maxWidth: 768 })
@@ -345,16 +345,20 @@ const handleResizeEnd = () => {
                   <Tooltip delayDuration={0}>
                     <TooltipTrigger asChild>
                       <button
-                        aria-label='Close side drawer'
-                        data-test-id='side-drawer-close'
-                        onClick={closeSideDrawer}
+                        aria-label={canGoBack ? 'Back' : 'Close side drawer'}
+                        data-test-id={canGoBack ? 'side-drawer-back' : 'side-drawer-close'}
+                        onClick={canGoBack ? goBackSideDrawer : closeSideDrawer}
                         className="z-[103]"
                       >
-                        <XMarkIcon className="h-5 w-5 text-muted-foreground" />
+                        {canGoBack ? (
+                          <ArrowLeftIcon className="h-5 w-5 text-muted-foreground" />
+                        ) : (
+                          <XMarkIcon className="h-5 w-5 text-muted-foreground" />
+                        )}
                       </button>
                     </TooltipTrigger>
                     <TooltipContent side='bottom'>
-                      Close side drawer
+                      {canGoBack ? 'Back' : 'Close side drawer'}
                     </TooltipContent>
                   </Tooltip>
                 </TooltipProvider>

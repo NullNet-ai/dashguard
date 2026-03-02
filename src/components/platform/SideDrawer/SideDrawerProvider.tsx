@@ -39,8 +39,18 @@ export const SideDrawerProvider: React.FC<React.PropsWithChildren<object>> = ({
   const [dynamicHeader, setDynamicHeader] = useState<React.ReactNode | null>(
     null,
   );
+  const [historyCount, setHistoryCount] = useState(0);
+  const [historyEnabled, setHistoryEnabled] = useState(false);
 
     const screenType = useScreenType();
+  const drawerHistoryRef = useRef<
+    Array<{
+      config: ISideDrawerConfig;
+      drawerType: string;
+      isPinned: boolean;
+      dynamicHeader: React.ReactNode | null;
+    }>
+  >([]);
 
     // Window resize handler with debounce
   const [windowSize, setWindowSize] = useState({ width: 0, height: 0 });
@@ -209,8 +219,47 @@ export const SideDrawerProvider: React.FC<React.PropsWithChildren<object>> = ({
   // Update the openSideDrawer function to use the registered componentProps
   // Update the openSideDrawer function to always check for stored width
   const openSideDrawer = (configOrType: ISideDrawerConfig | string) => {
-    let config: ISideDrawerConfig;
+    const currentConfig = config;
+    const currentDrawerType = drawerType;
+
+    const nextHistoryEnabled =
+      typeof configOrType === 'string'
+        ? Boolean((getConfigByType(configOrType) as any)?.enableHistory)
+        : Boolean((configOrType as ISideDrawerConfig).enableHistory);
+
+    if (!nextHistoryEnabled) {
+      drawerHistoryRef.current = [];
+      setHistoryCount(0);
+      setHistoryEnabled(false);
+    }
+
+    const isRefreshOpen =
+      typeof configOrType === 'string'
+        ? configOrType === currentDrawerType && isOpen
+        : configOrType === currentConfig && isOpen;
+
+    if (
+      nextHistoryEnabled &&
+      !isRefreshOpen &&
+      isOpen &&
+      currentConfig &&
+      currentDrawerType
+    ) {
+      drawerHistoryRef.current = [
+        ...drawerHistoryRef.current,
+        {
+          config: currentConfig,
+          drawerType: currentDrawerType,
+          isPinned,
+          dynamicHeader,
+        },
+      ];
+      setHistoryCount(drawerHistoryRef.current.length);
+    }
+
+    let nextConfig: ISideDrawerConfig;
     let newDrawerType: string;
+    let newPinnedState = false;
 
    
 
@@ -222,6 +271,7 @@ export const SideDrawerProvider: React.FC<React.PropsWithChildren<object>> = ({
       // Check if this drawer type is pinned
       const isTypePinned =
         localStorage.getItem(getPinnedKeyForType(newDrawerType)) === 'true';
+      newPinnedState = isTypePinned;
       setIsPinned(isTypePinned);
 
       // Get the component, header, and componentProps from registry
@@ -248,7 +298,7 @@ export const SideDrawerProvider: React.FC<React.PropsWithChildren<object>> = ({
       }
 
       // Create a config from the registered drawer
-      config = {
+      nextConfig = {
         header,
         body: {
           component: component as
@@ -265,21 +315,22 @@ export const SideDrawerProvider: React.FC<React.PropsWithChildren<object>> = ({
       };
     } else {
       // Use the provided config
-      config = configOrType;
+      nextConfig = configOrType;
 
       // Ensure componentProps is always defined
-      if (!config.body.componentProps) {
-        config.body.componentProps = {};
+      if (!nextConfig.body.componentProps) {
+        nextConfig.body.componentProps = {};
       }
 
       // Store the drawer type if provided
-      if (config.drawerType) {
-        newDrawerType = config.drawerType;
+      if (nextConfig.drawerType) {
+        newDrawerType = nextConfig.drawerType;
         setDrawerType(newDrawerType);
 
         // Check if this drawer type is pinned
         const isTypePinned =
           localStorage.getItem(getPinnedKeyForType(newDrawerType)) === 'true';
+        newPinnedState = isTypePinned;
         setIsPinned(isTypePinned);
 
         // Only use stored width if the drawer is pinned
@@ -289,12 +340,12 @@ export const SideDrawerProvider: React.FC<React.PropsWithChildren<object>> = ({
             getWidthKeyForType(newDrawerType),
           );
           if (storedWidth) {
-            config.sideDrawerWidth = storedWidth;
+            nextConfig.sideDrawerWidth = storedWidth;
           }
         }
       } else {
         // Generate a drawer type based on the component name
-        const component = config.body?.component;
+        const component = nextConfig.body?.component;
         let componentName = 'unknown';
 
         if (component && typeof component !== 'function') {
@@ -305,32 +356,35 @@ export const SideDrawerProvider: React.FC<React.PropsWithChildren<object>> = ({
 
         const generatedType = `drawer_${componentName}_${Date.now()}`;
         setDrawerType(generatedType);
-        config.drawerType = generatedType;
+        nextConfig.drawerType = generatedType;
         newDrawerType = generatedType;
+        newPinnedState = false;
+        setIsPinned(false);
       }
     }
 
     // Apply dynamicWidth override if provided - this takes precedence over all other width settings
-    if (config.dynamicWidth) {
-      config.sideDrawerWidth = config.dynamicWidth;
+    if (nextConfig.dynamicWidth) {
+      nextConfig.sideDrawerWidth = nextConfig.dynamicWidth;
       if(screenType === "4xl") {
-        config.sideDrawerWidth = "25%";
-        config.dynamicWidth = "25%";
+        nextConfig.sideDrawerWidth = "25%";
+        nextConfig.dynamicWidth = "25%";
       }
     }
 
     // Store component props
-    if (config.body?.componentProps) {
-      setComponentProps(config.body.componentProps);
+    if (nextConfig.body?.componentProps) {
+      setComponentProps(nextConfig.body.componentProps);
     }
 
-    setConfig(config);
-    setDynamicHeader(config.header);
+    setConfig(nextConfig);
+    setDynamicHeader(nextConfig.header);
     setIsOpen(true);
+    setHistoryEnabled(nextHistoryEnabled);
 
     // If pinned, save the config
-    if (isPinned) {
-      saveCurrentState(config);
+    if (newPinnedState) {
+      saveCurrentState(nextConfig);
     }
   };
 
@@ -361,15 +415,16 @@ export const SideDrawerProvider: React.FC<React.PropsWithChildren<object>> = ({
 
 
   const saveCurrentState = (configToSave: ISideDrawerConfig) => {
-    if (!drawerType) return;
+    const resolvedDrawerType = configToSave.drawerType ?? drawerType;
+    if (!resolvedDrawerType) return;
 
     try {
-      localStorage.setItem(DRAWER_TYPE_KEY, drawerType);
+      localStorage.setItem(DRAWER_TYPE_KEY, resolvedDrawerType);
 
       if (configToSave.sideDrawerWidth) {
         // Store width with type-specific key
         localStorage.setItem(
-          getWidthKeyForType(drawerType),
+          getWidthKeyForType(resolvedDrawerType),
           configToSave.sideDrawerWidth,
         );
         // Don't use the legacy key anymore
@@ -416,14 +471,74 @@ export const SideDrawerProvider: React.FC<React.PropsWithChildren<object>> = ({
     }
   };
 
+  const goBackSideDrawer = () => {
+    if (!historyEnabled || drawerHistoryRef.current.length === 0) {
+      closeSideDrawer();
+      return;
+    }
+
+    const previous =
+      drawerHistoryRef.current[drawerHistoryRef.current.length - 1];
+    drawerHistoryRef.current = drawerHistoryRef.current.slice(0, -1);
+    setHistoryCount(drawerHistoryRef.current.length);
+
+    setConfig(previous.config);
+    setDrawerType(previous.drawerType);
+    setIsPinned(previous.isPinned);
+    setDynamicHeader(previous.dynamicHeader ?? previous.config.header);
+    setIsOpen(true);
+
+    const previousHistoryEnabled = Boolean(previous.config.enableHistory);
+    setHistoryEnabled(previousHistoryEnabled);
+
+    if (!previousHistoryEnabled) {
+      drawerHistoryRef.current = [];
+      setHistoryCount(0);
+    }
+
+    if (previous.isPinned) {
+      localStorage.setItem(getPinnedKeyForType(previous.drawerType), 'true');
+      localStorage.setItem(OPEN_STATE_KEY, 'true');
+      localStorage.setItem(DRAWER_TYPE_KEY, previous.drawerType);
+
+      if (previous.config.body?.componentProps) {
+        try {
+          localStorage.setItem(
+            DRAWER_PROPS_KEY,
+            JSON.stringify(previous.config.body.componentProps),
+          );
+        } catch (e) {
+          console.error('Failed to stringify component props:', e);
+        }
+      }
+
+      const serializableConfig = {
+        overlayEnabled: previous.config.overlayEnabled,
+        closeOnOutsideClick: previous.config.closeOnOutsideClick,
+        resizable: previous.config.resizable,
+        showResizeHandle: previous.config.showResizeHandle,
+        minResizeWidth: previous.config.minResizeWidth,
+        maxResizeWidth: previous.config.maxResizeWidth,
+        isPinnable: previous.config.isPinnable,
+        sideDrawerWidth: previous.config.sideDrawerWidth,
+      };
+
+      localStorage.setItem(CONFIG_KEY, JSON.stringify(serializableConfig));
+    }
+  };
+
   const closeSideDrawer = () => {
-    // Allow closing even when pinned, but maintain the pinned state
-    setIsOpen(false);
+    drawerHistoryRef.current = [];
+    setHistoryCount(0);
+    setHistoryEnabled(false);
 
     // Call the onCloseSideDrawer callback if provided
     if (config?.onCloseSideDrawer) {
       config.onCloseSideDrawer();
     }
+
+    // Allow closing even when pinned, but maintain the pinned state
+    setIsOpen(false);
 
     // If not pinned, also clear the config but preserve the width
     if (!isPinned) {
@@ -515,6 +630,7 @@ export const SideDrawerProvider: React.FC<React.PropsWithChildren<object>> = ({
   const actions: IActions = {
     openSideDrawer,
     closeSideDrawer,
+    goBackSideDrawer,
     togglePinSideDrawer,
     saveCurrentState,
     setwidth,
@@ -530,6 +646,7 @@ export const SideDrawerProvider: React.FC<React.PropsWithChildren<object>> = ({
           isPinned,
           width,
           dynamicHeader,
+          canGoBack: historyEnabled && historyCount > 0,
         },
         actions,
       }}
