@@ -223,6 +223,8 @@ export const gridRouter = createTRPCRouter({
         group_advance_filters: _group_advance_filters = [],
       } = input;
 
+      console.log('$ [gridRouter] items - input', input);
+
       const pluck_object = {
         ...addCommonGridPluckObject(),
         [pluralize(entity)]: input.pluck,

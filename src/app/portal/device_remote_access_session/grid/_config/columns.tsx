@@ -92,7 +92,7 @@ const uiGridColumns = [
 
       const pad = (value: number) => String(value).padStart(2, '0')
       const dateObj = new Date(seconds * 1000)
-      const date = `${dateObj.getFullYear()}/${pad(dateObj.getMonth() + 1)}/${pad(dateObj.getDate())}`
+      const date = `${pad(dateObj.getMonth() + 1)}/${pad(dateObj.getDate())}/${dateObj.getFullYear()}`
       const time = `${pad(dateObj.getHours())}:${pad(dateObj.getMinutes())}`
 
       return (
@@ -110,18 +110,15 @@ const uiGridColumns = [
     },
   },
   {
-    header: 'Updated Date',
-    accessorKey: 'updated_date',
-    cell: ({ row }) => {
-      const date = row?.original?.updated_date
-      const time = row?.original?.updated_time
-      return (
-        <div className="flex items-center gap-x-2">
-          <div>{date}</div>
-          <div>{formatTimeWithoutSeconds(time)}</div>
-        </div>
-      )
-    },
+    header: "Updated Date",
+    accessorKey: "updated_date_time",
+    data_type: "datetime",
+    sortKey: "updated_date_time",
+    search_config: {
+      field: "updated_date_time",
+      operator: 'like',
+      custom_filter_field: 'updated_date',
+    }
   },
   {
     header: 'Updated By',
@@ -135,16 +132,13 @@ const uiGridColumns = [
   },
   {
     header: 'Created Date',
-    accessorKey: 'created_date',
-    cell: ({ row }) => {
-      const date = row?.original?.created_date
-      const time = row?.original?.created_time
-      return (
-        <div className="flex items-center gap-x-2">
-          <div>{date}</div>
-          <div>{formatTimeWithoutSeconds(time)}</div>
-        </div>
-      )
+    accessorKey: 'created_date_time',
+    data_type: 'datetime',
+    sortKey: "created_date_time",
+    search_config: {
+      field: 'created_date_time',
+      operator: 'like',
+      custom_filter_field: 'created_date',
     },
   },
   {
@@ -215,18 +209,15 @@ export const sshGridColumns = [
     },
   },
   {
-    header: 'Updated Date',
-    accessorKey: 'updated_date',
-    cell: ({ row }) => {
-      const date = row?.original?.updated_date
-      const time = row?.original?.updated_time
-      return (
-        <div className="flex items-center gap-x-2">
-          <div>{date}</div>
-          <div>{formatTimeWithoutSeconds(time)}</div>
-        </div>
-      )
-    },
+    header: "Updated Date",
+    accessorKey: "updated_date_time",
+    data_type: "datetime",
+    sortKey: "updated_date_time",
+    search_config: {
+      field: "updated_date_time",
+      operator: 'like',
+      custom_filter_field: 'updated_date',
+    }
   },
   {
     header: 'Updated By',
@@ -235,16 +226,13 @@ export const sshGridColumns = [
   },
   {
     header: 'Created Date',
-    accessorKey: 'created_date',
-    cell: ({ row }) => {
-      const date = row?.original?.created_date
-      const time = row?.original?.created_time
-      return (
-        <div className="flex items-center gap-x-2">
-          <div>{date}</div>
-          <div>{formatTimeWithoutSeconds(time)}</div>
-        </div>
-      )
+    accessorKey: 'created_date_time',
+    data_type: 'datetime',
+    sortKey: "created_date_time",
+    search_config: {
+      field: 'created_date_time',
+      operator: 'like',
+      custom_filter_field: 'created_date',
     },
   },
   {
@@ -310,18 +298,15 @@ export const ttyGridColumns = [
     },
   },
   {
-    header: 'Updated Date',
-    accessorKey: 'updated_date',
-    cell: ({ row }) => {
-      const date = row?.original?.updated_date
-      const time = row?.original?.updated_time
-      return (
-        <div className="flex items-center gap-x-2">
-          <div>{date}</div>
-          <div>{formatTimeWithoutSeconds(time)}</div>
-        </div>
-      )
-    },
+    header: "Updated Date",
+    accessorKey: "updated_date_time",
+    data_type: "datetime",
+    sortKey: "updated_date_time",
+    search_config: {
+      field: "updated_date_time",
+      operator: 'like',
+      custom_filter_field: 'updated_date',
+    }
   },
   {
     header: 'Updated By',
@@ -330,16 +315,13 @@ export const ttyGridColumns = [
   },
   {
     header: 'Created Date',
-    accessorKey: 'created_date',
-    cell: ({ row }) => {
-      const date = row?.original?.created_date
-      const time = row?.original?.created_time
-      return (
-        <div className="flex items-center gap-x-2">
-          <div>{date}</div>
-          <div>{formatTimeWithoutSeconds(time)}</div>
-        </div>
-      )
+    accessorKey: 'created_date_time',
+    data_type: 'datetime',
+    sortKey: "created_date_time",
+    search_config: {
+      field: 'created_date_time',
+      operator: 'like',
+      custom_filter_field: 'created_date',
     },
   },
   {

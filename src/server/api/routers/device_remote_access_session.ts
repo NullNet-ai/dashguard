@@ -377,7 +377,6 @@ export const deviceRemoteAccessSessionRouter = createTRPCRouter({
                   isCaseSensitiveSorting ? 'true' : '',
                 )
               : [],
-            date_format: 'YYYY/mm/dd' as EDateFormats,
             concatenate_fields: [
             {
               fields: ['first_name', 'last_name'],
@@ -392,6 +391,18 @@ export const deviceRemoteAccessSessionRouter = createTRPCRouter({
               separator: ' ',
               entity: 'contacts',
               aliased_entity: 'updated_by',
+            },
+            {
+              fields: ['created_date', 'created_time'],
+              field_name: 'created_date_time',
+              separator: ' ',
+              entity: baseEntity,
+            },
+            {
+              fields: ['updated_date', 'updated_time'],
+              field_name: 'updated_date_time',
+              separator: ' ',
+              entity: baseEntity,
             },
             ],
               
@@ -454,6 +465,8 @@ export const deviceRemoteAccessSessionRouter = createTRPCRouter({
         };
       }
 
+      console.log('$ [deviceRemoteAccessSessionRouter] items', items);
+
       const formatted_items = items?.map((item: Record<string, any>) => {
         const {
           [baseEntity]: entity_data,
@@ -465,7 +478,6 @@ export const deviceRemoteAccessSessionRouter = createTRPCRouter({
         } = item
 
         const resolvedTunnelType = entity_data?.tunnel_type
-
 
         return {
           ...entity_data,
