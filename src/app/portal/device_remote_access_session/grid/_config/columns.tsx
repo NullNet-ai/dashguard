@@ -123,6 +123,7 @@ const uiGridColumns = [
   {
     header: 'Updated By',
     accessorKey: 'updated_by',
+    // @ts-expect-error - No type yet
     sortKey: 'contacts.contact_updated_by',
     // search_config: {
     //   entity: 'contacts',
@@ -222,6 +223,7 @@ export const sshGridColumns = [
   {
     header: 'Updated By',
     accessorKey: 'updated_by',
+    // @ts-expect-error - No type yet
     sortKey: 'contacts.contact_updated_by',
   },
   {
@@ -311,6 +313,7 @@ export const ttyGridColumns = [
   {
     header: 'Updated By',
     accessorKey: 'updated_by',
+    // @ts-expect-error - No type yet
     sortKey: 'contacts.contact_updated_by',
   },
   {

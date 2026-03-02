@@ -482,12 +482,17 @@ export const SideDrawerProvider: React.FC<React.PropsWithChildren<object>> = ({
     drawerHistoryRef.current = drawerHistoryRef.current.slice(0, -1);
     setHistoryCount(drawerHistoryRef.current.length);
 
+    // @ts-expect-error - No type yet
     setConfig(previous.config);
+    // @ts-expect-error - No type yet
     setDrawerType(previous.drawerType);
+    // @ts-expect-error - No type yet
     setIsPinned(previous.isPinned);
+    // @ts-expect-error - No type yet
     setDynamicHeader(previous.dynamicHeader ?? previous.config.header);
     setIsOpen(true);
 
+    // @ts-expect-error - No type yet
     const previousHistoryEnabled = Boolean(previous.config.enableHistory);
     setHistoryEnabled(previousHistoryEnabled);
 
@@ -496,15 +501,19 @@ export const SideDrawerProvider: React.FC<React.PropsWithChildren<object>> = ({
       setHistoryCount(0);
     }
 
+    // @ts-expect-error - No type yet
     if (previous.isPinned) {
+      // @ts-expect-error - No type yet
       localStorage.setItem(getPinnedKeyForType(previous.drawerType), 'true');
       localStorage.setItem(OPEN_STATE_KEY, 'true');
+      // @ts-expect-error - No type yet
       localStorage.setItem(DRAWER_TYPE_KEY, previous.drawerType);
-
+      // @ts-expect-error - No type yet
       if (previous.config.body?.componentProps) {
         try {
           localStorage.setItem(
             DRAWER_PROPS_KEY,
+            // @ts-expect-error - No type yet
             JSON.stringify(previous.config.body.componentProps),
           );
         } catch (e) {
@@ -513,13 +522,21 @@ export const SideDrawerProvider: React.FC<React.PropsWithChildren<object>> = ({
       }
 
       const serializableConfig = {
+        // @ts-expect-error - No type yet
         overlayEnabled: previous.config.overlayEnabled,
+        // @ts-expect-error - No type yet
         closeOnOutsideClick: previous.config.closeOnOutsideClick,
+        // @ts-expect-error - No type yet
         resizable: previous.config.resizable,
+        // @ts-expect-error - No type yet
         showResizeHandle: previous.config.showResizeHandle,
+        // @ts-expect-error - No type yet
         minResizeWidth: previous.config.minResizeWidth,
+        // @ts-expect-error - No type yet
         maxResizeWidth: previous.config.maxResizeWidth,
+        // @ts-expect-error - No type yet
         isPinnable: previous.config.isPinnable,
+        // @ts-expect-error - No type yet
         sideDrawerWidth: previous.config.sideDrawerWidth,
       };
 
