@@ -59,6 +59,7 @@ export default function AuthorizeDeviceAction(
         </h1>
       ),
       sideDrawerWidth: '1000px',
+      enableHistory: true,
       body: {
         component: () => (
           type === 'remote_access' ? (

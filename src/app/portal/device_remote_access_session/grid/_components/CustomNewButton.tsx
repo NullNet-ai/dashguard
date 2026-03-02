@@ -12,7 +12,8 @@ export const CustomNewButton = (props) => {
 
   const config = {
     title: "New Remote Access",
-    sideDrawerWidth: '760px',
+    sideDrawerWidth: '1000px',
+    enableHistory: true,
     body: {
       // @ts-expect-error - No type yet
       component: () => <BasicDetails deviceId={deviceId} deviceCode={deviceCode} />,
