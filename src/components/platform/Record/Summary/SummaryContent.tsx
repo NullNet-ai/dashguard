@@ -7,7 +7,7 @@ import { api } from '~/trpc/react';
 import SummaryClientContent from './SummaryClientContent';
 import { useEventEmitter } from '~/context/EventEmitterProvider';
 
-const RecordSummaryContent = ({ children, image_placeholder }: any) => {
+const RecordSummaryContent = ({ children, image_placeholder, header_center_slot }: any) => {
   const eventEmitter = useEventEmitter();
   const pathname = usePathname();
   const token = (getCookie('token') as string) || '';
@@ -70,6 +70,7 @@ const RecordSummaryContent = ({ children, image_placeholder }: any) => {
       mainEntity={mainEntity}
       token={token}
       image_placeholder={image_placeholder}
+      header_center_slot={header_center_slot}
     >
       {children}
     </SummaryClientContent>

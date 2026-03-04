@@ -15,7 +15,7 @@ import { Badge } from '~/components/ui/badge';
 import { RecordContext, useRecord } from '../Provider';
 import { cn } from '~/lib/utils';
 
-const SummaryClientContent = ({ recordDetails, mainEntity, token, image_placeholder, children }: any) => {
+const SummaryClientContent = ({ recordDetails, mainEntity, token, image_placeholder, header_center_slot, children }: any) => {
   const { isCollapseRecordSummary, onClickCollapseButton } =
     useContext(RecordWrapperContext);
 
@@ -99,6 +99,7 @@ const SummaryClientContent = ({ recordDetails, mainEntity, token, image_placehol
                     {ellipsis(JSON.stringify(recordDetails?.data?.code!), 8)}
                   </span>
                 </div>
+                {header_center_slot}
                 <Badge
                   variant={status === "Archived" ? "secondary" : "success"}
                   data-test-id={entityName + "-rcrd-status"}
