@@ -1,7 +1,7 @@
 'use client';
 
 import { ChevronDownIcon } from 'lucide-react';
-import { useContext, useMemo } from 'react';
+import { type ReactNode, useContext, useMemo } from 'react';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import {
   DropdownMenu,
@@ -25,12 +25,13 @@ import { useSideDrawer } from '../../SideDrawer';
 type TabItemProps = {
   tabs: any[];
   pathname: string;
+  tab_items_left_slot?: ReactNode;
 };
 
 const SEARCH_BAR_WIDTH = 0;
 let SUMMARY_TAB_WIDTH = 300;
 
-const TabItems = ({ tabs, pathname }: TabItemProps) => {
+const TabItems = ({ tabs, pathname, tab_items_left_slot }: TabItemProps) => {
   const winWidth = useWindowSize().width;
   const { open } = useSidebar();
   const { state } = useContext(RecordContext);
@@ -80,8 +81,8 @@ const TabItems = ({ tabs, pathname }: TabItemProps) => {
   return (
     <Card>
       <div className="flex items-center">
-        <div className="flex items-center justify-between flex-1">
-          <div className={cn('flex flex-row')}>
+        <div className="flex items-center flex-1 min-w-0">
+          <div className={cn('flex flex-row flex-1 min-w-0')}>
             {newItems.map((tab, index: number) => {
               return (
                 <div
@@ -160,6 +161,11 @@ const TabItems = ({ tabs, pathname }: TabItemProps) => {
             </DropdownMenu>
           )}
         </div>
+        {tab_items_left_slot ? (
+          <div className="flex items-center shrink-0 ml-2">
+            {tab_items_left_slot}
+          </div>
+        ) : null}
         {/* <div className='border-r border-gray-200'>
               <Button
                 variant={"outline"}
