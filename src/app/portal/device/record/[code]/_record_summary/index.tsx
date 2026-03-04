@@ -17,7 +17,7 @@ export default async function Page() {
   return (
     <div className='flex flex-col gap-2 md:pr-0'>
       <RecordSummary
-        is_show_header_tab={true}
+        is_show_header_tab={false}
         header_center_slot={
           <RemoteAccessActionButton
             identifier={identifier!}
