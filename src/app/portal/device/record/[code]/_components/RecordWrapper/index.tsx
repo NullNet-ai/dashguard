@@ -8,6 +8,7 @@ import RecordProvider from "~/components/platform/Record/Provider";
 import statusOptions from "../../../_actions/statusOptions";
 import tabs from "../../../_config/tabs";
 import RecordContainer from './_component/RecordContainer';
+import RemoteAccessActionButton from "../RemoteAccessActionButton";
 
 const Wrapper = ({
   record,
@@ -32,7 +33,12 @@ const Wrapper = ({
               minSize={25}
               className="flex flex-col gap-2 min-h-60 flex-grow-[6] bg-transparent"
             >
-              <HeaderTabs tabs={tabs} />
+              <HeaderTabs tabs={tabs} tab_items_left_slot={
+                <RemoteAccessActionButton
+                  identifier={entity_code}
+                  main_entity={entity_name!}
+                />
+              } />
               <MainContent
                 style={{ 
                   height: 'calc(100vh - 110px)' 
