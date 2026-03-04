@@ -6,6 +6,7 @@ import RecordClientWrapper from './RecordClientWrapper';
 const RecordSummary = async ({
   image_placeholder,
   header_center_slot,
+  is_show_header_tab,
   children,
 }: any) => {
     const headerList = await headers();
@@ -25,6 +26,7 @@ const RecordSummary = async ({
       <RecordClientWrapper
         image_placeholder={textPlaceholder ?? image_placeholder}
         header_center_slot={header_center_slot}
+        is_show_header_tab={is_show_header_tab}
       >
         {children}
       </RecordClientWrapper>
