@@ -220,6 +220,23 @@ export default function RemoteAccessDetails(props: IFormProps) {
     }
   }, [clearSelectedDeviceService, filteredDeviceServices, remoteAccessType])
 
+  useEffect(() => {
+    if (!formRef.current) return
+    if (!Array.isArray(filteredDeviceServices) || filteredDeviceServices.length !== 1) return
+
+    const onlyOptionValue = filteredDeviceServices?.[0]?.value
+    if (!onlyOptionValue) return
+
+    const selectedServiceId = formRef.current?.getValues?.('device_service_id')
+    if (selectedServiceId) return
+
+    formRef.current?.setValue?.('device_service_id', onlyOptionValue, {
+      shouldDirty: false,
+      shouldTouch: false,
+      shouldValidate: true,
+    })
+  }, [filteredDeviceServices])
+
   const defaultValues = useMemo(() => record_data, [record_data])
 
   return (
