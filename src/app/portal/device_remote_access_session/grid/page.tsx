@@ -72,7 +72,8 @@ export default async function Page() {
       'service_id',
       'tunnel_type',
       'tunnel_status',
-      'last_accessed',
+      'last_access_date',
+      'last_access_time',
     ],
   });
 

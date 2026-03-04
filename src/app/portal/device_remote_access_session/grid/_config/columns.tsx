@@ -82,32 +82,15 @@ const uiGridColumns = [
     },
   },
   {
-    header: 'Last Accessed',
-    accessorKey: 'last_accessed',
-    sortKey: 'device_tunnels.last_accessed',
-    cell: ({ row }) => {
-      const raw = row?.original?.last_accessed
-      const seconds = typeof raw === 'string' || typeof raw === 'number' ? Number(raw) : NaN
-      if (!Number.isFinite(seconds) || seconds <= 0) return null
-
-      const pad = (value: number) => String(value).padStart(2, '0')
-      const dateObj = new Date(seconds * 1000)
-      const date = `${pad(dateObj.getMonth() + 1)}/${pad(dateObj.getDate())}/${dateObj.getFullYear()}`
-      const time = `${pad(dateObj.getHours())}:${pad(dateObj.getMinutes())}`
-
-      return (
-        <div className="flex items-center gap-x-2">
-          <div>{date}</div>
-          <div>{time}</div>
-        </div>
-      )
-    },
+    header: "Last Accessed Date",
+    accessorKey: "last_access_date_time",
+    data_type: "datetime",
+    sortKey: "last_access_date_time",
     search_config: {
-      entity: 'device_tunnels',
+      field: "last_access_date_time",
       operator: 'like',
-      field: 'last_accessed',
-      parse_as: "text",
-    },
+      custom_filter_field: 'last_access_date',
+    }
   },
   {
     header: "Updated Date",

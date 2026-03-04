@@ -29,7 +29,8 @@ const PLUCK = [
   'service_id',
   'tunnel_type',
   'tunnel_status',
-  'last_accessed',
+  'last_access_date',
+  'last_access_time',
 ] as string[];
 
 // @ts-expect-error  - No type yet
@@ -127,6 +128,21 @@ export default function DeviceRemoteAccessGrid(props) {
         gridEntity: entity,
         defaultAllTabName,
         defaultAdvanceFilter,
+        hideDefaultAllTab: true,
+        defaultGridTabs: [
+        {
+          name: 'All Remote Access',
+          current: true,
+          href: `${pathname}?filter_id=`,
+          default: true,
+          default_filter: defaultAdvanceFilter,
+          group_advance_filters: [],
+          advance_filters: [],
+          hidden: false,
+          order: 0,
+          is_tooltip_show: false,
+        },
+    ],
       }).then((data) => {
         setGridCacheData(data ?? {});
       });

@@ -41,6 +41,10 @@ export function GridSessionStatusBadge({ status }: { status?: string | null }) {
     return <GridBadge label={status} variant="success" />
   }
 
+  if (normalized === 'idle') {
+    return <GridBadge label={status} variant="warning" />
+  }
+
   if (normalized === 'terminated') {
     return <GridBadge label={status} variant="destructive" />
   }

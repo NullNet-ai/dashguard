@@ -120,7 +120,12 @@ const buildDeviceRemoteAccessSessionSuggestions = async ({
           // @ts-expect-error - No type yet
           ? formatSorting(sorting)
           : [],
-      concatenate_fields: [...addCommonGridConcatenates(baseEntity)],
+      concatenate_fields: [...addCommonGridConcatenates(baseEntity), {
+        fields: ['last_access_date', 'last_access_time'],
+        field_name: 'last_access_date_time',
+        separator: ' ',
+        entity: baseEntity,
+      }],
     },
   });
 
