@@ -13,7 +13,6 @@ import {
 } from '~/components/ui/tooltip'
 
 import AuthorizaDeviceForm from './AuthorizeDeviceForm'
-import { ChevronUpDownIcon } from '@heroicons/react/24/outline'
 import SelectExistingRemoteAccess from '../../_components/forms/select-existing-remote-access'
 import DeviceRemoteAccessGrid from '../../_components/forms/device-remote-access-grid'
 
@@ -82,7 +81,10 @@ export default function AuthorizeDeviceAction(
       {is_device_online && <Tooltip delayDuration={0}>
           <TooltipTrigger>
           <Button disabled={disabled} variant="ghost" onClick={() => handleOpenSideDrawer('remote_access')}>
-          <ChevronUpDownIcon className='h-4 w-4 text-success' />
+          <span
+            aria-hidden
+            className="inline-block h-4 w-4 bg-current text-success [mask-image:url('/remote_access.png')] [mask-position:center] [mask-repeat:no-repeat] [mask-size:contain]"
+          />
         </Button>
           <TooltipContent side="left">
             <div className="text-sm">
