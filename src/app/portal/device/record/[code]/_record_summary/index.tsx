@@ -4,6 +4,7 @@ import { headers } from 'next/headers';
 import NotFound from '~/app/not-found';
 import RecordShellSummary from './_1';
 import RecordContactBadge from '../_components/RecordContactBadge';
+import RemoteAccessActionButton from '../_components/RemoteAccessActionButton';
 export default async function Page() {
   const headerList = await headers();
   const pathname = headerList.get('x-pathname') || '';
@@ -15,7 +16,14 @@ export default async function Page() {
 
   return (
     <div className='flex flex-col gap-2 md:pr-0'>
-      <RecordSummary>
+      <RecordSummary
+        header_center_slot={
+          <RemoteAccessActionButton
+            identifier={identifier!}
+            main_entity={main_entity!}
+          />
+        }
+      >
         <RecordContactBadge 
           form_key={"device_basic_details"}
           identifier={identifier!}
