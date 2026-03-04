@@ -42,7 +42,7 @@ export function GridSessionStatusBadge({ status }: { status?: string | null }) {
   }
 
   if (normalized === 'idle') {
-    return <GridBadge label={status} variant="warning" />
+    return <GridBadge label={status} variant="caution" />
   }
 
   if (normalized === 'terminated') {
