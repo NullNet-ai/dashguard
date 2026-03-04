@@ -544,6 +544,7 @@ const DraggableTabs: React.FC<DraggableTabsProps> = ({ initialTabs }) => {
                 tab.name === 'user_role'
                   ? 'role'
                   : tab.name.split(' ').join('-');
+              const isTooltipShow = tab?.is_tooltip_show ?? true;
               return (
                 <div
                   key={tab.id}
@@ -569,14 +570,16 @@ const DraggableTabs: React.FC<DraggableTabsProps> = ({ initialTabs }) => {
                       <p>{formatGridTabName(tabNameRole)}</p>
                     </TooltipContent>
                   </Tooltip>
-                  <GridMenuDropClient
-                    actions={actions}
-                    tab={tab}
-                    filter_id={tab?.id}
-                    current={!!tab.href.match(newPathname)}
-                    tabs={tabs}
-                    entity={entity || ''}
-                  />
+                  {isTooltipShow && (
+                    <GridMenuDropClient
+                      actions={actions}
+                      tab={tab}
+                      filter_id={tab?.id}
+                      current={!!tab.href.match(newPathname)}
+                      tabs={tabs}
+                      entity={entity || ''}
+                    />
+                  )}
                 </div>
               );
             })}
@@ -639,6 +642,7 @@ const DraggableTabs: React.FC<DraggableTabsProps> = ({ initialTabs }) => {
                       tab.name === 'user_role'
                         ? 'role'
                         : tab.name.split(' ').join('-');
+                    const isTooltipShow = tab?.is_tooltip_show ?? true;
                     return (
                       <DropdownMenuItem
                         key={tab.id}
@@ -651,14 +655,16 @@ const DraggableTabs: React.FC<DraggableTabsProps> = ({ initialTabs }) => {
                         <span className="mr-1 max-w-[150px] truncate">
                           {formatGridTabName(tabNameRole)}
                         </span>
-                        <GridMenuDropClient
-                          actions={actions}
-                          tab={tab}
-                          filter_id={tab?.id}
-                          current={!!tab.href.match(newPathname)}
-                          tabs={tabs}
-                          entity={entity || ''}
-                        />
+                        {isTooltipShow && (
+                          <GridMenuDropClient
+                            actions={actions}
+                            tab={tab}
+                            filter_id={tab?.id}
+                            current={!!tab.href.match(newPathname)}
+                            tabs={tabs}
+                            entity={entity || ''}
+                          />
+                        )}
                       </DropdownMenuItem>
                     );
                   })}
