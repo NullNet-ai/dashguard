@@ -6,7 +6,7 @@ const menu = {
   url: getGridLink({
     mainEntity: "device",
   }),
-  icon: "DevicePhoneMobileIcon",
+  icon: "/device.svg",
 } as ISidebarMenu;
 
 export default menu;
