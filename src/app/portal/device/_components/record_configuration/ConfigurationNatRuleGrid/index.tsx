@@ -176,6 +176,8 @@ const ConfigurationNatRuleGrid = ({
               pluck: _pluck,
               group_advance_filters: filters?.groupAdvanceFilters,
               sorting: gridCachedData?.sorts?.sorting,
+              // @ts-expect-error - No type yet
+              device_id: record?.data?.id,
             },
           },
           customTabDefaults: {

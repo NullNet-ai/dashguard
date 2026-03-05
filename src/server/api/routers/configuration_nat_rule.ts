@@ -120,10 +120,20 @@ export const deviceNatRuleRouter = createTRPCRouter({
             : [],
         },
       })
-        .execute()
+      
+      if (input.grouping?.length) {
+        device_rules.groupBy({
+          query: {
+            fields: input.grouping,
+            has_count: true,
+          },
+        });
+      }
 
       const { total_count: totalCount = 1, data: items }
-      = device_rules
+      = await device_rules.execute()
+
+      const totalPages = Math.ceil(totalCount / limit)
 
       const formatted_items = items?.map((item: Record<string, any>) => {
         const {
@@ -139,7 +149,6 @@ export const deviceNatRuleRouter = createTRPCRouter({
         }
       })
 
-      const totalPages = Math.ceil(totalCount / limit)
       return {
         totalCount,
         items: formatted_items,

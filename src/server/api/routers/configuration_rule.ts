@@ -120,10 +120,30 @@ export const deviceRuleRouter = createTRPCRouter({
             : [],
         },
       })
-        .execute()
+      if (input.grouping?.length) {
+        device_rules.groupBy({
+          query: {
+            fields: input.grouping,
+            has_count: true,
+          },
+        });
+      }
 
       let { total_count: totalCount = 1, data: items }
-      = device_rules
+      = await device_rules.execute()
+
+      // Calculate total number of pages
+      const totalPages = Math.ceil(totalCount / limit);
+
+      if (input.grouping?.length) {
+        return {
+          totalCount,
+          items: items,
+          currentPage: 0,
+          totalPages,
+        };
+      }
+
       const groupedItems = items.reduce((acc, curr) => {
         if (curr.interface === 'wan') {
           return {
@@ -165,7 +185,6 @@ export const deviceRuleRouter = createTRPCRouter({
         }
       })
 
-      const totalPages = Math.ceil(totalCount / limit)
       return {
         totalCount,
         items: formatted_items,
