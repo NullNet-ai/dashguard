@@ -32,7 +32,11 @@ const gridColumns = [
     cell: ({ row }) => {
       const value = row?.original?.disabled
       if (![true, false]?.includes(value)) return null
-      return <Badge variant={value ? 'secondarySolid' : 'outlineSolid'}>{value ? 'Disabled' : 'Enabled'}</Badge>
+      return (
+        <Badge className="font-medium" variant={value ? 'secondarySolid' : 'outlineSolid'}>
+          {value ? 'Disabled' : 'Enabled'}
+        </Badge>
+      )
     },
   },
   {
