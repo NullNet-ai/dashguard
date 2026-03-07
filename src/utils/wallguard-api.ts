@@ -60,7 +60,7 @@ export class WallGuardApi {
 
   constructor(config: WallGuardApiConfig) {
     this.config = {
-      baseUrl: config.baseUrl || process.env.NEXT_PUBLIC_REMOTE_ACCESS_URL || 'https://wallguard-proxy.nullnet.dnaqa.net',
+      baseUrl: config.baseUrl || process.env.NEXT_PUBLIC_REMOTE_ACCESS_API_URL || 'https://wallguard-proxy.nullnet.dnaqa.net',
       apiVersion: config.apiVersion || 'v1',
       token: config.token,
       serverDomain: config.serverDomain || process.env.NEXT_PUBLIC_WG_SERVER_DOMAIN || 'nullnet.com'
