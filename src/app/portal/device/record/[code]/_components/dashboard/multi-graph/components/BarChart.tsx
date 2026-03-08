@@ -10,7 +10,7 @@ import {
 } from '~/components/ui/chart'
 import { formatNumber, modifyAxis } from './LineChart';
 import { useMemo } from 'react';
-import { graphColors } from './graph-color';
+import { getInterfaceColor } from './graph-color';
 import { formatBytes } from '../../pie-chart/function/formatBytes'
 
 const BarChartComponent = ({ filteredData, interfaces }: { filteredData: Record<string, any>[], interfaces: any }) => {
@@ -109,7 +109,7 @@ const BarChartComponent = ({ filteredData, interfaces }: { filteredData: Record<
           <Bar
             key={item.value}
             dataKey={item.value}
-            fill={graphColors[item.value] || '#16a34a'}
+            fill={getInterfaceColor(item.value, item.value1)}
             isAnimationActive={false}
           />
         ))}

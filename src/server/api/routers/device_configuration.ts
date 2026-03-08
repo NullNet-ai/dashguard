@@ -337,7 +337,8 @@ export const deviceConfigurationRouter = createTRPCRouter({
         const { device , name} = item
         return {
           label: `${name.toUpperCase()} (${device})`,
-          value: device
+          value: device,
+          value1: name,
         }
       })
       

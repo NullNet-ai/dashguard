@@ -7,7 +7,7 @@ import {
   ChartTooltip,
   ChartTooltipContent,
 } from '~/components/ui/chart';
-import { graphColors } from './graph-color';
+import { getInterfaceColor } from './graph-color';
 import { formatBytes as formatBytesTooltip } from '../../pie-chart/function/formatBytes'
 
 export const modifyAxis = (data: any[]) => {
@@ -144,7 +144,7 @@ const LineChartComponent = ({ filteredData, interfaces }: any) => {
           <Line
             key={item.value}
             dataKey={item.value}
-            stroke={graphColors[item.value] || '#16a34a'}
+            stroke={getInterfaceColor(item.value, item.value1)}
             dot={false}
             type="monotone"
             isAnimationActive={false}

@@ -3,7 +3,7 @@ import { Area, AreaChart, CartesianGrid, ResponsiveContainer, XAxis, YAxis } fro
 
 import { ChartLegend, ChartLegendContent, ChartTooltip, ChartTooltipContent } from '~/components/ui/chart';
 import { formatNumber, modifyAxis } from './LineChart';
-import { graphColors, sortInterface } from './graph-color';
+import { getInterfaceColor, sortInterface } from './graph-color';
 import { formatBytes } from '../../pie-chart/function/formatBytes'
 
 const AreaChartComponent = ({ filteredData, interfaces }: any) => {
@@ -44,7 +44,7 @@ const AreaChartComponent = ({ filteredData, interfaces }: any) => {
       >
         <defs>
           {sorted?.map((item: any) => {
-            const color = graphColors[item?.value] || '#16a34a';
+            const color = getInterfaceColor(item?.value, item?.value1);
             return (
               <linearGradient key={item.value} id={item?.value} x1="0" x2="0" y1="0" y2="1">
                 <stop offset="5%" stopColor={color} stopOpacity={0.8} />
@@ -117,7 +117,7 @@ const AreaChartComponent = ({ filteredData, interfaces }: any) => {
             <Area
               key={item.value}
               dataKey={item?.value}
-              stroke={graphColors[item?.value] ? graphColors[item?.value] : '#16a34a'}
+              stroke={getInterfaceColor(item?.value, item?.value1)}
               fill={`url(#${item?.value})`}
               type="monotone" // Use "monotone" to ensure smooth curves
               isAnimationActive={false}
