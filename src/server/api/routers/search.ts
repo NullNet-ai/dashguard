@@ -448,6 +448,7 @@ export const searchRouter = createTRPCRouter({
 
       const device_conf_id = device_configuration?.data?.[0]?.id as string
 
+      // @ts-expect-error - No type yet
       _advance_filters = _advance_filters.reduce((acc, curr) => {
         if (curr.entity === 'ip_aliases') {
           return [

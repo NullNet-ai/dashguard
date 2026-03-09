@@ -53,6 +53,7 @@ const gridColumns = [
     },
     cell: ({ row }) => {
       const value = row?.original?.ip_aliases?.ips?.join(' ')
+      // @ts-expect-error - No type yet
       const value1 = row?.original?.port_aliases?.upper_ports?.map(e => e)?.join(' ')
       return (
         <span>
