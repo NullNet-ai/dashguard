@@ -53,9 +53,10 @@ const gridColumns = [
     },
     cell: ({ row }) => {
       const value = row?.original?.ip_aliases?.ips?.join(' ')
+      const value1 = row?.original?.port_aliases?.upper_ports?.map(e => e)?.join(' ')
       return (
         <span>
-          {value?.split(' ').join(', ')}
+          {(value?.trim() || value1?.trim())?.split(' ').join(', ')}
         </span>
       )
     },

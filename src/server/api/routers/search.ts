@@ -396,7 +396,7 @@ export const searchRouter = createTRPCRouter({
       }),
     )
     .mutation(async ({ input, ctx }) => {
-      const {
+      let {
         advance_filters: _advance_filters = [],
         entity,
         sorting,
@@ -409,6 +409,7 @@ export const searchRouter = createTRPCRouter({
         ...addCommonGridPluckObject(),
         aliases: input.pluck,
         ip_aliases: ['ip'],
+        port_aliases: ['upper_port'],
       };
 
       const device_configuration = await ctx.dnaClient.findAll({
@@ -447,6 +448,27 @@ export const searchRouter = createTRPCRouter({
 
       const device_conf_id = device_configuration?.data?.[0]?.id as string
 
+      _advance_filters = _advance_filters.reduce((acc, curr) => {
+        if (curr.entity === 'ip_aliases') {
+          return [
+            ...acc,
+            curr,
+            { type: 'operator', operator: 'or', entity: 'aliases' },
+            {
+              type: 'criteria',
+              field: 'upper_port',
+              entity: 'port_aliases',
+              operator: 'like',
+              values: _advance_filters[0]?.values,
+              parse_as: 'text',
+              is_search: true
+            }
+          ]
+        }
+        return acc
+      }, [])
+      
+
       const query = ctx.dnaClient
         .searchSuggestions({
           entity,
@@ -456,6 +478,7 @@ export const searchRouter = createTRPCRouter({
             track_total_records: true,
             pluck_group_object: {
               ip_aliases: ['ip'],
+              port_aliases: ['upper_port'],
             },
             pluck_object,
             advance_filters: [
@@ -520,13 +543,40 @@ export const searchRouter = createTRPCRouter({
               field: 'id',
             },
           },
+        })
+        .join({
+          type: 'left',
+          field_relation: {
+            to: {
+              entity: 'port_aliases',
+              field: 'alias_id',
+            },
+            from: {
+              entity: 'aliases',
+              field: 'id',
+            },
+          },
         });
 
       addCommonGridJoins(query, entity);
 
       const { data: items } = await query.execute();
 
-      const suggestions = searchSuggestionTransformer(items, searchable_fields);
+      let suggestions = searchSuggestionTransformer(items, searchable_fields);
+      // @ts-expect-error - No type yet
+      suggestions = suggestions.map((e) => {
+        let updatedSuggestion = e
+        if (e.entity === 'port_aliases') {
+          updatedSuggestion = {
+            ...e,
+            accessorKey: 'upper_port',
+            label: 'Values',
+            operator: 'like',
+            parse_as: 'text',
+          }
+        }
+        return updatedSuggestion
+      });
 
       return { items: suggestions };
     }),

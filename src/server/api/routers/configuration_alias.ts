@@ -78,10 +78,12 @@ export const deviceAliasRouter = createTRPCRouter({
             pluck,
             pluck_group_object: {
               ip_aliases: ['ip'],
+              port_aliases: ['upper_port'],
             },
             pluck_object: {
               aliases: pluck,
               ip_aliases: ['ip'],
+              port_aliases: ['upper_port'],
             },
             advance_filters: _advance_filters?.length
               ? [
@@ -138,7 +140,21 @@ export const deviceAliasRouter = createTRPCRouter({
               field: 'id',
             },
           },
-        }).execute()
+        })
+        .join({
+          type: 'left',
+          field_relation: {
+            to: {
+              entity: 'port_aliases',
+              field: 'alias_id',
+            },
+            from: {
+              entity,
+              field: 'id',
+            },
+          },
+        })
+        .execute()
 
       const { total_count: totalCount = 1, data: items }
       = device_aliases
