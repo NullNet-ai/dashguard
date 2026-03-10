@@ -47,8 +47,8 @@ const InteractiveGraph = ({
   const form = useForm({
     defaultValues: {
       graph_type: 'area',
-      interfaces: multiSelectOptions,
-      pie_chart_interfaces: multiSelectOptions,
+      interfaces: multiSelectOptions?.filter(e => e.label.toLowerCase().includes('wan') || e.label.toLowerCase().includes('lan')),
+      pie_chart_interfaces: multiSelectOptions?.filter(e => e.label.toLowerCase().includes('wan') || e.label.toLowerCase().includes('lan')),
     },
   })
   
