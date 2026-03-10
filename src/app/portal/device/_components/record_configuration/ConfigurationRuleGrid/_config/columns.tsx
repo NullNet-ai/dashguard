@@ -78,6 +78,8 @@ const gridColumns = [
         'inet46/any': 'IPv4+6/*',
         'inet46/tcp': 'IPv4+6/TCP',
         'inet46/tcp/udp': 'IPv4+6/TCP/UDP',
+        'any': '*',
+        'tcp/udp': 'TCP/UDP',
       }[row.original?.protocol] ?? row.original?.protocol ?? ''
     } 
   },
