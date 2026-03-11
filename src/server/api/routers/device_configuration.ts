@@ -245,10 +245,10 @@ export const deviceConfigurationRouter = createTRPCRouter({
               input.code,
             ],
           },
-          {
-            type: 'operator',
-            operator: EOperator.AND,
-          },
+          // {
+          //   type: 'operator',
+          //   operator: EOperator.AND,
+          // },
           // {
           //   type: 'criteria',
           //   field: 'status',
@@ -312,8 +312,8 @@ export const deviceConfigurationRouter = createTRPCRouter({
               "device",
               "id"
             ],
-            // @ts-expect-error - No type yet
             order: {
+              limit: 20,
               by_field: 'created_date',
               by_direction: EOrderDirection.DESC,
             },

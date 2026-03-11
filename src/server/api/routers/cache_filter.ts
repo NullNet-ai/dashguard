@@ -158,6 +158,17 @@ export const cachedFilterRouter = createTRPCRouter({
 
       
       const filter = cached_data?.find((data: any) => data.id === filter_id)
+
+      if (type === 'timeline_filter' && filter_id === '01JNQ9WPA2JWNTC27YCTCYC1FE') {
+        return {
+          time: {
+            time_count: 60,
+            time_unit: 'second'
+          },
+          resolution: '1s',
+        }
+      }
+
       if(!filter) {
         return {
           time: {
