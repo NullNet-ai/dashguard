@@ -371,6 +371,7 @@ export default function NetworkFlowProvider({ children, params }: IProps) {
               time_unit: time_unit as 'hour',
               resolution: resolution as '1h',
             });
+            eventEmitter.emit('timeline_time_settings', { time_count, time_unit, resolution })
         
             return { time_count, time_unit, resolution };
           };
@@ -440,6 +441,7 @@ export default function NetworkFlowProvider({ children, params }: IProps) {
         time_unit: time_unit as 'hour',
         resolution: resolution as '1h',
       })
+      eventEmitter.emit('timeline_time_settings', { time_count, time_unit, resolution })
     }
     fetchTimeUnitandResolution()
   }, [filterId, (searchBy ?? [])?.length])
