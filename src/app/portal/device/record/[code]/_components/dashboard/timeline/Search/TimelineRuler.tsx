@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useEffect, useMemo, useState } from 'react'
+import React, { useEffect, useMemo, useState, useRef } from 'react'
 import { useEventEmitter } from '~/context/EventEmitterProvider'
 import { cn } from '~/lib/utils'
 
@@ -8,88 +8,150 @@ import { cn } from '~/lib/utils'
  * Terms guide:
  * - granularity: The active time unit for ticks ('second' | 'minute' | 'hour'),
  *   derived from the timeline resolution.
- * - TICK_CONFIG.idealMajorCount: Target number of labeled ticks visible at any zoom level.
- * - TICK_CONFIG.minSpacing: Minimum ticks between majors (prevents bunching on small datasets).
- * - TICK_CONFIG.maxSpacing: Maximum ticks between majors (prevents disappearing on huge datasets).
+ * - TICK_CONFIG.<unit>.spacing: Number of <unit> between major ticks
+ *   (e.g., seconds: 10 -> major every 10s).
+ * - TICK_CONFIG.<unit>.phase: Fixed offset for majors when anchorToFirst=false
+ *   (e.g., seconds phase=5 -> majors at :05, :15, :25, ...).
+ * - TICK_CONFIG.anchorToFirst: When true, majors align to the first bucket in
+ *   the current series (ignores phase). When false, majors use the fixed phase.
  */
+
 const TICK_CONFIG = {
-  idealMajorCount: 6,
-  minSpacing: 1,
-  maxSpacing: 99999,
+  second: { spacing: 10, phase: 0 },
+  minute: { spacing: 15, phase: 0 },
+  hour: { spacing: 60, phase: 0 },
+  anchorToFirst: false,
 } as const
 
-type Granularity = 'second' | 'minute' | 'hour'
+// threshold to distinguish between seconds and milliseconds (13-digit timestamps are milliseconds)
+const MILLISECONDS_THRESHOLD = 1e12
 
-// Extracted: was duplicated in onChartData and onTimeSettings
-function parseGranularity(resolution: string): Granularity {
-  const res = resolution.toLowerCase()
-  if (res.startsWith('s') || res.endsWith('s')) return 'second'
-  if (res.startsWith('m') || res.endsWith('m')) return 'minute'
-  if (res.startsWith('h') || res.endsWith('h')) return 'hour'
+interface TimelineData {
+  result?: Array<{ bucketTime?: any; time?: any }>
+  resolution?: string
+}
+
+function resolveGranularity(resolution?: string): 'second' | 'minute' | 'hour' {
+  const r = String(resolution || '').toLowerCase().trim()
+  if (/(^|\W)(hour|hours|hr|h)(\W|$)/.test(r) || r.endsWith('h')) return 'hour'
+  if (/(^|\W)(minute|minutes|min|m)(\W|$)/.test(r) || r.endsWith('m')) return 'minute'
+  if (/(^|\W)(second|seconds|sec|s)(\W|$)/.test(r) || r.endsWith('s')) return 'second'
   return 'second'
 }
 
-function parseTimeMs(value: any): number | null {
+function parseTimeMs(value: unknown): number | null {
   if (value == null) return null
-  if (typeof value === 'number' && Number.isFinite(value)) return value < 1e12 ? value * 1000 : value
+  
+  if (typeof value === 'number' && Number.isFinite(value)) {
+    return value < MILLISECONDS_THRESHOLD ? value * 1000 : value
+  }
+  
   const str = String(value).trim()
   if (!str) return null
-  const full = str.match(/^(\d{4})-(\d{2})-(\d{2})[ T](\d{2}):(\d{2}):(\d{2})$/)
-  if (full) {
-    const [, y, mo, d, h, mi, s] = full.map(Number)
-    return Date.UTC(y!, mo! - 1, d, h, mi, s)
+  
+  if (str.length === 19 && str[10] === ' ') {
+    const y = parseInt(str.slice(0, 4), 10)
+    const mo = parseInt(str.slice(5, 7), 10) - 1
+    const d = parseInt(str.slice(8, 10), 10)
+    const h = parseInt(str.slice(11, 13), 10)
+    const mi = parseInt(str.slice(14, 16), 10)
+    const s = parseInt(str.slice(17, 19), 10)
+    
+    if (!Number.isNaN(y + mo + d + h + mi + s)) {
+      return Date.UTC(y, mo, d, h, mi, s)
+    }
   }
+  
   if (/^\d{1,2}$/.test(str)) {
-    const now = new Date()
-    return Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate(), now.getUTCHours(), now.getUTCMinutes(), parseInt(str, 10))
+    const now = Date.now()
+    const date = new Date(now)
+    const s = parseInt(str, 10)
+    return Date.UTC(
+      date.getUTCFullYear(),
+      date.getUTCMonth(),
+      date.getUTCDate(),
+      date.getUTCHours(),
+      date.getUTCMinutes(),
+      s
+    )
   }
-  const d = new Date(str)
-  if (!Number.isNaN(d.getTime())) return d.getTime()
+  
+  const timestamp = Date.parse(str)
+  if (!Number.isNaN(timestamp)) return timestamp
+  
   const n = Number(str)
-  if (Number.isFinite(n)) return n < 1e12 ? n * 1000 : n
-  return null
+  return Number.isFinite(n) ? (n < MILLISECONDS_THRESHOLD ? n * 1000 : n) : null
 }
 
-function formatLabel(ms: number, granularity: Granularity): string {
-  const d = new Date(ms)
-  const pad = (n: number) => String(n).padStart(2, '0')
-  const hh = pad(d.getUTCHours())
-  const mm = pad(d.getUTCMinutes())
-  const ss = pad(d.getUTCSeconds())
-  if (granularity === 'hour') return `${hh}:00`
-  if (granularity === 'minute') return `${hh}:${mm}`
-  return `${hh}:${mm}:${ss}`
-}
 
-function buildFallbackTimes(nowMs: number): number[] {
-  const base = new Date(nowMs)
-  return Array.from({ length: 60 }, (_, i) =>
-    Date.UTC(base.getUTCFullYear(), base.getUTCMonth(), base.getUTCDate(), base.getUTCHours(), base.getUTCMinutes(), i),
-  )
+const padding = (n: number) => String(n).padStart(2, '0')
+
+function formatLabel(ms: number, granularity: 'second' | 'minute' | 'hour'): string {
+  const date = new Date(ms)
+  const hours = date.getUTCHours()
+  const minutes = date.getUTCMinutes()
+  
+  if (granularity === 'hour') return `${padding(hours)}:00`
+  if (granularity === 'minute') return `${padding(hours)}:${padding(minutes)}`
+  
+  const seconds = date.getUTCSeconds()
+  return `${padding(hours)}:${padding(minutes)}:${padding(seconds)}`
 }
 
 export default function TimelineRuler() {
   const eventEmitter = useEventEmitter()
   const [series, setSeries] = useState<any[]>([])
-  const [granularity, setGranularity] = useState<Granularity>('second')
-  const [nowMs, setNowMs] = useState<number>(Date.now())
+  const [granularity, setGranularity] = useState<'second' | 'minute' | 'hour'>('second')
+  const nowMsRef = useRef<number>(Date.now())
+  
+  // use ref to avoid unnecessary state updates for time
+  const [, forceUpdate] = useState({})
+
+  function generateFallbackTimes(g: 'second' | 'minute' | 'hour', nowMs: number): number[] {
+    const base = new Date(nowMs)
+    const y = base.getUTCFullYear()
+    const mo = base.getUTCMonth()
+    const d = base.getUTCDate()
+    const h = base.getUTCHours()
+    const mi = base.getUTCMinutes()
+    const times: number[] = []
+    if (g === 'second') {
+      const start = Date.UTC(y, mo, d, h, mi, 0)
+      for (let i = 0; i < 60; i++) times.push(start + i * 1000)
+      return times
+    }
+    if (g === 'minute') {
+      const start = Date.UTC(y, mo, d, h, 0, 0)
+      for (let i = 0; i < 60; i++) times.push(start + i * 60 * 1000)
+      return times
+    }
+    const count = 12
+    const start = Date.UTC(y, mo, d, h, 0, 0) - (count - 1) * 60 * 60 * 1000
+    for (let i = 0; i < count; i++) times.push(start + i * 60 * 60 * 1000)
+    return times
+  }
 
   useEffect(() => {
-    const onChartData = (data: any[]) => {
+    const onChartData = (data: TimelineData[]) => {
       const first = Array.isArray(data) && data.length > 0 ? data[0] : null
-      setSeries(first?.result || [])
-      setGranularity(parseGranularity(String(first?.resolution || '')))
+      const row = first?.result || []
+      setSeries(row)
+      
+      setGranularity(resolveGranularity(first?.resolution))
     }
+    
     const onLoading = (loading: boolean) => {
       if (loading) setSeries([])
     }
-    const onTimeSettings = (payload: any) => {
-      setGranularity(parseGranularity(String(payload?.resolution || '')))
+    
+    const onTimeSettings = (payload: { resolution?: string }) => {
+      setGranularity(resolveGranularity(payload?.resolution))
     }
-
+    
     eventEmitter.on('timeline_chart_data', onChartData)
     eventEmitter.on('timeline_loading', onLoading)
     eventEmitter.on('timeline_time_settings', onTimeSettings)
+    
     return () => {
       eventEmitter.off('timeline_chart_data', onChartData)
       eventEmitter.off('timeline_loading', onLoading)
@@ -98,57 +160,88 @@ export default function TimelineRuler() {
   }, [eventEmitter])
 
   useEffect(() => {
-    if (series.length > 0) return
-    const id = window.setInterval(() => setNowMs(Date.now()), 1000)
+    const id = window.setInterval(() => {
+      nowMsRef.current = Date.now()
+      // only force update if we have data to display
+      if (series.length > 0) {
+        forceUpdate({})
+      }
+    }, 1000)
     return () => window.clearInterval(id)
   }, [series.length])
 
   const ticks = useMemo(() => {
-    // No real data yet — show 60 fake minor ticks with no labels as a placeholder
-    if (series.length === 0) {
-      return buildFallbackTimes(nowMs).map(() => ({ isMajor: false, label: '' }))
+    // parse and filter valid timestamps
+    const times: number[] = []
+    for (const v of series) {
+      const ms = parseTimeMs(v?.bucketTime ?? v?.time)
+      if (ms != null) {
+        times.push(ms)
+      }
     }
 
-    // Use real data timestamps
-    const times = series
-      .map((v) => parseTimeMs(v?.bucketTime ?? v?.time))
-      .filter((ms): ms is number => ms != null)
+    // generate default times if no data available
+    if (times.length === 0) {
+      times.push(...generateFallbackTimes(granularity, nowMsRef.current))
+    }
 
     if (times.length === 0) return []
+ 
+     const firstD = new Date(times[0]!)
+     const secOffset = TICK_CONFIG.anchorToFirst
+       ? firstD.getUTCSeconds() % TICK_CONFIG.second.spacing
+       : (TICK_CONFIG.second.phase % TICK_CONFIG.second.spacing + TICK_CONFIG.second.spacing) % TICK_CONFIG.second.spacing
+     const minOffset = TICK_CONFIG.anchorToFirst
+       ? firstD.getUTCMinutes() % TICK_CONFIG.minute.spacing
+       : (TICK_CONFIG.minute.phase % TICK_CONFIG.minute.spacing + TICK_CONFIG.minute.spacing) % TICK_CONFIG.minute.spacing
+     const hourOffset = TICK_CONFIG.anchorToFirst
+       ? firstD.getUTCMinutes() % TICK_CONFIG.hour.spacing
+       : (TICK_CONFIG.hour.phase % TICK_CONFIG.hour.spacing + TICK_CONFIG.hour.spacing) % TICK_CONFIG.hour.spacing
 
-    // How far apart should labeled ticks be?
-    // e.g. 144 ticks ÷ 6 = label every 24th tick
-    const spacing = Math.min(
-      TICK_CONFIG.maxSpacing,
-      Math.max(TICK_CONFIG.minSpacing, Math.round(times.length / TICK_CONFIG.idealMajorCount))
-    )
-
-    // Mark every Nth tick as major (labeled), the rest as minor
-    return times.map((ms, i) => {
-      const isMajor = i % spacing === 0
-      return {
+     const result = []
+     for (let i = 0; i < times.length; i++) {
+       const ms = times[i]!
+       const date = new Date(ms)
+       const minute = date.getUTCMinutes()
+       const second = date.getUTCSeconds()
+      
+      let isMajor = false
+      if (granularity === 'hour') {
+        isMajor = ((minute - hourOffset + 60) % TICK_CONFIG.hour.spacing) === 0
+      } else if (granularity === 'minute') {
+        isMajor = ((minute - minOffset + 60) % TICK_CONFIG.minute.spacing) === 0
+      } else {
+        isMajor = ((second - secOffset + 60) % TICK_CONFIG.second.spacing) === 0
+      }
+      
+      result.push({
         isMajor,
         label: isMajor ? formatLabel(ms, granularity) : '',
-      }
-    })
-  }, [series, granularity, nowMs])
+      })
+    }
+    
+    if (!result.some((r) => r.isMajor) && result.length > 0) {
+      result[0] = { isMajor: true, label: formatLabel(times[0]!, granularity) }
+    }
+    
+    return result
+  }, [series, granularity])
 
-  if (ticks.length === 0) return <div className="h-6 w-full border-b border-slate-100" />
+  const columns = Math.max(ticks.length, 0)
+
+  if (columns === 0) return <div className="h-6 w-full border-b border-slate-100" />
 
   return (
     <div className="relative">
       <div className="absolute left-0 right-0 top-1 h-px bg-slate-200" />
       <div
         className="grid items-end"
-        style={{ gridTemplateColumns: `repeat(${ticks.length}, minmax(0, 1fr))` }}
+        style={{ gridTemplateColumns: `repeat(${columns}, minmax(0, 1fr))` }}
       >
         {ticks.map((t, i) => (
-          <div
-            key={i}
-            className={`relative flex items-end justify-center border-r ${t.isMajor ? 'h-3 border-slate-400' : 'h-2 border-slate-200'}`}
-          >
+          <div key={i} className={`relative flex items-end justify-center border-r  ${t.isMajor ? 'h-3 border-slate-400' : 'h-2 border-slate-200'}`}>
             {t.label && (
-              <span className={cn('absolute -top-5 text-[11px] text-slate-500', {
+              <span className={cn("absolute -top-5 text-[11px] text-slate-500", {
                 'translate-x-1/2': t.isMajor && granularity === 'second' && i === 0,
               })}>
                 {t.label}
