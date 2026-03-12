@@ -51,7 +51,7 @@ export default async function DashboardTabs() {
     },
     {
       id: 'configuration_nat_rules',
-      label: 'NAT Rules',
+      label: 'NAT',
       content: (
         <Suspense
           fallback={

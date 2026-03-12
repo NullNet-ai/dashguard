@@ -111,6 +111,20 @@ const gridColumns = [
       operator: 'like',
     },
   },
+ {
+    header: 'NAT IP',
+    accessorKey: 'redirect_ip',
+    search_config: {
+      operator: 'like',
+    },
+  },
+  {
+    header: 'NAT Port',
+    accessorKey: 'redirect_port',
+    search_config: {
+      operator: 'like',
+    },
+  },
   {
     header: 'Description',
     accessorKey: 'description',

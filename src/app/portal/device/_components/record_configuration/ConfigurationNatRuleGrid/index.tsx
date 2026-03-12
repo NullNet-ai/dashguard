@@ -95,7 +95,9 @@ const ConfigurationNatRuleGrid = ({
     'updated_date',
     'disabled',
     'interface',
-    'order'
+    'order',
+    'redirect_ip',
+    'redirect_port',
   ]
 
   const { gridParams, gridProps } = gridDataResolver({
