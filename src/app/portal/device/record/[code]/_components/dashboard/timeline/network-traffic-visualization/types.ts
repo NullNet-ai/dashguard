@@ -26,10 +26,24 @@ export interface FlowElement {
 
 }
 
+export interface IBandwidthBucket {
+  bucket: string
+  bandwidth: string
+}
+
 export interface IBandwidth {
   source_ip: string
-  destination_ip: string
-  result: Record<string, any>
+  result: IBandwidthBucket[]
+  flag: string
+  name: string
+  country: string
+  time_unit: string
+  time_count: number
+  resolution: string
+  time_range: [string, string]
+  total_bandwidths: number
+  total_active_packets: number
+  isNew?: boolean
 }
 
 export interface IState {

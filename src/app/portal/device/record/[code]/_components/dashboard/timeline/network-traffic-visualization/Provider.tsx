@@ -13,10 +13,22 @@ import { getLastTimeStamp } from '~/app/portal/device/utils/timeRange'
 import { useEventEmitter } from '~/context/EventEmitterProvider'
 import { api } from '~/trpc/react'
 
-import { type INetworkFlowContext } from './types'
+import { type IBandwidth, type INetworkFlowContext } from './types'
 import { useSocketConnection } from '../../custom-hooks/useSocketConnection';
 import { updateBandwidth } from './functions/updateBandwidth';
 import { useRouter } from 'next/navigation'
+
+const withTotal = (items: IBandwidth[]): IBandwidth[] =>
+  items.map(item => ({
+    ...item,
+    total_bandwidths: item.result?.reduce((acc, curr) => acc + Number(curr.bandwidth), 0) ?? 0,
+    total_active_packets: item.result?.reduce((acc, curr) => {
+      if (Number(curr.bandwidth) > 0) {
+        return acc + 1
+      }
+      return acc
+    }, 0) ?? 0,
+  }))
 
 const NetworkFlowContext = React.createContext<INetworkFlowContext>({
 })
@@ -34,7 +46,7 @@ export default function NetworkFlowProvider({ children, params }: IProps) {
   const eventEmitter = useEventEmitter()
   const [filterId, setFilterID] = useState('01JNQ9WPA2JWNTC27YCTCYC1FE')
   const [searchBy, setSearchBy] = useState()
-  const [new_bandwidth, setNewBandwidth] = useState<any>([])
+  const [new_bandwidth, setNewBandwidth] = useState<IBandwidth[]>([])
   const [loading, setLoading] = useState<boolean>(false)
   const [time, setTime] = useState<Record<string, any> | null>(null)
   const [current_index, setCurrentIndex] = useState<number>(0)
@@ -81,10 +93,10 @@ export default function NetworkFlowProvider({ children, params }: IProps) {
     if (!ips?.length) return
     window.setTimeout(() => {
       if (isUnmountedRef.current) return
-      setNewBandwidth((prev: any[]) => {
+      setNewBandwidth((prev: IBandwidth[]) => {
         if (!prev?.length) return prev
         const ipSet = new Set(ips)
-        return prev.map((entry: any) => (ipSet.has(entry?.source_ip) ? { ...entry, isNew: false } : entry))
+        return withTotal(prev.map((entry) => (ipSet.has(entry?.source_ip) ? { ...entry, isNew: false } : entry)))
       })
     }, delayMs)
   }, [])
@@ -166,9 +178,9 @@ export default function NetworkFlowProvider({ children, params }: IProps) {
     if (startIndex === 0) {
       // If it's the first batch, replace the data
       setNewBandwidth(
-        _bandwidth?.data?.map((item: Record<string, any>) => {
+        withTotal(_bandwidth?.data?.map((item: Record<string, any>) => {
           return { ...item, time_unit, time_count, resolution, time_range };
-        }) || []
+        }) || [])
       );
       return;
     }
@@ -189,8 +201,8 @@ export default function NetworkFlowProvider({ children, params }: IProps) {
       }, [])
     })
 
-    setNewBandwidth(updated_new_bandwidth)
-   
+    setNewBandwidth(withTotal(updated_new_bandwidth))
+
   }, [getBandwidthActions, params?.id, resolution, time_count, time_range, time_unit, searchBy])
   
   
@@ -213,7 +225,7 @@ export default function NetworkFlowProvider({ children, params }: IProps) {
     socket.on(eventKey, async (data: any) => {
       // if((searchBy ?? [])?.length && !(searchBy as any)?.[0]?.values?.includes(data?.source_ip)) return
       const updated_bandwidth = await updateBandwidth(new_bandwidth, data, time, searchBy);
-      setNewBandwidth([...updated_bandwidth])
+      setNewBandwidth(withTotal([...updated_bandwidth] as IBandwidth[]))
       clearIsNewAfterDelay(
         (updated_bandwidth || []).filter((e: any) => e?.isNew).map((e: any) => e?.source_ip).filter(Boolean),
       )
@@ -310,8 +322,29 @@ export default function NetworkFlowProvider({ children, params }: IProps) {
       }
     })
 
+    if ((realNewBandwidths as any[]).length > 0) {
+      const newIps = (realNewBandwidths as any[]).map((e: any) => e.source_ip).filter(Boolean)
+      const freshTr = getLastTimeStamp({ count: time_count, unit: time_unit, add_remaining_time: true }) as any 
+      const freshBandwidth: any = await getBandwidthActions.mutateAsync({
+        device_id: params?.id || '',
+        time_range: freshTr,
+        bucket_size: resolution,
+        source_ips: newIps,
+      })
+      if (isUnmountedRef.current) return
+      if (generationAtStart !== filterGenerationRef.current) return
+      if (filterIdAtStart !== activeFilterIdRef.current) return
+      if (freshBandwidth?.data) {
+        // @ts-expect-error - No type yet
+        realNewBandwidths = (realNewBandwidths as any[]).map((entry: any) => {
+          const fresh = (freshBandwidth.data as any[]).find((d: any) => d.source_ip === entry.source_ip)
+          return fresh ? { ...fresh, time_unit, time_count, resolution, time_range, isNew: true } : entry
+        })
+      }
+    }
+
     // @ts-expect-error - No type yet
-    setNewBandwidth([...realNewBandwidths, ...updated_new_bandwidth].slice(0, 25))
+    setNewBandwidth(withTotal([...realNewBandwidths, ...updated_new_bandwidth].slice(0, 10)))
     clearIsNewAfterDelay(
       // @ts-expect-error - No type yet
       (realNewBandwidths || []).map((e: any) => e?.source_ip).filter(Boolean),
@@ -371,6 +404,7 @@ export default function NetworkFlowProvider({ children, params }: IProps) {
               time_unit: time_unit as 'hour',
               resolution: resolution as '1h',
             });
+            eventEmitter.emit('timeline_time_settings', { time_count, time_unit, resolution })
         
             return { time_count, time_unit, resolution };
           };
@@ -400,7 +434,7 @@ export default function NetworkFlowProvider({ children, params }: IProps) {
           await fetchUniqueSourceIP(); // Trigger fetchUniqueSourceIP directly after fetchTimeUnitandResolution
         
           // Fetch bandwidth data
-          fetchBandwidth(0, 25); // Trigger fetchBandwidth
+          fetchBandwidth(0, 10); // Trigger fetchBandwidth
         } catch (error) {
           console.error('Error during handleRefresh:', error); // Log the error for debugging
         } finally {
@@ -440,6 +474,7 @@ export default function NetworkFlowProvider({ children, params }: IProps) {
         time_unit: time_unit as 'hour',
         resolution: resolution as '1h',
       })
+      eventEmitter.emit('timeline_time_settings', { time_count, time_unit, resolution })
     }
     fetchTimeUnitandResolution()
   }, [filterId, (searchBy ?? [])?.length])
@@ -484,13 +519,13 @@ export default function NetworkFlowProvider({ children, params }: IProps) {
     if (areIpsSame) return
 
     const generationAtStart = filterGenerationRef.current
-    setCurrentIndex(prevIndex => prevIndex + 25)
+    setCurrentIndex(prevIndex => prevIndex + 10)
     setNewBandwidth([])
     //  filterId !== '01JNQ9WPA2JWNTC27YCTCYC1FE' && fetchBandwidth(0, 20)
     setIsQueueEnabled(false)
     taskQueueRef.current = []
     void (async () => {
-      await fetchBandwidth(0, 25, true)
+      await fetchBandwidth(0, 10, true)
       if (isUnmountedRef.current) return
       if (generationAtStart !== filterGenerationRef.current) return
       setIsQueueEnabled(true)
