@@ -10,6 +10,7 @@ import MapComponent from './components/MapComponent'
 import { useSocketConnection } from '../../custom-hooks/useSocketConnection'
 import Filter from '../../timeline/Filter'
 import { Card, CardHeader, CardTitle } from '~/components/ui/card'
+import { Alert, AlertContent } from '~/components/ui/alert'
 
 /**
  * Formats IP data with country information, handling cases where country info is missing
@@ -573,12 +574,19 @@ export default function TrafficMaps({ params, defaultValues }: Record<string, an
       {/* <Search filter_type='map_search' params={{ ...params, router: 'packet', resolver: 'filterPackets' }} /> */}
       <CardHeader className={"flex flex-row items-center justify-between bg-slate-100"}>
         <CardTitle className="flex gap-3 items-center text-md text-foreground">
-          Traffic Flow 
+          Traffic Flow
           {defaultValues.is_device_online && isConnected && (
             <div className="flex gap-1 items-center leading-[0] text-[10px] text-success"><div className="size-1.5 rounded-full bg-success" /> LIVE</div>
           )}
         </CardTitle>
       </CardHeader>
+      {!(defaultValues?.address?.country || defaultValues?.address?.city) && (
+        <Alert variant="warning" dismissible className="mt-2 mb-2">
+          <AlertContent>
+            Select Device Location 1st
+          </AlertContent>
+        </Alert>
+      )}
 
       {false ? (// isLoading ? (
         <div className='flex justify-center items-center h-64'>
