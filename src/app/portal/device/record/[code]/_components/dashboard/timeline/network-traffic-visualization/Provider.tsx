@@ -192,7 +192,6 @@ export default function NetworkFlowProvider({ children, params }: IProps) {
 
     // @ts-expect-error - No type yet
     _bandwidth.data.forEach(e => {
-      // @ts-expect-error - No type yet
       updated_new_bandwidth = updated_new_bandwidth.reduce((acc, curr) => {
         if(curr?.source_ip === e?.source_ip) {
           return [...acc, { ...curr, result: [...curr.result, ...e.result] }]
@@ -322,7 +321,9 @@ export default function NetworkFlowProvider({ children, params }: IProps) {
       }
     })
 
+    // @ts-expect-error - No type yet
     if ((realNewBandwidths as any[]).length > 0) {
+      // @ts-expect-error - No type yet
       const newIps = (realNewBandwidths as any[]).map((e: any) => e.source_ip).filter(Boolean)
       const freshTr = getLastTimeStamp({ count: time_count, unit: time_unit, add_remaining_time: true }) as any 
       const freshBandwidth: any = await getBandwidthActions.mutateAsync({
@@ -343,10 +344,8 @@ export default function NetworkFlowProvider({ children, params }: IProps) {
       }
     }
 
-    // @ts-expect-error - No type yet
     setNewBandwidth(withTotal([...realNewBandwidths, ...updated_new_bandwidth].slice(0, 10)))
     clearIsNewAfterDelay(
-      // @ts-expect-error - No type yet
       (realNewBandwidths || []).map((e: any) => e?.source_ip).filter(Boolean),
     )
   }, [fetchBandwidth, filterId])
