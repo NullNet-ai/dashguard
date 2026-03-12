@@ -1306,7 +1306,7 @@ return (
           }
         `}
       </style>
-      <div id="map" style={{ height: 'calc(-145px + 100vh)', width: '100%' }} />
+      <div id="map" style={{ height: 'calc(-145px + 100vh)', width: '100%', backgroundColor: 'white' }} />
       
       {isLoading && (
         <div className="loading-overlay">
