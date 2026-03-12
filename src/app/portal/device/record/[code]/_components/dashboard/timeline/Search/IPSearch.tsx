@@ -4,11 +4,13 @@ import { type IAdvanceFilters } from '@dna-platform/common-orm'
 import { Combobox, ComboboxInput, ComboboxOptions } from '@headlessui/react'
 import { MagnifyingGlassIcon } from '@heroicons/react/20/solid'
 import { X } from 'lucide-react'
-import { useContext, useEffect, useMemo } from 'react'
+import { useContext, useEffect, useMemo, useState } from 'react'
 
 import { Button } from '~/components/ui/button'
 import { useDebounce } from '~/components/ui/multi-select'
 import { Badge } from '~/components/ui/badge'
+import { DropdownMenu, DropdownMenuContent, DropdownMenuTrigger } from '~/components/ui/dropdown-menu'
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '~/components/ui/tooltip'
 import { useEventEmitter } from '~/context/EventEmitterProvider'
 
 import { SearchGraphContext } from './Provider'
@@ -65,6 +67,8 @@ export default function IPSearch() {
       )
   }, [selectedSearchItems])
 
+  const [menuOpen, setMenuOpen] = useState(false)
+
   useEffect(() => {
     if (!debouncedSearchInput) return
     handleSearchQuery?.(
@@ -99,15 +103,14 @@ export default function IPSearch() {
   }, [items, debouncedSearchInput, searchableFields])
 
   return (
-    <div className="flex flex-col gap-2 py-2 px-[8px]">
-      <p className="whitespace-nowrap text-xs text-black pl-[2px]">Source IP</p>
+    <div className="flex flex-col gap-2 py-2 pr-[8px]">
       <Combobox>
         <div className="relative">
           <div className="flex items-center rounded-md border px-2 ps-3 focus-within:border-primary">
-            <MagnifyingGlassIcon aria-hidden="true" className="h-5 w-5 text-muted-foreground" />
+            <MagnifyingGlassIcon aria-hidden="true" className="h-4 w-4 text-muted-foreground" />
             <ComboboxInput
-              className="h-[30px] flex-grow border-none bg-transparent px-1.5 outline-none placeholder:text-muted-foreground focus:ring-0 sm:text-md"
-              placeholder="Search..."
+              className="h-7 flex-grow border-none bg-transparent px-1.5 outline-none placeholder:text-muted-foreground focus:ring-0 text-sm"
+              placeholder="Search by Source IP/Country"
               data-test-id={testIDFormatter(`${path1}-${path2}-srch-input`)}
               value={query}
               onChange={(e) => actions?.handleQuery(e.target.value)}
@@ -130,45 +133,100 @@ export default function IPSearch() {
         </div>
       </Combobox>
 
-      {defaultSearchItems.length > 0 && (
-        <div>
-          <span className="text-xs">Search By:</span>
-          <div className="flex flex-row flex-wrap gap-1">
-            {defaultSearchItems.map((item: any) => (
-              <Badge
-                className={cn('item-ref m-1 flex items-center gap-1 whitespace-nowrap')}
-                key={item.id}
-                variant="secondary"
-              >
-                {item.type === 'criteria'
-                  ? `${item?.label || formatAndCapitalize(item?.field ?? '')} is "${item?.display_value ?? item?.values?.[0]}"`
-                  : item?.operator}
-                {item.type === 'criteria' && !item.default && (
-                  <Button
-                    className="h-auto w-auto p-0 text-default/40 text-nowrap hover:bg-transparent focus:outline-none"
-                    key={`${item.id}-remove`}
-                    name="removeSortingButton"
-                    size="xs"
-                    variant="ghost"
-                    onClick={() => actions?.handleRemoveSearchItem(item)}
-                  >
-                    <X className="h-3 w-3" />
-                  </Button>
-                )}
-              </Badge>
-            ))}
-            <Button
-              type="button"
-              className={cn('h-[30px] text-default/60 underline hover:no-underline')}
-              name="resetSortButton"
-              variant="link"
-              onClick={() => actions?.handleClearSearchItems()}
-            >
-              Clear All
-            </Button>
+      <div className="flex items-center min-h-8">
+        <span className="text-sm">Search By:</span>
+        {defaultSearchItems.length > 0 && (
+          <div>
+            <div className="flex items-center flex-wrap gap-1">
+              {(() => {
+                const first = defaultSearchItems[0]
+                const rest = defaultSearchItems.slice(1)
+                return (
+                  <>
+                    {first && (
+                      <TooltipProvider>
+                        <Tooltip delayDuration={100}>
+                          <TooltipTrigger asChild>
+                            <Badge
+                              className={cn('item-ref m-1 flex items-center gap-1 whitespace-nowrap min-w-0')}
+                              key={first.id}
+                              variant="secondary"
+                            >
+                              <span className={`truncate min-w-0 flex-1 ${defaultSearchItems.length === 1 ? 'max-w-28' : 'max-w-14'}`}>
+                                {first.type === 'criteria'
+                                  ? `${first?.label || formatAndCapitalize(first?.field ?? '')} is "${first?.display_value ?? first?.values?.[0]}"`
+                                  : first?.operator}
+                              </span>
+                              {first.type === 'criteria' && !first.default && (
+                                <Button
+                                  className="h-auto w-auto p-0 text-default/40 text-nowrap hover:bg-transparent focus:outline-none"
+                                  key={`${first.id}-remove`}
+                                  name="removeSortingButton"
+                                  size="xs"
+                                  variant="ghost"
+                                  onClick={() => actions?.handleRemoveSearchItem(first)}
+                                >
+                                  <X className="h-3 w-3" />
+                                </Button>
+                              )}
+                            </Badge>
+                          </TooltipTrigger>
+                          <TooltipContent side="top" align="start">
+                            {first.type === 'criteria'
+                              ? `${first?.label || formatAndCapitalize(first?.field ?? '')} is "${first?.display_value ?? first?.values?.[0]}"`
+                              : first?.operator}
+                          </TooltipContent>
+                        </Tooltip>
+                      </TooltipProvider>
+                    )}
+
+                    {rest.length > 0 && (
+                      <DropdownMenu open={menuOpen} onOpenChange={setMenuOpen}>
+                        <DropdownMenuTrigger asChild>
+                          <Button
+                            className="h-[24px] w-auto text-nowrap bg-muted px-2 text-default/70 hover:bg-transparent focus:outline-none"
+                            size="xs"
+                            variant="outline"
+                          >
+                            More ({rest.length})
+                          </Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align="end" side="bottom">
+                          <div className="flex flex-col gap-1 gap-y-2 py-2 px-2">
+                            {rest.map((item: any) => (
+                              <Badge
+                                className="flex items-center gap-1 self-start whitespace-nowrap"
+                                key={item.id}
+                                variant="secondary"
+                              >
+                                {item.type === 'criteria'
+                                  ? `${item?.label || formatAndCapitalize(item?.field ?? '')} is "${item?.display_value ?? item?.values?.[0]}"`
+                                  : item?.operator}
+                                {item.type === 'criteria' && !item.default && (
+                                  <Button
+                                    className="h-auto w-auto p-0 text-default/40 text-nowrap hover:bg-transparent focus:outline-none"
+                                    key={`${item.id}-remove`}
+                                    name="removeSortingButton"
+                                    size="xs"
+                                    variant="ghost"
+                                    onClick={() => { setMenuOpen(false); actions?.handleRemoveSearchItem(item) }}
+                                  >
+                                    <X className="h-3 w-3" />
+                                  </Button>
+                                )}
+                              </Badge>
+                            ))}
+                          </div>
+                        </DropdownMenuContent>
+                      </DropdownMenu>
+                    )}
+                  </>
+                )
+              })()}
+            </div>
           </div>
-        </div>
-      )}
+        )}
+      </div>
     </div>
   )
 }

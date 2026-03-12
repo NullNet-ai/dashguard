@@ -17,6 +17,7 @@ const containerHeight = 600 // viewport height for virtualization
 // import TimelineV2 from './components/TimelineV2'
 // import TimelineV3 from './components/TimelineV3'
 import TimelineV4 from './components/TimelineV4'
+import TrafficSkeleton from './components/TrafficSkeleton'
 
 function getMaxBandwidth(data: any[]) {
   let maxBandwidth = 0
@@ -79,12 +80,7 @@ export default function NetworkFlowView() {
 
   if (loading) {
     return (
-      <Loader
-        className="bg-primary text-primary mt-4"
-        label="Fetching unique ips..."
-        size="md"
-        variant="circularShadow"
-      />
+      <TrafficSkeleton sections={[{ label: 'Top Traffic', rows: 3 }, { label: 'Recent IPs', rows: 5 }]} />
     );
   }
 

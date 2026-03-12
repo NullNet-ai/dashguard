@@ -12,7 +12,7 @@ function TimelineComponent({ params }: any) {
       <div className='relative z-[50] mb-2'>
         <Filter params={params} type='timeline_filter'  />
       </div>
-      <div className="flex flex-col border-x border-t border-b">
+      <div className="flex flex-col">
         <Search  params={{...params, router: 'packet', resolver: 'filterPackets' }} filter_type='timeline_search' />
         <NetworkTrafficFlow params={params} />
       </div>

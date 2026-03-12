@@ -8,6 +8,7 @@ import {
 } from '~/components/ui/tooltip';
 import { FlagIcon, ChevronDownIcon, ChevronRightIcon } from '@heroicons/react/20/solid';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '~/components/ui/select';
+import { Skeleton } from '~/components/ui/skeleton';
 
 const BW_SIZE = 18;
 
@@ -40,6 +41,7 @@ export default function GridVirtualizerFixed(props: any) {
     top_traffic: true,
     recent_ip: true,
   });
+  const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
     const handleInlineFilter = (filter: string) => {
@@ -59,6 +61,16 @@ export default function GridVirtualizerFixed(props: any) {
     eventEmitter.on('timeline_sort_key', handleSortKey);
     return () => {
       eventEmitter.off('timeline_sort_key', handleSortKey);
+    };
+  }, [eventEmitter]);
+
+  useEffect(() => {
+    const handleLoading = (loading: boolean) => {
+      setIsLoading(Boolean(loading));
+    };
+    eventEmitter.on('timeline_loading', handleLoading);
+    return () => {
+      eventEmitter.off('timeline_loading', handleLoading);
     };
   }, [eventEmitter]);
 
@@ -237,25 +249,53 @@ export default function GridVirtualizerFixed(props: any) {
 
   return (
     <TooltipProvider>
-      <div className="h-[602px] overflow-y-auto border-collapse border-y border-slate-100 pt-[2px]">
-        {sections.map((section) => (
-          <div key={section.key}>
-            <button
-              className="w-full flex items-center gap-1.5 px-2 py-1 text-xs font-semibold text-slate-600 bg-slate-50 border-b border-slate-200 hover:bg-slate-100 sticky top-0 z-10"
-              onClick={() => toggleSection(section.key)}
-            >
-              {expandedSections[section.key]
-                ? <ChevronDownIcon className="size-3.5 shrink-0" />
-                : <ChevronRightIcon className="size-3.5 shrink-0" />}
-              {section.label}
-            </button>
-
-            {expandedSections[section.key] &&
-              section.rows.map((pair: any, i: number) =>
-                renderRow(pair, `${section.key}-${i}`),
-              )}
+      <div className="h-[calc(100vh-280px)] overflow-y-auto">
+        {isLoading ? (
+          <div className="space-y-4 p-2">
+            {['Top Traffic', 'Recent IP'].map((label, sIdx) => (
+              <div key={sIdx}>
+                <div className="sticky top-0 z-10 w-full px-2 py-1">
+                  <Skeleton className="h-6 w-40" />
+                </div>
+                {Array.from({ length: 4 }).map((_, i) => (
+                  <div
+                    key={i}
+                    className="grid"
+                    style={{ gridTemplateColumns: `250px repeat(${Math.min(colCount || 20, 20)}, minmax(0, 1fr))` }}
+                  >
+                    <div className="flex items-center gap-2 pl-2 py-1 border-b border-r border-slate-100">
+                      <Skeleton className="h-4 w-28" />
+                    </div>
+                    {Array.from({ length: Math.min(colCount || 20, 20) }).map((__, j) => (
+                      <div key={j} className="border-b border-dotted border-slate-100 flex items-center justify-center w-full">
+                        <Skeleton className="w-full" style={{ height: BW_SIZE }} />
+                      </div>
+                    ))}
+                  </div>
+                ))}
+              </div>
+            ))}
           </div>
-        ))}
+        ) : (
+          sections.map((section, i) => (
+            <div key={section.key}>
+              <button
+                className={`w-full flex items-center gap-1.5 px-2 py-1 text-xs font-semibold text-slate-600 bg-slate-50 border-[1px] border-slate-200 hover:bg-slate-100 sticky top-0 z-10 ${i === 1 ? '-mt-[1px]' : ''}`}
+                onClick={() => toggleSection(section.key)}
+              >
+                {expandedSections[section.key]
+                  ? <ChevronDownIcon className="size-3.5 shrink-0" />
+                  : <ChevronRightIcon className="size-3.5 shrink-0" />}
+                {section.label}
+              </button>
+
+              {expandedSections[section.key] &&
+                section.rows.map((pair: any, i: number) =>
+                  renderRow(pair, `${section.key}-${i}`),
+                )}
+            </div>
+          ))
+        )}
       </div>
     </TooltipProvider>
   );
