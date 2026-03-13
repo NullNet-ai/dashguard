@@ -1,278 +1,303 @@
-import React, { useMemo, useState, useEffect } from 'react';
-import { useEventEmitter } from '~/context/EventEmitterProvider';
+import React, { useCallback, useEffect, useMemo, useState } from 'react'
+import { useEventEmitter } from '~/context/EventEmitterProvider'
 import {
   Tooltip,
   TooltipContent,
   TooltipProvider,
   TooltipTrigger,
-} from '~/components/ui/tooltip';
-import { FlagIcon, ChevronDownIcon, ChevronRightIcon } from '@heroicons/react/20/solid';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '~/components/ui/select';
-import { Skeleton } from '~/components/ui/skeleton';
+} from '~/components/ui/tooltip'
+import { FlagIcon, ChevronDownIcon, ChevronRightIcon } from '@heroicons/react/20/solid'
+import { Skeleton } from '~/components/ui/skeleton'
 
-const BW_SIZE = 18;
+const BW_SIZE = 18
+const MS_THRESHOLD = 1e12
 
-function truncateIP(ip: string, maxLength = 25) {
-  if (!ip || ip.length <= maxLength) return ip;
-  return ip.slice(0, maxLength - 3) + '...';
+interface FlowData {
+  source_ip?: string
+  name?: string
+  flag?: string
+  active?: boolean
+  isNew?: boolean
+  lastBandwidth?: string
+  total_active_packets?: number
+  total_bandwidth?: number
 }
 
-function getColorForValue(value: number, maxBandwidth: number) {
-  if (!value || value <= 0) return '#fff';
-  if (!maxBandwidth || maxBandwidth <= 0) return '#65A1C7';
-
-  const HIGH = '#3F5F7E';
-  const MEDIUM = '#B4D3ED';
-  const LOW = '#65A1C7';
-
-  const ratio = value / maxBandwidth;
-
-  if (ratio >= 1) return HIGH;
-  if (ratio > 2 / 3) return MEDIUM;
-  return LOW;
+interface CellData {
+  bucketTime?: unknown
+  time?: unknown
+  bandwidth?: number
 }
 
-export default function GridVirtualizerFixed(props: any) {
-  const { flowData, formatted } = props;
-  const eventEmitter = useEventEmitter();
-  const [inlineFilter, setInlineFilter] = useState('');
-  const [sortKey, setSortKey] = useState<string>('');
-  const [expandedSections, setExpandedSections] = useState<Record<string, boolean>>({
+interface FlowPair {
+  flow: FlowData
+  row: CellData[]
+}
+
+interface Section {
+  key: string
+  label: string
+  rows: FlowPair[]
+}
+
+function truncateIP(ip: string, maxLength = 25): string {
+  if (!ip || ip.length <= maxLength) return ip
+  return ip.slice(0, maxLength - 3) + '...'
+}
+
+function getBandwidthColor(value: number, maxBandwidth: number): string {
+  if (!value || value <= 0)                return '#fff'
+  if (!maxBandwidth || maxBandwidth <= 0)  return '#65A1C7'
+
+  const ratio = value / maxBandwidth
+  if (ratio >= 1)      return '#3F5F7E'
+  if (ratio > 2 / 3)  return '#B4D3ED'
+  return '#65A1C7'
+}
+
+function toMs(value: unknown): number | null {
+  if (value == null) return null
+
+  if (typeof value === 'number' && Number.isFinite(value)) {
+    return value < MS_THRESHOLD ? value * 1_000 : value
+  }
+
+  const str = String(value).trim()
+  if (!str) return null
+
+  if (str.length === 19 && str[10] === ' ') {
+    const ts = new Date(str.replace(' ', 'T')).getTime()
+    if (!Number.isNaN(ts)) return ts
+  }
+
+  const parsed = Date.parse(str)
+  if (!Number.isNaN(parsed)) return parsed
+
+  const n = Number(str)
+  return Number.isFinite(n) ? (n < MS_THRESHOLD ? n * 1_000 : n) : null
+}
+
+function pad(n: number): string {
+  return String(n).padStart(2, '0')
+}
+
+function formatBucketTime(raw: unknown): string {
+  const ms = toMs(raw)
+  if (ms == null || !Number.isFinite(ms)) return String(raw ?? '—')
+  const d = new Date(ms)
+  return (
+    `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())} ` +
+    `${pad(d.getHours())}:${pad(d.getMinutes())}:${pad(d.getSeconds())}`
+  )
+}
+
+function formatBandwidth(bytes: number): string {
+  return bytes > 1024
+    ? (bytes / 1024).toFixed(2) + ' KB'
+    : bytes + ' bytes'
+}
+
+interface Props {
+  flowData:  FlowData[]   | undefined
+  formatted: CellData[][] | undefined
+}
+
+export default function GridVirtualizerFixed({ flowData, formatted }: Props) {
+  const eventEmitter = useEventEmitter()
+
+  const [inlineFilter,      setInlineFilter]      = useState('')
+  const [sortKey,           setSortKey]           = useState('')
+  const [isLoading,         setIsLoading]         = useState(false)
+  const [expandedSections,  setExpandedSections]  = useState<Record<string, boolean>>({
     top_traffic: true,
-    recent_ip: true,
-  });
-  const [isLoading, setIsLoading] = useState(false);
+    recent_ip:   true,
+  })
 
   useEffect(() => {
-    const handleInlineFilter = (filter: string) => {
-      setInlineFilter(filter);
-    };
+    const onFilter  = (f: string)  => setInlineFilter(f)
+    const onSort    = (k: string)  => setSortKey(k)
+    const onLoading = (l: boolean) => setIsLoading(Boolean(l))
 
-    eventEmitter.on('timeline_inline_filter', handleInlineFilter);
+    eventEmitter.on('timeline_inline_filter', onFilter)
+    eventEmitter.on('timeline_sort_key',      onSort)
+    eventEmitter.on('timeline_loading',       onLoading)
+
     return () => {
-      eventEmitter.off('timeline_inline_filter', handleInlineFilter);
-    };
-  }, [eventEmitter]);
+      eventEmitter.off('timeline_inline_filter', onFilter)
+      eventEmitter.off('timeline_sort_key',      onSort)
+      eventEmitter.off('timeline_loading',       onLoading)
+    }
+  }, [eventEmitter])
+
+  const colCount = useMemo(() => formatted?.[0]?.length ?? 0, [formatted])
 
   useEffect(() => {
-    const handleSortKey = (key: string) => {
-      setSortKey(key);
-    };
-    eventEmitter.on('timeline_sort_key', handleSortKey);
-    return () => {
-      eventEmitter.off('timeline_sort_key', handleSortKey);
-    };
-  }, [eventEmitter]);
+    if (colCount <= 0) return
 
-  useEffect(() => {
-    const handleLoading = (loading: boolean) => {
-      setIsLoading(Boolean(loading));
-    };
-    eventEmitter.on('timeline_loading', handleLoading);
-    return () => {
-      eventEmitter.off('timeline_loading', handleLoading);
-    };
-  }, [eventEmitter]);
+    let latestMs = -Infinity
+    for (const row of formatted ?? []) {
+      const cell = row?.[colCount - 1]
+      const ms   = toMs(cell?.bucketTime ?? cell?.time ?? null)
+      if (ms != null && Number.isFinite(ms) && ms > latestMs) latestMs = ms
+    }
 
-  const sections = useMemo(() => {
-    const pairs = (flowData || []).map((fd: any, i: number) => ({ flow: fd, row: (formatted || [])[i] }));
-    const q = (inlineFilter || '').toLowerCase();
+    eventEmitter.emit('timeline_col_count', {
+      colCount,
+      lastBucketTime: latestMs > -Infinity ? latestMs : null,
+    })
+  }, [formatted, colCount, eventEmitter])
+
+  const sections = useMemo((): Section[] => {
+    const pairs: FlowPair[] = (flowData ?? []).map((flow, i) => ({
+      flow,
+      row: (formatted ?? [])[i] ?? [],
+    }))
+
+    const q        = inlineFilter.toLowerCase()
     const filtered = q
-      ? pairs.filter((p: { flow: any; row: any }) =>
-          String(p?.flow?.source_ip || '').toLowerCase().includes(q),
-        )
-      : pairs;
+      ? pairs.filter(p => p.flow.source_ip?.toLowerCase().includes(q))
+      : pairs
 
-    // Top Traffic: top 5 by total_active_packets, then total_bandwidth as tiebreaker
     const topTraffic = [...filtered]
-      .sort((a: any, b: any) => {
-        const pA = Number(a?.flow?.total_active_packets) || 0;
-        const pB = Number(b?.flow?.total_active_packets) || 0;
-        if (pB !== pA) return pB - pA;
-        const bwA = Number(a?.flow?.total_bandwidth) || 0;
-        const bwB = Number(b?.flow?.total_bandwidth) || 0;
-        return bwB - bwA;
+      .sort((a, b) => {
+        const packetDiff = (Number(b.flow.total_active_packets) || 0)
+                         - (Number(a.flow.total_active_packets) || 0)
+        if (packetDiff !== 0) return packetDiff
+        return (Number(b.flow.total_bandwidth) || 0) - (Number(a.flow.total_bandwidth) || 0)
       })
-      .slice(0, 5);
+      .slice(0, 5)
 
-    // Recent IP: first 10, with sort logic applied
-    let recentIP = filtered.slice(0, 10);
-    if (sortKey) {
-      recentIP = [...recentIP].sort((a: any, b: any) => {
+    const recentIP = [...filtered]
+      .slice(0, 10)
+      .sort((a, b) => {
         if (sortKey === 'country') {
-          const av = String(a?.flow?.name || '').toLowerCase();
-          const bv = String(b?.flow?.name || '').toLowerCase();
-          return av.localeCompare(bv);
+          return (a.flow.name ?? '').localeCompare(b.flow.name ?? '')
         }
         if (sortKey === 'source_ip') {
-          const av = String(a?.flow?.source_ip || '').toLowerCase();
-          const bv = String(b?.flow?.source_ip || '').toLowerCase();
-          return av.localeCompare(bv);
+          return (a.flow.source_ip ?? '').localeCompare(b.flow.source_ip ?? '')
         }
-        return 0;
-      });
-    }
+        return 0
+      })
 
     return [
       { key: 'top_traffic', label: 'Top Traffic', rows: topTraffic },
-      { key: 'recent_ip', label: 'Recent IP', rows: recentIP },
-    ];
-  }, [flowData, formatted, inlineFilter, sortKey]);
+      { key: 'recent_ip',   label: 'Recent IP',   rows: recentIP  },
+    ]
+  }, [flowData, formatted, inlineFilter, sortKey])
 
   const maxBandwidth = useMemo(() => {
-    let max = 0;
-    for (const section of sections) {
-      for (const pair of section.rows) {
-        for (const cell of pair.row || []) {
-          const bw = Number(cell?.bandwidth) || 0;
-          if (bw > max) max = bw;
+    let max = 0
+    for (const section of sections)
+      for (const pair of section.rows)
+        for (const cell of pair.row) {
+          const bw = Number(cell?.bandwidth) || 0
+          if (bw > max) max = bw
         }
-      }
-    }
-    return max;
-  }, [sections]);
+    return max
+  }, [sections])
 
-  const hasAnyRows = sections.some((s) => s.rows.length > 0);
-  if (!hasAnyRows || !formatted?.[0]?.length) return null;
+  const toggleSection = useCallback((key: string) => {
+    setExpandedSections(prev => ({ ...prev, [key]: !prev[key] }))
+  }, [])
 
-  const colCount = formatted[0].length;
+  const hasAnyRows = sections.some(s => s.rows.length > 0)
+  if (!hasAnyRows || colCount === 0) return null
 
-  const toggleSection = (key: string) => {
-    setExpandedSections((prev) => ({ ...prev, [key]: !prev[key] }));
-  };
-
-  const renderRow = (pair: any, rowKey: string | number) => {
-    const rowData = pair.row ?? [];
-    return (
-      <div
-        key={rowKey}
-        className="grid"
-        style={{
-          gridTemplateColumns: `250px repeat(${colCount}, minmax(0, 1fr))`,
-        }}
-      >
-        <TooltipProvider>
-          <Tooltip delayDuration={0}>
-            <TooltipTrigger>
-              <div className="flex items-center gap-2 pl-2 py-1 text-xs border-b border-r border-slate-100">
-                {pair.flow?.flag ? (
-                  pair.flow.flag === '/unknown-flag.svg' ? (
-                    <div className="flex h-[15px] min-w-[30px] items-center justify-center bg-[#efefef]">
-                      <FlagIcon className="size-2.5" />
-                    </div>
-                  ) : (
-                    <img
-                      src={pair.flow.flag}
-                      alt="Flag"
-                      className="h-[15px] min-w-[30px]"
-                    />
-                  )
-                ) : null}
-
-                <span
-                  className={
-                    pair.flow?.active || pair.flow?.isNew
-                      ? 'text-red-600'
-                      : 'text-black'
-                  }
-                >
-                  {truncateIP(pair.flow?.source_ip || '')}
-                </span>
-              </div>
-            </TooltipTrigger>
-            <TooltipContent side="top">
-              <div className="text-sm">
-                <div>
-                  <strong>Country:</strong>{' '}
-                  {pair.flow?.name}
-                </div>
-                <div>
-                  <strong>Source IP:</strong>{' '}
-                  {pair.flow?.source_ip}
-                </div>
-                {pair.flow?.active && pair.flow?.lastBandwidth && (
-                  <div>
-                    <strong>New Bandwidth:</strong>{' '}
-                    {pair.flow?.lastBandwidth}
-                  </div>
-                )}
-              </div>
-            </TooltipContent>
-          </Tooltip>
-        </TooltipProvider>
-
-        {Array(colCount)
-          .fill(0)
-          .map((_, colIndex) => {
-            const cell = rowData[colIndex];
-            const bw = Number(cell?.bandwidth) || 0;
-
-            return (
-              <div
-                key={colIndex}
-                className="border-b border-dotted border-slate-100 flex items-center justify-center w-full"
-              >
-                <Tooltip delayDuration={0}>
-                  <TooltipTrigger className="w-full">
-                    <div
-                      className="shrink-0 w-full"
-                      style={{
-                        height: BW_SIZE,
-                        backgroundColor: getColorForValue(bw, maxBandwidth),
-                      }}
-                    />
-                  </TooltipTrigger>
-
-                  {cell && (
-                    <TooltipContent side="top" className="z-[9999]">
-                      <div className="text-xs">
-                        <div>
-                          <strong>Time:</strong>{' '}
-                          {cell.bucketTime ?? cell.time}
-                        </div>
-                        <div>
-                          <strong>Bandwidth:</strong>{' '}
-                          {bw > 1024
-                            ? (bw / 1024).toFixed(2) + ' KB'
-                            : bw + ' bytes'}
-                        </div>
-                      </div>
-                    </TooltipContent>
-                  )}
-                </Tooltip>
-              </div>
-            );
-          })}
+  const renderSkeletonRow = (key: number) => (
+    <div
+      key={key}
+      className="grid"
+      style={{ gridTemplateColumns: `250px repeat(${Math.min(colCount, 20)}, minmax(0, 1fr))` }}
+    >
+      <div className="flex items-center gap-2 pl-2 py-1 border-b border-r border-slate-100">
+        <Skeleton className="h-4 w-28" />
       </div>
-    );
-  };
+      {Array.from({ length: Math.min(colCount, 20) }, (_, j) => (
+        <div key={j} className="border-b border-dotted border-slate-100 flex items-center justify-center w-full">
+          <Skeleton className="w-full" style={{ height: BW_SIZE }} />
+        </div>
+      ))}
+    </div>
+  )
+
+  const renderRow = (pair: FlowPair, rowKey: string) => (
+    <div
+      key={rowKey}
+      className="grid"
+      style={{ gridTemplateColumns: `250px repeat(${colCount}, minmax(0, 1fr))` }}
+    >
+      <Tooltip delayDuration={0}>
+        <TooltipTrigger asChild>
+          <div className="flex items-center gap-2 pl-2 py-1 text-xs border-b border-r border-slate-100 cursor-default">
+            {pair.flow.flag && (
+              pair.flow.flag === '/unknown-flag.svg' ? (
+                <div className="flex h-[15px] min-w-[30px] items-center justify-center bg-[#efefef]">
+                  <FlagIcon className="size-2.5" />
+                </div>
+              ) : (
+                <img src={pair.flow.flag} alt="" className="h-[15px] min-w-[30px]" />
+              )
+            )}
+            <span className={pair.flow.active || pair.flow.isNew ? 'text-red-600' : 'text-black'}>
+              {truncateIP(pair.flow.source_ip ?? '')}
+            </span>
+          </div>
+        </TooltipTrigger>
+        <TooltipContent side="top">
+          <div className="text-sm space-y-0.5">
+            <div><strong>Country:</strong> {pair.flow.name}</div>
+            <div><strong>Source IP:</strong> {pair.flow.source_ip}</div>
+            {pair.flow.active && pair.flow.lastBandwidth && (
+              <div><strong>Bandwidth:</strong> {pair.flow.lastBandwidth}</div>
+            )}
+          </div>
+        </TooltipContent>
+      </Tooltip>
+
+      {Array.from({ length: colCount }, (_, colIndex) => {
+        const cell = pair.row[colIndex]
+        const bw   = Number(cell?.bandwidth) || 0
+        return (
+          <div
+            key={colIndex}
+            className="border-b border-dotted border-slate-100 flex items-center justify-center w-full"
+          >
+            <Tooltip delayDuration={0}>
+              <TooltipTrigger className="w-full">
+                <div
+                  className="w-full"
+                  style={{
+                    height:          BW_SIZE,
+                    backgroundColor: getBandwidthColor(bw, maxBandwidth),
+                  }}
+                />
+              </TooltipTrigger>
+              {cell && (
+                <TooltipContent side="top" className="z-[9999]">
+                  <div className="text-xs space-y-0.5">
+                    <div><strong>Time:</strong> {formatBucketTime(cell.bucketTime ?? cell.time)}</div>
+                    <div><strong>Bandwidth:</strong> {formatBandwidth(bw)}</div>
+                  </div>
+                </TooltipContent>
+              )}
+            </Tooltip>
+          </div>
+        )
+      })}
+    </div>
+  )
 
   return (
     <TooltipProvider>
       <div className="h-[calc(100vh-280px)] overflow-y-auto">
         {isLoading ? (
           <div className="space-y-4 p-2">
-            {['Top Traffic', 'Recent IP'].map((label, sIdx) => (
-              <div key={sIdx}>
-                <div className="sticky top-0 z-10 w-full px-2 py-1">
+            {['Top Traffic', 'Recent IP'].map((_, i) => (
+              <div key={i}>
+                <div className="sticky top-0 z-10 px-2 py-1">
                   <Skeleton className="h-6 w-40" />
                 </div>
-                {Array.from({ length: 4 }).map((_, i) => (
-                  <div
-                    key={i}
-                    className="grid"
-                    style={{ gridTemplateColumns: `250px repeat(${Math.min(colCount || 20, 20)}, minmax(0, 1fr))` }}
-                  >
-                    <div className="flex items-center gap-2 pl-2 py-1 border-b border-r border-slate-100">
-                      <Skeleton className="h-4 w-28" />
-                    </div>
-                    {Array.from({ length: Math.min(colCount || 20, 20) }).map((__, j) => (
-                      <div key={j} className="border-b border-dotted border-slate-100 flex items-center justify-center w-full">
-                        <Skeleton className="w-full" style={{ height: BW_SIZE }} />
-                      </div>
-                    ))}
-                  </div>
-                ))}
+                {Array.from({ length: 4 }, (_, j) => renderSkeletonRow(j))}
               </div>
             ))}
           </div>
@@ -280,23 +305,29 @@ export default function GridVirtualizerFixed(props: any) {
           sections.map((section, i) => (
             <div key={section.key}>
               <button
-                className={`w-full flex items-center gap-1.5 px-2 py-1 text-xs font-semibold text-slate-600 bg-slate-50 border-[1px] border-slate-200 hover:bg-slate-100 sticky top-0 z-10 ${i === 1 ? '-mt-[1px]' : ''}`}
+                className={`
+                  w-full flex items-center gap-1.5 px-2 py-1
+                  text-xs font-semibold text-slate-600
+                  bg-slate-50 border border-slate-200
+                  hover:bg-slate-100 sticky top-0 z-10
+                  ${i === 1 ? '-mt-px' : ''}
+                `}
                 onClick={() => toggleSection(section.key)}
               >
                 {expandedSections[section.key]
-                  ? <ChevronDownIcon className="size-3.5 shrink-0" />
+                  ? <ChevronDownIcon  className="size-3.5 shrink-0" />
                   : <ChevronRightIcon className="size-3.5 shrink-0" />}
                 {section.label}
               </button>
 
               {expandedSections[section.key] &&
-                section.rows.map((pair: any, i: number) =>
-                  renderRow(pair, `${section.key}-${i}`),
+                section.rows.map((pair, j) =>
+                  renderRow(pair, `${section.key}-${j}`)
                 )}
             </div>
           ))
         )}
       </div>
     </TooltipProvider>
-  );
+  )
 }
