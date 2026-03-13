@@ -97,18 +97,19 @@ const RecordShellSummary = ({
         },
         {
           header_title: "Interfaces",
-          items: [
-            {
-              key: "WAN",
-              value: "wan",
-              truncated: () => ({ string_limit: 35, path: ['value'] })
-            },
-            {
-              key: "LAN",
-              value: "lan",
-              truncated: () => ({ string_limit: 35, path: ['value'] })
-            },
-          ]
+          items: [...deviceData.interfaces].sort((a: any, b: any) => {
+            const order = ['wan', 'lan']
+            const ai = order.indexOf(a?.name?.toLowerCase())
+            const bi = order.indexOf(b?.name?.toLowerCase())
+            if (ai !== -1 && bi !== -1) return ai - bi
+            if (ai !== -1) return -1
+            if (bi !== -1) return 1
+            return (a?.name ?? '').localeCompare(b?.name ?? '', undefined, { numeric: true })
+          }).map(e => ({
+            key: e?.name?.toUpperCase(),
+            value: e?.name,
+            truncated: () => ({ string_limit: 35, path: ['value'] })
+          }))
         },
       ]}
     />
