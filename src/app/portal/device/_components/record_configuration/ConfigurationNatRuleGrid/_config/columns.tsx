@@ -123,6 +123,7 @@ const gridColumns = [
     accessorKey: 'redirect_port',
     search_config: {
       operator: 'like',
+      parse_as: 'text',
     },
   },
   {
