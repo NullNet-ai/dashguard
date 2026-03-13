@@ -95,14 +95,7 @@ const PieChartComponent = ({ defaultValues, interfaces }: IFormProps) => {
   // Use a ref to store the previous traffic value
   const previousTrafficRef = useRef<number>(initialTraffic)
 
-  const { refetch: fetchBandWidth } = api.packet.getLastBandwithInterfacePerSecond.useQuery(
-    {
-      bucket_size: '1s',
-      timezone,
-      device_id: defaultValues?.id,
-      time_range: getLastTimeStamp({ count: 1, unit: 'second', _now: new Date() }) as string[],
-      interface_names: interfaces?.map((item: any) => item?.value),
-    }, { enabled: false })
+  const { mutateAsync: fetchBandWidth } = api.packet.getLastBandwithInterfacePerSecond.useMutation()
 
 
   useEffect(() => {
@@ -144,7 +137,13 @@ const PieChartComponent = ({ defaultValues, interfaces }: IFormProps) => {
 
     const fetchChartData = async () => {
       try {
-        const { data } = await fetchBandWidth()
+        const data = await fetchBandWidth({
+          bucket_size: '1s',
+          timezone,
+          device_id: defaultValues?.id,
+          time_range: getLastTimeStamp({ count: 60, unit: 'second', _now: new Date() }) as string[],
+          interface_names: interfaces?.map((item: any) => item?.value),
+        })
         const currentTraffic = Number(data) || 0
 
         // Ensure maxTraffic is always above currentTraffic for proper gauge display
@@ -169,7 +168,7 @@ const PieChartComponent = ({ defaultValues, interfaces }: IFormProps) => {
     }
 
     fetchChartData()
-    const interval = setInterval(fetchChartData, 1000)
+    const interval = setInterval(fetchChartData, 2000)
     return () => clearInterval(interval)
   }, [defaultValues?.id, defaultValues?.device_status, fetchBandWidth, interfaces])
 

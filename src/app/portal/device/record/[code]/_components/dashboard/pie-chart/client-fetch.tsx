@@ -24,7 +24,6 @@ const FormClientFetch = ({interfaces }: IFormProps) => {
   const fetched_interfaces = api.deviceConfiguration.fetchInterfaceOptions.useQuery({
     code: identifier!,
   })
-  console.log("🚀 ~ FormClientFetch ~ fetched_interfaces:", fetched_interfaces.error)
 
   return (
     <PieChartComponent
