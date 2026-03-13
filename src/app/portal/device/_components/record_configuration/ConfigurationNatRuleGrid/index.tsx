@@ -33,7 +33,7 @@ const ConfigurationNatRuleGrid = ({
       `${pathname}` +
       `${searchTest?.toString() ? `?${searchTest?.toString()}` : ''}`,
     defaultSorting: defaultSorting,
-    defaultAllTabName: 'All NAT Rules',
+    defaultAllTabName: 'All NAT',
   }), [pathname, searchTest, code]);
 
   const {
