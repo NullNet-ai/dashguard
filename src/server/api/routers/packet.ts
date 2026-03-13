@@ -454,69 +454,72 @@ export const packetRouter = createTRPCRouter({
     return transformed
   }),
   getLastBandwithInterfacePerSecond: privateProcedure.input(z.object({ device_id: z.string(), bucket_size: z.string(), time_range: z.array(z.string()).optional(), timezone: z.string(), interface_names: z.array(z.string()).optional(),
-  })).query(async ({ input, ctx }) => {
+  })).mutation(async ({ input, ctx }) => {
     const { device_id, bucket_size, time_range, timezone, interface_names } = input
 
-    const results = await Promise.all(_.chunk(interface_names, 4).map(async (chunkItem) => {
-      const res = await ctx.dnaClient.aggregate({
-        query: {
-          entity: 'connections',
-          aggregations: [
-            {
-              aggregation: 'SUM',
-              aggregate_on: 'total_byte',
-              bucket_name: 'bandwidth',
+    const results = await Bluebird.map(_.chunk(interface_names, 4), async (chunkItem) => {
+      try {
+        const res = await ctx.dnaClient.aggregate({
+          query: {
+            entity: 'connections',
+            aggregations: [
+              {
+                aggregation: 'SUM',
+                aggregate_on: 'total_byte',
+                bucket_name: 'bandwidth',
+              },
+            ],
+            advance_filters: [
+              {
+                type: 'criteria' as const,
+                field: 'interface_name',
+                entity: 'connections',
+                operator: EOperator.EQUAL,
+                values: chunkItem,
+              },
+              {
+                type: 'operator',
+                operator: EOperator.AND,
+              },
+              {
+                type: 'criteria' as const,
+                field: 'device_id',
+                entity: 'connections',
+                operator: EOperator.EQUAL,
+                values: [
+                  device_id,
+                ],
+              },
+              {
+                type: 'operator',
+                operator: EOperator.AND,
+              },
+              {
+                type: 'criteria',
+                field: 'timestamp',
+                entity: 'connections',
+                operator: EOperator.IS_BETWEEN,
+                values: time_range,
+              },
+            ],
+            joins: [],
+            bucket_size,
+            limit: 1,
+            order: {
+              order_by: 'bucket',
+              order_direction: EOrderDirection.DESC,
             },
-          ],
-          advance_filters: [
-            {
-              type: 'criteria' as const,
-              field: 'interface_name',
-              entity: 'connections',
-              operator: EOperator.EQUAL,
-              values: chunkItem,
-            },
-            {
-              type: 'operator',
-              operator: EOperator.AND,
-            },
-            {
-              type: 'criteria' as const,
-              field: 'device_id',
-              entity: 'connections',
-              operator: EOperator.EQUAL,
-              values: [
-                device_id,
-              ],
-            },
-            {
-              type: 'operator',
-              operator: EOperator.AND,
-            },
-            {
-              type: 'criteria',
-              field: 'timestamp',
-              entity: 'connections',
-              operator: EOperator.IS_BETWEEN,
-              values: time_range,
-            },
-          ],
-          joins: [],
-          bucket_size,
-          limit: 1,
-          order: {
-            order_by: 'bucket',
-            order_direction: EOrderDirection.DESC,
+            timezone,
           },
-          timezone,
-        },
-        token: ctx.token.value,
-
-      }).execute()
-
-      return res?.data?.[0]?.bandwidth || 0
-    }))
-
+          token: ctx.token.value,
+  
+        }).execute()
+  
+        return res?.data?.[0]?.bandwidth || 0
+      } catch (error) {
+        return 0
+      }
+    })
     return results.reduce((sum, val) => sum + val, 0)
   }),
   getBandwidthOfSourceIPandDestinationIP: privateProcedure.input(z.object({ packet_data: z.any() })).query(async ({ input, ctx }) => {
