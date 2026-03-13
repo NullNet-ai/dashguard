@@ -1,7 +1,7 @@
 'use client'
 
 import moment from 'moment-timezone'
-import React, { useCallback, useEffect, useMemo, useRef } from 'react'
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { z } from 'zod'
 
@@ -33,6 +33,7 @@ const InteractiveGraph = ({
 }: IFormProps) => {
 
 
+  const [prefsReady, setPrefsReady] = useState(false)
   const [interfaces, setInterfaces] = React.useState<IDropdown[]>([])
   const [packetsIP, setPacketsIP] = React.useState<any[]>([])
   const [filteredData, setFilteredData] = React.useState<any[]>([])
@@ -42,13 +43,17 @@ const InteractiveGraph = ({
   const {socket} = useSocketConnection({channel_name, token})
   const getAccount = api.organizationAccount.getAccountID.useMutation();
   const getChartData = api.packet.getBandwithInterfacePerSecond.useMutation();
+  const savePreferences = api.cachedFilter.saveGraphInterfacePreferences.useMutation();
+  const getPreferences = api.cachedFilter.getGraphInterfacePreferences.useMutation();
+  const isFirstRenderRef = useRef(true)
 
+  const wanLanFilter = multiSelectOptions?.filter(e => e.label.toLowerCase().includes('wan') || e.label.toLowerCase().includes('lan'))
 
   const form = useForm({
     defaultValues: {
       graph_type: 'area',
-      interfaces: multiSelectOptions?.filter(e => e.label.toLowerCase().includes('wan') || e.label.toLowerCase().includes('lan')),
-      pie_chart_interfaces: multiSelectOptions?.filter(e => e.label.toLowerCase().includes('wan') || e.label.toLowerCase().includes('lan')),
+      interfaces: [] as typeof wanLanFilter,
+      pie_chart_interfaces: [] as typeof wanLanFilter,
     },
   })
   
@@ -199,6 +204,38 @@ const InteractiveGraph = ({
     const interfacesData = form.watch('interfaces') || []
     setInterfaces(interfacesData as any)
   }, [form.watch('interfaces')])
+
+  useEffect(() => {
+    if (!defaultValues?.id) return
+    void (async () => {
+      const prefs = await getPreferences.mutateAsync({ device_id: defaultValues.id })
+      isFirstRenderRef.current = true // prevent save from firing on this programmatic reset
+      form.reset({
+        graph_type: form.getValues('graph_type'),
+        interfaces: prefs?.interfaces ?? wanLanFilter,
+        pie_chart_interfaces: prefs?.pie_chart_interfaces ?? wanLanFilter,
+      })
+      setPrefsReady(true)
+    })()
+  }, [])
+
+  useEffect(() => {
+    if (!prefsReady) return
+    if (isFirstRenderRef.current) {
+      isFirstRenderRef.current = false
+      return
+    }
+    if (!defaultValues?.id) return
+    const currentInterfaces = (form.getValues('interfaces') ?? []) as { value: string; label: string }[]
+    const currentPieChartInterfaces = (form.getValues('pie_chart_interfaces') ?? []) as { value: string; label: string }[]
+    savePreferences.mutate({
+      device_id: defaultValues.id,
+      interfaces: currentInterfaces,
+      pie_chart_interfaces: currentPieChartInterfaces,
+    })
+  }, [form.watch('interfaces'), form.watch('pie_chart_interfaces')])
+
+  if (!prefsReady) return null
 
   return (
     <div className="flex flex-col gap-3">
