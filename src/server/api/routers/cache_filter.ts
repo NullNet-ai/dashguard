@@ -138,6 +138,27 @@ export const cachedFilterRouter = createTRPCRouter({
 
     }
     ),
+    getGraphInterfacePreferences: privateProcedure
+    .input(z.object({ device_id: z.string().min(1) }))
+    .mutation(async ({ ctx, input }) => {
+      const key = `device_graph_interfaces:${input.device_id}`
+      return await ctx.redisClient.getCachedData(key) as {
+        interfaces: { label: string; value: string }[]
+        pie_chart_interfaces: { label: string; value: string }[]
+      } | null
+    }),
+    saveGraphInterfacePreferences: privateProcedure
+    .input(z.object({
+      device_id: z.string().min(1),
+      interfaces: z.array(z.object({ label: z.string(), value: z.string() })),
+      pie_chart_interfaces: z.array(z.object({ label: z.string(), value: z.string() })),
+    }))
+    .mutation(async ({ ctx, input }) => {
+      const { device_id, interfaces, pie_chart_interfaces } = input
+      const key = `device_graph_interfaces:${device_id}`
+      await ctx.redisClient.cacheData(key, { interfaces, pie_chart_interfaces }, 86400 * 30)
+      return { success: true }
+    }),
     fetchCachedFilterTimeUnitandResolution: privateProcedure
     .input(z.object({ type: z.string(), filter_id: z.string() }))
     .query(async ({ input, ctx }) => {
