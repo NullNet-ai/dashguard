@@ -478,6 +478,20 @@ export default function NetworkFlowProvider({ children, params }: IProps) {
     fetchTimeUnitandResolution()
   }, [filterId, (searchBy ?? [])?.length])
 
+  useEffect(() => {
+    if (!eventEmitter) return
+    const handleRequest = () => {
+      const { time_count = null, time_unit = null, resolution = null } = time || {}
+      if (time_count && time_unit && resolution) {
+        eventEmitter.emit('timeline_time_settings', { time_count, time_unit, resolution })
+      }
+    }
+    eventEmitter.on('timeline_request_time_settings', handleRequest)
+    return () => {
+      eventEmitter.off('timeline_request_time_settings', handleRequest)
+    }
+  }, [eventEmitter, time])
+
 
   useEffect(() => {
     if (!time_count || !time_unit || !resolution) return

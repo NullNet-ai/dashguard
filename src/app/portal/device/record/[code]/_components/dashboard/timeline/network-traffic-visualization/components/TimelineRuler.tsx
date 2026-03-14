@@ -235,15 +235,13 @@ export default function TimelineRuler() {
   }
 
   return (
-    <div className="relative">
-      {/* Horizontal baseline rule */}
+    <div className="relative w-full">
       <div className="absolute left-0 right-0 top-1 h-px bg-slate-200" />
 
       <div
         className="grid items-end"
         style={{ gridTemplateColumns: `0 repeat(${ticks.length}, minmax(0, 1fr))` }}
       >
-        {/* Offset column — aligns ticks with the grid data columns */}
         <div aria-hidden />
 
         {ticks.map((tick, i) => (
@@ -257,10 +255,13 @@ export default function TimelineRuler() {
             {tick.label && (
               <span
                 className={cn(
-                  'absolute -top-5 text-[11px] text-slate-500',
-                  tick.position === 'first'  && 'translate-x-1/2',
-                  tick.position === 'last'   && '-translate-x-1/2',
-                  tick.position === 'middle' && 'translate-x-[20%]',
+                  'absolute -top-5 text-[11px] text-slate-500 translate-x-[20%]',
+                  {
+                    'translate-x-1/2': tick.position === 'first',
+                    '-translate-x-1/2': tick.position === 'last',
+                    'translate-x-[70%]': /^\d{2}:\d{2}$/.test(tick.label) && tick.position !== 'last',
+                    '-translate-x-1': /^\d{2}:\d{2}$/.test(tick.label) && tick.position === 'last',
+                  }
                 )}
               >
                 {tick.label}

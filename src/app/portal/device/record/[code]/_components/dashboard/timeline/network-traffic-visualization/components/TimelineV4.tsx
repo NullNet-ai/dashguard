@@ -37,6 +37,7 @@ interface FlowPair {
 interface Section {
   key: string
   label: string
+  description: string
   rows: FlowPair[]
 }
 
@@ -46,12 +47,12 @@ function truncateIP(ip: string, maxLength = 25): string {
 }
 
 function getBandwidthColor(value: number, maxBandwidth: number): string {
-  if (!value || value <= 0)                return '#fff'
-  if (!maxBandwidth || maxBandwidth <= 0)  return '#65A1C7'
+  if (!value || value <= 0) return '#fff'
+  if (!maxBandwidth || maxBandwidth <= 0) return '#65A1C7'
 
   const ratio = value / maxBandwidth
-  if (ratio >= 1)      return '#3F5F7E'
-  if (ratio > 2 / 3)  return '#B4D3ED'
+  if (ratio >= 1) return '#3F5F7E'
+  if (ratio > 2 / 3) return '#B4D3ED'
   return '#65A1C7'
 }
 
@@ -92,9 +93,36 @@ function formatBucketTime(raw: unknown): string {
 }
 
 function formatBandwidth(bytes: number): string {
-  return bytes > 1024
-    ? (bytes / 1024).toFixed(2) + ' KB'
-    : bytes + ' bytes'
+  if (bytes >= 1024 * 1024) return (bytes / (1024 * 1024)).toFixed(2) + ' MB'
+  if (bytes >= 1024)        return (bytes / 1024).toFixed(2) + ' KB'
+  return bytes + ' bytes'
+}
+
+function getIntensityLabel(value: number, maxBandwidth: number): string {
+  if (!value || value <= 0 || !maxBandwidth) return 'None'
+  const ratio = value / maxBandwidth
+  if (ratio >= 1)     return 'High'
+  if (ratio > 2 / 3) return 'Medium'
+  return 'Low'
+}
+
+function getRefreshRate(
+  timeCount: number,
+  timeUnit: string,
+  section: 'top_traffic' | 'recent_ip',
+): string {
+  const totalSeconds =
+    timeCount * (timeUnit === 'hour' ? 3600 : timeUnit === 'minute' ? 60 : timeUnit === 'day' ? 86400 : 1)
+
+  if (section === 'recent_ip') {
+    if (totalSeconds <= 60)  return '3s'
+    if (totalSeconds <= 300) return '5s'
+    return '30s'
+  }
+
+  if (totalSeconds <= 60)  return '5s'
+  if (totalSeconds <= 300) return '10s'
+  return '60s'
 }
 
 interface Props {
@@ -104,28 +132,39 @@ interface Props {
 
 export default function GridVirtualizerFixed({ flowData, formatted }: Props) {
   const eventEmitter = useEventEmitter()
-
-  const [inlineFilter,      setInlineFilter]      = useState('')
-  const [sortKey,           setSortKey]           = useState('')
-  const [isLoading,         setIsLoading]         = useState(false)
-  const [expandedSections,  setExpandedSections]  = useState<Record<string, boolean>>({
+  const [inlineFilter, setInlineFilter] = useState('')
+  const [sortKey, setSortKey] = useState('')
+  const [isLoading, setIsLoading] = useState(false)
+  const [resolution, setResolution] = useState<string>('')
+  const [timeCount, setTimeCount] = useState<number | null>(null)
+  const [timeUnit, setTimeUnit] = useState<string>('')
+  const [expandedSections, setExpandedSections] = useState<Record<string, boolean>>({
     top_traffic: true,
     recent_ip:   true,
   })
 
   useEffect(() => {
-    const onFilter  = (f: string)  => setInlineFilter(f)
-    const onSort    = (k: string)  => setSortKey(k)
+    const onFilter = (f: string)  => setInlineFilter(f)
+    const onSort = (k: string)  => setSortKey(k)
     const onLoading = (l: boolean) => setIsLoading(Boolean(l))
+    const onTimeSettings = (payload: { resolution?: string; time_count?: number; time_unit?: string }) => {
+      setResolution(payload?.resolution ?? '')
+      setTimeCount(payload?.time_count ?? null)
+      setTimeUnit(payload?.time_unit ?? '')
+    }
+    
 
     eventEmitter.on('timeline_inline_filter', onFilter)
-    eventEmitter.on('timeline_sort_key',      onSort)
-    eventEmitter.on('timeline_loading',       onLoading)
+    eventEmitter.on('timeline_sort_key', onSort)
+    eventEmitter.on('timeline_loading', onLoading)
+    eventEmitter.on('timeline_time_settings',  onTimeSettings)
+    eventEmitter.emit('timeline_request_time_settings')
 
     return () => {
       eventEmitter.off('timeline_inline_filter', onFilter)
-      eventEmitter.off('timeline_sort_key',      onSort)
-      eventEmitter.off('timeline_loading',       onLoading)
+      eventEmitter.off('timeline_sort_key', onSort)
+      eventEmitter.off('timeline_loading', onLoading)
+      eventEmitter.off('timeline_time_settings',  onTimeSettings)
     }
   }, [eventEmitter])
 
@@ -137,7 +176,7 @@ export default function GridVirtualizerFixed({ flowData, formatted }: Props) {
     let latestMs = -Infinity
     for (const row of formatted ?? []) {
       const cell = row?.[colCount - 1]
-      const ms   = toMs(cell?.bucketTime ?? cell?.time ?? null)
+      const ms = toMs(cell?.bucketTime ?? cell?.time ?? null)
       if (ms != null && Number.isFinite(ms) && ms > latestMs) latestMs = ms
     }
 
@@ -153,7 +192,7 @@ export default function GridVirtualizerFixed({ flowData, formatted }: Props) {
       row: (formatted ?? [])[i] ?? [],
     }))
 
-    const q        = inlineFilter.toLowerCase()
+    const q = inlineFilter.toLowerCase()
     const filtered = q
       ? pairs.filter(p => p.flow.source_ip?.toLowerCase().includes(q))
       : pairs
@@ -180,8 +219,18 @@ export default function GridVirtualizerFixed({ flowData, formatted }: Props) {
       })
 
     return [
-      { key: 'top_traffic', label: 'Top Traffic', rows: topTraffic },
-      { key: 'recent_ip',   label: 'Recent IP',   rows: recentIP  },
+      { 
+        key: 'top_traffic', 
+        label: 'Top Traffic', 
+        description: 'IPs generating the highest traffic within the selected time range',
+        rows: topTraffic 
+      },
+      { 
+        key: 'recent_ip',   
+        label: 'Recent IP',   
+        description: 'Most recently observed IPs regardless of traffic volume',
+        rows: recentIP  
+      },
     ]
   }, [flowData, formatted, inlineFilter, sortKey])
 
@@ -256,7 +305,7 @@ export default function GridVirtualizerFixed({ flowData, formatted }: Props) {
 
       {Array.from({ length: colCount }, (_, colIndex) => {
         const cell = pair.row[colIndex]
-        const bw   = Number(cell?.bandwidth) || 0
+        const bw = Number(cell?.bandwidth) || 0
         return (
           <div
             key={colIndex}
@@ -267,7 +316,7 @@ export default function GridVirtualizerFixed({ flowData, formatted }: Props) {
                 <div
                   className="w-full"
                   style={{
-                    height:          BW_SIZE,
+                    height: BW_SIZE,
                     backgroundColor: getBandwidthColor(bw, maxBandwidth),
                   }}
                 />
@@ -275,8 +324,22 @@ export default function GridVirtualizerFixed({ flowData, formatted }: Props) {
               {cell && (
                 <TooltipContent side="top" className="z-[9999]">
                   <div className="text-xs space-y-0.5">
-                    <div><strong>Time:</strong> {formatBucketTime(cell.bucketTime ?? cell.time)}</div>
-                    <div><strong>Bandwidth:</strong> {formatBandwidth(bw)}</div>
+                    <div><span className="font-medium text-slate-600">IP:</span> {pair.flow.source_ip}</div>
+                    <div>
+                      <span className="font-medium text-slate-600">Time:</span>{' '}
+                      {timeCount === 60
+                        ? formatBucketTime(cell.bucketTime ?? cell.time).split(' ')[1]
+                        : formatBucketTime(cell.bucketTime ?? cell.time)
+                      }
+                    </div>
+                    <div>
+                      <span className="font-medium text-slate-600">Traffic:</span>{' '}
+                      {formatBandwidth(bw)} {resolution ? `(${resolution})` : ''}
+                    </div>
+                    <div>
+                      <span className="font-medium text-slate-600">Intensity:</span>{' '}
+                      {getIntensityLabel(bw, maxBandwidth)}
+                    </div>
                   </div>
                 </TooltipContent>
               )}
@@ -306,8 +369,8 @@ export default function GridVirtualizerFixed({ flowData, formatted }: Props) {
             <div key={section.key}>
               <button
                 className={`
-                  w-full flex items-center gap-1.5 px-2 py-1
-                  text-xs font-semibold text-slate-600
+                  w-full flex items-start gap-1.5 px-2 py-1
+                  text-xs font-semibold text-foreground
                   bg-slate-50 border border-slate-200
                   hover:bg-slate-100 sticky top-0 z-10
                   ${i === 1 ? '-mt-px' : ''}
@@ -315,9 +378,21 @@ export default function GridVirtualizerFixed({ flowData, formatted }: Props) {
                 onClick={() => toggleSection(section.key)}
               >
                 {expandedSections[section.key]
-                  ? <ChevronDownIcon  className="size-3.5 shrink-0" />
-                  : <ChevronRightIcon className="size-3.5 shrink-0" />}
-                {section.label}
+                  ? <ChevronDownIcon  className="size-4 shrink-0" />
+                  : <ChevronRightIcon className="size-4 shrink-0" />}
+                <span className="flex flex-col justify-start items-start">
+                  <span className="flex items-center gap-2">
+                    {section.label}
+                    {timeCount != null && timeUnit && (
+                      <span className="font-normal">
+                        (<span className='text-slate-600'>Refresh</span>: {getRefreshRate(timeCount, timeUnit, section.key as 'top_traffic' | 'recent_ip')})
+                      </span>
+                    )}
+                  </span>
+                  <span className="font-light text-slate-600 text-xs">
+                    {section.description}
+                  </span>
+                </span>
               </button>
 
               {expandedSections[section.key] &&
