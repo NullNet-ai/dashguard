@@ -140,7 +140,7 @@ const ConfigurationNatRuleGrid = ({
     <Card className="overflow-hidden max-w-[calc(100vw-38.4em)] h-[calc(100vh-7em)]">
       <CardHeader className="flex w-full flex-1 items-center justify-between bg-slate-100">
         <CardTitle className="text-md text-foreground">
-          NAT Rules
+          NAT
         </CardTitle>
       </CardHeader>
       <Grid
