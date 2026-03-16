@@ -18,10 +18,28 @@ export default function Search({params, filter_type} : {params: any, filter_type
   const eventEmitter = useEventEmitter()
   const [sortKey, setSortKey] = useState<string>('')
   const [isLoading, setIsLoading] = useState(false)
+  const [timeCount, setTimeCount] = useState<number | null>(null)
+  const [timeUnit, setTimeUnit] = useState<string>('')
   const onChangeSort = (v: string) => {
+    if (v === 'none') {
+      setSortKey('')
+      eventEmitter.emit('timeline_sort_key', '')
+      return
+    }
     setSortKey(v)
     eventEmitter.emit('timeline_sort_key', v)
   }
+  useEffect(() => {
+    const onTimeSettings = (payload: { time_count?: number; time_unit?: string }) => {
+      setTimeCount(typeof payload?.time_count === 'number' ? payload.time_count : null)
+      setTimeUnit(payload?.time_unit ?? '')
+    }
+    eventEmitter.on('timeline_time_settings', onTimeSettings)
+    eventEmitter.emit('timeline_request_time_settings')
+    return () => {
+      eventEmitter.off('timeline_time_settings', onTimeSettings)
+    }
+  }, [eventEmitter])
   useEffect(() => {
     const handleLoading = (loading: boolean) => setIsLoading(Boolean(loading))
     eventEmitter.on('timeline_loading', handleLoading)
@@ -29,6 +47,18 @@ export default function Search({params, filter_type} : {params: any, filter_type
       eventEmitter.off('timeline_loading', handleLoading)
     }
   }, [eventEmitter])
+  
+
+  function formatTimeLabel(count: number, unit: string): string {
+    if (unit === 'hour')  return `${count} hour${count > 1 ? 's' : ''}`
+    if (unit === 'day')   return `${count} day${count > 1 ? 's' : ''}`
+    if (unit === 'second') {
+      if (count >= 60 && count % 60 === 0) return `${count / 60} minute${count / 60 > 1 ? 's' : ''}`
+      return `${count} second${count > 1 ? 's' : ''}`
+    }
+    return `${count} ${unit}`
+  }
+
   return (
     <GraphSearchProvider params={params} filter_type={filter_type}>
       {/* <div className="flex w-full flex-col justify-start  gap-x-2">
@@ -55,45 +85,56 @@ export default function Search({params, filter_type} : {params: any, filter_type
           </div>
         </div>
       )}
-
-      <div className="grid grid-cols-[250px_1fr] border-b-[1px] -mb-[1px]">
-        <div className="border-r border-slate-100">
+        <div className="grid grid-cols-[250px_1fr] items-center">
           <IPSearch />
-        </div>
-        <div className="relative">
-          <div className="flex items-end justify-between w-full gap-4 pl-1.5 pr-5 py-2 border-b">
-            <div className="flex items-center gap-2 text-xs">
-              <span className="">Sort by:</span>
-              <Select value={sortKey} onValueChange={onChangeSort}>
-                <SelectTrigger className="h-7 w-[140px] text-sm">
-                  <SelectValue placeholder="None" />
-                </SelectTrigger>
-                <SelectContent className='text-sm'>
-                  <SelectItem value="country">Country</SelectItem>
-                  <SelectItem value="source_ip">Source IP</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
+          <div className="flex items-center justify-between gap-2">
+            <p className='text-sm'>
+              <p className='text-sm'>
+                Traffic Timeline - <span className='font-semibold'>
+                  Last {timeCount != null ? formatTimeLabel(timeCount, timeUnit) : '—'}
+                </span>
+              </p>
+            </p>
             <div className="flex items-center gap-4">
               <span className="text-sm">Traffic Intensity</span>
-              <div className="flex items-center gap-4">
-                <div className="flex items-center gap-2">
-                  <span className="h-4 w-6 rounded-sm bg-[#65A1C7]" />
-                  <span className="text-xs text-slate-600">Low</span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <span className="h-4 w-6 rounded-sm bg-[#B4D3ED]" />
-                  <span className="text-xs text-slate-600">Medium</span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <span className="h-4 w-6 rounded-sm bg-[#3F5F7E]" />
-                  <span className="text-xs text-slate-600">High</span>
+              <div className="flex items-end gap-4 py-2">
+                <div className="flex items-center gap-4">
+                  <div className="flex items-center gap-4">
+                    <div className="flex items-center gap-2">
+                      <span className="h-4 w-6 rounded-sm bg-[#65A1C7]" />
+                      <span className="text-xs text-slate-600">Low</span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <span className="h-4 w-6 rounded-sm bg-[#B4D3ED]" />
+                      <span className="text-xs text-slate-600">Medium</span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <span className="h-4 w-6 rounded-sm bg-[#3F5F7E]" />
+                      <span className="text-xs text-slate-600">High</span>
+                    </div>
+                  </div>
                 </div>
               </div>
             </div>
           </div>
+        </div>
 
-          <div className="absolute w-full bottom-0 px-0 pt-7"><TimelineRuler /></div>
+      <div className="grid grid-cols-[250px_1fr] items-end border-b-[1px] -mb-[1px]">
+        <div className="flex items-center gap-2 text-xs mb-2 pr-2">
+          <span className="whitespace-nowrap">Sort by:</span>
+          <Select value={sortKey} onValueChange={onChangeSort}>
+            <SelectTrigger className="h-[34px] w-full text-sm">
+              <SelectValue placeholder="None" />
+            </SelectTrigger>
+            <SelectContent className='text-sm'>
+              <SelectItem value="none">None</SelectItem>
+              <SelectItem value="country">Country</SelectItem>
+              <SelectItem value="source_ip">Source IP</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
+        <div className="flex items-center justify-end">
+          <TimelineRuler />
         </div>
       </div>
     </GraphSearchProvider>
