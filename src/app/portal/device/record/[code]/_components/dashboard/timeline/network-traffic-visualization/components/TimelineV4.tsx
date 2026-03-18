@@ -106,38 +106,23 @@ function getIntensityLabel(value: number, maxBandwidth: number): string {
   return 'Low'
 }
 
-function getRefreshRate(
-  timeCount: number,
-  timeUnit: string,
-  section: 'top_traffic' | 'recent_ip',
-): string {
-  const totalSeconds =
-    timeCount * (timeUnit === 'hour' ? 3600 : timeUnit === 'minute' ? 60 : timeUnit === 'day' ? 86400 : 1)
-
-  if (section === 'recent_ip') {
-    if (totalSeconds <= 60)  return '3s'
-    if (totalSeconds <= 300) return '5s'
-    return '30s'
-  }
-
-  if (totalSeconds <= 60)  return '5s'
-  if (totalSeconds <= 300) return '10s'
-  return '60s'
-}
 
 interface Props {
-  flowData:  FlowData[]   | undefined
-  formatted: CellData[][] | undefined
+  topTrafficData:           FlowData[]   | undefined
+  topTrafficFormatted:      CellData[][] | undefined
+  recentIPData:             FlowData[]   | undefined
+  recentIPFormatted:        CellData[][] | undefined
+  pollingIntervalTopTraffic?: number
+  pollingIntervalRecentIP?:   number
 }
 
-export default function GridVirtualizerFixed({ flowData, formatted }: Props) {
+export default function GridVirtualizerFixed({ topTrafficData, topTrafficFormatted, recentIPData, recentIPFormatted, pollingIntervalTopTraffic, pollingIntervalRecentIP }: Props) {
   const eventEmitter = useEventEmitter()
   const [inlineFilter, setInlineFilter] = useState('')
   const [sortKey, setSortKey] = useState('')
   const [isLoading, setIsLoading] = useState(false)
   const [resolution, setResolution] = useState<string>('')
   const [timeCount, setTimeCount] = useState<number | null>(null)
-  const [timeUnit, setTimeUnit] = useState<string>('')
   const [expandedSections, setExpandedSections] = useState<Record<string, boolean>>({
     top_traffic: true,
     recent_ip:   true,
@@ -150,7 +135,6 @@ export default function GridVirtualizerFixed({ flowData, formatted }: Props) {
     const onTimeSettings = (payload: { resolution?: string; time_count?: number; time_unit?: string }) => {
       setResolution(payload?.resolution ?? '')
       setTimeCount(payload?.time_count ?? null)
-      setTimeUnit(payload?.time_unit ?? '')
     }
     
 
@@ -168,13 +152,16 @@ export default function GridVirtualizerFixed({ flowData, formatted }: Props) {
     }
   }, [eventEmitter])
 
-  const colCount = useMemo(() => formatted?.[0]?.length ?? 0, [formatted])
+  const colCount = useMemo(
+    () => topTrafficFormatted?.[0]?.length ?? recentIPFormatted?.[0]?.length ?? 0,
+    [topTrafficFormatted, recentIPFormatted],
+  )
 
   useEffect(() => {
     if (colCount <= 0) return
 
     let latestMs = -Infinity
-    for (const row of formatted ?? []) {
+    for (const row of [...(topTrafficFormatted ?? []), ...(recentIPFormatted ?? [])]) {
       const cell = row?.[colCount - 1]
       const ms = toMs(cell?.bucketTime ?? cell?.time ?? null)
       if (ms != null && Number.isFinite(ms) && ms > latestMs) latestMs = ms
@@ -184,55 +171,55 @@ export default function GridVirtualizerFixed({ flowData, formatted }: Props) {
       colCount,
       lastBucketTime: latestMs > -Infinity ? latestMs : null,
     })
-  }, [formatted, colCount, eventEmitter])
+  }, [topTrafficFormatted, recentIPFormatted, colCount, eventEmitter])
 
   const sections = useMemo((): Section[] => {
-    const pairs: FlowPair[] = (flowData ?? []).map((flow, i) => ({
+    const topPairs: FlowPair[] = (topTrafficData ?? []).map((flow, i) => ({
       flow,
-      row: (formatted ?? [])[i] ?? [],
+      row: (topTrafficFormatted ?? [])[i] ?? [],
+    }))
+
+    const recentPairs: FlowPair[] = (recentIPData ?? []).map((flow, i) => ({
+      flow,
+      row: (recentIPFormatted ?? [])[i] ?? [],
     }))
 
     const q = inlineFilter.toLowerCase()
-    const filtered = q
-      ? pairs.filter(p => p.flow.source_ip?.toLowerCase().includes(q))
-      : pairs
+    const filteredTop = q
+      ? topPairs.filter(p => p.flow.source_ip?.toLowerCase().includes(q))
+      : topPairs
+    const filteredRecent = q
+      ? recentPairs.filter(p => p.flow.source_ip?.toLowerCase().includes(q))
+      : recentPairs
 
-    const topTraffic = [...filtered]
-      .sort((a, b) => {
-        const packetDiff = (Number(b.flow.total_active_packets) || 0)
-                         - (Number(a.flow.total_active_packets) || 0)
-        if (packetDiff !== 0) return packetDiff
-        return (Number(b.flow.total_bandwidth) || 0) - (Number(a.flow.total_bandwidth) || 0)
-      })
-      .slice(0, 5)
+    const topTraffic = [...filteredTop].sort((a, b) => {
+      const packetDiff = (Number(b.flow.total_active_packets) || 0)
+                       - (Number(a.flow.total_active_packets) || 0)
+      if (packetDiff !== 0) return packetDiff
+      return (Number(b.flow.total_bandwidth) || 0) - (Number(a.flow.total_bandwidth) || 0)
+    })
 
-    const recentIP = [...filtered]
-      .slice(0, 10)
-      .sort((a, b) => {
-        if (sortKey === 'country') {
-          return (a.flow.name ?? '').localeCompare(b.flow.name ?? '')
-        }
-        if (sortKey === 'source_ip') {
-          return (a.flow.source_ip ?? '').localeCompare(b.flow.source_ip ?? '')
-        }
-        return 0
-      })
+    const recentIP = [...filteredRecent].sort((a, b) => {
+      if (sortKey === 'country') return (a.flow.name ?? '').localeCompare(b.flow.name ?? '')
+      if (sortKey === 'source_ip') return (a.flow.source_ip ?? '').localeCompare(b.flow.source_ip ?? '')
+      return 0
+    })
 
     return [
-      { 
-        key: 'top_traffic', 
-        label: 'Top Traffic', 
+      {
+        key: 'top_traffic',
+        label: 'Top Traffic',
         description: 'IPs generating the highest traffic within the selected time range',
-        rows: topTraffic 
+        rows: topTraffic
       },
-      { 
-        key: 'recent_ip',   
-        label: 'Recent IP',   
+      {
+        key: 'recent_ip',
+        label: 'Recent IP',
         description: 'Most recently observed IPs regardless of traffic volume',
-        rows: recentIP  
+        rows: recentIP
       },
     ]
-  }, [flowData, formatted, inlineFilter, sortKey])
+  }, [topTrafficData, topTrafficFormatted, recentIPData, recentIPFormatted, inlineFilter, sortKey])
 
   const maxBandwidth = useMemo(() => {
     let max = 0
@@ -365,8 +352,12 @@ export default function GridVirtualizerFixed({ flowData, formatted }: Props) {
             ))}
           </div>
         ) : (
-          sections.map((section, i) => (
-            <div key={section.key}>
+          sections.map((section, i) => {
+            const refreshMs = section.key === 'top_traffic'
+              ? pollingIntervalTopTraffic
+              : pollingIntervalRecentIP
+
+            return <div key={section.key}>
               <button
                 className={`
                   w-full flex items-start gap-1.5 px-2 py-1
@@ -383,9 +374,9 @@ export default function GridVirtualizerFixed({ flowData, formatted }: Props) {
                 <span className="flex flex-col justify-start items-start">
                   <span className="flex items-center gap-2">
                     {section.label}
-                    {timeCount != null && timeUnit && (
+                    {refreshMs != null && (
                       <span className="font-normal">
-                        (<span className='text-slate-600'>Refresh</span>: {getRefreshRate(timeCount, timeUnit, section.key as 'top_traffic' | 'recent_ip')})
+                        (<span className='text-slate-600'>Refresh</span>: {refreshMs / 1000}s)
                       </span>
                     )}
                   </span>
@@ -400,7 +391,7 @@ export default function GridVirtualizerFixed({ flowData, formatted }: Props) {
                   renderRow(pair, `${section.key}-${j}`)
                 )}
             </div>
-          ))
+          })
         )}
       </div>
     </TooltipProvider>
