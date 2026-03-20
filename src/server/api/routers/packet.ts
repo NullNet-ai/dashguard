@@ -868,14 +868,12 @@ export const packetRouter = createTRPCRouter({
     return { data: ips }
   }),
 
-  getUniqueSourceIP: privateProcedure.input(z.object({ device_id: z.string(), time_range: z.array(z.string()), filter_id: z.string() })).mutation(async ({ input, ctx }) => {
-    const { device_id, time_range, filter_id } = input
+  getUniqueSourceIP: privateProcedure.input(z.object({ device_id: z.string(), time_range: z.array(z.string()), filter_id: z.string(), limit: z.number().optional().default(10) })).mutation(async ({ input, ctx }) => {
+    const { device_id, time_range, filter_id, limit } = input
 
     let source_ips: string[] = []
 
     const filterConnections = async (starts_at: number) => {
-      // const limit = 100000
-      const limit = 10 //1000
 
       const { account } = ctx.session
       const { contact } = account

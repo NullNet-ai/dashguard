@@ -48,6 +48,10 @@ export interface IBandwidth {
 
 export interface IState {
   flowData: any[]
+  topTrafficData: IBandwidth[]
+  recentIPData: IBandwidth[]
+  pollingIntervalTopTraffic: number
+  pollingIntervalRecentIP: number
   loading: boolean
   fetchMoreData: () => any
   unique_source_ips: string[]
