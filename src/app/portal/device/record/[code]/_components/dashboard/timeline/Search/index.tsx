@@ -88,13 +88,19 @@ export default function Search({params, filter_type} : {params: any, filter_type
         <div className="grid grid-cols-[250px_1fr] items-center">
           <IPSearch />
           <div className="flex items-center justify-between gap-2">
-            <p className='text-sm'>
-              <p className='text-sm'>
-                Traffic Timeline - <span className='font-semibold'>
-                  Last {timeCount != null ? formatTimeLabel(timeCount, timeUnit) : '—'}
-                </span>
-              </p>
-            </p>
+            <div className="flex items-center gap-2 text-xs pl-1.5 w-full max-w-44">
+              <span className="whitespace-nowrap">Sort by:</span>
+              <Select value={sortKey} onValueChange={onChangeSort}>
+                <SelectTrigger className="h-[34px] w-full text-sm">
+                  <SelectValue placeholder="None" />
+                </SelectTrigger>
+                <SelectContent className='text-sm'>
+                  <SelectItem value="none">None</SelectItem>
+                  <SelectItem value="country">Country</SelectItem>
+                  <SelectItem value="source_ip">Source IP</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
             <div className="flex items-center gap-4">
               <span className="text-sm">Traffic Intensity</span>
               <div className="flex items-end gap-4 py-2">
@@ -120,18 +126,12 @@ export default function Search({params, filter_type} : {params: any, filter_type
         </div>
 
       <div className="grid grid-cols-[250px_1fr] items-end border-b-[1px] -mb-[1px]">
-        <div className="flex items-center gap-2 text-xs mb-2 pr-2">
-          <span className="whitespace-nowrap">Sort by:</span>
-          <Select value={sortKey} onValueChange={onChangeSort}>
-            <SelectTrigger className="h-[34px] w-full text-sm">
-              <SelectValue placeholder="None" />
-            </SelectTrigger>
-            <SelectContent className='text-sm'>
-              <SelectItem value="none">None</SelectItem>
-              <SelectItem value="country">Country</SelectItem>
-              <SelectItem value="source_ip">Source IP</SelectItem>
-            </SelectContent>
-          </Select>
+        <div className='flex items-center pt-2 pb-4'>
+          <p className='text-sm'>
+            Traffic Timeline - <span className='font-semibold'>
+              Last {timeCount != null ? formatTimeLabel(timeCount, timeUnit) : '—'}
+            </span>
+          </p>
         </div>
         <div className="flex items-center justify-end">
           <TimelineRuler />

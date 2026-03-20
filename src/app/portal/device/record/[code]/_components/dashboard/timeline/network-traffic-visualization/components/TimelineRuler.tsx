@@ -5,7 +5,6 @@ import { useEventEmitter } from '~/context/EventEmitterProvider'
 import { cn } from '~/lib/utils'
 
 const MAJOR_TICK_COUNT = 4
-const LIVE_TICK_INTERVAL = 1_000
 
 type Granularity = 'second' | 'minute' | 'hour'
 
@@ -17,7 +16,7 @@ interface TimeSettings {
 
 interface ColCountPayload {
   colCount: number
-  lastBucketTime: unknown
+  lastBucketTime: number | null
 }
 
 interface Tick {
@@ -81,28 +80,20 @@ function evenlySpacedIndices(length: number, count: number): Set<number> {
  * buildTimes — computes the full array of ms timestamps for every ruler tick.
  *
  * ── LIVE MODE (liveColCount is set) ─────────────────────────────────────────
- *   Activated when GridVirtualizerFixed emits `timeline_col_count`.
- *   nowMs is always the anchor. Intermediate ticks floor to step boundaries;
- *   the last tick uses raw nowMs so seconds tick live at any resolution.
+ *   Anchor = nowMs floored to the nearest step boundary.
+ *   nowMs is ONLY updated when timeline_col_count fires (i.e. when the cell
+ *   grid updates). No interval — the ruler moves exactly when cells move.
  *
- *   Example — 12hr range, 5min resolution, 144 cols, now = 12:37:42
- *     step       = 300_000 ms
- *     flooredEnd = 12:35:00
- *     start      = 12:35:00 − (143 × 5min) = 00:40:00
- *     ticks      = [00:40:00, 00:45:00, …, 12:35:00, 12:37:42]  ← last = raw now
+ *   lastBucketTime from the server is intentionally ignored — it reflects the
+ *   window end boundary (e.g. 09:00:00), not the current time (e.g. 08:48:00).
  *
  * ── STATIC / FALLBACK MODE (liveColCount is null) ───────────────────────────
  *   Used on first load or after a filter/settings change resets state.
  *
  *   A) timeSettings present → span exactly the configured window
- *        e.g. 12hr + 5min res → 144 ticks from (now−12hr) to now
  *   B) granularity = 'second' → last 60 seconds (60 ticks)
  *   C) granularity = 'minute' → full current hour 00→59 (60 ticks)
  *   D) granularity = 'hour'   → last 12 hours (12 ticks)
- *
- * ── MAJOR TICK LABELS ───────────────────────────────────────────────────────
- *   4 evenly-spaced ticks get labels. Gap ≈ totalWindow / 3.
- *   e.g. 12hr window → labels ~4hr apart; 1hr window → labels ~20min apart.
  */
 function buildTimes(
   granularity: Granularity,
@@ -114,11 +105,9 @@ function buildTimes(
 
   // ── LIVE MODE ──────────────────────────────────────────────────────────────
   if (liveColCount != null && liveColCount > 0) {
-    const flooredEnd = Math.floor(nowMs / step) * step
-    const start      = flooredEnd - (liveColCount - 1) * step
-    const times      = Array.from({ length: liveColCount }, (_, i) => start + i * step)
-    times[times.length - 1] = nowMs  // last tick = exact now, never floored
-    return times
+    const flooredNow = Math.floor(nowMs / step) * step
+    const start = flooredNow - (liveColCount - 1) * step
+    return Array.from({ length: liveColCount }, (_, i) => start + i * step)
   }
 
   // ── STATIC / FALLBACK MODE ─────────────────────────────────────────────────
@@ -158,20 +147,13 @@ export default function TimelineRuler() {
   const [liveColCount, setLiveColCount] = useState<number | null>(null)
 
   /**
-   * nowMs drives live label updates. Stored as state (not a ref) so useMemo
-   * recomputes when it changes. Updates every second via setInterval.
+   * nowMs is ONLY updated when handleColCount fires.
+   * No setInterval — the ruler moves exactly when and only when the cell
+   * grid updates. This prevents the ruler from continuously ticking
+   * independently of the data.
    */
   const [nowMs, setNowMs] = useState<number>(() => Date.now())
 
-  // Live clock — updates nowMs every second so the last tick label keeps ticking.
-  // useMemo recomputes on every nowMs change; labels that floor to a boundary
-  // (intermediate ticks) only visually change when that boundary turns over.
-  useEffect(() => {
-    const id = window.setInterval(() => setNowMs(Date.now()), LIVE_TICK_INTERVAL)
-    return () => window.clearInterval(id)
-  }, [])
-
-  // Stable event handlers — useCallback prevents recreation on every render
   const handleChartData = useCallback((data: Array<{ resolution?: string }>) => {
     setGranularity(resolveGranularity(data?.[0]?.resolution))
   }, [])
@@ -187,10 +169,12 @@ export default function TimelineRuler() {
   }, [])
 
   const handleColCount = useCallback(({ colCount }: ColCountPayload) => {
-    if (Number.isFinite(colCount) && colCount > 0) setLiveColCount(colCount)
+    if (Number.isFinite(colCount) && colCount > 0) {
+      setLiveColCount(colCount)
+    }
+    setNowMs(Date.now())
   }, [])
 
-  // Single effect registers/cleans up all event listeners
   useEffect(() => {
     eventEmitter.on('timeline_chart_data',    handleChartData)
     eventEmitter.on('timeline_loading',       handleLoading)
@@ -206,25 +190,23 @@ export default function TimelineRuler() {
   }, [eventEmitter, handleChartData, handleLoading, handleTimeSettings, handleColCount])
 
   const ticks = useMemo((): Tick[] => {
-    // Always use nowMs as windowEnd so the ruler stays pinned to current time.
     const times = buildTimes(granularity, timeSettings, nowMs, liveColCount)
     if (times.length === 0) return []
 
-    // Hide all labels while loading to avoid stale time flicker
     const majorIndices = isLoading
       ? new Set<number>()
       : evenlySpacedIndices(times.length, MAJOR_TICK_COUNT)
 
     const majorList = [...majorIndices].sort((a, b) => a - b)
     const firstMajor = majorList[0]
-    const lastMajor  = majorList[majorList.length - 1]
+    const lastMajor = majorList[majorList.length - 1]
 
     return times.map((ms, i) => {
       const isMajor = majorIndices.has(i)
       const label   = isMajor ? formatLabel(ms, granularity) : ''
-      const position = !isMajor       ? 'none'
-                     : i === firstMajor ? 'first'
-                     : i === lastMajor  ? 'last'
+      const position = !isMajor          ? 'none'
+                     : i === firstMajor  ? 'first'
+                     : i === lastMajor   ? 'last'
                      : 'middle'
       return { isMajor, label, position }
     })
@@ -240,10 +222,8 @@ export default function TimelineRuler() {
 
       <div
         className="grid items-end"
-        style={{ gridTemplateColumns: `0 repeat(${ticks.length}, minmax(0, 1fr))` }}
+        style={{ gridTemplateColumns: `repeat(${ticks.length}, minmax(0, 1fr))` }}
       >
-        <div aria-hidden />
-
         {ticks.map((tick, i) => (
           <div
             key={i}

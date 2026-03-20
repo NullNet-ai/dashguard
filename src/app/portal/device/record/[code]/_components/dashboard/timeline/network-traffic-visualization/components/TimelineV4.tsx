@@ -8,6 +8,7 @@ import {
 } from '~/components/ui/tooltip'
 import { FlagIcon, ChevronDownIcon, ChevronRightIcon } from '@heroicons/react/20/solid'
 import { Skeleton } from '~/components/ui/skeleton'
+import { Star } from 'lucide-react'
 
 const BW_SIZE = 18
 const MS_THRESHOLD = 1e12
@@ -373,7 +374,10 @@ export default function GridVirtualizerFixed({ topTrafficData, topTrafficFormatt
                   : <ChevronRightIcon className="size-4 shrink-0" />}
                 <span className="flex flex-col justify-start items-start">
                   <span className="flex items-center gap-2">
-                    {section.label}
+                    <div className="flex gap-1">
+                      {section.key === 'top_traffic' && <Star size={14} fill="currentColor" className="text-[#EDC17E]" />}
+                      {section.label}
+                    </div>
                     {refreshMs != null && (
                       <span className="font-normal">
                         (<span className='text-slate-600'>Refresh</span>: {refreshMs / 1000}s)
