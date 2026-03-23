@@ -1,5 +1,6 @@
 'use client'
 import React, {
+  startTransition,
   useCallback,
   useContext,
   useEffect,
@@ -16,7 +17,6 @@ import { api } from '~/trpc/react'
 import { type IBandwidth, type INetworkFlowContext } from './types'
 import { useSocketConnection } from '../../custom-hooks/useSocketConnection';
 import { updateBandwidth } from './functions/updateBandwidth';
-import { useRouter } from 'next/navigation'
 
 interface ITimeSettings {
   time_count: number
@@ -58,38 +58,81 @@ export default function NetworkFlowProvider({ children, params }: IProps) {
   const eventEmitter = useEventEmitter()
   const [filterId, setFilterID] = useState('01JNQ9WPA2JWNTC27YCTCYC1FE')
   const [searchBy, setSearchBy] = useState()
-  const [new_bandwidth, setNewBandwidth] = useState<IBandwidth[]>([])
-  const [top_traffic_bandwidth, setTopTrafficBandwidth] = useState<IBandwidth[]>([])
-  const [loading, setLoading] = useState<boolean>(false)
-  const [time, setTime] = useState<Record<string, any> | null>(null)
-  const [current_index, setCurrentIndex] = useState<number>(0)
-  const [unique_source_ips, setUniqueSourceIP] = useState<string[]>([])
+  const [time, setTime] = useState<ITimeSettings | null>(null)
+  const [isInitialized, setIsInitialized] = useState(false)
   const [token, setToken] = React.useState<string | null>(null)
   const [org_acc_id, setOrgAccountID] = React.useState<string | null>(null)
-  const [isQueueEnabled, setIsQueueEnabled] = useState(false)
-  const taskQueueRef = useRef<Array<() => Promise<void>>>([])
-  const isQueueWorkerRunningRef = useRef(false)
-  const isUnmountedRef = useRef(false)
-  const startQueueServiceRef = useRef<(() => void) | null>(null)
-  const currentIndexRef = useRef(0)
-  const uniqueSourceIpsRef = useRef<string[]>([])
-  const filterGenerationRef = useRef(0)
-  const activeFilterIdRef = useRef(filterId)
+  /**
+   * Renderable snapshot committed to React state. Updating this triggers
+   * re-renders for consumers.  All *mutations* happen on the `*Ref` mirrors
+   * below; only the final result is written here via `startTransition` to
+   * avoid blocking the UI thread.
+   */
+  const [snapshot, setSnapshot] = useState({
+    recentIPData:           [] as IBandwidth[],  // IPs seen in the last poll window
+    topTrafficData:         [] as IBandwidth[],  // top-5 IPs by active-packet count
+    unique_source_ips:      [] as string[],
+    unique_top_traffic_ips: [] as string[],
+    loading:                false,
+  })
 
-  const router = useRouter()
+  /**
+   * Mutable mirrors of the snapshot arrays.  Keeping refs allows the polling
+   * callbacks (which capture a stale closure) to always read and write the
+   * latest data without triggering re-renders on every intermediate update.
+   */
+  const recentBandwidthRef     = useRef<IBandwidth[]>([])
+  const topTrafficBandwidthRef = useRef<IBandwidth[]>([])
+  const recentIpsRef           = useRef<string[]>([])   // accumulates known source IPs
+  const topTrafficIpsRef       = useRef<string[]>([])   // top-traffic IP list
+
+  /** Set to true in the cleanup of the mount effect; guards against state
+   *  updates on an unmounted component. */
+  const isUnmountedRef         = useRef(false)
+  /**
+   * Monotonically increasing counter.  Incremented whenever the active filter
+   * changes.  Every async operation captures the generation at start time and
+   * bails out if it no longer matches, preventing stale results from a
+   * superseded filter from overwriting fresh data.
+   */
+  const filterGenerationRef    = useRef(0)
+  const activeFilterIdRef      = useRef(filterId)
+  /** Concurrency guards — prevent overlapping poll calls for the same section. */
+  const isRecentIPRunningRef   = useRef(false)
+  const isTopTrafficRunningRef = useRef(false)
+
+  /** Ref copies of frequently-read values used inside async callbacks to avoid
+   *  stale closure issues without adding them to useCallback dependency arrays. */
+  const timeRef      = useRef<ITimeSettings | null>(null)
+  const paramsRef    = useRef(params)
+  const searchByRef  = useRef<any>(searchBy)
 
   const {socket} = useSocketConnection({channel_name, token})
   const getAccount = api.organizationAccount.getAccountID.useMutation();
-  
   const getBandwidthActions = api.packet.getBandwidthOfSourceIP.useMutation()
+  const getBandwidthTopTraffic  = api.packet.getBandwidthOfSourceIP.useMutation()
   const getUniqueSourceActions = api.packet.getUniqueSourceIP.useMutation()
-  const getUniqueSourceActionsTopTraffic = api.packet.getUniqueSourceIP.useMutation()
-  const {
-    time_count = null,
-    time_unit = null,
-    resolution = null,
-  } = time || {}
-  
+  const getUniqueSourceTopTraffic = api.packet.getUniqueSourceIP.useMutation()
+
+  /**
+   * Ref wrappers for tRPC mutation objects.  tRPC recreates the mutation
+   * object on every render; storing them in refs lets the polling callbacks
+   * call the latest instance without being listed as effect dependencies
+   * (which would restart intervals on every render).
+   */
+  const getBandwidthRef     = useRef(getBandwidthActions)
+  const getBandwidthTopRef  = useRef(getBandwidthTopTraffic)
+  const getUniqueIpRef      = useRef(getUniqueSourceActions)
+  const getUniqueIpTopRef   = useRef(getUniqueSourceTopTraffic)
+
+  /**
+   * Stable refs to the latest poll functions.  The interval callbacks always
+   * call through these refs so that interval IDs don't need to be recreated
+   * each time the poll functions are redefined.
+   */
+  const pollRecentIPRef   = useRef<() => Promise<void>>(async () => {})
+  const pollTopTrafficRef = useRef<() => Promise<void>>(async () => {})
+
   const { refetch: refetchTimeUnitandResolution } = api.cachedFilter.fetchCachedFilterTimeUnitandResolution.useQuery(
     {
       type: 'timeline_filter',
@@ -98,162 +141,50 @@ export default function NetworkFlowProvider({ children, params }: IProps) {
       enabled: false,
     }
   )
-  
-  // const { notifications, isConnected, disconnectSocket } = useSocketNotifications(userToken);
-  
-  const time_range = getLastTimeStamp({ count: time_count, unit: time_unit, add_remaining_time: true })
 
-  const clearIsNewAfterDelay = useCallback((ips: string[], delayMs = 1000) => {
-    if (!ips?.length) return
-    window.setTimeout(() => {
-      if (isUnmountedRef.current) return
-      setNewBandwidth((prev: IBandwidth[]) => {
-        if (!prev?.length) return prev
-        const ipSet = new Set(ips)
-        return withTotal(prev.map((entry) => (ipSet.has(entry?.source_ip) ? { ...entry, isNew: false } : entry)))
-      })
-    }, delayMs)
-  }, [])
-  
-  const startQueueService = useCallback(() => {
-    if (isQueueWorkerRunningRef.current) return
-    isQueueWorkerRunningRef.current = true
+  /**
+   * Interval (ms) for the "recent IPs" poll.  Shorter windows need more
+   * frequent updates; larger windows tolerate a slower cadence.
+   *   - second / 1-minute window → 1 s
+   *   - other minute windows     → 5 s
+   *   - hour windows             → 30 s
+   */
+  const pollingInterval = useMemo((): number => {
+    if (!time) return ONE_SECOND_MS
+    if (time.time_unit === 'second' || (time.time_unit === 'minute' && time.time_count === 1)) return ONE_SECOND_MS
+    if (time.time_unit === 'minute') return FIVE_SECONDS_MS
+    return THIRTY_SECONDS_MS
+  }, [time])
 
-    void (async () => {
-      try {
-        while (!isUnmountedRef.current) {
-          const next = taskQueueRef.current.shift()
-          if (!next) break
-          try {
-            await next()
-          } catch (err) {
-            console.error('[network-flow] queue task failed', err)
-          }
-        }
-      } finally {
-        isQueueWorkerRunningRef.current = false
-        if (!isUnmountedRef.current && taskQueueRef.current.length > 0) {
-          startQueueServiceRef.current?.()
-        }
-      }
-    })()
-  }, [])
+  /**
+   * Interval (ms) for the "top traffic" poll.  Top traffic changes more
+   * slowly so it can be polled less aggressively than recent IPs.
+   *   - second windows  → 5 s
+   *   - minute windows  → 10 s
+   *   - hour windows    → 60 s
+   */
+  const pollingIntervalTopTraffic = useMemo((): number => {
+    if (!time) return FIVE_SECONDS_MS
+    if (time.time_unit === 'second') return FIVE_SECONDS_MS
+    if (time.time_unit === 'minute') return TEN_SECONDS_MS
+    return ONE_MINUTE_MS
+  }, [time])
+
+  // ── Keep refs fresh on every render ──
+  useEffect(() => { getBandwidthRef.current = getBandwidthActions }, [getBandwidthActions])
+  useEffect(() => { getBandwidthTopRef.current = getBandwidthTopTraffic }, [getBandwidthTopTraffic])
+  useEffect(() => { getUniqueIpRef.current = getUniqueSourceActions }, [getUniqueSourceActions])
+  useEffect(() => { getUniqueIpTopRef.current = getUniqueSourceTopTraffic }, [getUniqueSourceTopTraffic])
+  useEffect(() => { timeRef.current = time }, [time])
+  useEffect(() => { paramsRef.current = params }, [params])
+  useEffect(() => { searchByRef.current = searchBy }, [searchBy])
+  useEffect(() => { activeFilterIdRef.current = filterId }, [filterId])
 
   useEffect(() => {
     return () => {
       isUnmountedRef.current = true
     }
   }, [])
-
-  useEffect(() => {
-    startQueueServiceRef.current = startQueueService
-  }, [startQueueService])
-
-  const enqueueTask = useCallback((task: () => Promise<void>) => {
-    const generationAtEnqueue = filterGenerationRef.current
-    taskQueueRef.current.push(async () => {
-      if (isUnmountedRef.current) return
-      if (generationAtEnqueue !== filterGenerationRef.current) return
-      await task()
-    })
-    if (isQueueEnabled) startQueueServiceRef.current?.()
-  }, [isQueueEnabled])
-
-  useEffect(() => {
-    currentIndexRef.current = current_index
-  }, [current_index])
-
-  useEffect(() => {
-    activeFilterIdRef.current = filterId
-  }, [filterId])
-
-  useEffect(() => {
-    uniqueSourceIpsRef.current = unique_source_ips
-  }, [unique_source_ips])
-
-  const fetchBandwidth = useCallback(async (startIndex: number, add_data_count: number, isInitial = false) => {  
-    const generationAtStart = filterGenerationRef.current
-    const filterIdAtStart = activeFilterIdRef.current
-    const getBandwidthParams = {
-      device_id: params?.id || '',
-      time_range: getLastTimeStamp({ count: time_count, unit: time_unit, add_remaining_time: true }) as any,
-      bucket_size: resolution,
-      // @ts-expect-error - No type yet
-      source_ips: (searchBy && searchBy.length) ? uniqueSourceIpsRef.current : (uniqueSourceIpsRef.current?.slice(startIndex, startIndex + add_data_count) || []),
-    }
-
-    const _bandwidth: any = await getBandwidthActions.mutateAsync(getBandwidthParams);
-    
-    if (!_bandwidth) return; // Exit early if no bandwidth data is returned
-    if (isUnmountedRef.current) return
-    if (generationAtStart !== filterGenerationRef.current) return
-    if (filterIdAtStart !== activeFilterIdRef.current) return
-    
-    if (startIndex === 0) {
-      // If it's the first batch, replace the data
-      setNewBandwidth(
-        withTotal(_bandwidth?.data?.map((item: Record<string, any>) => {
-          return { ...item, time_unit, time_count, resolution, time_range };
-        }) || [])
-      );
-      return;
-    }
-
-    let updated_new_bandwidth = new_bandwidth?.map((entry: any) => ({
-      ...entry,
-      isNew: false,
-    }))
-
-    // @ts-expect-error - No type yet
-    _bandwidth.data.forEach(e => {
-      updated_new_bandwidth = updated_new_bandwidth.reduce((acc, curr) => {
-        if(curr?.source_ip === e?.source_ip) {
-          return [...acc, { ...curr, result: [...curr.result, ...e.result] }]
-        }
-        return [...acc, { ...curr, time_unit, time_count, resolution, time_range }]
-      }, [])
-    })
-
-    setNewBandwidth(withTotal(updated_new_bandwidth))
-
-  }, [getBandwidthActions, params?.id, resolution, time_count, time_range, time_unit, searchBy])
-
-  const fetchTopTrafficBandwidth = useCallback(async () => {
-    const generationAtStart = filterGenerationRef.current
-    const filterIdAtStart = activeFilterIdRef.current
-
-    const freshIps = await getUniqueSourceActionsTopTraffic.mutateAsync({
-      device_id: params?.id || '',
-      time_range: getLastTimeStamp({ count: time_count, unit: time_unit, add_remaining_time: true }) as any,
-      filter_id: filterId,
-      limit: 5,
-    })
-    if (!freshIps) return
-    if (isUnmountedRef.current) return
-    if (generationAtStart !== filterGenerationRef.current) return
-    if (filterIdAtStart !== activeFilterIdRef.current) return
-
-    const ips = (freshIps as string[])
-    if (!ips.length) return
-
-    const _bandwidth: any = await getBandwidthActions.mutateAsync({
-      device_id: params?.id || '',
-      time_range: getLastTimeStamp({ count: time_count, unit: time_unit, add_remaining_time: true }) as any,
-      bucket_size: resolution,
-      source_ips: ips,
-    })
-    if (!_bandwidth) return
-    if (isUnmountedRef.current) return
-    if (generationAtStart !== filterGenerationRef.current) return
-    if (filterIdAtStart !== activeFilterIdRef.current) return
-
-    setTopTrafficBandwidth(
-      withTotal(_bandwidth?.data?.map((item: Record<string, any>) => ({
-        ...item, time_unit, time_count, resolution, time_range,
-      })) || [])
-    )
-  }, [getBandwidthActions, getUniqueSourceActionsTopTraffic, params?.id, filterId, resolution, time_count, time_range, time_unit])
-
 
   useEffect(() => {
     const _getAccount = async () => {
@@ -267,194 +198,399 @@ export default function NetworkFlowProvider({ children, params }: IProps) {
     _getAccount()
   }, [])
 
-  useEffect(() => {
-    if (!socket || !org_acc_id || filterId !== '01JNQ9WPA2JWNTC27YCTCYC1FE' ) return;
-  
-    const eventKey = `${channel_name}-${params?.id}-${org_acc_id}`;
-    socket.on(eventKey, async (data: any) => {
-      // if((searchBy ?? [])?.length && !(searchBy as any)?.[0]?.values?.includes(data?.source_ip)) return
-      const updated_bandwidth = await updateBandwidth(new_bandwidth, data, time, searchBy);
-      setNewBandwidth(withTotal([...updated_bandwidth] as IBandwidth[]))
-      clearIsNewAfterDelay(
-        (updated_bandwidth || []).filter((e: any) => e?.isNew).map((e: any) => e?.source_ip).filter(Boolean),
-      )
-    });
-  
-    // Cleanup function to remove the event listener
-    return () => {
-      socket.off(eventKey);
-    };
-  }, [socket, org_acc_id, new_bandwidth, clearIsNewAfterDelay]);
-  
-  
-
-  const fetchMoreDataInternal = useCallback(async () => {
-    const generationAtStart = filterGenerationRef.current
-    const filterIdAtStart = activeFilterIdRef.current
-    console.debug('[pooling] fetchMoreData')
-    if(!filterId && filterId === '01JNQ9WPA2JWNTC27YCTCYC1FE') return
-    const ips = uniqueSourceIpsRef.current
-    if (!ips || ips.length === 0) {
-      console.warn('No source IPs available for fetching new_bandwidth')
-      return
+  /**
+   * Fetches the cached filter's time-unit and resolution from the server,
+   * updates local state and the `timeRef`, broadcasts the new settings via the
+   * event emitter, and returns them to the caller.
+   *
+   * Returns `null` if the component has unmounted or the filter generation has
+   * changed since the request was kicked off (stale-result guard).
+   */
+  const fetchTimeSettings = useCallback(async (generation: number): Promise<ITimeSettings | null> => {
+    const { data: time_unit_resolution } = await refetchTimeUnitandResolution()
+    if (isUnmountedRef.current || generation !== filterGenerationRef.current) return null
+    const { time: t, resolution = '1s' } = time_unit_resolution || {}
+    const { time_count = 1, time_unit = 'hour' } = t || {}
+    const settings: ITimeSettings = {
+      time_count,
+      time_unit: time_unit as ITimeSettings['time_unit'],
+      resolution,
     }
+    setTime(settings)
+    timeRef.current = settings
+    eventEmitter.emit('timeline_time_settings', settings)
+    return settings
+  }, [refetchTimeUnitandResolution, eventEmitter])
 
-    const startIndex = currentIndexRef.current
-    const addCount = 2
-    if (startIndex + addCount > ips.length) return
+  /**
+   * Performs the one-time full data load for a given filter + time settings.
+   *
+   * Sequence:
+   * 1. Fetch unique source IPs for both "recent" and "top traffic" sections in
+   *    parallel (using the full configured time range).
+   * 2. Fetch per-IP bandwidth buckets for both sections in parallel.
+   * 3. Enrich every entry with `total_bandwidths` / `total_active_packets` via
+   *    `withTotal`, sort top-traffic by active packets, cap at 5.
+   * 4. Write results to the mutable refs and commit to React state.
+   * 5. Set `isInitialized = true` to start the polling intervals.
+   *
+   * Bails out silently on unmount or stale generation.
+   */
+  const performInitialLoad = useCallback(async (generation: number, fid: string, settings: ITimeSettings) => {
+    const tr = getLastTimeStamp({ count: settings.time_count, unit: settings.time_unit, add_remaining_time: true }) as any
 
-    await fetchBandwidth(startIndex, addCount)
-    if (isUnmountedRef.current) return
-    if (generationAtStart !== filterGenerationRef.current) return
-    if (filterIdAtStart !== activeFilterIdRef.current) return
+    const [ips, topIps] = await Promise.all([
+      getUniqueIpRef.current.mutateAsync({
+        device_id: paramsRef.current?.id || '',
+        time_range: tr,
+        filter_id: fid,
+      }) as Promise<string[]>,
+      getUniqueIpTopRef.current.mutateAsync({
+        device_id: paramsRef.current?.id || '',
+        time_range: tr,
+        filter_id: fid,
+        limit: 5,
+      }) as Promise<string[]>,
+    ])
+    if (isUnmountedRef.current || generation !== filterGenerationRef.current) return
 
-    setCurrentIndex(startIndex + addCount)
-    currentIndexRef.current = startIndex + addCount
-  }, [fetchBandwidth, filterId])
-  
-  const fetchMoreDataInternalV2 = useCallback(async () => {
-    const generationAtStart = filterGenerationRef.current
-    const filterIdAtStart = activeFilterIdRef.current
-    if(!filterId && filterId === '01JNQ9WPA2JWNTC27YCTCYC1FE') return
-    const ips = uniqueSourceIpsRef.current
-    if (!ips || ips.length === 0) {
-      console.warn('No source IPs available for fetching new_bandwidth')
-      return
-    }
+    const [bwResult, bwTopResult]: any[] = await Promise.all([
+      getBandwidthRef.current.mutateAsync({
+        device_id: paramsRef.current?.id || '',
+        time_range: tr,
+        bucket_size: settings.resolution,
+        source_ips: ips,
+      }),
+      getBandwidthTopRef.current.mutateAsync({
+        device_id: paramsRef.current?.id || '',
+        time_range: tr,
+        bucket_size: settings.resolution,
+        source_ips: topIps,
+      }),
+    ])
+    if (isUnmountedRef.current || generation !== filterGenerationRef.current) return
 
-    const tr = getLastTimeStamp({ count: 2, unit: 'second', add_remaining_time: true }) as any
-    // const trV2 = getLastTimeStamp({ count: 60, unit: 'second', add_remaining_time: true }) as any
-    const data = await getUniqueSourceActions.mutateAsync({
-    device_id: params?.id || '',
-    time_range: tr, // trV2
-    filter_id: filterId,
-  });
-    if (isUnmountedRef.current) return
-    if (generationAtStart !== filterGenerationRef.current) return
-    if (filterIdAtStart !== activeFilterIdRef.current) return
-    // Get Connections
-    const getBandwidthParams = {
-      device_id: params?.id || '',
-      time_range: tr, // trV2, // tr,
-      bucket_size: resolution,
-      source_ips: data, // uniq([...data, ...ips]).slice(20)
-    }
-    const _bandwidth: any = await getBandwidthActions.mutateAsync(getBandwidthParams);
-    if (isUnmountedRef.current) return
-    if (generationAtStart !== filterGenerationRef.current) return
-    if (filterIdAtStart !== activeFilterIdRef.current) return
-
-    // setNewBandwidth(_bandwidth?.data?.map((item: Record<string, any>) => {
-    //   return { ...item, time_unit, time_count, resolution, time_range };
-    // }) || [])
-
-    // return
-
-    let updated_new_bandwidth = new_bandwidth
-
-    // @ts-expect-error - No type yet
-    let realNewBandwidths = []
-    // @ts-expect-error - No type yet
-    _bandwidth.data.forEach(e => {
-      let isExist = false
-      // @ts-expect-error - No type yet
-      updated_new_bandwidth = updated_new_bandwidth.reduce((acc, curr) => {
-        if(curr?.source_ip === e?.source_ip) {
-          isExist = true
-          return [...acc, { ...curr, result: [...curr.result, ...e.result] }]
-        }
-        return [...acc, curr]
-      }, [])
-      if (!isExist) {
-        realNewBandwidths.push({ ...e, time_unit, time_count, resolution, time_range, isNew: true })
-      }
+    // Annotate each raw API item with the current time settings so consumers
+    // can derive window boundaries without referencing global state.
+    const toEntry = (item: Record<string, any>) => ({
+      ...item,
+      time_unit: settings.time_unit,
+      time_count: settings.time_count,
+      resolution: settings.resolution,
+      time_range: tr,
     })
 
-    // @ts-expect-error - No type yet
-    if ((realNewBandwidths as any[]).length > 0) {
-      // @ts-expect-error - No type yet
-      const newIps = (realNewBandwidths as any[]).map((e: any) => e.source_ip).filter(Boolean)
-      const freshTr = getLastTimeStamp({ count: time_count, unit: time_unit, add_remaining_time: true }) as any 
-      const freshBandwidth: any = await getBandwidthActions.mutateAsync({
-        device_id: params?.id || '',
-        time_range: freshTr,
-        bucket_size: resolution,
-        source_ips: newIps,
+    const recentInitial = withTotal((bwResult?.data ?? []).map(toEntry))
+    const topInitial = withTotal((bwTopResult?.data ?? []).map(toEntry))
+      .sort((a, b) => (b.total_active_packets ?? 0) - (a.total_active_packets ?? 0))
+      .slice(0, 5)
+
+    recentBandwidthRef.current     = recentInitial
+    topTrafficBandwidthRef.current  = topInitial
+    recentIpsRef.current            = ips
+    topTrafficIpsRef.current        = topInitial.map(e => e.source_ip)
+
+    startTransition(() => {
+      setSnapshot({
+        recentIPData:           recentInitial,
+        topTrafficData:         topInitial,
+        unique_source_ips:      ips,
+        unique_top_traffic_ips: topTrafficIpsRef.current,
+        loading:                false,
       })
-      if (isUnmountedRef.current) return
-      if (generationAtStart !== filterGenerationRef.current) return
-      if (filterIdAtStart !== activeFilterIdRef.current) return
-      if (freshBandwidth?.data) {
-        // @ts-expect-error - No type yet
-        realNewBandwidths = (realNewBandwidths as any[]).map((entry: any) => {
-          const fresh = (freshBandwidth.data as any[]).find((d: any) => d.source_ip === entry.source_ip)
-          return fresh ? { ...fresh, time_unit, time_count, resolution, time_range, isNew: true } : entry
+      setIsInitialized(true)
+    })
+  }, [])
+
+  /**
+   * Incremental poll for the "Recent IPs" section.  Runs on `pollingInterval`.
+   *
+   * Strategy:
+   * - Only looks at the last 2 seconds of traffic (tight window catches new
+   *   activity quickly without re-fetching the entire history).
+   * - Merges any newly seen IPs into the accumulated `recentIpsRef` list, then
+   *   fetches bandwidth buckets for the full merged set.
+   * - Appends new time-buckets to existing entries (deduped by bucket key) so
+   *   charts can animate new data arriving without a full repaint.
+   * - Brands brand-new source IPs with `isNew: true`; clears the flag after
+   *   1 s so the UI highlight fades automatically.
+   * - Prunes buckets older than 60 resolution-intervals to bound memory growth.
+   * - The `Promise.race` timeout (2 s) keeps the UI responsive when the server
+   *   is slow; the poll simply skips that cycle rather than queuing up.
+   */
+  const pollRecentIP = useCallback(async () => {
+    if (isRecentIPRunningRef.current) return
+    const generation = filterGenerationRef.current
+    const fid = activeFilterIdRef.current
+    const settings = timeRef.current
+    if (!settings) return
+
+    isRecentIPRunningRef.current = true
+    try {
+      const tr = getLastTimeStamp({ count: 2, unit: 'second', add_remaining_time: true }) as any
+
+      const newIps = await Promise.race([
+        getUniqueIpRef.current.mutateAsync({
+          device_id: paramsRef.current?.id || '',
+          time_range: tr,
+          filter_id: fid,
+        }) as Promise<string[]>,
+        new Promise<never>((_, reject) => window.setTimeout(() => reject(new Error('[recentIP] getUniqueIp timed out after 2s')), 2_000)),
+      ])
+      if (isUnmountedRef.current || generation !== filterGenerationRef.current) return
+
+      const mergedIps = [...new Set([...recentIpsRef.current, ...newIps])]
+
+      const bwResult: any = await getBandwidthRef.current.mutateAsync({
+        device_id: paramsRef.current?.id || '',
+        time_range: tr,
+        bucket_size: settings.resolution,
+        source_ips: mergedIps,
+      })
+      if (isUnmountedRef.current || generation !== filterGenerationRef.current) return
+
+      const incoming: IBandwidth[] = (bwResult?.data ?? []).map((item: any) => ({
+        ...item,
+        time_unit: settings.time_unit,
+        time_count: settings.time_count,
+        resolution: settings.resolution,
+      }))
+
+      const existingMap = new Map(recentBandwidthRef.current.map(e => [e.source_ip, e]))
+      const newEntries: IBandwidth[] = []
+
+      // Append only buckets that are not already stored (incremental merge).
+      const updatedExisting = recentBandwidthRef.current.map(entry => {
+        const match = incoming.find(e => e.source_ip === entry.source_ip)
+        if (!match) return entry
+        const existingBuckets = new Set(entry.result.map(r => r.bucket))
+        const freshResults = match.result.filter(r => !existingBuckets.has(r.bucket))
+        return { ...entry, result: [...entry.result, ...freshResults] }
+      })
+
+      incoming.forEach(e => {
+        if (!existingMap.has(e.source_ip)) newEntries.push({ ...e, isNew: true })
+      })
+
+      // Derive a sliding window of 60 resolution-intervals ending now to
+      // evict stale buckets and keep the data set bounded.
+      const resolutionValue = parseInt(settings.resolution.slice(0, -1))
+      const resolutionUnit  = settings.resolution.slice(-1)
+      const intervalMs = resolutionUnit === 'h' ? resolutionValue * 3_600_000
+        : resolutionUnit === 'm' ? resolutionValue * 60_000
+        : resolutionValue * 1_000
+      const endDate   = new Date()
+      const startDate = new Date(endDate.getTime() - 60 * intervalMs)
+
+      const twoMinutesAgo = endDate.getTime() - 2 * 60_000
+
+      const result = withTotal([...newEntries, ...updatedExisting]
+        .map(e => ({
+          ...e,
+          result: e.result.filter(r => {
+            const t = new Date(r.bucket.replace(' ', 'T')).getTime()
+            return t >= startDate.getTime() && t <= endDate.getTime()
+          }),
+        })))
+        .filter((entry, index) => {
+          if (index < 10) return true
+          const latestBucket = Math.max(
+            0,
+            ...entry.result.map(r => new Date(r.bucket.replace(' ', 'T')).getTime()),
+          )
+          return latestBucket >= twoMinutesAgo
         })
+
+      recentBandwidthRef.current = result
+      recentIpsRef.current = result.map(e => e.source_ip)
+
+      startTransition(() => {
+        setSnapshot(prev => ({
+          ...prev,
+          recentIPData:      result,
+          unique_source_ips: recentIpsRef.current,
+        }))
+      })
+
+      // Clear the `isNew` highlight after 1 s.
+      if (newEntries.length > 0) {
+        const newIpList = newEntries.map(e => e.source_ip)
+        window.setTimeout(() => {
+          if (isUnmountedRef.current) return
+          recentBandwidthRef.current = recentBandwidthRef.current.map(e =>
+            newIpList.includes(e.source_ip) ? { ...e, isNew: false } : e,
+          )
+          startTransition(() => setSnapshot(prev => ({ ...prev, recentIPData: recentBandwidthRef.current })))
+        }, 1_000)
       }
+    } catch (err) {
+      console.error('[recentIP] error:', err)
+    } finally {
+      isRecentIPRunningRef.current = false
     }
+  }, [])
 
-    setNewBandwidth(withTotal([...realNewBandwidths, ...updated_new_bandwidth].slice(0, 10)))
-    clearIsNewAfterDelay(
-      (realNewBandwidths || []).map((e: any) => e?.source_ip).filter(Boolean),
-    )
-  }, [fetchBandwidth, filterId])
+  /**
+   * Incremental poll for the "Top Traffic" section.  Runs on
+   * `pollingIntervalTopTraffic` (slower than the recent-IP poll).
+   *
+   * Mirrors the `pollRecentIP` strategy but with two differences:
+   * - Fetches up to 5 unique IPs (the server-side `limit: 5` caps the query).
+   * - After merging and pruning, re-sorts the full list by `total_active_packets`
+   *   descending and keeps only the top 5, so the ranking stays accurate as
+   *   traffic patterns shift.
+   * - New entries are NOT flagged `isNew` here (top-traffic is ranked, not
+   *   highlighted for recency).
+   */
+  const pollTopTraffic = useCallback(async () => {
+    if (isTopTrafficRunningRef.current) return
+    const generation = filterGenerationRef.current
+    const fid = activeFilterIdRef.current
+    const settings = timeRef.current
+    if (!settings) return
 
-  const fetchMoreData = useCallback(async () => {
-    enqueueTask(fetchMoreDataInternal)
-  }, [enqueueTask, fetchMoreDataInternal])
+    isTopTrafficRunningRef.current = true
+    try {
+      const tr = getLastTimeStamp({ count: 6, unit: 'second', add_remaining_time: true }) as any
 
-  const pollingInterval = useMemo((): number => {
-    const { time_unit, time_count } = (time as ITimeSettings | null) ?? {}
-    if (time_unit === 'second' || (time_unit === 'minute' && time_count === 1)) return ONE_SECOND_MS
-    if (time_unit === 'minute') return FIVE_SECONDS_MS
-    return THIRTY_SECONDS_MS
-  }, [time])
+      const newIps = await Promise.race([
+        getUniqueIpTopRef.current.mutateAsync({
+          device_id: paramsRef.current?.id || '',
+          time_range: tr,
+          filter_id: fid,
+          limit: 5,
+        }) as Promise<string[]>,
+        new Promise<never>((_, reject) => window.setTimeout(() => reject(new Error('[topTraffic] getUniqueIp timed out after 2s')), 2_000)),
+      ])
+      if (isUnmountedRef.current || generation !== filterGenerationRef.current) return
 
-  const pollingIntervalTopTraffic = useMemo((): number => {
-    const { time_unit } = (time as ITimeSettings | null) ?? {}
-    if (time_unit === 'second') return FIVE_SECONDS_MS
-    if (time_unit === 'minute') return TEN_SECONDS_MS
-    return ONE_MINUTE_MS
-  }, [time])
+      const mergedIps = [...new Set([...topTrafficIpsRef.current, ...newIps])]
+
+      const bwResult: any = await getBandwidthTopRef.current.mutateAsync({
+        device_id: paramsRef.current?.id || '',
+        time_range: tr,
+        bucket_size: settings.resolution,
+        source_ips: mergedIps,
+      })
+      if (isUnmountedRef.current || generation !== filterGenerationRef.current) return
+
+      const incoming: IBandwidth[] = (bwResult?.data ?? []).map((item: any) => ({
+        ...item,
+        time_unit: settings.time_unit,
+        time_count: settings.time_count,
+        resolution: settings.resolution,
+      }))
+
+      const existingMap = new Map(topTrafficBandwidthRef.current.map(e => [e.source_ip, e]))
+      const newEntries: IBandwidth[] = []
+
+      // Append only new buckets to existing entries (incremental merge).
+      const updatedExisting = topTrafficBandwidthRef.current.map(entry => {
+        const match = incoming.find(e => e.source_ip === entry.source_ip)
+        if (!match) return entry
+        const existingBuckets = new Set(entry.result.map(r => r.bucket))
+        const freshResults = match.result.filter(r => !existingBuckets.has(r.bucket))
+        return { ...entry, result: [...entry.result, ...freshResults] }
+      })
+
+      incoming.forEach(e => {
+        if (!existingMap.has(e.source_ip)) newEntries.push(e)
+      })
+
+      // Same sliding-window pruning as pollRecentIP.
+      const resolutionValue = parseInt(settings.resolution.slice(0, -1))
+      const resolutionUnit  = settings.resolution.slice(-1)
+      const intervalMs = resolutionUnit === 'h' ? resolutionValue * 3_600_000
+        : resolutionUnit === 'm' ? resolutionValue * 60_000
+        : resolutionValue * 1_000
+      const endDate      = new Date()
+      const startDate    = new Date(endDate.getTime() - 60 * intervalMs)
+      const twoMinutesAgo = endDate.getTime() - 2 * 60_000
+
+      // Re-rank by active packets and cap at 5 after every poll cycle.
+      const sorted = withTotal([...updatedExisting, ...newEntries]
+        .map(e => ({
+          ...e,
+          result: e.result.filter(r => {
+            const t = new Date(r.bucket.replace(' ', 'T')).getTime()
+            return t >= startDate.getTime() && t <= endDate.getTime()
+          }),
+        })))
+        .sort((a, b) => (b.total_active_packets ?? 0) - (a.total_active_packets ?? 0))
+        .filter((entry, index) => {
+          if (index < 5) return true
+          const latestBucket = Math.max(
+            0,
+            ...entry.result.map(r => new Date(r.bucket.replace(' ', 'T')).getTime()),
+          )
+          return latestBucket >= twoMinutesAgo
+        })
+
+      topTrafficBandwidthRef.current = sorted
+      topTrafficIpsRef.current = sorted.map(e => e.source_ip)
+
+      startTransition(() => {
+        setSnapshot(prev => ({
+          ...prev,
+          topTrafficData:         sorted,
+          unique_top_traffic_ips: topTrafficIpsRef.current,
+        }))
+      })
+    } catch (err) {
+      console.error('[topTraffic] error:', err)
+    } finally {
+      isTopTrafficRunningRef.current = false
+    }
+  }, [])
+
+  useEffect(() => { pollRecentIPRef.current = pollRecentIP }, [pollRecentIP])
+  useEffect(() => { pollTopTrafficRef.current = pollTopTraffic }, [pollTopTraffic])
 
   useEffect(() => {
-    if (!isQueueEnabled) return
-    const interval = window.setInterval(() => {
-      enqueueTask(fetchMoreDataInternalV2)
-    }, pollingInterval)
-
-    return () => {
-      window.clearInterval(interval)
-    }
-  }, [enqueueTask, fetchMoreDataInternalV2, isQueueEnabled, pollingInterval])
+    if (!isInitialized) return
+    const id = window.setInterval(() => void pollRecentIPRef.current(), pollingInterval)
+    return () => window.clearInterval(id)
+  }, [isInitialized, pollingInterval])
 
   useEffect(() => {
-    if (!isQueueEnabled) return
-    const interval = window.setInterval(() => {
-      enqueueTask(fetchTopTrafficBandwidth)
-    }, pollingIntervalTopTraffic)
+    if (!isInitialized) return
+    const id = window.setInterval(() => void pollTopTrafficRef.current(), pollingIntervalTopTraffic)
+    return () => window.clearInterval(id)
+  }, [isInitialized, pollingIntervalTopTraffic])
 
-    return () => {
-      window.clearInterval(interval)
-    }
-  }, [enqueueTask, fetchTopTrafficBandwidth, isQueueEnabled, pollingIntervalTopTraffic])
+  const fetchTimeSettingsRef    = useRef(fetchTimeSettings)
+  const performInitialLoadRef   = useRef(performInitialLoad)
+  useEffect(() => { fetchTimeSettingsRef.current = fetchTimeSettings }, [fetchTimeSettings])
+  useEffect(() => { performInitialLoadRef.current = performInitialLoad }, [performInitialLoad])
+
+  useEffect(() => {
+    if (!filterId) return
+    const generation = filterGenerationRef.current
+    const fid = filterId
+
+    setIsInitialized(false)
+    recentBandwidthRef.current     = []
+    topTrafficBandwidthRef.current  = []
+    recentIpsRef.current            = []
+    topTrafficIpsRef.current        = []
+    isRecentIPRunningRef.current    = false
+    isTopTrafficRunningRef.current  = false
+    setSnapshot(prev => ({ ...prev, loading: true }))
+
+    void (async () => {
+      const settings = await fetchTimeSettingsRef.current(generation)
+      if (!settings) return
+      await performInitialLoadRef.current(generation, fid, settings)
+    })()
+  }, [filterId, (searchBy ?? [])?.length])
 
   useEffect(() => {
     if (!eventEmitter) return
 
     const setFID = (data: any) => {
-      console.log('@@@ setFID', data)
       if (typeof data !== 'string') return
       if (data === activeFilterIdRef.current) return
       filterGenerationRef.current += 1
-      setIsQueueEnabled(false)
-      taskQueueRef.current = []
-      setLoading(true)
-      setTime(null)
-      setNewBandwidth([])
-      setTopTrafficBandwidth([])
-      setCurrentIndex(0)
-      currentIndexRef.current = 0
       setFilterID(data)
     }
     const setSBy = (data: any) => {
@@ -462,61 +598,21 @@ export default function NetworkFlowProvider({ children, params }: IProps) {
     }
 
     const handleRefresh = async (data: boolean) => {
-      if (!!data) {
-        setLoading(true); // Set loading to true before starting the fetch
-    
-        try {
-          // Fetch time unit and resolution
-          const fetchTimeUnitandResolution = async () => {
-            const { data: time_unit_resolution } = await refetchTimeUnitandResolution();
-        
-            const { time, resolution = '1s' } = time_unit_resolution || {};
-            const { time_count = 1, time_unit = 'hour' } = time || {};
-        
-            setTime({
-              time_count,
-              time_unit: time_unit as 'hour',
-              resolution: resolution as '1h',
-            });
-            eventEmitter.emit('timeline_time_settings', { time_count, time_unit, resolution })
-        
-            return { time_count, time_unit, resolution };
-          };
-        
-          const { time_count, time_unit = null, resolution } = await fetchTimeUnitandResolution(); // Await the fetch to ensure it completes
-        
-          // Ensure time_count, time_unit, and resolution are valid before proceeding
-          if (!time_count || !time_unit || !resolution) return;
-          if (!filterId) return;
-        
-          // Fetch unique source IPs
-          const fetchUniqueSourceIP = async () => {
-            const data = await getUniqueSourceActions.mutateAsync({
-              device_id: params?.id || '',
-              // @ts-expect-error - No type yet
-              time_range: getLastTimeStamp({ count: time_count, unit: time_unit, add_remaining_time: true }) as any,
-              filter_id: filterId,
-            });
-        
-            setUniqueSourceIP(data as string[]);
-            setCurrentIndex(0);
-            uniqueSourceIpsRef.current = data as string[]
-            currentIndexRef.current = 0
-            setLoading(false);
-          };
-        
-          await fetchUniqueSourceIP(); // Trigger fetchUniqueSourceIP directly after fetchTimeUnitandResolution
-        
-          // Fetch bandwidth data
-          fetchBandwidth(0, 10); // Trigger fetchBandwidth
-          fetchTopTrafficBandwidth(); // Trigger top traffic fetch
-        } catch (error) {
-          console.error('Error during handleRefresh:', error); // Log the error for debugging
-        } finally {
-          setLoading(false); // Ensure loading is set to false after the fetch completes
-        }
-      }
-    };
+      if (!data) return
+      const generation = filterGenerationRef.current
+      const fid = activeFilterIdRef.current
+
+      setIsInitialized(false)
+      isRecentIPRunningRef.current   = false
+      isTopTrafficRunningRef.current = false
+      recentBandwidthRef.current     = []
+      topTrafficBandwidthRef.current  = []
+      setSnapshot(prev => ({ ...prev, loading: true }))
+
+      const settings = await fetchTimeSettingsRef.current(generation)
+      if (!settings) return
+      await performInitialLoadRef.current(generation, fid, settings)
+    }
 
     eventEmitter.on(`timeline_filter_id`, setFID)
     eventEmitter.on('timeline_search', setSBy)
@@ -527,32 +623,6 @@ export default function NetworkFlowProvider({ children, params }: IProps) {
       eventEmitter.off('should_refresh_timeline_filter', handleRefresh)
     }
   }, [eventEmitter, filterId])
-
-  useEffect(() => {
-    if (!filterId) return
-
-    const generationAtStart = filterGenerationRef.current
-    setLoading(true)
-    const fetchTimeUnitandResolution = async () => {
-      const {
-        data: time_unit_resolution,
-      } = await refetchTimeUnitandResolution()
-        console.log("🚀 ~ fetchTimeUnitandResolution ~ time_unit_resolution:", time_unit_resolution)
-      if (isUnmountedRef.current) return
-      if (generationAtStart !== filterGenerationRef.current) return
-      
-      const { time, resolution = '1s' } = time_unit_resolution || {}
-      const { time_count = 1, time_unit = 'hour' } = time || {}
-      
-      setTime({
-        time_count,
-        time_unit: time_unit as 'hour',
-        resolution: resolution as '1h',
-      })
-      eventEmitter.emit('timeline_time_settings', { time_count, time_unit, resolution })
-    }
-    fetchTimeUnitandResolution()
-  }, [filterId, (searchBy ?? [])?.length])
 
   useEffect(() => {
     if (!eventEmitter) return
@@ -568,88 +638,63 @@ export default function NetworkFlowProvider({ children, params }: IProps) {
     }
   }, [eventEmitter, time])
 
-
-  useEffect(() => {
-    if (!time_count || !time_unit || !resolution) return
-    if (!filterId) return
-
-    const generationAtStart = filterGenerationRef.current
-    const fetchUniqueSourceIP = async () => {
-      const data = await getUniqueSourceActions.mutateAsync({
-        device_id: params?.id || '',
-        time_range: getLastTimeStamp({ count: time_count, unit: time_unit, add_remaining_time: true }) as any,
-        filter_id: filterId,
-      })
-      if (isUnmountedRef.current) return
-      if (generationAtStart !== filterGenerationRef.current) return
-
-      setUniqueSourceIP(data as string[])
-      setCurrentIndex(0)
-      uniqueSourceIpsRef.current = data as string[]
-      currentIndexRef.current = 0
-      setLoading(false)
-    }
-
-    const timeoutId = window.setTimeout(() => fetchUniqueSourceIP(), 1000) // delay to wait for the searchBy to be set in redis
-    return () => {
-      window.clearTimeout(timeoutId)
-    }
-  }, [filterId, time_count, time_unit, resolution, (searchBy ?? [])?.length])
-
-  useEffect(() => {
-    const bandwidthIps = new_bandwidth?.map((entry: {
-      source_ip: string
-    }) => entry.source_ip) || []
-
-    const areIpsSame
-      = bandwidthIps.length === unique_source_ips.length
-        && unique_source_ips.every(ip => bandwidthIps.includes(ip))
-
-    if (areIpsSame) return
-
-    const generationAtStart = filterGenerationRef.current
-    setCurrentIndex(prevIndex => prevIndex + 10)
-    setNewBandwidth([])
-    //  filterId !== '01JNQ9WPA2JWNTC27YCTCYC1FE' && fetchBandwidth(0, 20)
-    setIsQueueEnabled(false)
-    taskQueueRef.current = []
-    void (async () => {
-      await fetchBandwidth(0, 10, true)
-      await fetchTopTrafficBandwidth()
-      if (isUnmountedRef.current) return
-      if (generationAtStart !== filterGenerationRef.current) return
-      setIsQueueEnabled(true)
-      startQueueServiceRef.current?.()
-    })()
-  }, [unique_source_ips])
-
   useEffect(() => {
     if (!filterId) return
 
     eventEmitter.emit('timeline_filter_id_active_label', filterId)
   }, [filterId])
 
-const chartData = useMemo(() => new_bandwidth,[new_bandwidth])
+  useEffect(() => {
+    eventEmitter.emit('timeline_chart_data', snapshot.recentIPData)
+  }, [snapshot.recentIPData, eventEmitter])
 
   useEffect(() => {
-    eventEmitter.emit('timeline_chart_data', chartData)
-  }, [chartData])
+    eventEmitter.emit('timeline_loading', snapshot.loading)
+  }, [snapshot.loading, eventEmitter])
 
   useEffect(() => {
-    eventEmitter.emit('timeline_loading', loading)
-  }, [loading])
+    if (!socket || !org_acc_id || filterId !== '01JNQ9WPA2JWNTC27YCTCYC1FE') return
 
+    const eventKey = `${channel_name}-${params?.id}-${org_acc_id}`
+    socket.on(eventKey, async (data: any) => {
+      const updated = await updateBandwidth(recentBandwidthRef.current, data, timeRef.current, searchByRef.current)
+      recentBandwidthRef.current = withTotal([...updated] as IBandwidth[])
+      const newIps = updated
+        .filter((e: any) => e?.isNew)
+        .map((e: any) => e?.source_ip)
+        .filter(Boolean) as string[]
+      startTransition(() => setSnapshot(prev => ({ ...prev, recentIPData: recentBandwidthRef.current })))
+      if (newIps.length > 0) {
+        window.setTimeout(() => {
+          if (isUnmountedRef.current) return
+          recentBandwidthRef.current = recentBandwidthRef.current.map(e =>
+            newIps.includes(e.source_ip) ? { ...e, isNew: false } : e,
+          )
+          startTransition(() => setSnapshot(prev => ({ ...prev, recentIPData: recentBandwidthRef.current })))
+        }, 1_000)
+      }
+    })
+
+    return () => { socket.off(eventKey) }
+  }, [socket, org_acc_id])
+
+  /**
+   * Context value exposed to consumers via `useFetchNetworkFlow`.
+   * `flowData` and `chartData` are aliases for `recentIPData` kept for
+   * backwards-compatibility with existing consumer components.
+   * `fetchMoreData` is a no-op placeholder; pagination is not implemented.
+   */
   const state = {
-    flowData: new_bandwidth,
-    topTrafficData: top_traffic_bandwidth,
-    recentIPData: new_bandwidth,
+    flowData:                  snapshot.recentIPData,
+    topTrafficData:            snapshot.topTrafficData,
+    recentIPData:              snapshot.recentIPData,
     pollingIntervalTopTraffic,
-    pollingIntervalRecentIP: pollingInterval,
-    loading,
-    unique_source_ips,
-    fetchMoreData,
-    chartData
-
+    pollingIntervalRecentIP:   pollingInterval,
+    loading:                   snapshot.loading,
+    unique_source_ips:         snapshot.unique_source_ips,
+    unique_top_traffic_ips:    snapshot.unique_top_traffic_ips,
+    fetchMoreData:             () => {},
+    chartData:                 snapshot.recentIPData,
   } as any
 
   return (

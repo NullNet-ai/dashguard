@@ -3,6 +3,7 @@
 import React, { useCallback, useEffect, useMemo, useState } from 'react'
 import { useEventEmitter } from '~/context/EventEmitterProvider'
 import { cn } from '~/lib/utils'
+import { type Tick } from '../types'
 
 const MAJOR_TICK_COUNT = 4
 const LIVE_TICK_INTERVAL = 1_000
@@ -20,11 +21,6 @@ interface ColCountPayload {
   lastBucketTime: unknown
 }
 
-interface Tick {
-  isMajor:  boolean
-  label:    string
-  position: 'first' | 'middle' | 'last' | 'none'
-}
 
 /** Milliseconds per granularity step — used as the ruler tick interval. */
 const GRANULARITY_MS: Record<Granularity, number> = {
@@ -229,6 +225,10 @@ export default function TimelineRuler() {
       return { isMajor, label, position }
     })
   }, [granularity, timeSettings, isLoading, liveColCount, nowMs])
+
+  useEffect(() => {
+    eventEmitter.emit('timeline_ticks', ticks)
+  }, [eventEmitter, ticks])
 
   if (ticks.length === 0) {
     return <div className="h-6 w-full border-b border-slate-100" />

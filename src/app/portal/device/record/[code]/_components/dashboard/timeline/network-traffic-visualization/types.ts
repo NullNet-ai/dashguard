@@ -72,3 +72,9 @@ export interface INetworkFlowContext {
   state?: IState
   actions?: IAction
 }
+
+export interface Tick {
+  isMajor:  boolean
+  label:    string
+  position: 'first' | 'middle' | 'last' | 'none'
+}
