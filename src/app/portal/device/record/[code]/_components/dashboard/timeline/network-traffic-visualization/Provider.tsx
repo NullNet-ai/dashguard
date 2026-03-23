@@ -214,6 +214,7 @@ export default function NetworkFlowProvider({ children, params }: IProps) {
     const settings: ITimeSettings = {
       time_count,
       time_unit: time_unit as ITimeSettings['time_unit'],
+      // @ts-expect-error - No type yet
       resolution,
     }
     setTime(settings)
