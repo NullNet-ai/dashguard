@@ -211,13 +211,13 @@ export default function GridVirtualizerFixed({ topTrafficData, topTrafficFormatt
         key: 'top_traffic',
         label: 'Top Traffic',
         description: 'IPs generating the highest traffic within the selected time range',
-        rows: topTraffic
+        rows: topTraffic.slice(0, 5)
       },
       {
         key: 'recent_ip',
         label: 'Recent IP',
         description: 'Most recently observed IPs regardless of traffic volume',
-        rows: recentIP
+        rows: recentIP.slice(0, 10)
       },
     ]
   }, [topTrafficData, topTrafficFormatted, recentIPData, recentIPFormatted, inlineFilter, sortKey])
