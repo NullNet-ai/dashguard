@@ -1080,7 +1080,7 @@ export const packetRouter = createTRPCRouter({
           return { result: res?.data }
         }, { concurrency: 100 })
 
-        if (_connections_length == limit) {
+        if (_connections_length == limit && source_ips.length < limit) {
           const new_start = starts_at + limit
           await filterConnections(new_start)
         }
@@ -1130,7 +1130,7 @@ export const packetRouter = createTRPCRouter({
           }, { concurrency: 100 })
           source_ips = filteredSourceIPs
         }
-        if (_connections_length == limit) {
+        if (source_ips.length < limit && _connections_length > 0) {
           const new_start = starts_at + limit
           await filterConnections(new_start)
         }
