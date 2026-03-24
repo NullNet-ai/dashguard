@@ -62,10 +62,10 @@ function evenlySpacedIndices(length: number, count: number): Set<number> {
   return new Set(Array.from({ length: n }, (_, k) => Math.round((k * last) / (n - 1))))
 }
 
-function buildTimes(stepMs: number, nowMs: number): number[] {
-  const flooredNow = Math.floor(nowMs / stepMs) * stepMs
-  const start = flooredNow - (COL_COUNT - 1) * stepMs
-  return Array.from({ length: COL_COUNT }, (_, i) => start + i * stepMs)
+function buildTimes(stepMs: number, endMs: number, count: number): number[] {
+  const flooredEnd = Math.floor(endMs / stepMs) * stepMs
+  const start = flooredEnd - (count - 1) * stepMs
+  return Array.from({ length: count }, (_, i) => start + i * stepMs)
 }
 
 export default function TimelineRuler() {
@@ -73,6 +73,7 @@ export default function TimelineRuler() {
   const [stepMs, setStepMs] = useState<number>(60_000)
   const [isLoading, setIsLoading] = useState(false)
   const [nowMs, setNowMs] = useState<number>(() => Date.now())
+  const [count, setCount] = useState<number>(COL_COUNT)
 
   const handleLoading = useCallback((loading: boolean) => {
     setIsLoading(Boolean(loading))
@@ -80,11 +81,17 @@ export default function TimelineRuler() {
 
   const handleTimeSettings = useCallback((payload: TimeSettings) => {
     setStepMs(resolveStepMs(payload?.resolution))
-    setNowMs(Date.now())
   }, [])
 
-  const handleColCount = useCallback((_payload: ColCountPayload) => {
-    setNowMs(Date.now())
+  const handleColCount = useCallback((payload: ColCountPayload) => {
+    if (payload?.colCount && Number.isFinite(payload.colCount)) {
+      setCount(payload.colCount)
+    }
+    if (payload?.lastBucketTime != null && Number.isFinite(payload.lastBucketTime)) {
+      setNowMs(payload.lastBucketTime)
+    } else {
+      setNowMs(Date.now())
+    }
   }, [])
 
   useEffect(() => {
@@ -99,7 +106,7 @@ export default function TimelineRuler() {
   }, [eventEmitter, handleLoading, handleTimeSettings, handleColCount])
 
   const ticks = useMemo((): Tick[] => {
-    const times = buildTimes(stepMs, nowMs)
+    const times = buildTimes(stepMs, nowMs, count)
     const majorIndices = isLoading
       ? new Set<number>()
       : evenlySpacedIndices(times.length, MAJOR_TICK_COUNT)
@@ -115,7 +122,7 @@ export default function TimelineRuler() {
         : 'middle'
       return { isMajor, label, position }
     })
-  }, [stepMs, isLoading, nowMs])
+  }, [stepMs, isLoading, nowMs, count])
 
   useEffect(() => {
     eventEmitter.emit('timeline_ticks', ticks)
