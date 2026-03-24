@@ -155,9 +155,10 @@ export default function TimelineRuler() {
                 className={cn(
                   'absolute -top-5 text-[11px] text-slate-500',
                   {
-                    'translate-x-1/2': tick.position === 'first',
-                    '-translate-x-1/2': tick.position === 'last',
-                    'translate-x-[20%]': tick.position === 'middle',
+                    'translate-x-1/4':  (tick.position === 'first'  && tick.label.length > 5) || (tick.position === 'last'   && tick.label.length <= 5),
+                    '-translate-x-1/4': tick.position === 'last'   && tick.label.length > 5,
+                    '-translate-x-1.5': (tick.position === 'middle' && tick.label.length > 5) || (tick.position === 'first'  && tick.label.length <= 5),
+                    '-translate-x-4':   tick.position === 'middle' && tick.label.length <= 5,
                   }
                 )}
               >
