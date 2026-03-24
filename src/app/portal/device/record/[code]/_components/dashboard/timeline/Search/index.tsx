@@ -20,6 +20,7 @@ export default function Search({params, filter_type} : {params: any, filter_type
   const [isLoading, setIsLoading] = useState(false)
   const [timeCount, setTimeCount] = useState<number | null>(null)
   const [timeUnit, setTimeUnit] = useState<string>('')
+  const [hasAnyRows, setHasAnyRows] = useState(false)
   const onChangeSort = (v: string) => {
     if (v === 'none') {
       setSortKey('')
@@ -42,9 +43,14 @@ export default function Search({params, filter_type} : {params: any, filter_type
   }, [eventEmitter])
   useEffect(() => {
     const handleLoading = (loading: boolean) => setIsLoading(Boolean(loading))
+    const handleHasRows = (hasRows: boolean) => setHasAnyRows(Boolean(hasRows))
+    
     eventEmitter.on('timeline_loading', handleLoading)
+    eventEmitter.on('timeline_has_rows', handleHasRows)
+    
     return () => {
       eventEmitter.off('timeline_loading', handleLoading)
+      eventEmitter.off('timeline_has_rows', handleHasRows)
     }
   }, [eventEmitter])
   
@@ -74,7 +80,7 @@ export default function Search({params, filter_type} : {params: any, filter_type
           <SearchListMobile />
         </div>
       </div> */}
-      {isLoading && (
+      {(isLoading || !hasAnyRows) && (
         <div className="mb-2 rounded-md border border-amber-200 bg-amber-50 p-3 py-2 text-amber-800">
           <div className="flex items-center gap-2">
             <ArrowPathIcon className="mt-0.5 size-6 text-amber-500 animate-spin" />

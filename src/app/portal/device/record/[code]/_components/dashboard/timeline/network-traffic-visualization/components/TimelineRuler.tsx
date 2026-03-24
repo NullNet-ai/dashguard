@@ -1,13 +1,11 @@
 'use client'
-
 import React, { useCallback, useEffect, useMemo, useState } from 'react'
 import { useEventEmitter } from '~/context/EventEmitterProvider'
 import { cn } from '~/lib/utils'
 import { type Tick } from '../types'
 
 const MAJOR_TICK_COUNT = 4
-
-type Granularity = 'second' | 'minute' | 'hour'
+const COL_COUNT = 60
 
 interface TimeSettings {
   time_count?: number
@@ -20,193 +18,104 @@ interface ColCountPayload {
   lastBucketTime: number | null
 }
 
-
-/** Milliseconds per granularity step — used as the ruler tick interval. */
-const GRANULARITY_MS: Record<Granularity, number> = {
-  second: 1_000,
-  minute: 60_000,
-  hour:   3_600_000,
-}
-
-/** Milliseconds per time unit — used to convert timeSettings window to ms. */
-const UNIT_MS: Record<string, number> = {
-  second: 1_000,
-  minute: 60_000,
-  hour:   3_600_000,
-}
-
-/** Derives tick granularity from a resolution string like "5min", "1hour". */
-function resolveGranularity(resolution?: string): Granularity {
+/**
+ * Parses resolution string into milliseconds.
+ * Resolution is fixed by time range:
+ *   30m → 30s → 30_000ms
+ *   1h  → 1m  → 60_000ms
+ *   3h  → 3m  → 180_000ms
+ *   6h  → 6m  → 360_000ms
+ *   12h → 12m → 720_000ms
+ *   24h → 24m → 1_440_000ms
+ *
+ * All produce 60 cols: timeRange / resolution = 60
+ */
+function resolveStepMs(resolution?: string): number {
   const r = String(resolution ?? '').toLowerCase().trim()
-  if (/hour|hours|hr\b|h$/.test(r)) return 'hour'
-  if (/minute|minutes|min\b|m$/.test(r)) return 'minute'
-  return 'second'
-}
-
-/** Zero-pads a number to 2 digits. */
-function pad(n: number): string {
-  return String(n).padStart(2, '0')
-}
-
-function formatLabel(ms: number, granularity: Granularity): string {
-  const d = new Date(ms)
-  const h = pad(d.getHours())
-  const m = pad(d.getMinutes())
-  const s = pad(d.getSeconds())
-  if (granularity === 'minute') return `${h}:${m}`
-  return `${h}:${m}:${s}`
+  // e.g. "30s", "1m", "3m", "6m", "12m", "24m"
+  const secMatch = r.match(/^(\d+)s$/)
+  if (secMatch && secMatch[1]) return parseInt(secMatch[1], 10) * 1_000
+  const minMatch = r.match(/^(\d+)m(in)?$/)
+  if (minMatch && minMatch[1]) return parseInt(minMatch[1], 10) * 60_000
+  const hrMatch = r.match(/^(\d+)h(r)?$/)
+  if (hrMatch && hrMatch[1]) return parseInt(hrMatch[1], 10) * 3_600_000
+  // default: 1 minute
+  return 60_000
 }
 
 /**
- * Returns a Set of `count` indices evenly spread across [0, length-1].
- * Used to pick which ticks get visible labels.
- *
- * Example: length=144, count=4 → {0, 48, 96, 143}
+ * Whether to show HH:MM:SS or HH:MM on labels.
+ * Show seconds only when step < 60s (i.e. second-level resolution).
  */
+function formatLabel(ms: number, stepMs: number): string {
+  const d = new Date(ms)
+  const h = String(d.getHours()).padStart(2, '0')
+  const m = String(d.getMinutes()).padStart(2, '0')
+  const s = String(d.getSeconds()).padStart(2, '0')
+  return stepMs < 60_000 ? `${h}:${m}:${s}` : `${h}:${m}`
+}
+
 function evenlySpacedIndices(length: number, count: number): Set<number> {
   const n = Math.min(count, length)
   if (n <= 1) return new Set([0])
   const last = length - 1
-  return new Set(
-    Array.from({ length: n }, (_, k) => Math.round((k * last) / (n - 1)))
-  )
+  return new Set(Array.from({ length: n }, (_, k) => Math.round((k * last) / (n - 1))))
 }
 
-/**
- * buildTimes — computes the full array of ms timestamps for every ruler tick.
- *
- * ── LIVE MODE (liveColCount is set) ─────────────────────────────────────────
- *   Anchor = nowMs floored to the nearest step boundary.
- *   nowMs is ONLY updated when timeline_col_count fires (i.e. when the cell
- *   grid updates). No interval — the ruler moves exactly when cells move.
- *
- *   lastBucketTime from the server is intentionally ignored — it reflects the
- *   window end boundary (e.g. 09:00:00), not the current time (e.g. 08:48:00).
- *
- * ── STATIC / FALLBACK MODE (liveColCount is null) ───────────────────────────
- *   Used on first load or after a filter/settings change resets state.
- *
- *   A) timeSettings present → span exactly the configured window
- *   B) granularity = 'second' → last 60 seconds (60 ticks)
- *   C) granularity = 'minute' → full current hour 00→59 (60 ticks)
- *   D) granularity = 'hour'   → last 12 hours (12 ticks)
- */
-function buildTimes(
-  granularity: Granularity,
-  timeSettings: TimeSettings | null,
-  nowMs: number,
-  liveColCount: number | null,
-): number[] {
-  const step = GRANULARITY_MS[granularity]
-
-  // ── LIVE MODE ──────────────────────────────────────────────────────────────
-  if (liveColCount != null && liveColCount > 0) {
-    const flooredNow = Math.floor(nowMs / step) * step
-    const start = flooredNow - (liveColCount - 1) * step
-    return Array.from({ length: liveColCount }, (_, i) => start + i * step)
-  }
-
-  // ── STATIC / FALLBACK MODE ─────────────────────────────────────────────────
-  const end = Math.floor(nowMs / step) * step
-
-  // A) Configured time window
-  if (timeSettings?.time_count && timeSettings?.time_unit) {
-    const windowMs = timeSettings.time_count * (UNIT_MS[timeSettings.time_unit] ?? 0)
-    if (windowMs > 0) {
-      const count = Math.round(windowMs / step)
-      return Array.from({ length: count }, (_, i) => end - windowMs + i * step)
-    }
-  }
-
-  // B) Default: last 60 seconds
-  if (granularity === 'second') {
-    return Array.from({ length: 60 }, (_, i) => end - 59_000 + i * 1_000)
-  }
-
-  // C) Default: full current hour using local time (handles DST correctly)
-  if (granularity === 'minute') {
-    const d     = new Date(end)
-    const start = new Date(d.getFullYear(), d.getMonth(), d.getDate(), d.getHours(), 0, 0).getTime()
-    return Array.from({ length: 60 }, (_, i) => start + i * 60_000)
-  }
-
-  // D) Default: last 12 hours
-  return Array.from({ length: 12 }, (_, i) => end - 11 * 3_600_000 + i * 3_600_000)
+function buildTimes(stepMs: number, nowMs: number): number[] {
+  const flooredNow = Math.floor(nowMs / stepMs) * stepMs
+  const start = flooredNow - (COL_COUNT - 1) * stepMs
+  return Array.from({ length: COL_COUNT }, (_, i) => start + i * stepMs)
 }
 
 export default function TimelineRuler() {
   const eventEmitter = useEventEmitter()
-
-  const [granularity,  setGranularity]  = useState<Granularity>('second')
-  const [timeSettings, setTimeSettings] = useState<TimeSettings | null>(null)
-  const [isLoading,    setIsLoading]    = useState(false)
-  const [liveColCount, setLiveColCount] = useState<number | null>(null)
-
-  /**
-   * nowMs is ONLY updated when handleColCount fires.
-   * No setInterval — the ruler moves exactly when and only when the cell
-   * grid updates. This prevents the ruler from continuously ticking
-   * independently of the data.
-   */
+  const [stepMs, setStepMs] = useState<number>(60_000)
+  const [isLoading, setIsLoading] = useState(false)
   const [nowMs, setNowMs] = useState<number>(() => Date.now())
-
-  const handleChartData = useCallback((data: Array<{ resolution?: string }>) => {
-    setGranularity(resolveGranularity(data?.[0]?.resolution))
-  }, [])
 
   const handleLoading = useCallback((loading: boolean) => {
     setIsLoading(Boolean(loading))
   }, [])
 
   const handleTimeSettings = useCallback((payload: TimeSettings) => {
-    setGranularity(resolveGranularity(payload?.resolution))
-    setTimeSettings(payload)
-    setLiveColCount(null)
+    setStepMs(resolveStepMs(payload?.resolution))
+    setNowMs(Date.now())
   }, [])
 
-  const handleColCount = useCallback(({ colCount }: ColCountPayload) => {
-    if (Number.isFinite(colCount) && colCount > 0) {
-      setLiveColCount(colCount)
-    }
+  const handleColCount = useCallback((_payload: ColCountPayload) => {
     setNowMs(Date.now())
   }, [])
 
   useEffect(() => {
-    eventEmitter.on('timeline_chart_data',    handleChartData)
-    eventEmitter.on('timeline_loading',       handleLoading)
+    eventEmitter.on('timeline_loading', handleLoading)
     eventEmitter.on('timeline_time_settings', handleTimeSettings)
-    eventEmitter.on('timeline_col_count',     handleColCount)
-
+    eventEmitter.on('timeline_col_count', handleColCount)
     return () => {
-      eventEmitter.off('timeline_chart_data',    handleChartData)
-      eventEmitter.off('timeline_loading',       handleLoading)
+      eventEmitter.off('timeline_loading', handleLoading)
       eventEmitter.off('timeline_time_settings', handleTimeSettings)
-      eventEmitter.off('timeline_col_count',     handleColCount)
+      eventEmitter.off('timeline_col_count', handleColCount)
     }
-  }, [eventEmitter, handleChartData, handleLoading, handleTimeSettings, handleColCount])
+  }, [eventEmitter, handleLoading, handleTimeSettings, handleColCount])
 
   const ticks = useMemo((): Tick[] => {
-    const times = buildTimes(granularity, timeSettings, nowMs, liveColCount)
-    if (times.length === 0) return []
-
+    const times = buildTimes(stepMs, nowMs)
     const majorIndices = isLoading
       ? new Set<number>()
       : evenlySpacedIndices(times.length, MAJOR_TICK_COUNT)
-
     const majorList = [...majorIndices].sort((a, b) => a - b)
     const firstMajor = majorList[0]
     const lastMajor = majorList[majorList.length - 1]
-
     return times.map((ms, i) => {
       const isMajor = majorIndices.has(i)
-      const label   = isMajor ? formatLabel(ms, granularity) : ''
-      const position = !isMajor          ? 'none'
-                     : i === firstMajor  ? 'first'
-                     : i === lastMajor   ? 'last'
-                     : 'middle'
+      const label = isMajor ? formatLabel(ms, stepMs) : ''
+      const position = !isMajor ? 'none'
+        : i === firstMajor ? 'first'
+        : i === lastMajor ? 'last'
+        : 'middle'
       return { isMajor, label, position }
     })
-  }, [granularity, timeSettings, isLoading, liveColCount, nowMs])
+  }, [stepMs, isLoading, nowMs])
 
   useEffect(() => {
     eventEmitter.emit('timeline_ticks', ticks)
@@ -214,33 +123,34 @@ export default function TimelineRuler() {
 
   if (ticks.length === 0) {
     return <div className="h-6 w-full border-b border-slate-100" />
-  }
+  } 
 
   return (
     <div className="relative w-full">
-      <div className="absolute left-0 right-0 top-1 h-px bg-slate-200" />
-
+      <div className="absolute left-0 right-0 top-1 h-px bg-slate-200 mx-[1px]" />
       <div
-        className="grid items-end"
+        className="grid items-end border-x border-slate-400"
         style={{ gridTemplateColumns: `repeat(${ticks.length}, minmax(0, 1fr))` }}
       >
         {ticks.map((tick, i) => (
           <div
             key={i}
             className={cn(
-              'relative flex items-end justify-center border-r',
-              tick.isMajor ? 'h-4 border-slate-400' : 'h-3 border-slate-200',
+              'relative flex items-end justify-center border-l',
+              tick.isMajor ? 'h-4 border-slate-400' : 'h-3 border-slate-200', {
+                'h-3 border-slate-200 border-l-0' : tick.position === 'first',
+                'h-3 border-slate-200' : tick.position === 'last',
+              }
             )}
           >
             {tick.label && (
               <span
                 className={cn(
-                  'absolute -top-5 text-[11px] text-slate-500 translate-x-[20%]',
+                  'absolute -top-5 text-[11px] text-slate-500',
                   {
                     'translate-x-1/2': tick.position === 'first',
                     '-translate-x-1/2': tick.position === 'last',
-                    'translate-x-[70%]': /^\d{2}:\d{2}$/.test(tick.label) && tick.position !== 'last',
-                    '-translate-x-1': /^\d{2}:\d{2}$/.test(tick.label) && tick.position === 'last',
+                    'translate-x-[20%]': tick.position === 'middle',
                   }
                 )}
               >

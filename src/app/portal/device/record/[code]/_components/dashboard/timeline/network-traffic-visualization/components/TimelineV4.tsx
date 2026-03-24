@@ -9,6 +9,7 @@ import {
 import { FlagIcon, ChevronDownIcon, ChevronRightIcon } from '@heroicons/react/20/solid'
 import { Skeleton } from '~/components/ui/skeleton'
 import { Star } from 'lucide-react'
+import TrafficSkeleton from './TrafficSkeleton'
 
 const BW_SIZE = 18
 const MS_THRESHOLD = 1e12
@@ -238,7 +239,10 @@ export default function GridVirtualizerFixed({ topTrafficData, topTrafficFormatt
   }, [])
 
   const hasAnyRows = sections.some(s => s.rows.length > 0)
-  if (!hasAnyRows || colCount === 0) return null
+
+  useEffect(() => {
+    eventEmitter.emit('timeline_has_rows', hasAnyRows)
+  }, [hasAnyRows, eventEmitter])
 
   const renderSkeletonRow = (key: number) => (
     <div
@@ -312,7 +316,10 @@ export default function GridVirtualizerFixed({ topTrafficData, topTrafficFormatt
               {cell && (
                 <TooltipContent side="top" className="z-[9999]">
                   <div className="text-xs space-y-0.5">
-                    <div><span className="font-medium text-slate-600">IP:</span> {pair.flow.source_ip}</div>
+                    <div>
+                      <span className="font-medium text-slate-600">IP:</span>{' '}
+                      <span className="font-semibold">{pair.flow.source_ip}</span>
+                    </div>
                     <div>
                       <span className="font-medium text-slate-600">Time:</span>{' '}
                       {timeCount === 60
@@ -322,11 +329,11 @@ export default function GridVirtualizerFixed({ topTrafficData, topTrafficFormatt
                     </div>
                     <div>
                       <span className="font-medium text-slate-600">Traffic:</span>{' '}
-                      {formatBandwidth(bw)} {resolution ? `(${resolution})` : ''}
+                      <span className="font-semibold">{formatBandwidth(bw)} {resolution ? `(${resolution})` : ''}</span>
                     </div>
                     <div>
                       <span className="font-medium text-slate-600">Intensity:</span>{' '}
-                      {getIntensityLabel(bw, maxBandwidth)}
+                      <span className="font-semibold">{getIntensityLabel(bw, maxBandwidth)}</span>
                     </div>
                   </div>
                 </TooltipContent>
@@ -352,7 +359,7 @@ export default function GridVirtualizerFixed({ topTrafficData, topTrafficFormatt
               </div>
             ))}
           </div>
-        ) : (
+        ) : hasAnyRows ? (
           sections.map((section, i) => {
             const refreshMs = section.key === 'top_traffic'
               ? pollingIntervalTopTraffic
@@ -396,6 +403,15 @@ export default function GridVirtualizerFixed({ topTrafficData, topTrafficFormatt
                 )}
             </div>
           })
+        ) : (
+          <TrafficSkeleton
+            sections={sections.map(section => ({
+              key: section.key,
+              label: section.label,
+              description: section.description,
+              rows: section.key === 'top_traffic' ? 5 : 10,
+            }))}
+          />
         )}
       </div>
     </TooltipProvider>
