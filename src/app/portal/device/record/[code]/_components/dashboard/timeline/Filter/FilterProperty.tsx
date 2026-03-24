@@ -14,7 +14,8 @@ import { useFilter } from './FilterProvider'
 export default function FilterProperty({ filter, filter_type }: { filter: any, filter_type: string }) {
   const { actions: sideDrawerActions } = useSideDrawer()
   const { openSideDrawer } = sideDrawerActions
-  const { actions } = useFilter()
+  const { actions, state: filterState } = useFilter()
+  const { filters = [] } = filterState ?? {}
 
   const handleOpenSideDrawer = () => {
     openSideDrawer({
@@ -27,6 +28,7 @@ export default function FilterProperty({ filter, filter_type }: { filter: any, f
             columns= { columns }
             filter_type= { filter_type }
             tab={filter }
+            existingFilters={filters}
           >
             <GridManageFilter filter_type={filter_type} />
           </ManageFilterProvider>
