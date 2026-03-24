@@ -20,6 +20,7 @@ export default function Search({params, filter_type} : {params: any, filter_type
   const [isLoading, setIsLoading] = useState(false)
   const [timeCount, setTimeCount] = useState<number | null>(null)
   const [timeUnit, setTimeUnit] = useState<string>('')
+  const [hasAnyRows, setHasAnyRows] = useState(false)
   const onChangeSort = (v: string) => {
     if (v === 'none') {
       setSortKey('')
@@ -42,9 +43,14 @@ export default function Search({params, filter_type} : {params: any, filter_type
   }, [eventEmitter])
   useEffect(() => {
     const handleLoading = (loading: boolean) => setIsLoading(Boolean(loading))
+    const handleHasRows = (hasRows: boolean) => setHasAnyRows(Boolean(hasRows))
+    
     eventEmitter.on('timeline_loading', handleLoading)
+    eventEmitter.on('timeline_has_rows', handleHasRows)
+    
     return () => {
       eventEmitter.off('timeline_loading', handleLoading)
+      eventEmitter.off('timeline_has_rows', handleHasRows)
     }
   }, [eventEmitter])
   
@@ -74,7 +80,7 @@ export default function Search({params, filter_type} : {params: any, filter_type
           <SearchListMobile />
         </div>
       </div> */}
-      {isLoading && (
+      {(isLoading || !hasAnyRows) && (
         <div className="mb-2 rounded-md border border-amber-200 bg-amber-50 p-3 py-2 text-amber-800">
           <div className="flex items-center gap-2">
             <ArrowPathIcon className="mt-0.5 size-6 text-amber-500 animate-spin" />
@@ -88,13 +94,19 @@ export default function Search({params, filter_type} : {params: any, filter_type
         <div className="grid grid-cols-[250px_1fr] items-center">
           <IPSearch />
           <div className="flex items-center justify-between gap-2">
-            <p className='text-sm'>
-              <p className='text-sm'>
-                Traffic Timeline - <span className='font-semibold'>
-                  Last {timeCount != null ? formatTimeLabel(timeCount, timeUnit) : '—'}
-                </span>
-              </p>
-            </p>
+            <div className="flex items-center gap-2 text-xs pl-1.5 w-full max-w-44">
+              <span className="whitespace-nowrap">Sort by:</span>
+              <Select value={sortKey} onValueChange={onChangeSort}>
+                <SelectTrigger className="h-[34px] w-full text-sm">
+                  <SelectValue placeholder="None" />
+                </SelectTrigger>
+                <SelectContent className='text-sm'>
+                  <SelectItem value="none">None</SelectItem>
+                  <SelectItem value="country">Country</SelectItem>
+                  <SelectItem value="source_ip">Source IP</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
             <div className="flex items-center gap-4">
               <span className="text-sm">Traffic Intensity</span>
               <div className="flex items-end gap-4 py-2">
@@ -120,18 +132,12 @@ export default function Search({params, filter_type} : {params: any, filter_type
         </div>
 
       <div className="grid grid-cols-[250px_1fr] items-end border-b-[1px] -mb-[1px]">
-        <div className="flex items-center gap-2 text-xs mb-2 pr-2">
-          <span className="whitespace-nowrap">Sort by:</span>
-          <Select value={sortKey} onValueChange={onChangeSort}>
-            <SelectTrigger className="h-[34px] w-full text-sm">
-              <SelectValue placeholder="None" />
-            </SelectTrigger>
-            <SelectContent className='text-sm'>
-              <SelectItem value="none">None</SelectItem>
-              <SelectItem value="country">Country</SelectItem>
-              <SelectItem value="source_ip">Source IP</SelectItem>
-            </SelectContent>
-          </Select>
+        <div className='flex items-center pt-2 pb-4'>
+          <p className='text-sm'>
+            Traffic Timeline - <span className='font-semibold'>
+              Last {timeCount != null ? formatTimeLabel(timeCount, timeUnit) : '—'}
+            </span>
+          </p>
         </div>
         <div className="flex items-center justify-end">
           <TimelineRuler />

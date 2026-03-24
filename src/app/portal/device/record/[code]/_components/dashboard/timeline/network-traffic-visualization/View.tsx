@@ -30,7 +30,20 @@ export default function NetworkFlowView() {
 
   if (loading) {
     return (
-      <TrafficSkeleton sections={[{ label: 'Top Traffic', rows: 3 }, { label: 'Recent IPs', rows: 5 }]} />
+      <TrafficSkeleton 
+        sections={[{ 
+          key: 'top_traffic', 
+          label: 'Top Traffic', 
+          description: 'IPs generating the highest traffic within the selected time range', 
+          rows: 5 
+        }, 
+        { 
+          key: 'recent_ip', 
+          label: 'Recent IP', 
+          description: 'Most recently observed IPs regardless of traffic volume', 
+          rows: 10 
+        }]} 
+      />
     );
   }
 
