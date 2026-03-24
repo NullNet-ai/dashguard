@@ -72,7 +72,7 @@ const FilterView = () => {
       sideDrawerWidth: '1000px',
       body: {
         component: () => (
-           <ManageFilterProvider columns = { columns } filter_type ={ filter_type as string } tab = { { name: 'New Filter' } }>
+           <ManageFilterProvider columns = { columns } filter_type ={ filter_type as string } tab = { { name: 'New Filter' } } existingFilters={filters}>
             <GridManageFilter filter_type={filter_type as string} /> 
           </ManageFilterProvider>
         ),
