@@ -292,7 +292,7 @@ export default function NetworkFlowProvider({ children, params }: IProps) {
     recentIpsRef.current            = ips
     topTrafficIpsRef.current        = topInitial.map(e => e.source_ip)
 
-    startTransition(() => {
+    // startTransition(() => {
       setSnapshot({
         recentIPData:           recentInitial,
         topTrafficData:         topInitial,
@@ -301,7 +301,7 @@ export default function NetworkFlowProvider({ children, params }: IProps) {
         loading:                false,
       })
       setIsInitialized(true)
-    })
+    // })
   }, [])
 
   /**
@@ -410,13 +410,13 @@ export default function NetworkFlowProvider({ children, params }: IProps) {
       recentBandwidthRef.current = result
       recentIpsRef.current = result.map(e => e.source_ip)
 
-      startTransition(() => {
+      // startTransition(() => {
         setSnapshot(prev => ({
           ...prev,
           recentIPData:      result,
           unique_source_ips: recentIpsRef.current,
         }))
-      })
+      // })
 
       // Clear the `isNew` highlight after 1 s.
       if (newEntries.length > 0) {
@@ -426,7 +426,9 @@ export default function NetworkFlowProvider({ children, params }: IProps) {
           recentBandwidthRef.current = recentBandwidthRef.current.map(e =>
             newIpList.includes(e.source_ip) ? { ...e, isNew: false } : e,
           )
-          startTransition(() => setSnapshot(prev => ({ ...prev, recentIPData: recentBandwidthRef.current })))
+          // startTransition(() =>  {
+            setSnapshot(prev => ({ ...prev, recentIPData: recentBandwidthRef.current }))
+          // })
         }, 1_000)
       }
     } catch (err) {
@@ -539,13 +541,13 @@ export default function NetworkFlowProvider({ children, params }: IProps) {
       topTrafficBandwidthRef.current = sorted
       topTrafficIpsRef.current = sorted.map(e => e.source_ip)
 
-      startTransition(() => {
+      // startTransition(() => {
         setSnapshot(prev => ({
           ...prev,
           topTrafficData:         sorted,
           unique_top_traffic_ips: topTrafficIpsRef.current,
         }))
-      })
+      // })
     } catch (err) {
       console.error('[topTraffic] error:', err)
     } finally {
@@ -673,14 +675,18 @@ export default function NetworkFlowProvider({ children, params }: IProps) {
         .filter((e: any) => e?.isNew)
         .map((e: any) => e?.source_ip)
         .filter(Boolean) as string[]
-      startTransition(() => setSnapshot(prev => ({ ...prev, recentIPData: recentBandwidthRef.current })))
+      // startTransition(() => {
+        setSnapshot(prev => ({ ...prev, recentIPData: recentBandwidthRef.current }))
+      // })
       if (newIps.length > 0) {
         window.setTimeout(() => {
           if (isUnmountedRef.current) return
           recentBandwidthRef.current = recentBandwidthRef.current.map(e =>
             newIps.includes(e.source_ip) ? { ...e, isNew: false } : e,
           )
-          startTransition(() => setSnapshot(prev => ({ ...prev, recentIPData: recentBandwidthRef.current })))
+          // startTransition(() => {
+            setSnapshot(prev => ({ ...prev, recentIPData: recentBandwidthRef.current }))
+          // })
         }, 1_000)
       }
     })
