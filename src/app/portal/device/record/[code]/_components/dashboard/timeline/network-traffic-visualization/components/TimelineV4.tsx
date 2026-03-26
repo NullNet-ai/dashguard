@@ -278,9 +278,14 @@ export default function GridVirtualizerFixed({ topTrafficData, topTrafficFormatt
                 <img src={pair.flow.flag} alt="" className="h-[15px] min-w-[30px]" />
               )
             )}
-            <span className={pair.flow.active || pair.flow.isNew ? 'text-red-600' : 'text-black'}>
+            <span className={pair.flow.active ? 'text-red-600' : 'text-black'}>
               {truncateIP(pair.flow.source_ip ?? '')}
             </span>
+            {pair.flow.isNew && (
+              <span className="ml-1 inline-flex items-center rounded px-1.5 py-0.5 text-[10px] font-semibold bg-[#7DB87D] text-white leading-none">
+                NEW
+              </span>
+            )}
           </div>
         </TooltipTrigger>
         <TooltipContent side="top">
@@ -345,7 +350,7 @@ export default function GridVirtualizerFixed({ topTrafficData, topTrafficFormatt
   )
 
   return (
-    <TooltipProvider>
+    <TooltipProvider delayDuration={0}>
       <div className="h-[calc(100vh-280px)] overflow-y-auto">
         {isLoading ? (
           <div className="space-y-4 p-2">

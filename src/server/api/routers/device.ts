@@ -860,6 +860,9 @@ export const deviceRouter = createTRPCRouter({
                     'address',
                   ],
                 },
+                order: {
+                  limit: 50,
+                },
               },
             })
             .join({

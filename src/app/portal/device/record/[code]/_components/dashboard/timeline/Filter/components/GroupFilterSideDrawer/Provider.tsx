@@ -38,6 +38,7 @@ export function ManageFilterProvider({
   columns,
   searchConfig,
   filter_type,
+  existingFilters = [],
 }: {
   children: React.ReactNode
   tab: any
@@ -49,6 +50,7 @@ export function ManageFilterProvider({
   }
   errors?: Record<string, any>
   filter_type: string
+  existingFilters?: Record<string, any>[]
 }) {
   const { actions } = useSideDrawer()
   const router = useRouter()
@@ -67,6 +69,9 @@ export function ManageFilterProvider({
       ...filterDetails,
       ...data
     });
+    if ('name' in data) {
+      setErrors((prev: any) => { const { name: _, ...rest } = prev; return rest })
+    }
   };
 
  
@@ -114,6 +119,18 @@ export function ManageFilterProvider({
       setErrors(validateCriteriaErrors)
       return
     }
+    const updatedName = filterDetails?.name?.trim()?.toLowerCase()
+    if (!updatedName) {
+      setErrors({ name: 'Filter name is required.' })
+      return
+    }
+    const isDuplicateName = existingFilters.some(
+      (f) => f.name?.trim()?.toLowerCase() === updatedName && f.id !== filterDetails.id
+    )
+    if (isDuplicateName) {
+      setErrors({ name: 'A filter with this name already exists.' })
+      return
+    }
     const sorting = filterDetails?.sorts?.length
       ? filterDetails.sorts.map((item: any) => {
           return {
@@ -152,8 +169,21 @@ export function ManageFilterProvider({
 
   const handleCreateNewFilter = async () => {
     const validateCriteriaErrors = validateCriteria(filterDetails.filterGroups)
+    console.log("🚀 ~ handleCreateNewFilter ~ validateCriteriaErrors:", validateCriteriaErrors)
     if (validateCriteriaErrors) {
       setErrors(validateCriteriaErrors)
+      return
+    }
+    const newName = filterDetails?.name?.trim()?.toLowerCase()
+    if (!newName) {
+      setErrors({ name: 'Filter name is required.' })
+      return
+    }
+    const isDuplicateName = existingFilters.some(
+      (f) => f.name?.trim()?.toLowerCase() === newName
+    )
+    if (isDuplicateName) {
+      setErrors({ name: 'A filter with this name already exists.' })
       return
     }
     const sorting = filterDetails?.sorts?.length
