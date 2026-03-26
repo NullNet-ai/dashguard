@@ -73,7 +73,7 @@ export default function NetworkFlowProvider({ children, params }: IProps) {
     topTrafficData:         [] as IBandwidth[],  // top-5 IPs by active-packet count
     unique_source_ips:      [] as string[],
     unique_top_traffic_ips: [] as string[],
-    loading:                false,
+    loading:                true,
   })
 
   /**
@@ -239,16 +239,17 @@ export default function NetworkFlowProvider({ children, params }: IProps) {
    */
   const performInitialLoad = useCallback(async (generation: number, fid: string, settings: ITimeSettings) => {
     const tr = getLastTimeStamp({ count: settings.time_count, unit: settings.time_unit, add_remaining_time: true }) as any
+    const tr2 = getLastTimeStamp({ count: 1, unit: 'minute', add_remaining_time: true }) as any
 
     const [ips, topIps] = await Promise.all([
       getUniqueIpRef.current.mutateAsync({
         device_id: paramsRef.current?.id || '',
-        time_range: tr,
+        time_range: settings.time_unit === 'hour' ? tr2 : tr,
         filter_id: fid,
       }) as Promise<string[]>,
       getUniqueIpTopRef.current.mutateAsync({
         device_id: paramsRef.current?.id || '',
-        time_range: tr,
+        time_range: settings.time_unit === 'hour' ? tr2 : tr,
         filter_id: fid,
         limit: 5,
       }) as Promise<string[]>,
@@ -328,7 +329,11 @@ export default function NetworkFlowProvider({ children, params }: IProps) {
 
     isRecentIPRunningRef.current = true
     try {
-      const tr = getLastTimeStamp({ count: 2, unit: 'second', add_remaining_time: true }) as any
+      // Step back 1s leeway for connection insertion from Wallguard Agent
+      const recentCount = settings.time_unit === 'second' || (settings.time_unit === 'minute' && settings.time_count === 1) ? 3
+        : settings.time_unit === 'minute' ? 7
+        : 32
+      const tr = getLastTimeStamp({ count: recentCount, unit: 'second', add_remaining_time: true, _now: new Date(Date.now() - 1_000) }) as any
 
       const newIps = await Promise.race([
         getUniqueIpRef.current.mutateAsync({
@@ -394,7 +399,7 @@ export default function NetworkFlowProvider({ children, params }: IProps) {
           }),
         })))
         .filter((entry, index) => {
-          if (index < 10) return true
+          // if (index < 10) return true
           const latestBucket = Math.max(
             0,
             ...entry.result.map(r => new Date(r.bucket.replace(' ', 'T')).getTime()),
@@ -452,7 +457,11 @@ export default function NetworkFlowProvider({ children, params }: IProps) {
 
     isTopTrafficRunningRef.current = true
     try {
-      const tr = getLastTimeStamp({ count: 6, unit: 'second', add_remaining_time: true }) as any
+      // Step back 1s leeway for connection insertion from Wallguard Agent
+      const topCount = settings.time_unit === 'second' ? 7
+        : settings.time_unit === 'minute' ? 12
+        : 62
+      const tr = getLastTimeStamp({ count: topCount, unit: 'second', add_remaining_time: true, _now: new Date(Date.now() - 1_000) }) as any
 
       const newIps = await Promise.race([
         getUniqueIpTopRef.current.mutateAsync({
@@ -519,7 +528,7 @@ export default function NetworkFlowProvider({ children, params }: IProps) {
         })))
         .sort((a, b) => (b.total_active_packets ?? 0) - (a.total_active_packets ?? 0))
         .filter((entry, index) => {
-          if (index < 5) return true
+          // if (index < 5) return true
           const latestBucket = Math.max(
             0,
             ...entry.result.map(r => new Date(r.bucket.replace(' ', 'T')).getTime()),
