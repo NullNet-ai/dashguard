@@ -61,7 +61,7 @@ export const cachedFilterRouter = createTRPCRouter({
       })
       console.log("%c Line:53 🍎 updatedData", "color:#465975", updatedData);
       await ctx.redisClient.cacheData(`${type}_${contact.id}`, updatedData)
-      return updatedData?.[0]
+      return updatedData?.find(e => e.id === input_data?.id)
     }
   }),
     updateSearchFilter: privateProcedure

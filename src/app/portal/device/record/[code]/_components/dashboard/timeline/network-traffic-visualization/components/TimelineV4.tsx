@@ -364,7 +364,7 @@ export default function GridVirtualizerFixed({ topTrafficData, topTrafficFormatt
               </div>
             ))}
           </div>
-        ) : hasAnyRows ? (
+        ) : true ? (
           sections.map((section, i) => {
             const refreshMs = section.key === 'top_traffic'
               ? pollingIntervalTopTraffic
