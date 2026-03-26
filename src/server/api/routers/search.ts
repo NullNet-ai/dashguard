@@ -65,7 +65,7 @@ const resolveProtocolDisplayValue = (value: unknown) => {
   if (key === 'inet46') return 'IPv4+6';
   if (key === 'inet6') return 'IPv6';
   if (key === 'inet') return 'IPv4';
-  return value;
+  return value.toUpperCase();
 };
 
 const buildDeviceRemoteAccessSessionSuggestions = async ({
@@ -245,21 +245,41 @@ export const searchRouter = createTRPCRouter({
         [pluralize(entity)]: input.pluck,
       };
       if (entity === 'device_filter_rules' || entity === 'device_nat_rules') {
-        _advance_filters = _advance_filters.map(e => {
-          let updatedFilter = e
-          if (e.field === 'order' || e.field === 'disabled') {
+        // @ts-expect-error - No type yet
+        _advance_filters = _advance_filters.reduce((acc, curr) => {
+          let updatedFilter = curr
+          if (curr.field === 'order' || curr.field === 'disabled') {
             updatedFilter = {
-              ...e,
+              ...curr,
               parse_as: 'text',
             }
           }
-          if (e.field === 'protocol') {
-            updatedFilter = {
-              ...e,
-              values: e.values?.map(resolveProtocolFilterValue)
-            }
+          if (curr.field === 'protocol') {
+            return [
+              ...acc,
+              ...(curr.values?.reduce((acc1, curr1) => {
+                const values = curr1.split(' ').map(resolveProtocolFilterValue)
+                return [
+                  ...acc1,
+                  {
+                    ...curr,
+                    field: 'ipprotocol',
+                    values,
+                  },
+                  {
+                    operator: 'or',
+                    type: 'operator',
+                  },
+                  {
+                    ...curr,
+                    field: 'protocol',
+                    values,
+                  }
+                ]
+              }, []) ?? [])
+            ].flatMap(e => e)
           }
-          else if (e.field === 'disabled') {
+          else if (curr.field === 'disabled') {
             updatedFilter = {
               ...updatedFilter,
               values: updatedFilter.values?.map(v => {
@@ -272,8 +292,11 @@ export const searchRouter = createTRPCRouter({
               }),
             }
           }
-          return updatedFilter
-        })
+          return [
+            ...acc,
+            updatedFilter,
+          ]
+        }, [])
       } else if (entity === 'device') {
         _advance_filters = _advance_filters.map(e => {
           let updatedFilter = e
@@ -346,7 +369,17 @@ export const searchRouter = createTRPCRouter({
               // @ts-expect-error - No type yet
               ? formatSorting(sorting)
               : [],
-          concatenate_fields: [...addCommonGridConcatenates(input?.entity)],
+          concatenate_fields: [
+            ...addCommonGridConcatenates(input?.entity),
+            ...(entity === 'device_filter_rules' || entity === 'device_nat_rules'
+              ? [{
+                  fields: ['ipprotocol', 'protocol'],
+                  field_name: 'protocol',
+                  separator: ' ',
+                  entity,
+                }]
+              : []),
+          ],
         },
       });
       addCommonGridJoins(query, entity);
@@ -370,12 +403,15 @@ export const searchRouter = createTRPCRouter({
             ...e,
             display_value: e.values?.[0] === 'true' ? 'Online' : 'Offline'
           }
-        } else if (e.field === 'protocol') {
+        } else if (e.field === 'ipprotocol' || e.field === 'protocol') {
           const displayValue = Array.isArray(e.values)
-            ? e.values.map(resolveProtocolDisplayValue).join(', ')
+          // @ts-expect-error - No type yet
+            ? e.values.map((e) => (typeof e === 'string' ? e.split(' ') : [e]).map(resolveProtocolDisplayValue).join(' ')).join(', ')
             : e.display_value
           updatedSuggestion = {
             ...e,
+            label: 'Protocol',
+            field: 'protocol',
             display_value: displayValue,
           }
         } else if (e.field === 'disabled') {
