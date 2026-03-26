@@ -61,6 +61,7 @@ export const cachedFilterRouter = createTRPCRouter({
       })
       console.log("%c Line:53 🍎 updatedData", "color:#465975", updatedData);
       await ctx.redisClient.cacheData(`${type}_${contact.id}`, updatedData)
+      // @ts-expect-error - No type yet
       return updatedData?.find(e => e.id === input_data?.id)
     }
   }),
