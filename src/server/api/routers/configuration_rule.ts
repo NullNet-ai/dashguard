@@ -118,6 +118,14 @@ export const deviceRuleRouter = createTRPCRouter({
           multiple_sort: _sorting?.length
             ? formatSorting(_sorting, 'device_filter_rules', is_case_sensitive_sorting)
             : [],
+            concatenate_fields: [
+            {
+              fields: ['ipprotocol', 'protocol'],
+              field_name: 'protocol',
+              separator: ' ',
+              entity: 'device_filter_rules',
+            },
+          ]
         },
       })
       if (input.grouping?.length) {

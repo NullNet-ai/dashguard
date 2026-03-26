@@ -779,65 +779,93 @@ export const packetRouter = createTRPCRouter({
       _query,
     }
   }),
-  getBandwidthOfSourceIP: privateProcedure.input(z.object({ device_id: z.string(), time_range: z.array(z.string()), bucket_size: z.string(), source_ips: z.array(z.string()), limit: z.number().optional() })).mutation(async ({ input, ctx }) => {
-    const { device_id, time_range, bucket_size = '1s', source_ips, limit = 60 } = input
+  getBandwidthOfSourceIP: privateProcedure.input(z.object({ device_id: z.string(), time_range: z.array(z.string()), bucket_size: z.string(), source_ips: z.array(z.string()), limit: z.number().optional(), use_chunks: z.boolean().optional().default(true) })).mutation(async ({ input, ctx }) => {
+    const { device_id, time_range, bucket_size = '1s', source_ips, limit = 60, use_chunks } = input
+
+    const buildTimeChunks = (range: string[]): string[][] => {
+      const [start, end] = range
+      const startMs = new Date(start!).getTime()
+      const endMs = new Date(end!).getTime()
+      const oneHour = 60 * 60 * 1000
+      if (endMs - startMs <= oneHour) return [range]
+      const fmt = (d: Date) => d.toISOString().replace('T', ' ').slice(0, 19) + '+00'
+      const chunks: string[][] = []
+      let cur = startMs
+      while (cur < endMs) {
+        const next = Math.min(cur + oneHour, endMs)
+        chunks.push([fmt(new Date(cur)), fmt(new Date(next))])
+        cur = next
+      }
+      return chunks
+    }
+
+    const timeChunks = false // use_chunks
+    ? buildTimeChunks(time_range) : [time_range]
+
     // return []
     const ips = await Bluebird.map(source_ips, async (source_ip: string) => {
-      const res = await ctx.dnaClient.aggregate({
-        query: {
-          entity: 'connections',
-          aggregations: [
-            {
-              aggregation: 'SUM',
-              aggregate_on: 'total_byte',
-              bucket_name: 'bandwidth',
+      const parallelStart = Date.now()
+      const chunkResults = await Bluebird.map(timeChunks, async (chunk) => {
+        const chunkStart = Date.now()
+        const res = await ctx.dnaClient.aggregate({
+          query: {
+            entity: 'connections',
+            aggregations: [
+              {
+                aggregation: 'SUM',
+                aggregate_on: 'total_byte',
+                bucket_name: 'bandwidth',
+              },
+            ],
+            advance_filters: [
+              {
+                type: 'criteria',
+                field: 'timestamp',
+                entity: 'connections',
+                operator: EOperator.IS_BETWEEN,
+                values: chunk,
+              },
+              {
+                type: 'operator',
+                operator: EOperator.AND,
+              },
+              {
+                type: 'criteria' as const,
+                field: 'source_ip',
+                entity: 'connections',
+                operator: EOperator.EQUAL,
+                values: [
+                  source_ip,
+                ],
+              },
+              {
+                type: 'operator',
+                operator: EOperator.AND,
+              },
+              {
+                type: 'criteria',
+                field: 'device_id',
+                entity: 'connections',
+                operator: EOperator.EQUAL,
+                values: [device_id],
+              },
+            ],
+            joins: [],
+            bucket_size,
+            order: {
+              order_by: 'bucket',
+              order_direction: EOrderDirection.DESC,
             },
-          ],
-          advance_filters: [
-            {
-              type: 'criteria',
-              field: 'timestamp',
-              entity: 'connections',
-              operator: EOperator.IS_BETWEEN,
-              values: time_range,
-            },
-            {
-              type: 'operator',
-              operator: EOperator.AND,
-            },
-            {
-              type: 'criteria' as const,
-              field: 'source_ip',
-              entity: 'connections',
-              operator: EOperator.EQUAL,
-              values: [
-                source_ip,
-              ],
-            },
-            {
-              type: 'operator',
-              operator: EOperator.AND,
-            },
-            {
-              type: 'criteria',
-              field: 'device_id',
-              entity: 'connections',
-              operator: EOperator.EQUAL,
-              values: [device_id],
-            },
-          ],
-          joins: [],
-          bucket_size,
-          order: {
-            order_by: 'bucket',
-            order_direction: EOrderDirection.DESC,
+            timezone: 'Asia/Manila',
+            limit: limit || 60,
           },
-          timezone: 'Asia/Manila',
-          limit: limit || 60,
-        },
-        token: ctx.token.value,
+          token: ctx.token.value,
 
-      }).execute()
+        }).execute()
+        return res?.data ?? []
+      })
+
+      const combinedData = chunkResults.flat()
 
       const ip_info = await ctx.dnaClient
         .findAll({
@@ -862,8 +890,8 @@ export const packetRouter = createTRPCRouter({
         })
         .execute()
       const flagDetails = await getFlagDetails(ip_info?.data?.[0]?.country)
-      return { source_ip, result: res?.data, ...flagDetails }
-    }, { concurrency: 100 })
+      return { source_ip, result: combinedData, ...flagDetails }
+    }, { concurrency: 240 })
 
     return { data: ips }
   }),
@@ -1025,14 +1053,24 @@ export const packetRouter = createTRPCRouter({
 
           },
 
-        }).groupBy({
-          query: { fields: [
-            'source_ip',
-          ] },
         })
+        // .groupBy({
+        //   query: { fields: [
+        //     'source_ip',
+        //   ] },
+        // })
         .execute()
 
-      const _connections = connections?.data || []
+      let _connections = connections?.data || []
+
+      _connections = _connections.map(e => {
+        return {
+          connections: {
+            source_ip: e?.source_ip,
+          }
+        }
+      })
+
       const _connections_length = _connections.length
       
       const sourceIPs = new Set()

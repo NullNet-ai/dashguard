@@ -161,6 +161,7 @@ export function ManageFilterProvider({
     setUpdateFilterLoading(true)
     eventEmitter.emit(`${filter_type}_manage_filter`, { modifyFilterDetails })
     const {href} = await updateGridFilter(modifyFilterDetails, filter_type)
+    eventEmitter.emit('should_refresh_timeline_filter', true)
     setUpdateFilterLoading(false)
     closeSideDrawer()
     router.push(href)

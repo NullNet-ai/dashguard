@@ -67,8 +67,15 @@ const gridColumns = [
       operator: 'like',
     },
     cell: ({row}) => {
+      const [ipprotocol, protocol] = row.original?.protocol?.split(' ') || []
       // @ts-expect-error - No type yet
-      return {
+      const ipProtocolMappedValue = {
+        inet: 'IPv4',
+        inet6: 'IPv6',
+        inet46: 'IPv4+6',
+      }[ipprotocol] ?? ipprotocol ?? ''
+      // @ts-expect-error - No type yet
+      const protocolMappedValue = {
         'inet/any': 'IPv4/*',
         'inet/tcp': 'IPv4/TCP',
         'inet/tcp/udp': 'IPv4/TCP/UDP',
@@ -80,7 +87,9 @@ const gridColumns = [
         'inet46/tcp/udp': 'IPv4+6/TCP/UDP',
         'any': '*',
         'tcp/udp': 'TCP/UDP',
-      }[row.original?.protocol] ?? row.original?.protocol ?? ''
+        'tcp': 'TCP',
+      }[protocol] ?? protocol ?? ''
+      return `${ipProtocolMappedValue} ${protocolMappedValue}`.trim()
     } 
   },
   {
