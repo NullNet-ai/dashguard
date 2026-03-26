@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useState } from 'react'
+import React, { useEffect, useMemo, useState } from 'react'
 import { useEventEmitter } from '~/context/EventEmitterProvider'
 import {
   Tooltip,
@@ -6,6 +6,7 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from '~/components/ui/tooltip'
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '~/components/ui/collapsible'
 import { FlagIcon, ChevronDownIcon, ChevronRightIcon } from '@heroicons/react/20/solid'
 import { Skeleton } from '~/components/ui/skeleton'
 import { Star } from 'lucide-react'
@@ -234,9 +235,7 @@ export default function GridVirtualizerFixed({ topTrafficData, topTrafficFormatt
     return max
   }, [sections])
 
-  const toggleSection = useCallback((key: string) => {
-    setExpandedSections(prev => ({ ...prev, [key]: !prev[key] }))
-  }, [])
+  
 
   const hasAnyRows = sections.some(s => s.rows.length > 0)
 
@@ -370,43 +369,53 @@ export default function GridVirtualizerFixed({ topTrafficData, topTrafficFormatt
               ? pollingIntervalTopTraffic
               : pollingIntervalRecentIP
 
-            return <div key={section.key}>
-              <button
-                className={`
-                  w-full flex items-start gap-1.5 px-2 py-1
-                  text-xs font-semibold text-foreground
-                  bg-slate-50 border border-slate-200
-                  hover:bg-slate-100 sticky top-0 z-10
-                  ${i === 1 ? '-mt-px' : ''}
-                `}
-                onClick={() => toggleSection(section.key)}
+            return (
+              <Collapsible
+                key={section.key}
+                open={!!expandedSections[section.key]}
+                onOpenChange={(open) =>
+                  setExpandedSections(prev => ({ ...prev, [section.key]: open }))
+                }
               >
-                {expandedSections[section.key]
-                  ? <ChevronDownIcon  className="size-4 shrink-0" />
-                  : <ChevronRightIcon className="size-4 shrink-0" />}
-                <span className="flex flex-col justify-start items-start">
-                  <span className="flex items-center gap-2">
-                    <div className="flex gap-1">
-                      {section.key === 'top_traffic' && <Star size={14} fill="currentColor" className="text-[#EDC17E]" />}
-                      {section.label}
-                    </div>
-                    {refreshMs != null && (
-                      <span className="font-normal">
-                        (<span className='text-slate-600'>Refresh</span>: {refreshMs / 1000}s)
+                <CollapsibleTrigger asChild>
+                  <button
+                    className={`
+                      w-full flex items-start gap-1.5 px-2 py-1
+                      text-xs font-semibold text-foreground
+                      bg-slate-50 border border-slate-200
+                      hover:bg-slate-100 sticky top-0 z-10
+                      ${i === 1 ? '-mt-px' : ''}
+                    `}
+                  >
+                    {expandedSections[section.key]
+                      ? <ChevronDownIcon  className="size-4 shrink-0 transition-transform duration-200" />
+                      : <ChevronRightIcon className="size-4 shrink-0 transition-transform duration-200" />}
+                    <span className="flex flex-col justify-start items-start">
+                      <span className="flex items-center gap-2">
+                        <div className="flex gap-1">
+                          {section.key === 'top_traffic' && <Star size={14} fill="currentColor" className="text-[#EDC17E]" />}
+                          {section.label}
+                        </div>
+                        {refreshMs != null && (
+                          <span className="font-normal">
+                            (<span className='text-slate-600'>Refresh</span>: {refreshMs / 1000}s)
+                          </span>
+                        )}
                       </span>
-                    )}
-                  </span>
-                  <span className="font-light text-slate-600 text-xs">
-                    {section.description}
-                  </span>
-                </span>
-              </button>
+                      <span className="font-light text-slate-600 text-xs">
+                        {section.description}
+                      </span>
+                    </span>
+                  </button>
+                </CollapsibleTrigger>
 
-              {expandedSections[section.key] &&
-                section.rows.map((pair, j) =>
-                  renderRow(pair, `${section.key}-${j}`)
-                )}
-            </div>
+                <CollapsibleContent className="overflow-hidden data-[state=open]:animate-collapsible-down data-[state=closed]:animate-collapsible-up">
+                  {section.rows.map((pair, j) =>
+                    renderRow(pair, `${section.key}-${j}`)
+                  )}
+                </CollapsibleContent>
+              </Collapsible>
+            )
           })
         ) : (
           <TrafficSkeleton
