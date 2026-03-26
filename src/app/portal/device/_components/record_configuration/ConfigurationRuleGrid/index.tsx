@@ -258,7 +258,8 @@ const ConfigurationRuleGrid = ({
     'updated_date',
     'disabled',
     'interface',
-    'order'
+    'order',
+    'ipprotocol'
   ]
 
   const { gridParams, gridProps } = gridDataResolver({

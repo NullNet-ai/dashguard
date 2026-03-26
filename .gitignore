@@ -55,3 +55,6 @@ dump.rdb
 
 # /src/app/playground
 # /src/app/playground
+
+# MCP config (contains secrets)
+.mcp.json
