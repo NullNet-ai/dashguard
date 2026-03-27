@@ -28,7 +28,12 @@ function MainServer({
   defaultGrouping,
   current_tab_id,
   gridParentClass = '',
-  gridRecordClass = '',
+  gridDesktopClass = '',
+  gridChildClass = '',
+  sidebarTab = {
+    closed: true,
+    useSidebar: false
+  },
   withVerticalTabs = false,
 }: IPropsGrid) {
   const screenType = useScreenType();
@@ -57,14 +62,16 @@ function MainServer({
       current_tab_id={current_tab_id}
     >
       {isDesktop ? (
-        <GridScrollView parentType={parentType} className={gridParentClass}>
+        <GridScrollView parentType={parentType} className={gridParentClass} sidebarTab={sidebarTab}>
           <GridDesktop
             isLoading={isLoading}
             parentType={parentType}
             gridKey={gridKey}
             grid_tabs={grid_tabs}
-            gridRecordClass={gridRecordClass}
             withVerticalTabs={withVerticalTabs}
+            gridDesktopClass={gridDesktopClass}
+            gridChildClass={gridChildClass}
+            sidebarTab={sidebarTab}
           />
         </GridScrollView>
       ) : (

@@ -16,13 +16,13 @@ export const ScrollContainerContext = React.createContext<any>(null);
 interface ScrollContainerProps {
   children: React.ReactNode;
   parentType?: string;
-  gridRecordClass?: string;
+  gridChildClass?: string;
 }
 
 const ScrollContainer: React.FC<ScrollContainerProps> = ({
   children,
   parentType,
-  gridRecordClass = '',
+  gridChildClass = '',
 }) => {
   const { height } = useWindowSize();
   const { state, actions } = useContext(GridContext);
@@ -194,7 +194,7 @@ const ScrollContainer: React.FC<ScrollContainerProps> = ({
         <div
           ref={scrollableRef}
           onScroll={handleScroll}
-          className={`grid-scrollview-record main-grid-scroll-container mx-2 min-h-[300px] overflow-x-auto rounded-md border bg-card text-card-foreground ${gridRecordClass}`}
+          className={`grid-scrollview-record main-grid-scroll-container mx-2 min-h-[300px] overflow-x-auto rounded-md border bg-card text-card-foreground ${gridChildClass}`}
           style={
             {
               scrollbarWidth: 'none',
@@ -239,7 +239,7 @@ const ScrollContainer: React.FC<ScrollContainerProps> = ({
           }}
           ref={scrollableRef}
           onScroll={handleScroll}
-          className="main-grid-scroll-container mx-2 !h-[calc(100vh-13em)] overflow-x-auto rounded-md border bg-card text-card-foreground"
+          className={`main-grid-scroll-container mx-2 !h-[calc(100vh-13em)] overflow-x-auto rounded-md border bg-card text-card-foreground ${gridChildClass}`}
         >
           <style jsx>{`
             div::-webkit-scrollbar {

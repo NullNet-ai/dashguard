@@ -14,6 +14,7 @@ import gridColumns from './_config/columns';
 import { defaultSorting } from './_config/sorting';
 import { api } from '~/trpc/react';
 import { ulid } from 'ulid';
+import { useSidebarTab } from '~/components/platform/SidebarTab/Provider';
 
 const ConfigurationRuleGrid = ({
   code,
@@ -23,6 +24,7 @@ const ConfigurationRuleGrid = ({
   console.log("%c Line:21 🥪 code", "color:#e41a6a", code);
   const pathname = usePathname();
   const searchTest = useSearchParams();
+  const { isCollapsed } = useSidebarTab();
 
   const grid_config = useMemo(() => ({
     gridKey: 'configuration_rule_grid',
@@ -299,7 +301,7 @@ const ConfigurationRuleGrid = ({
   }, [record?.data?.id, !!grid_tabs?.[0]])
 
   return (
-    <Card className="overflow-hidden max-w-[calc(100vw-38.4em)] h-[calc(100vh-7em)]">
+    <Card className="overflow-hidden h-[calc(100vh-7.5em)]">
       <CardHeader className="flex w-full flex-1 items-center justify-between bg-slate-100">
         <CardTitle className="text-md text-foreground">
           Rules
@@ -307,8 +309,10 @@ const ConfigurationRuleGrid = ({
       </CardHeader>
       <Grid
         {...gridProps}
-        gridParentClass="max-w-[calc(100vw-39em)] mx-auto"
-        gridRecordClass="h-[calc(100vh-19.1em)]"
+        sidebarTab={{
+          closed: isCollapsed ?? false,
+          useSidebar: true
+        }}
         gridKey="configuration_rule_grid"
         totalCount={totalCount || 0}
         parentType="record"
