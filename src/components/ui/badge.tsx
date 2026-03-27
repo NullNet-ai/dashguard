@@ -24,6 +24,9 @@ const badgeVariants = cva(
         outlineSolid: "border-border text-foreground bg-background",
         primary: "border-transparent bg-primary/10 text-primary ",
         primarySolid: "border-transparent bg-primary text-primary-foreground shadow hover:bg-primary/80",
+        primaryBlue: "border-transparent bg-blue-50 text-blue-700",
+        grayOutlined: "bg-gray-100/60 text-gray-700",
+        solidGray: "border-transparent bg-gray-200/80 text-slate-700",
       },
       borderRadius: {
         none: "rounded-none",
