@@ -22,7 +22,7 @@ const gridColumns = [
     enableResizing: false,
     cell: ({ row }) => {
       const value = row?.original?.device_rule_status
-      return <Badge variant={value === 'Applied' ? 'primary' : 'warning'}>{value}</Badge>
+      return <Badge variant={value === 'Applied' ? 'primaryBlue' : 'warning'}>{value}</Badge>
     },
   },
   {
@@ -33,7 +33,7 @@ const gridColumns = [
       const value = row?.original?.disabled
       if (![true, false]?.includes(value)) return null
       return (
-        <Badge className="font-medium" variant={value ? 'secondarySolid' : 'outlineSolid'}>
+        <Badge className="font-medium" variant={value ? 'solidGray' : 'grayOutlined'}>
           {value ? 'Disabled' : 'Enabled'}
         </Badge>
       )
