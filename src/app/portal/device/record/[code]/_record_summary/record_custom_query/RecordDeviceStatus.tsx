@@ -29,5 +29,8 @@ export default function GridDeviceStatus({ device_id }: { device_id: string }) {
     return null
   }
 
-  return <Badge variant={status == 'Online' ? 'success' : 'destructive'}>{status}</Badge>
+  return <Badge variant={status == 'Online' ? 'success' : 'destructive'} className="flex items-center gap-x-1.5">
+    <span className="size-[7px] rounded-full opacity-70" style={{ backgroundColor: status == 'Online' ? 'green' : 'red' }}></span>
+    {status}
+  </Badge>
 }
