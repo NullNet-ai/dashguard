@@ -36,13 +36,14 @@ export default function CustomConfirmationDetails() {
           </div>
           
           {/* Connecting text with animated dots */}
-          <div className="flex items-center gap-1 text-gray-700 text-lg font-medium">
-            <span>Waiting for connection</span>
-            <span className="flex gap-1">
+          <div className="flex flex-col items-center gap-2 max-w-[470px] text-center">
+            <span className='text-slate-700 text-2xl font-medium'>Waiting for WallGuard Agent Connection</span>
+            <span className='text-slate-700 text-xl'>The portal is waiting for the WallGuard agent to establish a secure connection.</span>
+            {/* <span className="flex gap-1">
               <span className="animate-bounce" style={{ animationDelay: '0ms' }}>.</span>
               <span className="animate-bounce" style={{ animationDelay: '150ms' }}>.</span>
               <span className="animate-bounce" style={{ animationDelay: '300ms' }}>.</span>
-            </span>
+            </span> */}
           </div>
         </div>
         </div>
