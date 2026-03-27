@@ -370,8 +370,13 @@ export interface IPropsGrid {
   defaultGrouping?: IGroupBy[];
   current_tab_id?: string;
   gridParentClass?: string;
-  gridRecordClass?: string;
   withVerticalTabs?: boolean;
+  gridChildClass?: string;
+  gridDesktopClass?: string;
+  sidebarTab?: {
+    closed: boolean;
+    useSidebar: boolean;
+  };
 }
 
 export interface IExpandedRow {

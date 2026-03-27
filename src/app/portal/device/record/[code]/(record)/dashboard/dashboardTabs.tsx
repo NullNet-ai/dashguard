@@ -4,6 +4,8 @@ import StateTab from '~/components/platform/StateTab';
 import { Loader } from '~/components/ui/loader';
 import { api } from '~/trpc/server';
 import OfflineWarning from './offlineWarning';
+import SidebarTab from '~/components/platform/SidebarTab';
+import { Clock, Map, TrendingUp } from 'lucide-react';
 
 // Lazy load components
 const Timeline = lazy(
@@ -45,6 +47,7 @@ export default async function DashboardTabs() {
     {
       id: 'live_graph',
       label: 'Graphs',
+      icon: <TrendingUp size={16} />,
       content: (
         <Suspense
           fallback={
@@ -70,6 +73,7 @@ export default async function DashboardTabs() {
     {
       id: 'timeline',
       label: 'Timeline',
+      icon: <Clock size={16} />,
       content: (
         <Suspense
           fallback={
@@ -92,6 +96,7 @@ export default async function DashboardTabs() {
     {
       id: 'map',
       label: 'Map',
+      icon: <Map size={16} />,
       content: (
         <Suspense
           fallback={
@@ -115,17 +120,13 @@ export default async function DashboardTabs() {
 
   return (
     <div className="space-y-2">
-      <div className="">
-        <StateTab
-          defaultValue="live_graph"
-          orientation="vertical"
-          rotateText={true}
-          persistKey={`dashboard_graphs-${identifier}`}
-          tabs={tabs}
-          variant="underline"
-          size='sm'
-        />
-      </div>
+      <SidebarTab
+        defaultValue="live_graph"
+        isStickyContainer
+        stickyClassName="top-[50px]"
+        persistKey={`dashboard_graphs-${identifier}`}
+        tabs={tabs}
+      />
     </div>
   );
 }

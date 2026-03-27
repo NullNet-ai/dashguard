@@ -1,5 +1,7 @@
+import { AtSign, ListOrdered, Network } from 'lucide-react';
 import { headers } from 'next/headers';
 import { Suspense, lazy } from 'react';
+import SidebarTab from '~/components/platform/SidebarTab';
 import StateTab from '~/components/platform/StateTab';
 import { Loader } from '~/components/ui/loader';
 
@@ -31,6 +33,7 @@ export default async function DashboardTabs() {
     {
       id: 'configuration_rules',
       label: 'Rules',
+      icon: <ListOrdered size={16} />,
       content: (
         <Suspense
           fallback={
@@ -52,6 +55,7 @@ export default async function DashboardTabs() {
     {
       id: 'configuration_nat_rules',
       label: 'NAT',
+      icon: <Network size={16} />,
       content: (
         <Suspense
           fallback={
@@ -73,6 +77,7 @@ export default async function DashboardTabs() {
     {
       id: 'configuration_aliases',
       label: 'Aliases',
+      icon: <AtSign size={16} />,
       content: (
         <Suspense
           fallback={
@@ -116,15 +121,12 @@ export default async function DashboardTabs() {
 
   return (
     <div className="space-y-2">
-      <div className="">
-        <StateTab
+        <SidebarTab
           defaultValue="configuration_rules"
-          orientation="vertical"
-          rotateText={true}
+          isStickyContainer
+          stickyClassName="top-[50px]"
           persistKey={`configuration_rule-${identifier}`}
           tabs={tabs}
-          variant="underline"
-          size='sm'
         />
          {/* <StateTab
           defaultValue="filter"
@@ -133,7 +135,6 @@ export default async function DashboardTabs() {
           
           size="sm"
         /> */}
-      </div>
     </div>
   );
 }

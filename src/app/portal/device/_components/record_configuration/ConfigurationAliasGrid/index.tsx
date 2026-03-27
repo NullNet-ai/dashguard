@@ -13,6 +13,7 @@ import useFetchGridData from '~/hooks/useFetchGridData';
 import { defaultSorting } from './_config/sorting';
 import gridColumns from './_config/columns';
 import { api } from '~/trpc/react';
+import { useSidebarTab } from '~/components/platform/SidebarTab/Provider';
 
 const ConfigurationAliasGrid = ({
   code,
@@ -21,6 +22,7 @@ const ConfigurationAliasGrid = ({
 }) => {
   const pathname = usePathname();
   const searchTest = useSearchParams();
+  const { isCollapsed } = useSidebarTab();
 
   const grid_config = {
     gridKey: 'configuration_alias_grid',
@@ -128,7 +130,7 @@ const ConfigurationAliasGrid = ({
     }, [record?.data?.id])
 
   return (
-    <Card className="overflow-hidden max-w-[calc(100vw-38.4em)] h-[calc(100vh-7em)]">
+    <Card className="overflow-hidden h-[calc(100vh-7.5em)]">
       <CardHeader className="flex w-full flex-1 items-center justify-between bg-slate-100">
         <CardTitle className="text-md text-foreground">
           Aliases
@@ -136,8 +138,10 @@ const ConfigurationAliasGrid = ({
       </CardHeader>
       <Grid
         {...gridProps}
-        gridParentClass="max-w-[calc(100vw-39em)] mx-auto"
-        gridRecordClass="h-[calc(100vh-19.1em)]"
+        sidebarTab={{
+          closed: isCollapsed ?? false,
+          useSidebar: true
+        }}
         gridKey="configuration_alias_grid"
         totalCount={totalCount || 0}
         parentType="record"
