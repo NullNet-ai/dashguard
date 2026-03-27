@@ -310,7 +310,8 @@ export const deviceConfigurationRouter = createTRPCRouter({
             pluck: [
               'name',
               "device",
-              "id"
+              "id",
+              "description",
             ],
             order: {
               limit: 20,
@@ -333,10 +334,11 @@ export const deviceConfigurationRouter = createTRPCRouter({
       const drpdwn_optn = data.map((item: {
         name: string
         device: string
+        description: string
       }) => {
-        const { device , name} = item
+        const { device , name, description} = item
         return {
-          label: `${name.toUpperCase()} (${device})`,
+          label: `${(description ?? name).toUpperCase()} (${device})`,
           value: device,
           value1: name,
         }
