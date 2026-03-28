@@ -79,18 +79,20 @@ const SummaryClientContent = ({ recordDetails, mainEntity, token, image_placehol
         <div className={cn(`flex flex-col `,
           `${recordState?.config?.showToolbar === false ? '' : 'gap-2'}`
         )}>
-          <div className="relative group">
-            <Card>
-              {is_show_header_tab && <IdentifierComponent
-                code={recordDetails?.data?.code!}
-                status={recordDetails?.data?.status!}
-                data-test-id={testIDFormatter('rcrd-sum-identifier')}
-              />}
-            </Card>
-            <div className="hidden group-hover:block">
-              {collapseBtn}
+          {is_show_header_tab && 
+            <div className="relative group">
+              <Card>
+                <IdentifierComponent
+                  code={recordDetails?.data?.code!}
+                  status={recordDetails?.data?.status!}
+                  data-test-id={testIDFormatter('rcrd-sum-identifier')}
+                />
+              </Card>
+              <div className="hidden group-hover:block">
+                {collapseBtn}
+              </div>
             </div>
-          </div>
+          }
           <Card>
             <div className='flex flex-col gap-2 p-3'>
               <div className="flex items-center justify-between text-sm">

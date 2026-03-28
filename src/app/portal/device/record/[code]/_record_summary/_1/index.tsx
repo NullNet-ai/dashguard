@@ -97,6 +97,8 @@ const RecordShellSummary = ({
         },
         {
           header_title: "Interfaces",
+          scrollable: true,
+          maxHeight: 200,
           items: [...deviceData.interfaces].sort((a: any, b: any) => {
             const order = ['wan', 'lan']
             const ai = order.indexOf(a?.name?.toLowerCase())

@@ -29,6 +29,8 @@ interface SummaryDetailsCardProps {
   items?: SummaryFieldItem[];
   className?: string;
   data?: any;
+  scrollable?: boolean;
+  maxHeight?: number | string;
 }
 
 interface SummaryDetailsProps {
@@ -120,26 +122,46 @@ function SummaryDetailsCard({
   items = [],
   className,
   data,
+  scrollable,
+  maxHeight,
 }: SummaryDetailsCardProps) {
+  const contentMaxHeight =
+    typeof maxHeight === 'number' ? `${maxHeight}px` : maxHeight || '16rem';
   return (
     <Card
       className={className}
       data-test-id={testIDFormatter('rcrd-sum-details-container')}
     >
-      <div className="flex flex-col gap-1 p-3">
+      <div className={cn('flex flex-col gap-1 py-3', scrollable ? 'h-auto' : undefined)}>
         {header_title && (
-          <p className="text-md font-medium text-foreground">{header_title}</p>
+          <p className="text-md font-medium text-foreground px-3">{header_title}</p>
         )}
-        <Separator
-          data-test-id={testIDFormatter('rcrd-sum-details-separator')}
-        />
-        {items.map((item, index) => (
-          <SummaryFieldRow
-            key={`${item.key}-${index}`}
-            item={item}
-            data={data}
+        <span className='px-3'>
+          <Separator
+            data-test-id={testIDFormatter('rcrd-sum-details-separator')}
           />
-        ))}
+        </span>
+        {scrollable ? (
+          <div className="flex flex-col gap-1 overflow-auto scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-gray-100 pl-3 pr-1" style={{ maxHeight: contentMaxHeight }}>
+            {items.map((item, index) => (
+              <SummaryFieldRow
+                key={`${item.key}-${index}`}
+                item={item}
+                data={data}
+              />
+            ))}
+          </div>
+        ) : (
+          <div className="flex flex-col gap-1 px-3">
+            {items.map((item, index) => (
+              <SummaryFieldRow
+                key={`${item.key}-${index}`}
+                item={item}
+                data={data}
+              />
+            ))}
+          </div>
+        )}
       </div>
     </Card>
   );
