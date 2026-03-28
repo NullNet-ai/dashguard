@@ -16,6 +16,10 @@ import { Form } from '~/components/ui/form'
 import { api } from '~/trpc/react'
 import FormClientFetch from '../pie-chart/client-fetch'
 import { type IFormProps } from '../types'
+import { Popover, PopoverTrigger, PopoverContent } from '~/components/ui/popover'
+import { Command, CommandGroup, CommandItem, CommandList } from '~/components/ui/command'
+import { Checkbox } from '~/components/ui/checkbox'
+import { ChevronDown, Check } from 'lucide-react'
 
 import { renderChart } from './function/renderChart'
 import { useSocketConnection } from '../custom-hooks/useSocketConnection';
@@ -260,12 +264,12 @@ const InteractiveGraph = ({
             </CardHeader>
             <CardContent className="px-4">
               <Form {...form}>
-                <div className="grid !grid-cols-4 gap-4 pt-2">
+                <div className="grid !grid-cols-4 gap-4 pt-2.5">
                   <FormModule
                     fields={[
                       {
                         id: 'pie_chart_interfaces',
-                        formType: 'multi-select',
+                        formType: 'custom-field',
                         name: 'pie_chart_interfaces',
                         label: 'Interfaces',
                         description: 'Field Description',
@@ -274,6 +278,82 @@ const InteractiveGraph = ({
                         fieldStyle: {
                           gridColumn: '1 / span 4',
                           gridRow: '1 / span 1',
+                        },
+                        render: ({ form }) => {
+                          const selected = form?.watch('pie_chart_interfaces') || []
+                          const summary =
+                            Array.isArray(selected) && selected.length > 0
+                              ? selected.map((o: { label: string }) => o.label).join(', ')
+                              : 'Select interfaces'
+                          const toggleOption = (opt: any) => {
+                            const value = String(opt?.value ?? '')
+                            const label = String(opt?.label ?? '')
+                            const exists = selected.some((s: { value: string }) => s.value === value)
+                            const next = exists
+                              ? selected.filter((s: { value: string }) => s.value !== value)
+                              : [...selected, { value, label }]
+                            form.setValue('pie_chart_interfaces', next, { shouldDirty: true, shouldTouch: true })
+                          }
+                          const triggerRef = React.useRef<HTMLButtonElement>(null)
+                          const [contentWidth, setContentWidth] = React.useState<number>(0)
+                          React.useEffect(() => {
+                            const update = () => setContentWidth(triggerRef.current?.offsetWidth ?? 0)
+                            update()
+                            window.addEventListener('resize', update)
+                            return () => window.removeEventListener('resize', update)
+                          }, [])
+                          return (
+                            <div className='space-y-2'>
+                              <span className='text-sm leading-6 font-medium text-slate-700'>Interfaces</span>
+                              <Popover>
+                                <PopoverTrigger asChild>
+                                  <button
+                                    type="button"
+                                    className="flex h-[36px] w-full items-center justify-between rounded-md border border-input bg-background px-3 text-sm"
+                                    ref={triggerRef}
+                                  >
+                                    <span className="truncate text-slate-700">{summary}</span>
+                                    <ChevronDown className="size-4 text-muted-foreground" />
+                                  </button>
+                                </PopoverTrigger>
+                                <PopoverContent className="p-0 w-full" style={{ width: contentWidth || undefined }}>
+                                  {/* <div className="px-3 py-2 text-sm font-medium">Interfaces</div> */}
+                                  <Command className="w-full rounded-none">
+                                    <CommandList>
+                                      <CommandGroup>
+                                        {(multiSelectOptions ?? []).map((opt: any) => {
+                                          const isSelected = selected.some((s: { value: string }) => s.value === String(opt?.value ?? ''))
+                                          return (
+                                            <CommandItem
+                                              key={opt.value}
+                                              // onSelect={() => toggleOption(opt)}
+                                              className="!text-md hover:bg-slate-100 active:bg-slate-200 data-[selected=true]:!bg-slate-100 data-[selected=true]:!text-foreground !rounded-none"
+                                            >
+                                              <div className="flex w-full items-center justify-between">
+                                                <div className="flex items-center gap-3">
+                                                  <Checkbox
+                                                    checked={isSelected}
+                                                    onCheckedChange={() => toggleOption(opt)}
+                                                    className="h-4 w-4"
+                                                  />
+                                                  <span className="text-sm">{opt.label}</span>
+                                                </div>
+                                                {isSelected ? (
+                                                  <Check className="size-4 text-success" />
+                                                ) : (
+                                                  <span className="size-4 opacity-0" />
+                                                )}
+                                              </div>
+                                            </CommandItem>
+                                          )
+                                        })}
+                                      </CommandGroup>
+                                    </CommandList>
+                                  </Command>
+                                </PopoverContent>
+                              </Popover>
+                            </div>
+                          )
                         },
                       },
                       {
@@ -342,7 +422,7 @@ const InteractiveGraph = ({
                       // },
                       {
                         id: 'interfaces',
-                        formType: 'multi-select',
+                        formType: 'custom-field',
                         name: 'interfaces',
                         label: 'Interfaces',
                         description: 'Field Description',
@@ -351,6 +431,81 @@ const InteractiveGraph = ({
                         fieldStyle: {
                           gridColumn: '1 / span 2',
                           gridRow: '1 / span 1',
+                        },
+                        render: ({ form }) => {
+                          const selected = form?.watch('interfaces') || []
+                          const summary =
+                            Array.isArray(selected) && selected.length > 0
+                              ? selected.map((o: { label: string }) => o.label).join(', ')
+                              : 'Select interfaces'
+                          const toggleOption = (opt: any) => {
+                            const value = String(opt?.value ?? '')
+                            const label = String(opt?.label ?? '')
+                            const exists = selected.some((s: { value: string }) => s.value === value)
+                            const next = exists
+                              ? selected.filter((s: { value: string }) => s.value !== value)
+                              : [...selected, { value, label }]
+                            form.setValue('interfaces', next, { shouldDirty: true, shouldTouch: true })
+                          }
+                          const triggerRef = React.useRef<HTMLButtonElement>(null)
+                          const [contentWidth, setContentWidth] = React.useState<number>(0)
+                          React.useEffect(() => {
+                            const update = () => setContentWidth(triggerRef.current?.offsetWidth ?? 0)
+                            update()
+                            window.addEventListener('resize', update)
+                            return () => window.removeEventListener('resize', update)
+                          }, [])
+                          return (
+                            <div className="space-y-2">
+                              <span className="text-sm leading-6 font-medium text-slate-700">Interfaces</span>
+                              <Popover>
+                                <PopoverTrigger asChild>
+                                  <button
+                                    type="button"
+                                    className="flex h-[36px] w-full items-center justify-between rounded-md border border-input bg-background px-3 text-sm"
+                                    ref={triggerRef}
+                                  >
+                                    <span className="truncate text-slate-700">{summary}</span>
+                                    <ChevronDown className="size-4 text-muted-foreground" />
+                                  </button>
+                                </PopoverTrigger>
+                                <PopoverContent className="p-0 w-full" style={{ width: contentWidth || undefined }}>
+                                  {/* <div className="px-3 py-2 text-sm font-medium">Interfaces</div> */}
+                                  <Command className="w-full rounded-none">
+                                    <CommandList>
+                                      <CommandGroup>
+                                        {(multiSelectOptions ?? []).map((opt: any) => {
+                                          const isSelected = selected.some((s: { value: string }) => s.value === String(opt?.value ?? ''))
+                                          return (
+                                            <CommandItem
+                                              key={opt.value}
+                                              className="!text-md hover:bg-slate-100 active:bg-slate-200 data-[selected=true]:!bg-slate-100 data-[selected=true]:!text-foreground !rounded-none"
+                                            >
+                                              <div className="flex w-full items-center justify-between">
+                                                <div className="flex items-center gap-3">
+                                                  <Checkbox
+                                                    checked={isSelected}
+                                                    onCheckedChange={() => toggleOption(opt)}
+                                                    className="h-4 w-4"
+                                                  />
+                                                  <span className="text-sm">{opt.label}</span>
+                                                </div>
+                                                {isSelected ? (
+                                                  <Check className="size-4 text-success" />
+                                                ) : (
+                                                  <span className="size-4 opacity-0" />
+                                                )}
+                                              </div>
+                                            </CommandItem>
+                                          )
+                                        })}
+                                      </CommandGroup>
+                                    </CommandList>
+                                  </Command>
+                                </PopoverContent>
+                              </Popover>
+                            </div>
+                          )
                         },
                       },
                       {
