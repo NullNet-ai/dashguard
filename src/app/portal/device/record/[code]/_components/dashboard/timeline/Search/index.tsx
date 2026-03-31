@@ -80,7 +80,7 @@ export default function Search({params, filter_type} : {params: any, filter_type
           <SearchListMobile />
         </div>
       </div> */}
-      {(isLoading || !hasAnyRows) && (
+      {(isLoading) && (
         <div className="mb-2 rounded-md border border-amber-200 bg-amber-50 p-3 py-2 text-amber-800">
           <div className="flex items-center gap-2">
             <ArrowPathIcon className="mt-0.5 size-6 text-amber-500 animate-spin" />
