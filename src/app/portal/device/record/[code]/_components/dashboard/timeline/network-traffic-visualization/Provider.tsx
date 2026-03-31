@@ -103,9 +103,10 @@ export default function NetworkFlowProvider({ children, params }: IProps) {
 
   /** Ref copies of frequently-read values used inside async callbacks to avoid
    *  stale closure issues without adding them to useCallback dependency arrays. */
-  const timeRef      = useRef<ITimeSettings | null>(null)
-  const paramsRef    = useRef(params)
-  const searchByRef  = useRef<any>(searchBy)
+  const timeRef              = useRef<ITimeSettings | null>(null)
+  const paramsRef            = useRef(params)
+  const searchByRef          = useRef<any>(searchBy)
+  const pollingIntervalRef   = useRef<number>(ONE_SECOND_MS)
 
   const {socket} = useSocketConnection({channel_name, token})
   const getAccount = api.organizationAccount.getAccountID.useMutation();
@@ -178,6 +179,7 @@ export default function NetworkFlowProvider({ children, params }: IProps) {
   useEffect(() => { timeRef.current = time }, [time])
   useEffect(() => { paramsRef.current = params }, [params])
   useEffect(() => { searchByRef.current = searchBy }, [searchBy])
+  useEffect(() => { pollingIntervalRef.current = pollingInterval }, [pollingInterval])
   useEffect(() => { activeFilterIdRef.current = filterId }, [filterId])
 
   useEffect(() => {
@@ -418,7 +420,7 @@ export default function NetworkFlowProvider({ children, params }: IProps) {
         }))
       // })
 
-      // Clear the `isNew` highlight after 1 s.
+      // Clear the `isNew` highlight after one polling interval.
       if (newEntries.length > 0) {
         const newIpList = newEntries.map(e => e.source_ip)
         window.setTimeout(() => {
@@ -429,7 +431,7 @@ export default function NetworkFlowProvider({ children, params }: IProps) {
           // startTransition(() =>  {
             setSnapshot(prev => ({ ...prev, recentIPData: recentBandwidthRef.current }))
           // })
-        }, 1_000)
+        }, pollingIntervalRef.current + 1_000)
       }
     } catch (err) {
       console.error('[recentIP] error:', err)
@@ -687,7 +689,7 @@ export default function NetworkFlowProvider({ children, params }: IProps) {
           // startTransition(() => {
             setSnapshot(prev => ({ ...prev, recentIPData: recentBandwidthRef.current }))
           // })
-        }, 1_000)
+        }, pollingIntervalRef.current + 1_000)
       }
     })
 
