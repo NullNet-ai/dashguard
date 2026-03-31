@@ -103,7 +103,7 @@ export default function IPSearch() {
   }, [items, debouncedSearchInput, searchableFields])
 
   return (
-    <div className="flex flex-col gap-2 py-2 pr-[8px]">
+    <div className="flex flex-col gap-2 py-2 pr-[8px] w-full">
       <Combobox>
         <div className="relative">
           <div className="flex items-center rounded-md border pl-2 pr-3 focus-within:border-primary flex-nowrap gap-1 overflow-x-auto whitespace-nowrap w-full">

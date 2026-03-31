@@ -31,6 +31,7 @@ interface SummaryDetailsCardProps {
   data?: any;
   scrollable?: boolean;
   maxHeight?: number | string;
+  defaultVisibleCount?: number;
 }
 
 interface SummaryDetailsProps {
@@ -124,15 +125,22 @@ function SummaryDetailsCard({
   data,
   scrollable,
   maxHeight,
+  defaultVisibleCount = 5,
 }: SummaryDetailsCardProps) {
-  const contentMaxHeight =
-    typeof maxHeight === 'number' ? `${maxHeight}px` : maxHeight || '16rem';
+  const [expanded, setExpanded] = React.useState(false);
+
+  const visibleLimit =
+    typeof maxHeight === 'number' ? maxHeight : defaultVisibleCount;
+  const hasMore = scrollable && items.length > visibleLimit;
+  const visibleItems =
+    scrollable && !expanded ? items.slice(0, visibleLimit) : items;
+
   return (
     <Card
       className={className}
       data-test-id={testIDFormatter('rcrd-sum-details-container')}
     >
-      <div className={cn('flex flex-col gap-1 py-3', scrollable ? 'h-auto' : undefined)}>
+      <div className="flex flex-col gap-1 py-3">
         {header_title && (
           <p className="text-md font-medium text-foreground px-3">{header_title}</p>
         )}
@@ -141,27 +149,23 @@ function SummaryDetailsCard({
             data-test-id={testIDFormatter('rcrd-sum-details-separator')}
           />
         </span>
-        {scrollable ? (
-          <div className="flex flex-col gap-1 overflow-auto scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-gray-100 pl-3 pr-1" style={{ maxHeight: contentMaxHeight }}>
-            {items.map((item, index) => (
-              <SummaryFieldRow
-                key={`${item.key}-${index}`}
-                item={item}
-                data={data}
-              />
-            ))}
-          </div>
-        ) : (
-          <div className="flex flex-col gap-1 px-3">
-            {items.map((item, index) => (
-              <SummaryFieldRow
-                key={`${item.key}-${index}`}
-                item={item}
-                data={data}
-              />
-            ))}
-          </div>
-        )}
+        <div className="flex flex-col gap-1 px-3">
+          {visibleItems.map((item, index) => (
+            <SummaryFieldRow
+              key={`${item.key}-${index}`}
+              item={item}
+              data={data}
+            />
+          ))}
+          {hasMore && (
+            <button
+              className="mt-1 self-start text-xs text-blue-500 hover:text-blue-700"
+              onClick={() => setExpanded(prev => !prev)}
+            >
+              {expanded ? 'See less' : `See more`}
+            </button>
+          )}
+        </div>
       </div>
     </Card>
   );

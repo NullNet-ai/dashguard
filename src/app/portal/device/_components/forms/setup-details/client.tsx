@@ -1,10 +1,11 @@
 'use client';
 
 import React, { useEffect } from 'react';
-import { Copy } from 'lucide-react';
+import { CircleCheck, Copy } from 'lucide-react';
 import { z } from 'zod';
 import { FormBuilder } from '~/components/platform/FormBuilder';
 import { Button } from '~/components/ui/button';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '~/components/ui/tooltip';
 import { api } from '~/trpc/react';
 
 const toControlChannelUrl = (remoteAccessUrl?: string) => {
@@ -45,20 +46,29 @@ const CodeRow = ({
   }, [value]);
 
   return (
-    <div className={`flex items-center justify-between gap-3 rounded-md border px-3 py-2 ${styles}`}>
+    <div className={`flex items-center justify-between gap-3 rounded-md border px-3 ${styles}`}>
       <pre className="m-0 flex-1 overflow-x-auto whitespace-pre-wrap break-all text-sm leading-5">
         <code>{value}</code>
       </pre>
-      <Button
-        type="button"
-        variant="ghost"
-        size="icon"
-        onClick={handleCopy}
-        disabled={!value}
-        className="shrink-0"
-      >
-        <Copy className="h-4 w-4" />
-      </Button>
+      <TooltipProvider delayDuration={0}>
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <Button
+              type="button"
+              variant="ghost"
+              size="icon"
+              onClick={handleCopy}
+              disabled={!value}
+              className="shrink-0 size-7 my-1"
+            >
+              <Copy className="h-4 w-4" />
+            </Button>
+          </TooltipTrigger>
+          <TooltipContent side="top">
+            Copy to clipboard
+          </TooltipContent>
+        </Tooltip>
+      </TooltipProvider>
     </div>
   );
 };
@@ -81,16 +91,16 @@ const Step = ({ number, title, isLast = false, children, color = 'slate' }: Step
   const { badgeClasses, lineClasses } = React.useMemo(() => {
     switch (color) {
       case 'amber':
-        return { badgeClasses: 'bg-amber-50 text-slate-700 ring-amber-300/50', lineClasses: 'bg-amber-300/30 grayscale-' };
+        return { badgeClasses: 'bg-amber-200 text-slate-700 ring-amber-300/50', lineClasses: 'bg-amber-300/30 grayscale-' };
       case 'blue':
-        return { badgeClasses: 'bg-blue-50 text-slate-700 ring-blue-300/50', lineClasses: 'bg-blue-300/30' };
+        return { badgeClasses: 'bg-blue-200 text-slate-700 ring-blue-300/50', lineClasses: 'bg-blue-300/30' };
       case 'green':
-        return { badgeClasses: 'bg-emerald-50 text-slate-700 ring-emerald-300/50', lineClasses: 'bg-emerald-300/30' };
+        return { badgeClasses: 'bg-emerald-200 text-slate-700 ring-emerald-300/50', lineClasses: 'bg-emerald-300/30' };
       case 'purple':
-        return { badgeClasses: 'bg-violet-50 text-slate-700 ring-violet-300/50', lineClasses: 'bg-violet-300/30' };
+        return { badgeClasses: 'bg-violet-200 text-slate-700 ring-violet-300/50', lineClasses: 'bg-violet-300/30' };
       case 'slate':
       default:
-        return { badgeClasses: 'bg-slate-50 text-slate-700 ring-slate-300/50', lineClasses: 'bg-slate-300/30' };
+        return { badgeClasses: 'bg-slate-200 text-slate-700 ring-slate-300/50', lineClasses: 'bg-slate-300/30' };
     }
   }, [color]);
 
@@ -102,7 +112,7 @@ const Step = ({ number, title, isLast = false, children, color = 'slate' }: Step
         </div>
         <div className={`my-1 w-[2px] flex-1 ${lineClasses}`} style={{ filter: 'grayscale(40%)' }} />
       </div>
-      <div className="flex-1 pb-6">
+      <div className="flex-1 pb-4">
         <div className="mb-2 pt-1 text-sm font-semibold text-slate-900">{title}</div>
         {children}
       </div>
@@ -276,8 +286,14 @@ const SetupDetails: React.FC<{ identifier: string }> = ({
             {/* <div className="text-base font-semibold text-slate-900">
               Download and install the WallGuard Package on pfSense
             </div> */}
-          <div className="text-sm text-slate-600">
-            Follow these steps to install and set up the WallGuard agent on your pfSense system.
+          <div className="">
+            <div className="text-sm text-slate-600">
+              Follow these steps to install and set up the WallGuard agent on your pfSense system.
+            </div>
+            <div className="flex items-center gap-1 text-sm text-slate-600">
+              Run these commands in your pfSense SSH shell
+              <CircleCheck size={13} fill='#7FCEAB' className='text-white'/>
+            </div>
           </div>
 
           <div>

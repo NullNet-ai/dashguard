@@ -17,7 +17,7 @@ const RecordContainer = ({ children }: any) => {
     }
 
   return (
-    <div className={cn(`hidden h-full min-h-[calc(100dvh-100px)] w-full md:block`, `${!isCollapseRecordSummary ? 'w-full min-w-[300px] max-w-min' : 'w-12'}`
+    <div className={cn(`hidden h-full min-h-[calc(100dvh-100px)] pb-1 w-full md:block overflow-y-auto`, `${!isCollapseRecordSummary ? 'w-full min-w-[300px] max-w-min' : 'w-12'}`
     )}
     >
       {children}

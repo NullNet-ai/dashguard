@@ -91,8 +91,11 @@ export default function Search({params, filter_type} : {params: any, filter_type
           </div>
         </div>
       )}
-        <div className="grid grid-cols-[250px_1fr] items-center">
-          <IPSearch />
+        <div className="grid grid-cols-[300px_1fr] items-center">
+          <div className="flex items-center gap-2 text-xs pl-1.5 w-full">
+            <span className="whitespace-nowrap">Search by:</span>
+            <IPSearch />
+          </div>
           <div className="flex items-center justify-between gap-2">
             <div className="flex items-center gap-2 text-xs pl-1.5 w-full max-w-44">
               <span className="whitespace-nowrap">Sort by:</span>
