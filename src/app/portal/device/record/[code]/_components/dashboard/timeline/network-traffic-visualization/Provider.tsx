@@ -25,6 +25,7 @@ interface ITimeSettings {
 }
 
 const ONE_SECOND_MS     = 1_000
+const THREE_SECONDS_MS  = 3_000
 const FIVE_SECONDS_MS   = 5_000
 const TEN_SECONDS_MS    = 10_000
 const THIRTY_SECONDS_MS = 30_000
@@ -152,9 +153,9 @@ export default function NetworkFlowProvider({ children, params }: IProps) {
    */
   const pollingInterval = useMemo((): number => {
     if (!time) return ONE_SECOND_MS
-    if (time.time_unit === 'second' || (time.time_unit === 'minute' && time.time_count === 1)) return ONE_SECOND_MS
-    if (time.time_unit === 'minute') return FIVE_SECONDS_MS
-    return THIRTY_SECONDS_MS
+    if (time.time_unit === 'second') return THREE_SECONDS_MS
+    if (time.time_unit === 'minute') return FIVE_SECONDS_MS * time.time_count
+    return THIRTY_SECONDS_MS * time.time_count
   }, [time])
 
   /**
@@ -167,8 +168,8 @@ export default function NetworkFlowProvider({ children, params }: IProps) {
   const pollingIntervalTopTraffic = useMemo((): number => {
     if (!time) return FIVE_SECONDS_MS
     if (time.time_unit === 'second') return FIVE_SECONDS_MS
-    if (time.time_unit === 'minute') return TEN_SECONDS_MS
-    return ONE_MINUTE_MS
+    if (time.time_unit === 'minute') return TEN_SECONDS_MS * time.time_count
+    return ONE_MINUTE_MS * time.time_count
   }, [time])
 
   // ── Keep refs fresh on every render ──
