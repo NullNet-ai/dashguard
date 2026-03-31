@@ -63,7 +63,8 @@ export function generateTimeSeriesData(
   sampleData: any,
   resolution: string,
   time_count: number,
-  time_unit: string
+  time_unit: string,
+  sharedNow?: Date
 ) {
   // Parse resolution
   const resolution_value = parseInt(resolution.slice(0, -1));
@@ -111,8 +112,11 @@ export function generateTimeSeriesData(
   const intervals = 60 // Math.floor(totalSpanMs / intervalMs);
 
   // Generate the full range of time intervals
-  const now = new Date()
+  const now = sharedNow ?? new Date()
   const endDate = new Date(now)
+  if (resolution_unit === 's') {
+    endDate.setSeconds(endDate.getSeconds() - 3)
+  }
   if (resolution_unit === 's') {
     const needsAdvance = endDate.getMilliseconds() !== 0
     endDate.setMilliseconds(0)
@@ -167,7 +171,7 @@ export function generateTimeSeriesData(
   }
 
   if (time_unit === 'hour') {
-    return timeSeriesArray.slice(-24)
+    // return timeSeriesArray.slice(-24)
   } 
   return timeSeriesArray;
 }
