@@ -107,7 +107,7 @@ export default function NetworkFlowProvider({ children, params }: IProps) {
   const timeRef              = useRef<ITimeSettings | null>(null)
   const paramsRef            = useRef(params)
   const searchByRef          = useRef<any>(searchBy)
-  const pollingIntervalRef   = useRef<number>(ONE_SECOND_MS)
+  const pollingIntervalRef = useRef<number>(THREE_SECONDS_MS)
 
   const {socket} = useSocketConnection({channel_name, token})
   const getAccount = api.organizationAccount.getAccountID.useMutation();
@@ -391,7 +391,8 @@ export default function NetworkFlowProvider({ children, params }: IProps) {
       const endDate   = new Date()
       const startDate = new Date(endDate.getTime() - 60 * intervalMs)
 
-      const twoMinutesAgo = endDate.getTime() - 2 * 60_000
+      const timeUnitMs     = settings.time_unit === 'hour' ? 3_600_000 : settings.time_unit === 'minute' ? 60_000 : 1_000
+      const pruneThreshold = endDate.getTime() - settings.time_count * timeUnitMs * 2
 
       const result = withTotal([...newEntries, ...updatedExisting]
         .map(e => ({
@@ -407,7 +408,7 @@ export default function NetworkFlowProvider({ children, params }: IProps) {
             0,
             ...entry.result.map(r => new Date(r.bucket.replace(' ', 'T')).getTime()),
           )
-          return latestBucket >= twoMinutesAgo
+          return latestBucket >= pruneThreshold
         })
 
       recentBandwidthRef.current = result
@@ -518,9 +519,10 @@ export default function NetworkFlowProvider({ children, params }: IProps) {
       const intervalMs = resolutionUnit === 'h' ? resolutionValue * 3_600_000
         : resolutionUnit === 'm' ? resolutionValue * 60_000
         : resolutionValue * 1_000
-      const endDate      = new Date()
-      const startDate    = new Date(endDate.getTime() - 60 * intervalMs)
-      const twoMinutesAgo = endDate.getTime() - 2 * 60_000
+      const endDate        = new Date()
+      const startDate      = new Date(endDate.getTime() - 60 * intervalMs)
+      const timeUnitMs     = settings.time_unit === 'hour' ? 3_600_000 : settings.time_unit === 'minute' ? 60_000 : 1_000
+      const pruneThreshold = endDate.getTime() - settings.time_count * timeUnitMs * 2
 
       // Re-rank by active packets and cap at 5 after every poll cycle.
       const sorted = withTotal([...updatedExisting, ...newEntries]
@@ -538,7 +540,7 @@ export default function NetworkFlowProvider({ children, params }: IProps) {
             0,
             ...entry.result.map(r => new Date(r.bucket.replace(' ', 'T')).getTime()),
           )
-          return latestBucket >= twoMinutesAgo
+          return latestBucket >= pruneThreshold
         })
 
       topTrafficBandwidthRef.current = sorted
