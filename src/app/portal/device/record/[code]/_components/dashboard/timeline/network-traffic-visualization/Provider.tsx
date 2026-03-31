@@ -333,10 +333,13 @@ export default function NetworkFlowProvider({ children, params }: IProps) {
     isRecentIPRunningRef.current = true
     try {
       // Step back 1s leeway for connection insertion from Wallguard Agent
-      const recentCount = settings.time_unit === 'second' || (settings.time_unit === 'minute' && settings.time_count === 1) ? 3
-        : settings.time_unit === 'minute' ? 7
-        : 32
-      const tr = getLastTimeStamp({ count: recentCount, unit: 'second', add_remaining_time: true, _now: new Date(Date.now() - 1_000) }) as any
+      // const recentCount = settings.time_unit === 'second' || (settings.time_unit === 'minute' && settings.time_count === 1) ? 3
+      //   : settings.time_unit === 'minute' ? 7
+      //   : 32
+      // const tr = getLastTimeStamp({ count: recentCount, unit: 'second', add_remaining_time: true, _now: new Date(Date.now() - 1_000) }) as any
+      const tr = getLastTimeStamp({ count: settings.time_count, unit: settings.time_unit, add_remaining_time: true,
+        // _now: new Date(Date.now() - 1_000)
+      }) as any
 
       const newIps = await Promise.race([
         getUniqueIpRef.current.mutateAsync({
@@ -397,10 +400,11 @@ export default function NetworkFlowProvider({ children, params }: IProps) {
       const result = withTotal([...newEntries, ...updatedExisting]
         .map(e => ({
           ...e,
-          result: e.result.filter(r => {
-            const t = new Date(r.bucket.replace(' ', 'T')).getTime()
-            return t >= startDate.getTime() && t <= endDate.getTime()
-          }),
+          // result: e.result.filter(r => {
+          //   const t = new Date(r.bucket.replace(' ', 'T')).getTime()
+          //   return t >= startDate.getTime() && t <= endDate.getTime()
+          // }),
+          result: e.result.slice(0, 120)
         })))
         .filter((entry, index) => {
           // if (index < 10) return true
@@ -467,7 +471,10 @@ export default function NetworkFlowProvider({ children, params }: IProps) {
       const topCount = settings.time_unit === 'second' ? 7
         : settings.time_unit === 'minute' ? 12
         : 62
-      const tr = getLastTimeStamp({ count: topCount, unit: 'second', add_remaining_time: true, _now: new Date(Date.now() - 1_000) }) as any
+      // const tr = getLastTimeStamp({ count: topCount, unit: 'second', add_remaining_time: true, _now: new Date(Date.now() - 1_000) }) as any
+      const tr = getLastTimeStamp({ count: settings.time_count, unit: settings.time_unit, add_remaining_time: true,
+        // _now: new Date(Date.now() - 1_000)
+      }) as any
 
       const newIps = await Promise.race([
         getUniqueIpTopRef.current.mutateAsync({
@@ -528,10 +535,11 @@ export default function NetworkFlowProvider({ children, params }: IProps) {
       const sorted = withTotal([...updatedExisting, ...newEntries]
         .map(e => ({
           ...e,
-          result: e.result.filter(r => {
-            const t = new Date(r.bucket.replace(' ', 'T')).getTime()
-            return t >= startDate.getTime() && t <= endDate.getTime()
-          }),
+          // result: e.result.filter(r => {
+          //   const t = new Date(r.bucket.replace(' ', 'T')).getTime()
+          //   return t >= startDate.getTime() && t <= endDate.getTime()
+          // }),
+          result: e.result.slice(0, 120)
         })))
         .sort((a, b) => (b.total_active_packets ?? 0) - (a.total_active_packets ?? 0))
         .filter((entry, index) => {

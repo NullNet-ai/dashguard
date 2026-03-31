@@ -16,17 +16,21 @@ export default function NetworkFlowView() {
   const { state } = useFetchNetworkFlow();
   const { topTrafficData, recentIPData, pollingIntervalTopTraffic, pollingIntervalRecentIP, loading } = state ?? {} as any;
 
+  // Single reference time shared across both series so they always cover the same time range.
+  // Recomputes whenever either dataset changes (e.g. on different polling intervals).
+  const sharedNow = useMemo(() => new Date(), [topTrafficData, recentIPData]);
+
   const topTrafficFormattedArr = useMemo(() => {
     return (topTrafficData || []).map((el: any) =>
-      generateTimeSeriesData(el.result, el.resolution, el.time_count, el.time_unit)
+      generateTimeSeriesData(el.result, el.resolution, el.time_count, el.time_unit, sharedNow)
     );
-  }, [topTrafficData]);
+  }, [topTrafficData, sharedNow]);
 
   const recentIPFormattedArr = useMemo(() => {
     return (recentIPData || []).map((el: any) =>
-      generateTimeSeriesData(el.result, el.resolution, el.time_count, el.time_unit)
+      generateTimeSeriesData(el.result, el.resolution, el.time_count, el.time_unit, sharedNow)
     );
-  }, [recentIPData]);
+  }, [recentIPData, sharedNow]);
 
   if (loading) {
     return (
