@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState, useCallback, useRef } from 'react'
+import { useEffect, useState, useCallback, useRef, useMemo } from 'react'
 import { getFlagDetails } from '~/app/api/device/get_flags'
 import { getLastTimeStamp } from '~/app/portal/device/utils/timeRange'
 import { useEventEmitter } from '~/context/EventEmitterProvider'
@@ -261,6 +261,8 @@ export function prepareMapComponentData(formattedData: Record<string, any>) {
   return mapReadyData
 }
 
+const THREE_SECONDS_MS  = 3_000
+
 export default function TrafficMaps({ params, defaultValues }: Record<string, any>) {
   const eventEmitter = useEventEmitter()
   const [filterId, setFilterID] = useState('01JNQ9WPA2JWNTC27YCTCYC1FE')
@@ -286,11 +288,11 @@ export default function TrafficMaps({ params, defaultValues }: Record<string, an
   const channel_name = 'live_map'
   const {socket, isConnected} = useSocketConnection({channel_name, token})
   const getAccount = api.organizationAccount.getAccountID.useMutation()
-  const taskQueueRef = useRef<Array<() => Promise<void>>>([])
-  const isQueueWorkerRunningRef = useRef(false)
   const isUnmountedRef = useRef(false)
-  const startQueueServiceRef = useRef<(() => void) | null>(null)
-  
+  const [isInitialized, setIsInitialized] = useState(false)
+  const isFetchRunningRef = useRef(false)
+  const fetchInitialDataRef = useRef<((isInitial: boolean) => Promise<void>) | null>(null)
+
   // API hooks
   const getUniqueSourceAndDestinationIP = api.packet.getUniqueSourceAndDestinationIP.useMutation()
   const { refetch: refetchTimeUnitandResolution } = api.cachedFilter.fetchCachedFilterTimeUnitandResolution.useQuery(
@@ -302,53 +304,9 @@ export default function TrafficMaps({ params, defaultValues }: Record<string, an
     }
   )
 
-  const startQueueService = useCallback(() => {
-    if (isQueueWorkerRunningRef.current) return
-    isQueueWorkerRunningRef.current = true
-
-    void (async () => {
-      try {
-        while (!isUnmountedRef.current) {
-          const next = taskQueueRef.current.shift()
-          if (!next) break
-          try {
-            await next()
-          } catch (err) {
-            console.error('[traffic-map] queue task failed', err)
-          }
-        }
-      } finally {
-        isQueueWorkerRunningRef.current = false
-        if (!isUnmountedRef.current && taskQueueRef.current.length > 0) {
-          startQueueServiceRef.current?.()
-        }
-      }
-    })()
+  const pollingInterval = useMemo(() => {
+    return THREE_SECONDS_MS
   }, [])
-
-  useEffect(() => {
-    startQueueServiceRef.current = startQueueService
-  }, [startQueueService])
-
-  const enqueueTask = useCallback((task: () => Promise<void>) => {
-    taskQueueRef.current.push(task)
-    startQueueServiceRef.current?.()
-  }, [])
-  const fetchInitialDataRef = useRef<((isInitial: boolean) => Promise<void>) | null>(null)
-  const isFirstReloadRef = useRef(true)
-  
-  useEffect(() => {
-    isFirstReloadRef.current = true
-  }, [filterId, params?.id, searchBy])
-
-  const reloadData = useCallback(() => {
-    enqueueTask(() => {
-      if (!fetchInitialDataRef.current) return Promise.resolve()
-      const isInitial = isFirstReloadRef.current
-      isFirstReloadRef.current = false
-      return fetchInitialDataRef.current(isInitial)
-    })
-  }, [enqueueTask])
 
   // Process and enhance IP data with country flags
   const processIPData = useCallback(async (ipData: Record<string, any>) => {
@@ -405,6 +363,9 @@ export default function TrafficMaps({ params, defaultValues }: Record<string, an
   useEffect(() => {
     if (!filterId) return;
 
+    setIsInitialized(false)
+    isFetchRunningRef.current = false
+
     const fetchTimeSettings = async () => {
       try {
         const { data: time_unit_resolution } = await refetchTimeUnitandResolution();
@@ -417,23 +378,24 @@ export default function TrafficMaps({ params, defaultValues }: Record<string, an
           resolution,
         });
         
-        // After time settings are updated, fetch initial data
-        reloadData();
+        await fetchInitialDataRef.current?.(true)
       } catch (error) {
         console.error('Failed to fetch time settings:', error);
       }
     };
     
     fetchTimeSettings();
-  }, [filterId, searchBy, refetchTimeUnitandResolution, reloadData]);
+  }, [filterId, searchBy, refetchTimeUnitandResolution]);
 
   // Fetch initial data (just one record for initial display)
   const fetchInitialData = useCallback(async (isInitial: boolean) => {
+    if (isFetchRunningRef.current) return
+    isFetchRunningRef.current = true
     console.debug(`[pooling] - fetchInitialData`)
     setIsLoading(true);
     
     try {
-      const timeRange = isInitial ? getLastTimeStamp({
+      const timeRange = false ? getLastTimeStamp({
           count: 1,
           unit: 'day',
           add_remaining_time: true,
@@ -473,6 +435,8 @@ export default function TrafficMaps({ params, defaultValues }: Record<string, an
       console.error('Error fetching initial data:', error);
     } finally {
       setIsLoading(false);
+      isFetchRunningRef.current = false
+      if (!isUnmountedRef.current) setIsInitialized(true)
     }
   }, [filterId, params?.id, getUniqueSourceAndDestinationIP, timeSettings, processIPData]);
   
@@ -548,19 +512,16 @@ export default function TrafficMaps({ params, defaultValues }: Record<string, an
 
   useEffect(() => {
     isUnmountedRef.current = false
-    taskQueueRef.current = []
-
-    const twelveHoursMs = 2000 // 12 * 60 * 60 * 1000
-    const interval = window.setInterval(() => {
-      reloadData()
-    }, twelveHoursMs)
-
     return () => {
-      window.clearInterval(interval)
       isUnmountedRef.current = true
-      taskQueueRef.current = []
     }
-  }, [reloadData])
+  }, [])
+
+  useEffect(() => {
+    if (!isInitialized) return
+    const id = window.setInterval(() => void fetchInitialDataRef.current?.(false), pollingInterval)
+    return () => window.clearInterval(id)
+  }, [isInitialized, pollingInterval])
 
   useEffect(() => {
     if (!filterId) return
