@@ -1,4 +1,5 @@
 import React, { useEffect, useMemo, useState } from 'react'
+import moment from 'moment'
 import { useEventEmitter } from '~/context/EventEmitterProvider'
 import {
   Tooltip,
@@ -99,6 +100,18 @@ function formatBandwidth(bytes: number): string {
   if (bytes >= 1024 * 1024) return (bytes / (1024 * 1024)).toFixed(2) + ' MB'
   if (bytes >= 1024)        return (bytes / 1024).toFixed(2) + ' KB'
   return bytes + ' bytes'
+}
+
+function formatDuration(ms: number): string {
+  const dur = moment.duration(ms)
+  const h = Math.floor(dur.asHours())
+  const m = dur.minutes()
+  const s = dur.seconds()
+  const parts: string[] = []
+  if (h > 0) parts.push(`${h}h`)
+  if (m > 0) parts.push(`${m}m`)
+  if (s > 0 || parts.length === 0) parts.push(`${s}s`)
+  return parts.join(' ')
 }
 
 function getIntensityLabel(value: number, maxBandwidth: number): string {
@@ -398,7 +411,7 @@ export default function GridVirtualizerFixed({ topTrafficData, topTrafficFormatt
                         </div>
                         {refreshMs != null && (
                           <span className="font-normal">
-                            (<span className='text-slate-600'>Refresh</span>: {refreshMs / 1000}s)
+                            (<span className='text-slate-600'>Refresh</span>: {formatDuration(refreshMs)})
                           </span>
                         )}
                       </span>
