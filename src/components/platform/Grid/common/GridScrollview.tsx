@@ -22,7 +22,7 @@ export const GridScrollView = ({ children, className, parentType, sidebarTab }: 
   const { dimentionOptions } = gridState?.config || {};
 
   const finalwidth = parentType === 'record' ? _width - (dimentionOptions?.summaryWidth || 350) : _width
-  const sidebarTransition = path2 !== 'grid' ? sidebarTab.useSidebar ? `transition-[max-width] duration-200 ease-in-out ${sidebarTab.closed ? 'max-w-[calc(100vw-41em)]' : 'max-w-[calc(100vw-49em)]'}` : '!w-[calc(100vw-36.5em)]' : '';
+  const sidebarTransition = path2 !== 'grid' ? sidebarTab.useSidebar ? `transition-[max-width] duration-200 ease-in-out ${sidebarTab.closed ? 'max-w-[calc(100vw-41em)]' : 'max-w-[calc(100vw-49em)]'}` : 'w-[calc(100vw-36.5em)]' : '';
 
   return (
     <div

@@ -237,20 +237,25 @@ export default function GridVirtualizerFixed({ topTrafficData, topTrafficFormatt
     ]
   }, [topTrafficData, topTrafficFormatted, recentIPData, recentIPFormatted, inlineFilter, sortKey])
 
+  const hasAnyRows = sections.some(s => s.rows.length > 0)
+
+  const prevSectionsRef = useRef<Section[]>(sections)
+  if (!isLoading && hasAnyRows) {
+    prevSectionsRef.current = sections
+  }
+  const displayedSections = isLoading ? prevSectionsRef.current : sections
+  const isInitialLoad = isLoading && !prevSectionsRef.current.some(s => s.rows.length > 0)
+
   const maxBandwidth = useMemo(() => {
     let max = 0
-    for (const section of sections)
+    for (const section of displayedSections)
       for (const pair of section.rows)
         for (const cell of pair.row) {
           const bw = Number(cell?.bandwidth) || 0
           if (bw > max) max = bw
         }
     return max
-  }, [sections])
-
-  
-
-  const hasAnyRows = sections.some(s => s.rows.length > 0)
+  }, [displayedSections])
 
   useEffect(() => {
     eventEmitter.emit('timeline_has_rows', hasAnyRows)
@@ -365,7 +370,7 @@ export default function GridVirtualizerFixed({ topTrafficData, topTrafficFormatt
   return (
     <TooltipProvider delayDuration={0}>
       <div className="h-[calc(100vh-280px)] overflow-y-auto">
-        {isLoading ? (
+        {isInitialLoad ? (
           <div className="space-y-4 p-2">
             {['Top Traffic', 'Recent IP'].map((_, i) => (
               <div key={i}>
@@ -377,7 +382,7 @@ export default function GridVirtualizerFixed({ topTrafficData, topTrafficFormatt
             ))}
           </div>
         ) : true ? (
-          sections.map((section, i) => {
+          displayedSections.map((section, i) => {
             const refreshMs = section.key === 'top_traffic'
               ? pollingIntervalTopTraffic
               : pollingIntervalRecentIP

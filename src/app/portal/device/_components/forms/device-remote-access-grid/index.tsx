@@ -254,6 +254,7 @@ export default function DeviceRemoteAccessGrid(props) {
     <div className="space-y-2">
       <Grid
         {...grid.gridProps}
+        gridChildClass="!h-[calc(100vh-15em)]"
         gridKey={gridKey}
         hideCreateNewFilter
         config={{
