@@ -1205,7 +1205,7 @@ export const packetRouter = createTRPCRouter({
           entity: 'connections',
           token: ctx.token.value,
           query: {
-            track_total_records: true,
+            // track_total_records: true,
             pluck: ['source_ip', 'timestamp', 'destination_ip', 'total_byte', 'timestamp'],
             advance_filters: [
               {
