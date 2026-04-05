@@ -14,6 +14,73 @@ import { formatSorting } from '~/server/utils/formatSorting';
 const entity = 'device_rules'
 export const deviceRuleRouter = createTRPCRouter({
   ...createDefineRoutes(entity),
+  getInterfaces: privateProcedure
+    .input(z.object({ device_id: z.string() }))
+    .query(async ({ input, ctx }) => {
+      const { device_id } = input
+
+      const deviceConfiguration = await ctx.dnaClient.findAll({
+        entity: 'device_configurations',
+        token: ctx.token.value,
+        query: {
+          pluck: ['id'],
+          advance_filters: [
+            {
+              type: 'criteria',
+              field: 'device_id',
+              entity: 'device_configurations',
+              operator: EOperator.EQUAL,
+              values: [device_id],
+            },
+          ],
+          order: {
+            limit: 1,
+            by_field: 'timestamp',
+            by_direction: EOrderDirection.DESC,
+            is_case_sensitive_sorting: true,
+          },
+        },
+      }).execute()
+
+      const deviceConfigId = deviceConfiguration?.data?.[0]?.id
+      if (!deviceConfigId) return []
+
+      const PAGE_SIZE = 100
+      let startsAt = 0
+      let totalCount: number | null = null
+      let allInterfaces: string[] = []
+
+      do {
+        const { total_count, data } = await ctx.dnaClient.findAll({
+          entity: 'device_filter_rules',
+          token: ctx.token.value,
+          query: {
+            track_total_records: true,
+            pluck: ['interface'],
+            advance_filters: createAdvancedFilter({
+              device_configuration_id: deviceConfigId,
+              status: 'Active',
+            }) as IAdvanceFilters[],
+            order: {
+              starts_at: startsAt,
+              limit: PAGE_SIZE,
+              by_field: 'interface',
+              by_direction: EOrderDirection.ASC,
+            },
+          },
+        }).execute()
+
+        if (totalCount === null) totalCount = total_count ?? 0
+        const pageInterfaces = (data ?? [] as Record<string, unknown>[])
+          .map((r: Record<string, unknown>) => r.interface)
+          .filter((networkInterface): networkInterface is string => typeof networkInterface === 'string')
+        allInterfaces = [...allInterfaces, ...pageInterfaces]
+        startsAt += PAGE_SIZE
+      } while (startsAt < (totalCount ?? 0))
+
+      return [...new Set(allInterfaces)]
+    }),
+
   mainGrid: privateProcedure
     .input(ZodItems.extend({
       device_id: z.string(),

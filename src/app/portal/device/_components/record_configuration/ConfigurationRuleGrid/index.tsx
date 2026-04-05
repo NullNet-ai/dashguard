@@ -8,205 +8,26 @@ import {
 } from '~/components/platform/Grid/utils/grid-get-cache-data';
 import { gridDataResolver } from '~/components/platform/Grid/utils/gridDataResolver';
 import { Card, CardHeader, CardTitle } from '~/components/ui/card';
-import { Label } from '~/components/ui/label';
 import useFetchGridData from '~/hooks/useFetchGridData';
 import gridColumns from './_config/columns';
 import { defaultSorting } from './_config/sorting';
 import { api } from '~/trpc/react';
 import { ulid } from 'ulid';
 import { useSidebarTab } from '~/components/platform/SidebarTab/Provider';
+import type { IConfigurationRuleGridProps, TGridDataResult } from './types';
 
 const ConfigurationRuleGrid = ({
   code,
-}: {
-  code: string;
-}) => {
+}: IConfigurationRuleGridProps) => {
   console.log("%c Line:21 🥪 code", "color:#e41a6a", code);
   const pathname = usePathname();
-  const searchTest = useSearchParams();
+  const searchParams = useSearchParams();
   const { isCollapsed } = useSidebarTab();
-
-  const grid_config = useMemo(() => ({
-    gridKey: 'configuration_rule_grid',
-    entity: 'devices',
-    application: 'record',
-    identifier: code,
-    pathname:
-      `${pathname}` +
-      `${searchTest?.toString() ? `?${searchTest?.toString()}` : ''}`,
-    defaultSorting: defaultSorting,
-    hideDefaultAllTab: true,
-    defaultGridTabs: [
-      {
-        name: 'Floating',
-        current: true,
-        href: `${pathname}?filter_id=`,
-        default: true,
-        default_filter: [],
-        group_advance_filters: [],
-        advance_filters: [
-          {
-            type: 'criteria',
-            field: 'floating',
-            entity: 'device_filter_rules',
-            operator: 'equal',
-            values: ['true'],
-            id: ulid(),
-            label: 'Floating',
-            default: true,
-          },
-        ],
-        hidden: false,
-        order: 0,
-      },
-      {
-        name: 'WAN',
-        current: true,
-        href: `${pathname}?filter_id=`,
-        default: true,
-        default_filter: [],
-        group_advance_filters: [],
-        advance_filters: [
-          {
-            type: 'criteria',
-            field: 'interface',
-            entity: 'device_filter_rules',
-            operator: 'equal',
-            values: ['wan'],
-            id: ulid(),
-            label: 'Interface',
-            default: true,
-          },
-          {
-            operator: "and",
-            type: "operator",
-            default: true,
-          },
-          {
-            type: 'criteria',
-            field: 'floating',
-            entity: 'device_filter_rules',
-            operator: 'equal',
-            values: ['false'],
-            id: ulid(),
-            label: 'Floating',
-            default: true,
-          },
-        ],
-        hidden: false,
-        order: 0,
-      },
-      {
-        name: 'LAN',
-        current: false,
-        href: `${pathname}?filter_id=`,
-        default: true,
-        default_filter: [],
-        group_advance_filters: [],
-        advance_filters: [
-          {
-            type: 'criteria',
-            field: 'interface',
-            entity: 'device_filter_rules',
-            operator: 'equal',
-            values: ['lan'],
-            id: ulid(),
-            label: 'Interface',
-            default: true,
-          },
-          {
-            operator: "and",
-            type: "operator",
-            default: true,
-          },
-          {
-            type: 'criteria',
-            field: 'floating',
-            entity: 'device_filter_rules',
-            operator: 'equal',
-            values: ['false'],
-            id: ulid(),
-            label: 'Floating',
-            default: true,
-          },
-        ],
-        hidden: false,
-        order: 1,
-      },
-      {
-        name: 'Others',
-        current: false,
-        href: `${pathname}?filter_id=`,
-        default: true,
-        default_filter: [],
-        group_advance_filters: [],
-        advance_filters: [
-          {
-            type: 'criteria',
-            field: 'floating',
-            entity: 'device_filter_rules',
-            operator: 'not_equal',
-            values: ['true'],
-            id: ulid(),
-            label: 'Floating',
-            default: true,
-          },
-          {
-            operator: "and",
-            type: "operator",
-            default: true,
-          },
-          {
-            type: 'criteria',
-            field: 'interface',
-            entity: 'device_filter_rules',
-            operator: 'not_equal',
-            values: ['wan'],
-            id: ulid(),
-            label: 'Interface',
-            default: true,
-          },
-          {
-            operator: "and",
-            type: "operator",
-            default: true,
-          },
-          {
-            type: 'criteria',
-            field: 'interface',
-            entity: 'device_filter_rules',
-            operator: 'not_equal',
-            values: ['lan'],
-            id: ulid(),
-            label: 'Interface',
-            default: true,
-          },
-          {
-            operator: "and",
-            type: "operator",
-            default: true,
-          },
-          {
-            type: 'criteria',
-            field: 'floating',
-            entity: 'device_filter_rules',
-            operator: 'equal',
-            values: ['false'],
-            id: ulid(),
-            label: 'Floating',
-            default: true,
-          },
-        ],
-        hidden: false,
-        order: 1,
-      },
-    ],
-  }), [pathname, searchTest, code]);
 
   const {
     data: record = { data: { id: null } },
     refetch,
-    error,
+    isSuccess: isRecordLoaded,
   } = api.record.getByCode.useQuery({
     id: code,
     pluck_fields: ['id'],
@@ -217,25 +38,113 @@ const ConfigurationRuleGrid = ({
     refetch()
   }, [refetch])
 
+  const deviceId = record?.data?.id as string | null
+
+  const { data: deviceInterfaces = [], isSuccess: isInterfacesLoaded } = api.deviceRule.getInterfaces.useQuery(
+    { device_id: deviceId! },
+    { enabled: !!deviceId },
+  )
+
+  // Wait until record is loaded and, if there's a deviceId, until its interfaces are loaded too.
+  // This ensures the first (cache-writing) call to initializeGridTabs has the full defaultGridTabs.
+  const isCacheReady = isRecordLoaded && (!deviceId || isInterfacesLoaded)
+
+  const gridConfig = useMemo(() => {
+    const floatingTab = {
+      name: 'Floating',
+      current: true,
+      href: `${pathname}?filter_id=`,
+      default: true,
+      default_filter: [],
+      group_advance_filters: [],
+      advance_filters: [
+        {
+          type: 'criteria',
+          field: 'floating',
+          entity: 'device_filter_rules',
+          operator: 'equal',
+          values: ['true'],
+          id: ulid(),
+          label: 'Floating',
+          default: true,
+        },
+      ],
+      hidden: false,
+      order: 0,
+    }
+
+    const interfaceTabs = deviceInterfaces.map((networkInterface, index) => ({
+      name: networkInterface.toUpperCase(),
+      current: false,
+      href: `${pathname}?filter_id=`,
+      default: true,
+      default_filter: [],
+      group_advance_filters: [],
+      advance_filters: [
+        {
+          type: 'criteria',
+          field: 'interface',
+          entity: 'device_filter_rules',
+          operator: 'equal',
+          values: [networkInterface],
+          id: ulid(),
+          label: 'Interface',
+          default: true,
+        },
+        {
+          operator: 'and',
+          type: 'operator',
+          default: true,
+        },
+        {
+          type: 'criteria',
+          field: 'floating',
+          entity: 'device_filter_rules',
+          operator: 'equal',
+          values: ['false'],
+          id: ulid(),
+          label: 'Floating',
+          default: true,
+        },
+      ],
+      hidden: false,
+      order: index + 1,
+    }))
+
+    return {
+      gridKey: 'configuration_rule_grid',
+      entity: 'devices',
+      application: 'record',
+      identifier: code,
+      pathname:
+        `${pathname}` +
+        `${searchParams?.toString() ? `?${searchParams?.toString()}` : ''}`,
+      defaultSorting: defaultSorting,
+      hideDefaultAllTab: true,
+      defaultGridTabs: [floatingTab, ...interfaceTabs],
+    }
+  }, [pathname, searchParams, code, deviceInterfaces])
+  console.log("🚀 ~ ConfigurationRuleGrid ~ gridConfig:", gridConfig)
+
   const [gridCachedData, setGridCachedData] = useState<IGridCacheDataResponse>(
     {} as IGridCacheDataResponse,
   );
 
   const getGridCachedData = useCallback(async () => {
-    const gridCachedData = await getGridCacheData({
-      ...grid_config,
+    const cachedData = await getGridCacheData({
+      ...gridConfig,
     });
-    setGridCachedData(gridCachedData);
-  }, [grid_config]);
+    setGridCachedData(cachedData);
+  }, [gridConfig]);
 
-  const searchParamsString = searchTest?.toString();
+  const searchParamsString = searchParams?.toString();
   useEffect(() => {
-    if (!code) return;
+    if (!code || !isCacheReady) return;
     getGridCachedData();
-  }, [searchParamsString, code, getGridCachedData]);
+  }, [searchParamsString, code, getGridCachedData, isCacheReady]);
 
   const { sorts, pagination, filters, groups, columns, grid_tabs } =
-    (gridCachedData || {}) as IGridCacheDataResponse;
+  (gridCachedData || {}) as IGridCacheDataResponse;
 
   const _pluck = [
     'id',
@@ -291,7 +200,7 @@ const ConfigurationRuleGrid = ({
     router: 'deviceRule',
   });
   
-  const { items = [], totalCount = 0 } = (grid_data || {}) as any;
+  const { items = [], totalCount = 0 } = (grid_data ?? {}) as Partial<TGridDataResult>;
 
   useEffect(() => {
     if (record?.data?.id && !!grid_tabs?.[0]) {
