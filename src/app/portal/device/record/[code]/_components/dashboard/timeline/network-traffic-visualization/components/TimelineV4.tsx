@@ -200,10 +200,14 @@ export default function GridVirtualizerFixed({ topTrafficData, topTrafficFormatt
       row: (recentIPFormatted ?? [])[i] ?? [],
     }))
 
+    const hasNonZeroBandwidth = (p: FlowPair) =>
+      p.row.some(cell => Number(cell?.bandwidth) > 0)
+
     const q = inlineFilter.toLowerCase()
-    const filteredTop = q
+    const filteredTop = (q
       ? topPairs.filter(p => p.flow.source_ip?.toLowerCase().includes(q))
       : topPairs
+    ).filter(hasNonZeroBandwidth)
     const filteredRecent = q
       ? recentPairs.filter(p => p.flow.source_ip?.toLowerCase().includes(q))
       : recentPairs
