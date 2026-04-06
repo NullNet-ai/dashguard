@@ -109,7 +109,7 @@ const RecordShellSummary = ({
             return (a?.name ?? '').localeCompare(b?.name ?? '', undefined, { numeric: true })
           }).map(e => ({
             key: e?.name?.toUpperCase(),
-            value: e?.name,
+            value: e?.address,
             truncated: () => ({ string_limit: 35, path: ['value'] })
           }))
         },
