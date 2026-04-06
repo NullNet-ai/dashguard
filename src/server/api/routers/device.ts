@@ -851,9 +851,9 @@ export const deviceRouter = createTRPCRouter({
                 advance_filters: createAdvancedFilter({
                   device_configuration_id: item.id,
                 }),
-                pluck: ['id', 'device_configuration_id', 'name'],
+                pluck: ['id', 'device_configuration_id', 'name', 'description'],
                 pluck_object: {
-                  device_interfaces: ['id', 'device_configuration_id', 'name'],
+                  device_interfaces: ['id', 'device_configuration_id', 'name', 'description'],
                   device_interface_addresses: [
                     'id',
                     'device_interface_id',
@@ -897,7 +897,7 @@ export const deviceRouter = createTRPCRouter({
 
       const transformed_device_interface_address =
         configuration?.interfaces?.map((iface: Record<string, any>) => ({
-          name: iface.device_interfaces?.name || '',
+          name: iface.device_interfaces?.description || iface.device_interfaces?.name || '',
           address: iface.device_interface_addresses?.address
         }));
       const { id: device_group_setting_id, name } =
