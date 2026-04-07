@@ -88,6 +88,10 @@ const PieChartComponent = ({ defaultValues, interfaces }: IFormProps) => {
 
   const {size} = useChartSize()
 
+  useEffect(() => {
+    setTrafficData({ traffic: initialTraffic, previousTraffic: initialTraffic, maxTraffic: 100 })
+  }, [interfaces])
+
   const {socket} = useSocketConnection({channel_name, token})
   
   const getAccount = api.organizationAccount.getAccountID.useMutation();
