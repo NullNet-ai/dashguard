@@ -46,6 +46,9 @@ export interface IBandwidth {
   isNew?: boolean
 }
 
+/** Raw item returned by the bandwidth API before we overlay the local time settings. */
+export interface IRawBandwidthItem extends Omit<IBandwidth, 'time_unit' | 'time_count' | 'resolution'> {}
+
 export interface IState {
   flowData: any[]
   topTrafficData: IBandwidth[]
@@ -59,7 +62,8 @@ export interface IState {
     name: string
     flag: string
   }
-  fetchBandwidthLoading?:boolean
+  fetchBandwidthLoading?: boolean
+  ipPollTick: number
 }
 
 export interface IAction {

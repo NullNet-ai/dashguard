@@ -14,11 +14,19 @@ import TrafficSkeleton from './components/TrafficSkeleton'
 
 export default function NetworkFlowView() {
   const { state } = useFetchNetworkFlow();
-  const { topTrafficData, recentIPData, pollingIntervalTopTraffic, pollingIntervalRecentIP, loading } = state ?? {} as any;
+  const {
+    topTrafficData            = [],
+    recentIPData              = [],
+    pollingIntervalTopTraffic = 0,
+    pollingIntervalRecentIP   = 0,
+    loading                   = true,
+    ipPollTick                = 0,
+  } = state ?? {}
 
   // Single reference time shared across both series so they always cover the same time range.
-  // Recomputes whenever either dataset changes (e.g. on different polling intervals).
-  const sharedNow = useMemo(() => new Date(), [topTrafficData, recentIPData]);
+  // Advances every time the IP poll fires (every 3 s) so the time axis stays current
+  // independently of whether the bandwidth data itself changed.
+  const sharedNow = useMemo(() => new Date(), [ipPollTick]);
 
   const topTrafficFormattedArr = useMemo(() => {
     return (topTrafficData || []).map((el: any) =>
