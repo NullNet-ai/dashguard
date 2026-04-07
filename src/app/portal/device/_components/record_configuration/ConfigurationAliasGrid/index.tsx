@@ -130,7 +130,7 @@ const ConfigurationAliasGrid = ({
     }, [record?.data?.id])
 
   return (
-    <Card className="overflow-hidden h-[calc(100vh-7.5em)]">
+    <Card className="overflow-hidden">
       <CardHeader className="flex w-full flex-1 items-center justify-between bg-slate-100">
         <CardTitle className="text-md text-foreground">
           Aliases
@@ -138,6 +138,7 @@ const ConfigurationAliasGrid = ({
       </CardHeader>
       <Grid
         {...gridProps}
+        gridChildClass='!h-[calc(100vh-19.1em)]'
         sidebarTab={{
           closed: isCollapsed ?? false,
           useSidebar: true

@@ -105,7 +105,7 @@ export default async function Page() {
       <Suspense fallback={fallback}>
         <Grid
           {...mainGrid.gridProps}
-          gridChildClass="!h-[calc(100vh-15em)]"
+          gridChildClass='!h-[calc(100vh-12.6em)]'
           gridKey="device_remote_access"
           config={{
             ...gridBaseConfig,

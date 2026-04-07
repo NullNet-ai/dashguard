@@ -155,6 +155,7 @@ export default function Page() {
   return (
     <Grid
       {...gridProps}
+      gridChildClass='!h-[calc(100vh-12.6em)]'
       totalCount={totalCount || 0}
       data={items}
       isLoading={isLoading}
