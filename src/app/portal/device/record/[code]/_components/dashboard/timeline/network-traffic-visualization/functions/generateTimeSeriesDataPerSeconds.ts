@@ -115,7 +115,7 @@ export function generateTimeSeriesData(
   const now = sharedNow ?? new Date()
   const endDate = new Date(now)
   if (resolution_unit === 's') {
-    endDate.setSeconds(endDate.getSeconds() - 3)
+    // endDate.setSeconds(endDate.getSeconds() - 3)
   }
   if (resolution_unit === 's') {
     const needsAdvance = endDate.getMilliseconds() !== 0

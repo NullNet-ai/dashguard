@@ -26,7 +26,7 @@ export default function NetworkFlowView() {
   // Single reference time shared across both series so they always cover the same time range.
   // Advances every time the IP poll fires (every 3 s) so the time axis stays current
   // independently of whether the bandwidth data itself changed.
-  const sharedNow = useMemo(() => new Date(), [ipPollTick]);
+  const sharedNow = useMemo(() => new Date(Date.now() - 10_000), [ipPollTick]);
 
   const topTrafficFormattedArr = useMemo(() => {
     return (topTrafficData || []).map((el: any) =>

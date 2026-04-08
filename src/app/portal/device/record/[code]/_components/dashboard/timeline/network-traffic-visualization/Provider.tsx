@@ -100,9 +100,10 @@ export default function NetworkFlowProvider({ children, params }: IProps) {
   const filterGenerationRef    = useRef(0)
   const activeFilterIdRef      = useRef(filterId)
   /** Concurrency guards — prevent overlapping poll calls for the same section. */
-  const isBandwidthRunningRef         = useRef(false)
-  const isRecentIPRunningRef   = useRef(false)
-  const isTopTrafficRunningRef = useRef(false)
+  const isRecentBandwidthRunningRef = useRef(false)
+  const isTopBandwidthRunningRef    = useRef(false)
+  const isRecentIPRunningRef        = useRef(false)
+  const isTopTrafficRunningRef      = useRef(false)
 
   /** Ref copies of frequently-read values used inside async callbacks to avoid
    *  stale closure issues without adding them to useCallback dependency arrays. */
@@ -134,7 +135,8 @@ export default function NetworkFlowProvider({ children, params }: IProps) {
    * call through these refs so that interval IDs don't need to be recreated
    * each time the poll functions are redefined.
    */
-  const pollBandwidthsRef = useRef<() => Promise<void>>(async () => {})
+  const pollRecentBandwidthRef = useRef<() => Promise<void>>(async () => {})
+  const pollTopBandwidthRef    = useRef<() => Promise<void>>(async () => {})
   const pollRecentIPRef   = useRef<() => Promise<void>>(async () => {})
   const pollTopTrafficRef = useRef<() => Promise<void>>(async () => {})
 
@@ -244,18 +246,20 @@ export default function NetworkFlowProvider({ children, params }: IProps) {
    * Bails out silently on unmount or stale generation.
    */
   const performInitialLoad = useCallback(async (generation: number, fid: string, settings: ITimeSettings) => {
-    const tr = getLastTimeStamp({ count: settings.time_count, unit: settings.time_unit, add_remaining_time: true }) as any
+    const timeRange = getLastTimeStamp({ count: settings.time_count, unit: settings.time_unit, add_remaining_time: true,
+      _now: new Date(new Date(Date.now() - 10_000))
+    }) as any
     const tr2 = getLastTimeStamp({ count: 1, unit: 'minute', add_remaining_time: true }) as any
 
     const [ips, topIps] = await Promise.all([
       getUniqueIpRef.current.mutateAsync({
         device_id: paramsRef.current?.id || '',
-        time_range: settings.time_unit === 'hour' ? tr2 : tr,
+        time_range: settings.time_unit === 'hour' ? tr2 : timeRange,
         filter_id: fid,
       }) as Promise<string[]>,
       getUniqueIpTopRef.current.mutateAsync({
         device_id: paramsRef.current?.id || '',
-        time_range: settings.time_unit === 'hour' ? tr2 : tr,
+        time_range: settings.time_unit === 'hour' ? tr2 : timeRange,
         filter_id: fid,
         limit: 5,
       }) as Promise<string[]>,
@@ -265,13 +269,13 @@ export default function NetworkFlowProvider({ children, params }: IProps) {
     const [bwResult, bwTopResult]: any[] = await Promise.all([
       getBandwidthRef.current.mutateAsync({
         device_id: paramsRef.current?.id || '',
-        time_range: tr,
+        time_range: timeRange,
         bucket_size: settings.resolution,
         source_ips: ips,
       }),
       getBandwidthTopRef.current.mutateAsync({
         device_id: paramsRef.current?.id || '',
-        time_range: tr,
+        time_range: timeRange,
         bucket_size: settings.resolution,
         source_ips: topIps,
       }),
@@ -285,7 +289,7 @@ export default function NetworkFlowProvider({ children, params }: IProps) {
       time_unit: settings.time_unit,
       time_count: settings.time_count,
       resolution: settings.resolution,
-      time_range: tr,
+      time_range: timeRange,
     })
 
     const recentInitial = withTotal((bwResult?.data ?? []).map(toEntry))
@@ -398,121 +402,71 @@ export default function NetworkFlowProvider({ children, params }: IProps) {
     }
   }, [])
 
-  /**
-   * Shared bandwidth poll — always runs every 3 s regardless of the configured
-   * time window.  Fetches bandwidth for both sections in parallel using the IP
-   * lists accumulated by `pollRecentIP` and `pollTopTraffic`, then merges,
-   * prunes, and commits a single snapshot update.
-   *
-   * Recent bandwidth: full merge + `isNew` highlight for IPs seen for the first time.
-   * Top traffic bandwidth: re-sorted by active-packet count, capped at 5.
-   */
-  const pollBandwidths = useCallback(async () => {
-    if (isBandwidthRunningRef.current) return
+  /** Bandwidth poll for the Recent IP section — runs every 3 s. */
+  const pollRecentBandwidth = useCallback(async () => {
+    if (isRecentBandwidthRunningRef.current) return
     const generation = filterGenerationRef.current
     const settings = timeRef.current
     if (!settings) return
 
-    isBandwidthRunningRef.current = true
+    isRecentBandwidthRunningRef.current = true
     try {
-      const timeRange = getLastTimeStamp({ count: settings.time_count, unit: settings.time_unit, add_remaining_time: true })
+      const timeRange = getLastTimeStamp({ count: settings.time_count, unit: settings.time_unit, add_remaining_time: true,
+        _now: new Date(Date.now() - 10_000)
+      })
 
-      const [recentBwResult, topBwResult] = await Promise.all([
-        getBandwidthRef.current.mutateAsync({
-          device_id: paramsRef.current?.id || '',
-          time_range: timeRange,
-          bucket_size: settings.resolution,
-          source_ips: recentIpsRef.current,
-        }),
-        getBandwidthTopRef.current.mutateAsync({
-          device_id: paramsRef.current?.id || '',
-          time_range: timeRange,
-          bucket_size: settings.resolution,
-          source_ips: topTrafficIpsRef.current,
-        }),
-      ])
+      const bwResult: any = await getBandwidthRef.current.mutateAsync({
+        device_id: paramsRef.current?.id || '',
+        time_range: timeRange as any,
+        bucket_size: settings.resolution,
+        source_ips: recentIpsRef.current,
+      })
       if (isUnmountedRef.current || generation !== filterGenerationRef.current) return
 
-      // Shared pruning threshold — same formula used by both sections.
       const endDate        = new Date()
       const timeUnitMs     = settings.time_unit === 'hour' ? 3_600_000 : settings.time_unit === 'minute' ? 60_000 : 1_000
       const pruneThreshold = endDate.getTime() - settings.time_count * timeUnitMs * 2
 
-      // Recent IP bandwidth
-      const recentIncoming: IBandwidth[] = (recentBwResult?.data ?? []).map((item: IRawBandwidthItem) => ({
+      const incoming: IBandwidth[] = (bwResult?.data ?? []).map((item: IRawBandwidthItem) => ({
         ...item,
         time_unit: settings.time_unit,
         time_count: settings.time_count,
         resolution: settings.resolution,
       }))
 
-      const recentExistingMap = new Map(recentBandwidthRef.current.map(e => [e.source_ip, e]))
+      const existingMap = new Map(recentBandwidthRef.current.map(e => [e.source_ip, e]))
 
-      const recentUpdated = recentBandwidthRef.current.map(entry => {
-        const match = recentIncoming.find(e => e.source_ip === entry.source_ip)
+      const updated = recentBandwidthRef.current.map(entry => {
+        const match = incoming.find(e => e.source_ip === entry.source_ip)
         if (!match) return entry
         const existingBuckets = new Set(entry.result.map(r => r.bucket))
         const freshResults = match.result.filter(r => !existingBuckets.has(r.bucket))
         return { ...entry, result: [...entry.result, ...freshResults] }
       })
 
-      const recentNewEntries = recentIncoming
-        .filter(e => !recentExistingMap.has(e.source_ip))
+      const newEntries = incoming
+        .filter(e => !existingMap.has(e.source_ip))
         .map(e => ({ ...e, isNew: true as const }))
 
-      const recentResult = withTotal([...recentNewEntries, ...recentUpdated]
+      const result = withTotal([...newEntries, ...updated]
         .map(e => ({ ...e, result: e.result.slice(0, 120) })))
         .filter(entry => {
           const latestBucket = Math.max(0, ...entry.result.map(r => new Date(r.bucket.replace(' ', 'T')).getTime()))
           return latestBucket >= pruneThreshold
         })
 
-      // Top traffic bandwidth
-      const topIncoming: IBandwidth[] = (topBwResult?.data ?? []).map((item: IRawBandwidthItem) => ({
-        ...item,
-        time_unit: settings.time_unit,
-        time_count: settings.time_count,
-        resolution: settings.resolution,
-      }))
-
-      const topExistingMap = new Map(topTrafficBandwidthRef.current.map(e => [e.source_ip, e]))
-
-      const topUpdated = topTrafficBandwidthRef.current.map(entry => {
-        const match = topIncoming.find(e => e.source_ip === entry.source_ip)
-        if (!match) return entry
-        const existingBuckets = new Set(entry.result.map(r => r.bucket))
-        const freshResults = match.result.filter(r => !existingBuckets.has(r.bucket))
-        return { ...entry, result: [...entry.result, ...freshResults] }
-      })
-
-      const topNewEntries = topIncoming.filter(e => !topExistingMap.has(e.source_ip))
-
-      const topSorted = withTotal([...topUpdated, ...topNewEntries]
-        .map(e => ({ ...e, result: e.result.slice(0, 120) })))
-        .sort((a, b) => (b.total_active_packets ?? 0) - (a.total_active_packets ?? 0))
-        .filter(entry => {
-          const latestBucket = Math.max(0, ...entry.result.map(r => new Date(r.bucket.replace(' ', 'T')).getTime()))
-          return latestBucket >= pruneThreshold
-        })
-
-      // Commit to refs + state
-      recentBandwidthRef.current     = recentResult
-      recentIpsRef.current           = recentResult.map(e => e.source_ip)
-      topTrafficBandwidthRef.current = topSorted
-      topTrafficIpsRef.current       = topSorted.map(e => e.source_ip)
+      recentBandwidthRef.current = result
+      recentIpsRef.current       = result.map(e => e.source_ip)
 
       setSnapshot(prev => ({
         ...prev,
-        recentIPData:           recentResult,
-        unique_source_ips:      recentIpsRef.current,
-        topTrafficData:         topSorted,
-        unique_top_traffic_ips: topTrafficIpsRef.current,
-        ipPollTick:             (prev.ipPollTick + 1) % 1_000_000,
+        recentIPData:      result,
+        unique_source_ips: recentIpsRef.current,
+        ipPollTick:        (prev.ipPollTick + 1) % 1_000_000,
       }))
 
-      // Clear the `isNew` highlight after one bandwidth poll cycle.
-      if (recentNewEntries.length > 0) {
-        const newIpList = recentNewEntries.map(e => e.source_ip)
+      if (newEntries.length > 0) {
+        const newIpList = newEntries.map(e => e.source_ip)
         window.setTimeout(() => {
           if (isUnmountedRef.current) return
           recentBandwidthRef.current = recentBandwidthRef.current.map(e =>
@@ -522,19 +476,93 @@ export default function NetworkFlowProvider({ children, params }: IProps) {
         }, THREE_SECONDS_MS + 1_000)
       }
     } catch (err) {
-      console.error('[pollBandwidths] error:', err)
+      console.error('[recentBandwidth] error:', err)
     } finally {
-      isBandwidthRunningRef.current = false
+      isRecentBandwidthRunningRef.current = false
     }
   }, [])
 
-  useEffect(() => { pollBandwidthsRef.current  = pollBandwidths }, [pollBandwidths])
-  useEffect(() => { pollRecentIPRef.current   = pollRecentIP   }, [pollRecentIP])
-  useEffect(() => { pollTopTrafficRef.current = pollTopTraffic }, [pollTopTraffic])
+  /** Bandwidth poll for the Top Traffic section — runs every 3 s. */
+  const pollTopBandwidth = useCallback(async () => {
+    if (isTopBandwidthRunningRef.current) return
+    const generation = filterGenerationRef.current
+    const settings = timeRef.current
+    if (!settings) return
+
+    isTopBandwidthRunningRef.current = true
+    try {
+      const timeRange = getLastTimeStamp({ count: settings.time_count, unit: settings.time_unit, add_remaining_time: true,
+        _now: new Date(Date.now() - 3_000)
+      })
+
+      const bwResult: any = await getBandwidthTopRef.current.mutateAsync({
+        device_id: paramsRef.current?.id || '',
+        time_range: timeRange as any,
+        bucket_size: settings.resolution,
+        source_ips: topTrafficIpsRef.current,
+      })
+      if (isUnmountedRef.current || generation !== filterGenerationRef.current) return
+
+      const endDate        = new Date()
+      const timeUnitMs     = settings.time_unit === 'hour' ? 3_600_000 : settings.time_unit === 'minute' ? 60_000 : 1_000
+      const pruneThreshold = endDate.getTime() - settings.time_count * timeUnitMs * 2
+
+      const incoming: IBandwidth[] = (bwResult?.data ?? []).map((item: IRawBandwidthItem) => ({
+        ...item,
+        time_unit: settings.time_unit,
+        time_count: settings.time_count,
+        resolution: settings.resolution,
+      }))
+
+      const existingMap = new Map(topTrafficBandwidthRef.current.map(e => [e.source_ip, e]))
+
+      const updated = topTrafficBandwidthRef.current.map(entry => {
+        const match = incoming.find(e => e.source_ip === entry.source_ip)
+        if (!match) return entry
+        const existingBuckets = new Set(entry.result.map(r => r.bucket))
+        const freshResults = match.result.filter(r => !existingBuckets.has(r.bucket))
+        return { ...entry, result: [...entry.result, ...freshResults] }
+      })
+
+      const newEntries = incoming.filter(e => !existingMap.has(e.source_ip))
+
+      const sorted = withTotal([...updated, ...newEntries]
+        .map(e => ({ ...e, result: e.result.slice(0, 120) })))
+        .sort((a, b) => (b.total_active_packets ?? 0) - (a.total_active_packets ?? 0))
+        .filter(entry => {
+          const latestBucket = Math.max(0, ...entry.result.map(r => new Date(r.bucket.replace(' ', 'T')).getTime()))
+          return latestBucket >= pruneThreshold
+        })
+
+      topTrafficBandwidthRef.current = sorted
+      topTrafficIpsRef.current       = sorted.map(e => e.source_ip)
+
+      setSnapshot(prev => ({
+        ...prev,
+        topTrafficData:         sorted,
+        unique_top_traffic_ips: topTrafficIpsRef.current,
+      }))
+    } catch (err) {
+      console.error('[topBandwidth] error:', err)
+    } finally {
+      isTopBandwidthRunningRef.current = false
+    }
+  }, [])
+
+  useEffect(() => { pollRecentBandwidthRef.current = pollRecentBandwidth }, [pollRecentBandwidth])
+  useEffect(() => { pollTopBandwidthRef.current    = pollTopBandwidth    }, [pollTopBandwidth])
+  useEffect(() => { pollRecentIPRef.current        = pollRecentIP        }, [pollRecentIP])
+  useEffect(() => { pollTopTrafficRef.current      = pollTopTraffic      }, [pollTopTraffic])
 
   useEffect(() => {
     if (!isInitialized) return
-    const id = window.setInterval(() => void pollBandwidthsRef.current(), THREE_SECONDS_MS)
+    const id = window.setInterval(() => void pollRecentBandwidthRef.current(), THREE_SECONDS_MS)
+    return () => window.clearInterval(id)
+  }, [isInitialized])
+
+  useEffect(() => {
+    if (!isInitialized) return
+    const id = window.setInterval(() => void pollTopBandwidthRef.current(), THREE_SECONDS_MS)
     return () => window.clearInterval(id)
   }, [isInitialized])
 
@@ -565,9 +593,10 @@ export default function NetworkFlowProvider({ children, params }: IProps) {
     topTrafficBandwidthRef.current  = []
     recentIpsRef.current            = []
     topTrafficIpsRef.current        = []
-    isBandwidthRunningRef.current          = false
-    isRecentIPRunningRef.current    = false
-    isTopTrafficRunningRef.current  = false
+    isRecentBandwidthRunningRef.current = false
+    isTopBandwidthRunningRef.current    = false
+    isRecentIPRunningRef.current        = false
+    isTopTrafficRunningRef.current      = false
     setSnapshot(prev => ({ ...prev, loading: true }))
 
     void (async () => {
@@ -596,9 +625,10 @@ export default function NetworkFlowProvider({ children, params }: IProps) {
       const fid = activeFilterIdRef.current
 
       setIsInitialized(false)
-      isBandwidthRunningRef.current         = false
-      isRecentIPRunningRef.current   = false
-      isTopTrafficRunningRef.current = false
+      isRecentBandwidthRunningRef.current = false
+      isTopBandwidthRunningRef.current    = false
+      isRecentIPRunningRef.current        = false
+      isTopTrafficRunningRef.current      = false
       recentBandwidthRef.current     = []
       topTrafficBandwidthRef.current = []
       recentIpsRef.current           = []
