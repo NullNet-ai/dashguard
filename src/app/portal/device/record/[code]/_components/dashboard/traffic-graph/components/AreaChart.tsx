@@ -39,11 +39,12 @@ export const formatNumber = (num: number) => {
 }
 const AreaChartComponent = ({ filteredData }: { filteredData: Record<string, any>[] }) => {
   console.log("🚀 ~ AreaChartComponent ~ filteredData:", filteredData)
-  const formatTooltipValue = (value: unknown) => {
+  const formatTooltipValue = (value: unknown, item: any) => {
+    const packet = item.payload.packet
     const numericValue = typeof value === 'number' ? value : Number(value)
-    return Number.isFinite(numericValue)
+    return `${Number.isFinite(numericValue)
       ? formatBytesTooltip(numericValue)
-      : String(value ?? '')
+      : String(value ?? '')} (${packet} Packet${packet > 1 ? 's' : ''})`
   }
 
   const { yAxisMax, yAxisMin } = useMemo(
