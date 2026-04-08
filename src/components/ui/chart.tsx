@@ -111,7 +111,14 @@ const ChartTooltipContent = React.forwardRef<
       indicator?: "line" | "dot" | "dashed";
       nameKey?: string;
       labelKey?: string;
-      valueFormatter?: (value: unknown) => React.ReactNode;
+      valueFormatter?: (
+        value: unknown,
+        item: {
+          dataKey?: string | number;
+          name?: string | number;
+          payload?: Record<string, unknown>;
+        },
+      ) => React.ReactNode;
     }
 >(
   (
@@ -243,7 +250,7 @@ const ChartTooltipContent = React.forwardRef<
                       {item.value !== undefined && item.value !== null && (
                         <span className="font-mono font-medium tabular-nums text-foreground">
                           {valueFormatter
-                            ? valueFormatter(item.value)
+                            ? valueFormatter(item.value, item)
                             : typeof item.value === "number"
                               ? item.value.toLocaleString()
                               : String(item.value)}

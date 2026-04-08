@@ -7,9 +7,11 @@ import { getInterfaceColor, sortInterface } from './graph-color';
 import { formatBytes } from '../../pie-chart/function/formatBytes'
 
 const AreaChartComponent = ({ filteredData, interfaces }: any) => {
-  const formatTooltipValue = (value: unknown) => {
+  const formatTooltipValue = (value: unknown, item: any) => {
+    const { payload, dataKey } = item
+    const packet = payload[`${dataKey}_packet`]
     const numericValue = typeof value === 'number' ? value : Number(value)
-    return Number.isFinite(numericValue) ? formatBytes(numericValue) : String(value ?? '')
+    return `${Number.isFinite(numericValue) ? formatBytes(numericValue) : String(value ?? '')} (${packet} Packet${packet > 1 ? 's' : ''})`
   }
   const sorted = sortInterface(interfaces);
   const { yAxisMax, yAxisMin } = modifyAxis(filteredData);

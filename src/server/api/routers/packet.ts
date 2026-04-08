@@ -252,6 +252,11 @@ export const packetRouter = createTRPCRouter({
             aggregate_on: 'total_byte',
             bucket_name: 'bandwidth',
           },
+          {
+            aggregation: 'SUM',
+            aggregate_on: 'total_packet',
+            bucket_name: 'packet',
+          },
         ],
         advance_filters: [
           {
@@ -305,9 +310,9 @@ export const packetRouter = createTRPCRouter({
       const data = res?.data.find((element: any) => element.bucket?.includes(item))
       if (data) {
         const bandwidth = typeof data.bandwidth === 'string' ? parseInt(data.bandwidth, 10) : (data.bandwidth ?? 0)
-        return { bucket: item, bandwidth, bandwidth_formatted: bandwidth.toLocaleString('en-US') }
+        return { bucket: item, bandwidth, bandwidth_formatted: bandwidth.toLocaleString('en-US'), packet: data.packet }
       }
-      return { bucket: item, bandwidth: 0, bandwidth_formatted: '0' }
+      return { bucket: item, bandwidth: 0, bandwidth_formatted: '0', packet: 0 }
     })
 
     return result
@@ -328,6 +333,11 @@ export const packetRouter = createTRPCRouter({
                 aggregation: 'SUM',
                 aggregate_on: 'total_byte',
                 bucket_name: 'bandwidth',
+              },
+              {
+                aggregation: 'SUM',
+                aggregate_on: 'total_packet',
+                bucket_name: 'packet',
               },
             ],
             advance_filters: [
@@ -401,6 +411,7 @@ export const packetRouter = createTRPCRouter({
           return {
             ...acc,
             [key]: same_val?.bandwidth || 0,
+            [`${key}_packet`]: same_val?.packet || 0,
           }
         }, {})
 
