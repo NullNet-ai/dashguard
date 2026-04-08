@@ -403,6 +403,7 @@ export default function TrafficMaps({ params, defaultValues }: Record<string, an
         count: 2,  // timeSettings.time_count,
         unit: 'second', // timeSettings.time_unit,
         add_remaining_time: true,
+        _now: new Date(Date.now() - 3_000)
       });
       
       const input: any = {
