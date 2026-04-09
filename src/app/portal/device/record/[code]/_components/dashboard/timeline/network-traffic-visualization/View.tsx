@@ -62,8 +62,10 @@ export default function NetworkFlowView() {
   return (
     <TimelineV4
       topTrafficData={topTrafficData}
+      // @ts-expect-error - No type yet
       topTrafficFormatted={topTrafficFormattedArr}
       recentIPData={recentIPData}
+      // @ts-expect-error - No type yet
       recentIPFormatted={recentIPFormattedArr}
       pollingIntervalTopTraffic={pollingIntervalTopTraffic}
       pollingIntervalRecentIP={pollingIntervalRecentIP}
