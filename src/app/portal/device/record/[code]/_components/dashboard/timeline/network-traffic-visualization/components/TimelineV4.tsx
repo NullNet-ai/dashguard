@@ -225,18 +225,41 @@ export default function GridVirtualizerFixed({ topTrafficData, topTrafficFormatt
       return 0
     })
 
+    const topTrafficSliced = topTraffic.slice(0, 5)
+    const recentIPSliced = recentIP.slice(0, 10)
+
+    const topTrafficIPs = new Set(topTrafficSliced.map(p => p.flow.source_ip))
+    const finalTopTraffic = topTrafficSliced.length < 5
+      ? [
+          ...topTrafficSliced,
+          ...recentIPSliced
+            .filter(p => !topTrafficIPs.has(p.flow.source_ip))
+            .slice(0, 5 - topTrafficSliced.length),
+        ]
+      : topTrafficSliced
+
+    const recentIPs = new Set(recentIPSliced.map(p => p.flow.source_ip))
+    const finalRecentIP = recentIPSliced.length < 10
+      ? [
+          ...recentIPSliced,
+          ...topTrafficSliced
+            .filter(p => !recentIPs.has(p.flow.source_ip))
+            .slice(0, 10 - recentIPSliced.length),
+        ]
+      : recentIPSliced
+
     return [
       {
         key: 'top_traffic',
         label: 'Top Traffic',
         description: 'IPs generating the highest traffic within the selected time range',
-        rows: topTraffic.slice(0, 5)
+        rows: finalTopTraffic
       },
       {
         key: 'recent_ip',
         label: 'Recent IP',
         description: 'Most recently observed IPs regardless of traffic volume',
-        rows: recentIP.slice(0, 10)
+        rows: finalRecentIP
       },
     ]
   }, [topTrafficData, topTrafficFormatted, recentIPData, recentIPFormatted, inlineFilter, sortKey])
