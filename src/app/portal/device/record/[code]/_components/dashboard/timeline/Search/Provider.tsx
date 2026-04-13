@@ -41,7 +41,6 @@ export default function GraphSearchProvider({ children, params, filter_type }: I
   const {id: device_id, router = 'packet', resolver = 'filterConnections'} = params || {}
   
   const { defaultEntity } = searchConfig ?? {}
-  const isTimelineSearch = filter_type === 'timeline_search'
 
   const [_query, setQuery] = useState<string>('')
   
@@ -53,55 +52,6 @@ export default function GraphSearchProvider({ children, params, filter_type }: I
   const [search_params, setSearchParams] = useState({})
   const [filterId, setFilterID] = useState('01JNQ9WPA2JWNTC27YCTCYC1FE')
   const [time, setTime] = useState<Record<string, any> | null>(null)
-  const [chartData, setChartData] = useState<any[]>([])
-
-  const localRawItems = useMemo(() => {
-    if (!Array.isArray(chartData)) return []
-    return chartData
-      .filter(Boolean)
-      .map((item: any) => {
-        const interface_name
-          = item?.interface_name ?? item?.interface ?? item?.iface ?? item?.if_name
-        const source_ip
-          = item?.source_ip ?? item?.src_ip ?? item?.source?.ip ?? item?.source_ip_address
-        const destination_ip
-          = item?.destination_ip ?? item?.dst_ip ?? item?.destination?.ip ?? item?.destination_ip_address
-        const protocol = item?.protocol ?? item?.proto ?? item?.protocol_name
-        const country
-          = item?.country
-            ?? item?.ip_info?.country
-            ?? item?.ip_infos?.country
-            ?? item?.source_ip_info?.country
-            ?? item?.name
-
-        return {
-          ...item,
-          interface_name,
-          source_ip,
-          destination_ip,
-          protocol,
-          country,
-        }
-      })
-  }, [chartData])
-
-  const getLocalRawItemsByQuery = (query: string) => {
-    const q = (query || '').trim().toLowerCase()
-    if (!q) return localRawItems
-
-    return localRawItems.filter((item: any) => {
-      return searchableFields.some((field: any) => {
-        const key = field?.accessorKey
-        if (!key) return false
-        const value = item?.[key]
-        if (typeof value === 'string') return value.toLowerCase().includes(q)
-        if (Array.isArray(value) && value.every(v => typeof v === 'string')) {
-          return value.some(v => v.toLowerCase().includes(q))
-        }
-        return false
-      })
-    })
-  }
 
   // const [searchItems, setItems] = useState()
 
@@ -174,16 +124,7 @@ export default function GraphSearchProvider({ children, params, filter_type }: I
   const handleSearchQuery = async(
     search_params: ISearchParams,
   ) => {
-    if (isTimelineSearch) {
-      setRawItems(getLocalRawItemsByQuery(_query) as any)
-      return {
-        items: getLocalRawItemsByQuery(_query),
-        _query,
-      } as any
-    }
-
     setSearchParams(search_params)
-    return data
   };
 
 
@@ -191,31 +132,29 @@ export default function GraphSearchProvider({ children, params, filter_type }: I
     if (!filterId) return
 
     const fetchTimeUnitandResolution = async () => {
-      const {
-        data: time_unit_resolution,
-      } = await refetchTimeUnitandResolution()
+      // const {
+      //   data: time_unit_resolution,
+      // } = await refetchTimeUnitandResolution()
 
-      const { time, resolution = '1h' } = time_unit_resolution || {}
-      const { time_count = 12, time_unit = 'hour' } = time || {}
+      // const { time, resolution = '1h' } = time_unit_resolution || {}
+      // const { time_count = 12, time_unit = 'hour' } = time || {}
       
       setTime({
-        time_count,
-        time_unit: time_unit as 'hour',
-        resolution: resolution as '1h',
+        time_count: 12, // time_count,
+        time_unit: 'hour', // time_unit as 'hour',
+        resolution: '1h', // resolution as '1h',
       })
     }
     fetchTimeUnitandResolution()
   }, [filterId])
 
   useEffect(() => {
-    if (!isTimelineSearch) return
-    if (!_query) return
-    setRawItems(getLocalRawItemsByQuery(_query) as any)
-  }, [isTimelineSearch, _query, localRawItems])
+    const refetchSearchOption = async () => {
+      
+      setRawItems([])
+      
+      if (!_query) return
 
-  useEffect(() => {
-    if (isTimelineSearch) return
-    const refetchSearchOption =async () => {
       const {data}: any = await refetch()
       if(data?._query == _query){
         setRawItems(data?.items)
@@ -298,19 +237,11 @@ export default function GraphSearchProvider({ children, params, filter_type }: I
       if (typeof data !== 'string') return
       setFilterID(data)
     }
-    
-    const setCData = (data: any) => {
-      setChartData(data)
-    }
-
     // eventEmitter.on(`${filter_type}_id`, setFID)
     eventEmitter.on(`timeline_filter_id`, setFID)
 
-    eventEmitter.on('timeline_chart_data', setCData)
-
     return () => {
       eventEmitter.off(`timeline_filter_id`, setFID)
-      eventEmitter.off('timeline_chart_data', setCData)
     }
 
   }, [eventEmitter])

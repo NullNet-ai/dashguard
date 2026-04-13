@@ -75,7 +75,7 @@ export default function IPSearch() {
       {
         entity: 'connections',
         current: 0,
-        limit: 100,
+        limit: 20,
         pluck: ['id', 'code', 'categories', 'status', 'created_date', 'updated_date', 'created_time', 'updated_time'],
         advance_filters: advanceFilterItems as IAdvanceFilters[],
       },
@@ -89,7 +89,7 @@ export default function IPSearch() {
 
   useEffect(() => {
     if (debouncedInlineFilter == null) return
-    eventEmitter.emit('timeline_inline_filter', debouncedInlineFilter)
+    // eventEmitter.emit('timeline_inline_filter', debouncedInlineFilter)
   }, [debouncedInlineFilter, eventEmitter])
 
   useEffect(() => {
