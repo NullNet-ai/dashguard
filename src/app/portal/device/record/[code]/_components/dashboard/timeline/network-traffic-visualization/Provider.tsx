@@ -110,7 +110,8 @@ export default function NetworkFlowProvider({ children, params }: IProps) {
   const timeRef              = useRef<ITimeSettings | null>(null)
   const paramsRef            = useRef(params)
   const searchByRef          = useRef<any>(searchBy)
-  const pollingIntervalRef = useRef<number>(THREE_SECONDS_MS)
+  const pollingIntervalRef             = useRef<number>(THREE_SECONDS_MS)
+  const pollingIntervalTopTrafficRef   = useRef<number>(FIVE_SECONDS_MS)
 
   const {socket} = useSocketConnection({channel_name, token})
   const getAccount = api.organizationAccount.getAccountID.useMutation();
@@ -118,6 +119,8 @@ export default function NetworkFlowProvider({ children, params }: IProps) {
   const getBandwidthTopTraffic  = api.packet.getBandwidthOfSourceIP.useMutation()
   const getUniqueSourceActions = api.packet.getUniqueSourceIP.useMutation()
   const getUniqueSourceTopTraffic = api.packet.getUniqueSourceIP.useMutation()
+  const saveNetworkTrafficIPsMutation = api.packet.saveNetworkTrafficIPs.useMutation()
+  const getNetworkTrafficIPsMutation  = api.packet.getNetworkTrafficIPs.useMutation()
 
   /**
    * Ref wrappers for tRPC mutation objects.  tRPC recreates the mutation
@@ -129,6 +132,9 @@ export default function NetworkFlowProvider({ children, params }: IProps) {
   const getBandwidthTopRef  = useRef(getBandwidthTopTraffic)
   const getUniqueIpRef      = useRef(getUniqueSourceActions)
   const getUniqueIpTopRef   = useRef(getUniqueSourceTopTraffic)
+  const saveNetworkTrafficIPsRef = useRef(saveNetworkTrafficIPsMutation)
+  const getNetworkTrafficIPsRef  = useRef(getNetworkTrafficIPsMutation)
+  const lastSavedRef             = useRef<number>(0)
 
   /**
    * Stable refs to the latest poll functions.  The interval callbacks always
@@ -182,10 +188,13 @@ export default function NetworkFlowProvider({ children, params }: IProps) {
   useEffect(() => { getBandwidthTopRef.current = getBandwidthTopTraffic }, [getBandwidthTopTraffic])
   useEffect(() => { getUniqueIpRef.current = getUniqueSourceActions }, [getUniqueSourceActions])
   useEffect(() => { getUniqueIpTopRef.current = getUniqueSourceTopTraffic }, [getUniqueSourceTopTraffic])
+  useEffect(() => { saveNetworkTrafficIPsRef.current = saveNetworkTrafficIPsMutation }, [saveNetworkTrafficIPsMutation])
+  useEffect(() => { getNetworkTrafficIPsRef.current  = getNetworkTrafficIPsMutation  }, [getNetworkTrafficIPsMutation])
   useEffect(() => { timeRef.current = time }, [time])
   useEffect(() => { paramsRef.current = params }, [params])
   useEffect(() => { searchByRef.current = searchBy }, [searchBy])
-  useEffect(() => { pollingIntervalRef.current = pollingInterval }, [pollingInterval])
+  useEffect(() => { pollingIntervalRef.current           = pollingInterval           }, [pollingInterval])
+  useEffect(() => { pollingIntervalTopTrafficRef.current = pollingIntervalTopTraffic }, [pollingIntervalTopTraffic])
   useEffect(() => { activeFilterIdRef.current = filterId }, [filterId])
 
   useEffect(() => {
@@ -204,6 +213,31 @@ export default function NetworkFlowProvider({ children, params }: IProps) {
     }
     
     _getAccount()
+  }, [])
+
+  const saveIPsToCache = useCallback((recentIps: string[], topIps: string[], force = false) => {
+    const now = Date.now()
+    if (!force && now - lastSavedRef.current < 1_000) return
+    const deviceId = paramsRef.current?.id
+    const fid = activeFilterIdRef.current
+    if (!deviceId || !fid) return
+    lastSavedRef.current = now
+    saveNetworkTrafficIPsRef.current.mutate(
+      {
+        device_id: deviceId,
+        filter_id: fid,
+        recent_ips: recentIps.slice(0, 10),
+        top_ips: topIps.slice(0, 5),
+        recent_ttl: Math.min(300, Math.max(1, Math.round(pollingIntervalRef.current / 1_000)) + 15),
+        top_ttl: Math.min(300, Math.max(1, Math.round(pollingIntervalTopTrafficRef.current / 1_000)) + 15),
+      },
+      {
+        onError: (err) => {
+          if (isUnmountedRef.current) return
+          console.error('[saveIPsToCache] Redis write failed', err)
+        },
+      }
+    )
   }, [])
 
   /**
@@ -251,19 +285,43 @@ export default function NetworkFlowProvider({ children, params }: IProps) {
     }) as any
     const tr2 = getLastTimeStamp({ count: 1, unit: 'minute', add_remaining_time: true }) as any
 
-    const [ips, topIps] = await Promise.all([
-      getUniqueIpRef.current.mutateAsync({
-        device_id: paramsRef.current?.id || '',
-        time_range: settings.time_unit === 'hour' ? tr2 : timeRange,
-        filter_id: fid,
-      }) as Promise<string[]>,
-      getUniqueIpTopRef.current.mutateAsync({
-        device_id: paramsRef.current?.id || '',
-        time_range: settings.time_unit === 'hour' ? tr2 : timeRange,
-        filter_id: fid,
-        limit: 5,
-      }) as Promise<string[]>,
-    ])
+    if (isUnmountedRef.current || generation !== filterGenerationRef.current) return
+
+    // 1. Check Redis cache first — skip expensive IP discovery on cache hit
+    const cachedIPs = await getNetworkTrafficIPsRef.current.mutateAsync({
+      device_id: paramsRef.current?.id || '',
+      filter_id: fid,
+    })
+    if (isUnmountedRef.current || generation !== filterGenerationRef.current) return
+
+    let ips: string[]
+    let topIps: string[]
+
+    if (cachedIPs?.data) {
+      // Cache hit — use cached IPs directly, skip getUniqueSourceIP queries
+      ips    = cachedIPs.data.recent_ips
+      topIps = cachedIPs.data.top_ips
+    } else {
+      // Cache miss — discover IPs from the data store
+      const [fetchedIps, fetchedTopIps] = await Promise.all([
+        getUniqueIpRef.current.mutateAsync({
+          device_id: paramsRef.current?.id || '',
+          time_range: settings.time_unit === 'hour' ? tr2 : timeRange,
+          filter_id: fid,
+        }) as Promise<string[]>,
+        getUniqueIpTopRef.current.mutateAsync({
+          device_id: paramsRef.current?.id || '',
+          time_range: settings.time_unit === 'hour' ? tr2 : timeRange,
+          filter_id: fid,
+          limit: 5,
+        }) as Promise<string[]>,
+      ])
+      ips    = fetchedIps
+      topIps = fetchedTopIps
+      // Save freshly discovered IPs to Redis immediately so the next refresh can skip discovery
+      saveIPsToCache(ips, topIps, true)
+    }
+
     if (isUnmountedRef.current || generation !== filterGenerationRef.current) return
 
     const [bwResult, bwTopResult]: any[] = await Promise.all([
@@ -292,10 +350,10 @@ export default function NetworkFlowProvider({ children, params }: IProps) {
       time_range: timeRange,
     })
 
-    const recentInitial = withTotal((bwResult?.data ?? []).map(toEntry))
+    const recentInitial = withTotal((bwResult?.data ?? []).map(toEntry)).slice(0, 60)
     const topInitial = withTotal((bwTopResult?.data ?? []).map(toEntry))
       .sort((a, b) => (b.total_active_packets ?? 0) - (a.total_active_packets ?? 0))
-      .slice(0, 5)
+      .slice(0, 60)
 
     recentBandwidthRef.current     = recentInitial
     topTrafficBandwidthRef.current  = topInitial
@@ -313,7 +371,7 @@ export default function NetworkFlowProvider({ children, params }: IProps) {
       }))
       setIsInitialized(true)
     // })
-  }, [])
+  }, [saveIPsToCache])
 
   /**
    * Incremental poll for the "Recent IPs" section.  Runs on `pollingInterval`.
@@ -352,13 +410,19 @@ export default function NetworkFlowProvider({ children, params }: IProps) {
       ])
       if (isUnmountedRef.current || generation !== filterGenerationRef.current) return
 
+      const previousRecentIps = new Set(recentIpsRef.current)
       recentIpsRef.current = [...new Set([...recentIpsRef.current, ...newIps])]
+      saveIPsToCache(recentIpsRef.current, topTrafficIpsRef.current)
+      const hasNewRecentIps = newIps.some(ip => !previousRecentIps.has(ip))
+      if (hasNewRecentIps) {
+        void pollRecentBandwidthRef.current()
+      }
     } catch (err) {
       console.error('[recentIP] error:', err)
     } finally {
       isRecentIPRunningRef.current = false
     }
-  }, [])
+  }, [saveIPsToCache])
 
   /**
    * Incremental poll for the "Top Traffic" section.  Runs on
@@ -395,12 +459,13 @@ export default function NetworkFlowProvider({ children, params }: IProps) {
       if (isUnmountedRef.current || generation !== filterGenerationRef.current) return
 
       topTrafficIpsRef.current = [...new Set([...topTrafficIpsRef.current, ...newIps])]
+      saveIPsToCache(recentIpsRef.current, topTrafficIpsRef.current)
     } catch (err) {
       console.error('[topTraffic] error:', err)
     } finally {
       isTopTrafficRunningRef.current = false
     }
-  }, [])
+  }, [saveIPsToCache])
 
   /** Bandwidth poll for the Recent IP section — runs every 3 s. */
   const pollRecentBandwidth = useCallback(async () => {
@@ -449,7 +514,7 @@ export default function NetworkFlowProvider({ children, params }: IProps) {
         .map(e => ({ ...e, isNew: true as const }))
 
       const result = withTotal([...newEntries, ...updated]
-        .map(e => ({ ...e, result: e.result.slice(0, 120) })))
+        .map(e => ({ ...e, result: e.result.slice(0, 60) })))
         .filter(entry => {
           const latestBucket = Math.max(0, ...entry.result.map(r => new Date(r.bucket.replace(' ', 'T')).getTime()))
           return latestBucket >= pruneThreshold
@@ -457,12 +522,12 @@ export default function NetworkFlowProvider({ children, params }: IProps) {
 
       recentBandwidthRef.current = result
       recentIpsRef.current       = result.map(e => e.source_ip)
+      saveIPsToCache(recentIpsRef.current, topTrafficIpsRef.current)
 
       setSnapshot(prev => ({
         ...prev,
         recentIPData:      result,
         unique_source_ips: recentIpsRef.current,
-        ipPollTick:        (prev.ipPollTick + 1) % 1_000_000,
       }))
 
       if (newEntries.length > 0) {
@@ -480,7 +545,7 @@ export default function NetworkFlowProvider({ children, params }: IProps) {
     } finally {
       isRecentBandwidthRunningRef.current = false
     }
-  }, [])
+  }, [saveIPsToCache])
 
   /** Bandwidth poll for the Top Traffic section — runs every 3 s. */
   const pollTopBandwidth = useCallback(async () => {
@@ -527,7 +592,7 @@ export default function NetworkFlowProvider({ children, params }: IProps) {
       const newEntries = incoming.filter(e => !existingMap.has(e.source_ip))
 
       const sorted = withTotal([...updated, ...newEntries]
-        .map(e => ({ ...e, result: e.result.slice(0, 120) })))
+        .map(e => ({ ...e, result: e.result.slice(0, 60) })))
         .sort((a, b) => (b.total_active_packets ?? 0) - (a.total_active_packets ?? 0))
         .filter(entry => {
           const latestBucket = Math.max(0, ...entry.result.map(r => new Date(r.bucket.replace(' ', 'T')).getTime()))
@@ -536,6 +601,7 @@ export default function NetworkFlowProvider({ children, params }: IProps) {
 
       topTrafficBandwidthRef.current = sorted
       topTrafficIpsRef.current       = sorted.map(e => e.source_ip)
+      saveIPsToCache(recentIpsRef.current, topTrafficIpsRef.current)
 
       setSnapshot(prev => ({
         ...prev,
@@ -547,12 +613,20 @@ export default function NetworkFlowProvider({ children, params }: IProps) {
     } finally {
       isTopBandwidthRunningRef.current = false
     }
-  }, [])
+  }, [saveIPsToCache])
 
   useEffect(() => { pollRecentBandwidthRef.current = pollRecentBandwidth }, [pollRecentBandwidth])
   useEffect(() => { pollTopBandwidthRef.current    = pollTopBandwidth    }, [pollTopBandwidth])
   useEffect(() => { pollRecentIPRef.current        = pollRecentIP        }, [pollRecentIP])
   useEffect(() => { pollTopTrafficRef.current      = pollTopTraffic      }, [pollTopTraffic])
+
+  useEffect(() => {
+    if (!isInitialized) return
+    const id = window.setInterval(() => {
+      setSnapshot(prev => ({ ...prev, ipPollTick: (prev.ipPollTick + 1) % 1_000_000 }))
+    }, ONE_SECOND_MS)
+    return () => window.clearInterval(id)
+  }, [isInitialized])
 
   useEffect(() => {
     if (!isInitialized) return

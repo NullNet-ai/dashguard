@@ -1525,6 +1525,36 @@ export const packetRouter = createTRPCRouter({
   //   return { data: ips }
   // }),
 
+  saveNetworkTrafficIPs: privateProcedure.input(z.object({
+    device_id: z.string(),
+    filter_id: z.string(),
+    recent_ips: z.array(z.string()).max(10),
+    top_ips: z.array(z.string()).max(5),
+    recent_ttl: z.number().int().positive(),
+    top_ttl: z.number().int().positive(),
+  })).mutation(async ({ input, ctx }) => {
+    const { device_id, filter_id, recent_ips, top_ips, recent_ttl, top_ttl } = input
+    await Promise.all([
+      ctx.redisClient.cacheData(`network_traffic_ips:recent:${device_id}:${filter_id}`, recent_ips, recent_ttl),
+      ctx.redisClient.cacheData(`network_traffic_ips:top:${device_id}:${filter_id}`, top_ips, top_ttl),
+    ])
+    return { success: true }
+  }),
+
+  getNetworkTrafficIPs: privateProcedure.input(z.object({
+    device_id: z.string(),
+    filter_id: z.string(),
+  })).mutation(async ({ input, ctx }) => {
+    const { device_id, filter_id } = input
+    const [recentIps, topIps] = await Promise.all([
+      ctx.redisClient.getCachedData(`network_traffic_ips:recent:${device_id}:${filter_id}`),
+      ctx.redisClient.getCachedData(`network_traffic_ips:top:${device_id}:${filter_id}`),
+    ])
+    if (!recentIps || !topIps) return { success: true, data: null }
+    if (!Array.isArray(recentIps) || !Array.isArray(topIps)) return { success: true, data: null }
+    return { success: true, data: { recent_ips: recentIps as string[], top_ips: topIps as string[] } }
+  }),
+
   getCountriesSourceIP: privateProcedure.input(z.object({ source_ips: z.any(), time_range: z.array(z.string()) })).mutation(async ({ input, ctx }) => {
     const { source_ips, time_range } = input
     const _res = await Bluebird.map(source_ips, async (source_ip: string) => {
