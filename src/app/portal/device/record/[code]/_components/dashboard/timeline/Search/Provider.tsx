@@ -115,6 +115,7 @@ export default function GraphSearchProvider({ children, params, filter_type }: I
   } = time || {}
   
 
+  // @ts-expect-error - No type yet
   const { data, refetch } = api?.[router as 'packet']?.[resolver as 'filterPackets'].useQuery({ ...search_params, time_range:  getLastTimeStamp({count: time_count, unit: time_unit as 'minute',_now: new Date()}), device_id, _query }, {
     refetchOnWindowFocus: false,
     gcTime: 0,
