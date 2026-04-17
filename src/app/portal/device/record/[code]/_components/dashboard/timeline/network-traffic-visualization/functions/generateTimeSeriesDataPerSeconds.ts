@@ -128,14 +128,11 @@ export function generateTimeSeriesData(
       endDate.setSeconds(currentSeconds + resolution_value)
     }
   } else if (resolution_unit === 'm') {
-    const needsAdvance = endDate.getSeconds() !== 0 || endDate.getMilliseconds() !== 0
     endDate.setSeconds(0, 0)
     const currentMinutes = endDate.getMinutes()
     const remainder = currentMinutes % resolution_value
     if (remainder !== 0) {
-      endDate.setMinutes(currentMinutes + (resolution_value - remainder))
-    } else if (needsAdvance) {
-      endDate.setMinutes(currentMinutes + resolution_value)
+      endDate.setMinutes(currentMinutes - remainder)
     }
   } else if (resolution_unit === 'h') {
     const needsAdvance =
