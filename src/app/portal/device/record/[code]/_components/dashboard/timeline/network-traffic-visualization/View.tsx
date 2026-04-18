@@ -40,6 +40,32 @@ export default function NetworkFlowView() {
     );
   }, [recentIPData, sharedNow]);
 
+  const { sortedTopTrafficData, sortedTopTrafficFormattedArr } = useMemo(() => {
+    if (!topTrafficFormattedArr.length) {
+      return {
+        sortedTopTrafficData:        topTrafficData,
+        sortedTopTrafficFormattedArr: topTrafficFormattedArr,
+      }
+    }
+
+    const paired = topTrafficData.map((ip: any, index: number) => {
+      const series        = topTrafficFormattedArr[index] ?? []
+      const activePackets   = series.filter((entry: any) => Number(entry.bandwidth) > 0).length
+      const totalBandwidths = series.reduce((sum: number, entry: any) => sum + Number(entry.bandwidth), 0)
+      return { ip, series, activePackets, totalBandwidths }
+    })
+
+    paired.sort((a: any, b: any) => {
+      const byPackets = b.activePackets - a.activePackets
+      return byPackets !== 0 ? byPackets : b.totalBandwidths - a.totalBandwidths
+    })
+
+    return {
+      sortedTopTrafficData:        paired.map((p: any) => p.ip),
+      sortedTopTrafficFormattedArr: paired.map((p: any) => p.series),
+    }
+  }, [topTrafficData, topTrafficFormattedArr])
+
   if (loading) {
     return (
       <TrafficSkeleton 
@@ -61,9 +87,8 @@ export default function NetworkFlowView() {
 
   return (
     <TimelineV4
-      topTrafficData={topTrafficData}
-      // @ts-expect-error - No type yet
-      topTrafficFormatted={topTrafficFormattedArr}
+      topTrafficData={sortedTopTrafficData}
+      topTrafficFormatted={sortedTopTrafficFormattedArr}
       recentIPData={recentIPData}
       // @ts-expect-error - No type yet
       recentIPFormatted={recentIPFormattedArr}

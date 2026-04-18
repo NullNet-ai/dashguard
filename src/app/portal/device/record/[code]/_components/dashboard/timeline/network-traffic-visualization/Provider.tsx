@@ -352,7 +352,10 @@ export default function NetworkFlowProvider({ children, params }: IProps) {
 
     const recentInitial = withTotal((bwResult?.data ?? []).map(toEntry)).slice(0, 60)
     const topInitial = withTotal((bwTopResult?.data ?? []).map(toEntry))
-      .sort((a, b) => (b.total_active_packets ?? 0) - (a.total_active_packets ?? 0))
+      .sort((a, b) => {
+        const byPackets = (b.total_active_packets ?? 0) - (a.total_active_packets ?? 0)
+        return byPackets !== 0 ? byPackets : (b.total_bandwidths ?? 0) - (a.total_bandwidths ?? 0)
+      })
       .slice(0, 60)
 
     recentBandwidthRef.current     = recentInitial
@@ -593,7 +596,10 @@ export default function NetworkFlowProvider({ children, params }: IProps) {
 
       const sorted = withTotal([...updated, ...newEntries]
         .map(e => ({ ...e, result: e.result.slice(0, 60) })))
-        .sort((a, b) => (b.total_active_packets ?? 0) - (a.total_active_packets ?? 0))
+        .sort((a, b) => {
+          const byPackets = (b.total_active_packets ?? 0) - (a.total_active_packets ?? 0)
+          return byPackets !== 0 ? byPackets : (b.total_bandwidths ?? 0) - (a.total_bandwidths ?? 0)
+        })
         .filter(entry => {
           const latestBucket = Math.max(0, ...entry.result.map(r => new Date(r.bucket.replace(' ', 'T')).getTime()))
           return latestBucket >= pruneThreshold
