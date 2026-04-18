@@ -297,7 +297,7 @@ export default function NetworkFlowProvider({ children, params }: IProps) {
     let ips: string[]
     let topIps: string[]
 
-    if (cachedIPs?.data) {
+    if ((!searchByRef.current || searchByRef.current.length === 0) && cachedIPs?.data) {
       // Cache hit — use cached IPs directly, skip getUniqueSourceIP queries
       ips    = cachedIPs.data.recent_ips
       topIps = cachedIPs.data.top_ips
@@ -677,7 +677,7 @@ export default function NetworkFlowProvider({ children, params }: IProps) {
     isTopBandwidthRunningRef.current    = false
     isRecentIPRunningRef.current        = false
     isTopTrafficRunningRef.current      = false
-    setSnapshot(prev => ({ ...prev, loading: true }))
+    setSnapshot(prev => ({ ...prev, topTraficData: [], recentIPData: [], loading: true }))
 
     void (async () => {
       const settings = await fetchTimeSettingsRef.current(generation)

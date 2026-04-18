@@ -93,7 +93,6 @@ export default function IPSearch() {
   }, [debouncedInlineFilter, eventEmitter])
 
   useEffect(() => {
-    if (!defaultSearchItems.length) return
     eventEmitter.emit('timeline_search', defaultSearchItems)
   }, [eventEmitter, defaultSearchItems])
 
