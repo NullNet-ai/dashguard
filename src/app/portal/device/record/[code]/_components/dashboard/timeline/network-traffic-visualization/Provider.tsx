@@ -141,8 +141,8 @@ export default function NetworkFlowProvider({ children, params }: IProps) {
    * call through these refs so that interval IDs don't need to be recreated
    * each time the poll functions are redefined.
    */
-  const pollRecentBandwidthRef = useRef<() => Promise<void>>(async () => {})
-  const pollTopBandwidthRef    = useRef<() => Promise<void>>(async () => {})
+  const pollRecentBandwidthRef = useRef<(hasNewIps?: boolean) => Promise<void>>(async () => {})
+  const pollTopBandwidthRef    = useRef<(hasNewIps?: boolean) => Promise<void>>(async () => {})
   const pollRecentIPRef   = useRef<() => Promise<void>>(async () => {})
   const pollTopTrafficRef = useRef<() => Promise<void>>(async () => {})
 
@@ -164,9 +164,12 @@ export default function NetworkFlowProvider({ children, params }: IProps) {
    */
   const pollingInterval = useMemo((): number => {
     if (!time) return ONE_SECOND_MS
-    if (time.time_unit === 'second') return THREE_SECONDS_MS
-    if (time.time_unit === 'minute') return FIVE_SECONDS_MS * time.time_count
-    return THIRTY_SECONDS_MS * time.time_count
+    const match = time.resolution?.match(/^(\d+)([smh])$/)
+    const resolutionCount = match ? parseInt(match[1]!, 10) : 1
+    const resolutionUnit  = match ? (match[2] as 's' | 'm' | 'h') : 's'
+    if (resolutionUnit === 's') return THREE_SECONDS_MS  * resolutionCount
+    if (resolutionUnit === 'm') return FIVE_SECONDS_MS   * resolutionCount
+    return THIRTY_SECONDS_MS * resolutionCount
   }, [time])
 
   /**
@@ -178,9 +181,12 @@ export default function NetworkFlowProvider({ children, params }: IProps) {
    */
   const pollingIntervalTopTraffic = useMemo((): number => {
     if (!time) return FIVE_SECONDS_MS
-    if (time.time_unit === 'second') return FIVE_SECONDS_MS
-    if (time.time_unit === 'minute') return TEN_SECONDS_MS * time.time_count
-    return ONE_MINUTE_MS * time.time_count
+    const match = time.resolution?.match(/^(\d+)([smh])$/)
+    const resolutionCount = match ? parseInt(match[1]!, 10) : 1
+    const resolutionUnit  = match ? (match[2] as 's' | 'm' | 'h') : 's'
+    if (resolutionUnit === 's') return FIVE_SECONDS_MS   * resolutionCount
+    if (resolutionUnit === 'm') return TEN_SECONDS_MS    * resolutionCount
+    return ONE_MINUTE_MS * resolutionCount
   }, [time])
 
   // ── Keep refs fresh on every render ──
@@ -401,12 +407,15 @@ export default function NetworkFlowProvider({ children, params }: IProps) {
 
     isRecentIPRunningRef.current = true
     try {
-      const tr = getLastTimeStamp({ count: settings.time_count, unit: settings.time_unit, add_remaining_time: true }) as any
+      const tr = getLastTimeStamp({ count: settings.time_count, unit: settings.time_unit, add_remaining_time: true,
+        _now: new Date(Date.now() - 10_000),
+      }) as any
+      const tr2 = getLastTimeStamp({ count: 1, unit: 'minute', add_remaining_time: true }) as any
 
       const newIps = await Promise.race([
         getUniqueIpRef.current.mutateAsync({
           device_id: paramsRef.current?.id || '',
-          time_range: tr,
+          time_range: settings.time_unit === 'hour' ? tr2 : tr,
           filter_id: fid,
         }) as Promise<string[]>,
         new Promise<never>((_, reject) => window.setTimeout(() => reject(new Error('[recentIP] getUniqueIp timed out after 2s')), 2_000)),
@@ -418,7 +427,7 @@ export default function NetworkFlowProvider({ children, params }: IProps) {
       saveIPsToCache(recentIpsRef.current, topTrafficIpsRef.current)
       const hasNewRecentIps = newIps.some(ip => !previousRecentIps.has(ip))
       if (hasNewRecentIps) {
-        void pollRecentBandwidthRef.current()
+        void pollRecentBandwidthRef.current(true)
       }
     } catch (err) {
       console.error('[recentIP] error:', err)
@@ -448,12 +457,15 @@ export default function NetworkFlowProvider({ children, params }: IProps) {
 
     isTopTrafficRunningRef.current = true
     try {
-      const tr = getLastTimeStamp({ count: settings.time_count, unit: settings.time_unit, add_remaining_time: true }) as any
+      const tr = getLastTimeStamp({ count: settings.time_count, unit: settings.time_unit, add_remaining_time: true,
+        _now: new Date(Date.now() - 10_000),
+      }) as any
+      const tr2 = getLastTimeStamp({ count: 1, unit: 'minute', add_remaining_time: true }) as any
 
       const newIps = await Promise.race([
         getUniqueIpTopRef.current.mutateAsync({
           device_id: paramsRef.current?.id || '',
-          time_range: tr,
+          time_range: settings.time_unit === 'hour' ? tr2 : tr,
           filter_id: fid,
           limit: 5,
         }) as Promise<string[]>,
@@ -471,7 +483,7 @@ export default function NetworkFlowProvider({ children, params }: IProps) {
   }, [saveIPsToCache])
 
   /** Bandwidth poll for the Recent IP section — runs every 3 s. */
-  const pollRecentBandwidth = useCallback(async () => {
+  const pollRecentBandwidth = useCallback(async (hasNewIps: boolean = false) => {
     if (isRecentBandwidthRunningRef.current) return
     const generation = filterGenerationRef.current
     const settings = timeRef.current
@@ -482,10 +494,13 @@ export default function NetworkFlowProvider({ children, params }: IProps) {
       const timeRange = getLastTimeStamp({ count: settings.time_count, unit: settings.time_unit, add_remaining_time: true,
         _now: new Date(Date.now() - 10_000)
       })
+      const tr2 = getLastTimeStamp({ count: 1, unit: 'minute', add_remaining_time: true,
+        _now: new Date(Date.now() - 10_000)
+      })
 
       const bwResult: any = await getBandwidthRef.current.mutateAsync({
         device_id: paramsRef.current?.id || '',
-        time_range: timeRange as any,
+        time_range: hasNewIps ? timeRange : tr2 as any,
         bucket_size: settings.resolution,
         source_ips: recentIpsRef.current,
       })
@@ -551,7 +566,7 @@ export default function NetworkFlowProvider({ children, params }: IProps) {
   }, [saveIPsToCache])
 
   /** Bandwidth poll for the Top Traffic section — runs every 3 s. */
-  const pollTopBandwidth = useCallback(async () => {
+  const pollTopBandwidth = useCallback(async (hasNewIps: boolean = false) => {
     if (isTopBandwidthRunningRef.current) return
     const generation = filterGenerationRef.current
     const settings = timeRef.current
@@ -562,10 +577,13 @@ export default function NetworkFlowProvider({ children, params }: IProps) {
       const timeRange = getLastTimeStamp({ count: settings.time_count, unit: settings.time_unit, add_remaining_time: true,
         _now: new Date(Date.now() - 3_000)
       })
+      const tr2 = getLastTimeStamp({ count: 1, unit: 'minute', add_remaining_time: true,
+        _now: new Date(Date.now() - 10_000),
+      })
 
       const bwResult: any = await getBandwidthTopRef.current.mutateAsync({
         device_id: paramsRef.current?.id || '',
-        time_range: timeRange as any,
+        time_range: hasNewIps ? timeRange : tr2 as any,
         bucket_size: settings.resolution,
         source_ips: topTrafficIpsRef.current,
       })
