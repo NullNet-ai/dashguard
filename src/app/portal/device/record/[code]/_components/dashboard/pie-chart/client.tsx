@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useState, useEffect, useRef } from 'react'
+import React, { useState, useEffect, useRef, useMemo } from 'react'
 import { Pie, PieChart, ResponsiveContainer, Tooltip } from 'recharts'
 import { getLastTimeStamp } from '~/app/portal/device/utils/timeRange'
 import {
@@ -82,7 +82,6 @@ const PieChartComponent = ({ defaultValues, interfaces }: IFormProps) => {
     previousTraffic: initialTraffic,
     maxTraffic: 100,
   })
-  const [animatedTraffic, setAnimatedTraffic] = useState(initialTraffic)
   const [token, setToken] = React.useState<string | null>(null)
   const [org_acc_id, setOrgAccountID] = React.useState<string | null>(null)
 
@@ -95,9 +94,6 @@ const PieChartComponent = ({ defaultValues, interfaces }: IFormProps) => {
   const {socket} = useSocketConnection({channel_name, token})
   
   const getAccount = api.organizationAccount.getAccountID.useMutation();
-
-  // Use a ref to store the previous traffic value
-  const previousTrafficRef = useRef<number>(initialTraffic)
 
   const { mutateAsync: fetchBandWidth } = api.packet.getLastBandwithInterfacePerSecond.useMutation()
 
@@ -118,15 +114,16 @@ const PieChartComponent = ({ defaultValues, interfaces }: IFormProps) => {
     if (!socket || !org_acc_id) return
     let currentTime: any = null
     
-    socket.on( `pie_chart-${defaultValues?.id}-${org_acc_id}`, (data: Record<string,any>) => {
-      let currentTraffic = data?.total_byte || 0
-      if(currentTime == data?.timestamp) {
-         currentTraffic = trafficData.traffic + data?.total_byte
-      }
-      const maxTraffic = Math.max(currentTraffic * 2 + 100, trafficData.maxTraffic)
-      // @ts-expect-error - No type yet
-      setTrafficData({ traffic: currentTraffic, maxTraffic })
-      currentTime = data?.timestamp
+    socket.on(`pie_chart-${defaultValues?.id}-${org_acc_id}`, (data: Record<string, any>) => {
+      setTrafficData((prev) => {
+        let currentTraffic = data?.total_byte || 0
+        if (currentTime === data?.timestamp) {
+          currentTraffic = prev.traffic + (data?.total_byte || 0)
+        }
+        const maxTraffic = Math.max(currentTraffic * 1.1, prev.maxTraffic * 0.97, 100)
+        currentTime = data?.timestamp
+        return { ...prev, traffic: currentTraffic, maxTraffic }
+      })
     })
 
     return () => {
@@ -150,21 +147,16 @@ const PieChartComponent = ({ defaultValues, interfaces }: IFormProps) => {
         })
         const currentTraffic = Number(data) || 0
 
-        // Ensure maxTraffic is always above currentTraffic for proper gauge display
-        const maxTraffic = Math.max(currentTraffic * 2 + 100, trafficData.maxTraffic)
-        if(currentTraffic) {
-          setTrafficData({ traffic: currentTraffic, previousTraffic: currentTraffic, maxTraffic })
-        } else {
-          setTrafficData((prev) => {
-            if (prev.traffic > 0) {
-              return {
-                ...prev,
-                traffic: prev.traffic - 1
-              }
-            }
-            return prev
-          })
-        }
+        setTrafficData((prev) => {
+          if (currentTraffic) {
+            const maxTraffic = Math.max(currentTraffic * 1.1, prev.maxTraffic * 0.97, 100)
+            return { traffic: currentTraffic, previousTraffic: prev.traffic, maxTraffic }
+          }
+          if (prev.traffic > 0) {
+            return { ...prev, traffic: prev.traffic - 1 }
+          }
+          return prev
+        })
       }
       catch (error) {
         console.error('Error fetching bandwidth data:', error)
@@ -175,11 +167,6 @@ const PieChartComponent = ({ defaultValues, interfaces }: IFormProps) => {
     const interval = setInterval(fetchChartData, 2000)
     return () => clearInterval(interval)
   }, [defaultValues?.id, defaultValues?.device_status, fetchBandWidth, interfaces])
-
-  // Update previousTrafficRef whenever trafficData.traffic changes
-  useEffect(() => {
-    previousTrafficRef.current = trafficData.traffic
-  }, [trafficData.traffic])
 
   // Smooth animation effect - update more frequently with smaller steps
   // useEffect(() => {
@@ -203,10 +190,8 @@ const PieChartComponent = ({ defaultValues, interfaces }: IFormProps) => {
   // Adjusted arrow rotation (no more stuck needle)
   const arrowRotation = Math.min(90, Math.max(-90, (minTrafficFill / trafficData.maxTraffic) * 180 - 90));
 
-  const previousTraffic = previousTrafficRef.current
-
-  const { innerRadius, outerRadius } = calculateRadius(size.width || 300);
-   const needleProps = calculateNeedlePoints(size.width || 300);
+  const { innerRadius, outerRadius } = useMemo(() => calculateRadius(size.width || 300), [size.width])
+  const needleProps = useMemo(() => calculateNeedlePoints(size.width || 300), [size.width])
    
   return (
     <ResponsiveContainer height={
