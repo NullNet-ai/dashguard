@@ -277,11 +277,6 @@ export default function TrafficMaps({ params, defaultValues }: Record<string, an
     cityToCityConnections: [],
   })
   const [isLoading, setIsLoading] = useState(true)
-  const [timeSettings, setTimeSettings] = useState<Record<string, any>>({
-    time_count: 1,
-    time_unit: 'hour',
-    resolution: '1h',
-  })
 
   const [token, setToken] = useState<string | null>(null)
   const [org_acc_id, setOrgAccountID] = useState<string | null>(null)
@@ -295,14 +290,6 @@ export default function TrafficMaps({ params, defaultValues }: Record<string, an
 
   // API hooks
   const getUniqueSourceAndDestinationIP = api.packet.getUniqueSourceAndDestinationIP.useMutation()
-  const { refetch: refetchTimeUnitandResolution } = api.cachedFilter.fetchCachedFilterTimeUnitandResolution.useQuery(
-    {
-      type: 'map_filter',
-      filter_id: filterId,
-    }, {
-      enabled: false,
-    }
-  )
 
   const pollingInterval = useMemo(() => {
     return THREE_SECONDS_MS
@@ -368,16 +355,8 @@ export default function TrafficMaps({ params, defaultValues }: Record<string, an
 
     const fetchTimeSettings = async () => {
       try {
-        const { data: time_unit_resolution } = await refetchTimeUnitandResolution();
-        const { time, resolution = '1h' } = time_unit_resolution || {};
-        const { time_count = 1, time_unit = 'hour' } = time || {};
-
-        setTimeSettings({
-          time_count,
-          time_unit,
-          resolution,
-        });
-        
+       
+        fetchInitialDataRef.current = fetchInitialData
         await fetchInitialDataRef.current?.(true)
       } catch (error) {
         console.error('Failed to fetch time settings:', error);
@@ -385,7 +364,7 @@ export default function TrafficMaps({ params, defaultValues }: Record<string, an
     };
     
     fetchTimeSettings();
-  }, [filterId, searchBy, refetchTimeUnitandResolution]);
+  }, [filterId, searchBy]);
 
   // Fetch initial data (just one record for initial display)
   const fetchInitialData = useCallback(async (isInitial: boolean) => {
@@ -395,15 +374,16 @@ export default function TrafficMaps({ params, defaultValues }: Record<string, an
     setIsLoading(true);
     
     try {
-      const timeRange = false ? getLastTimeStamp({
+      const timeRange = isInitial ? getLastTimeStamp({
           count: 1,
-          unit: 'day',
+          unit: 'minute',
           add_remaining_time: true,
+          _now: new Date(Date.now() - 10_000)
         }) : getLastTimeStamp({
         count: 2,  // timeSettings.time_count,
         unit: 'second', // timeSettings.time_unit,
         add_remaining_time: true,
-        _now: new Date(Date.now() - 3_000)
+        _now: new Date(Date.now() - 10_000)
       });
       
       const input: any = {
@@ -439,12 +419,7 @@ export default function TrafficMaps({ params, defaultValues }: Record<string, an
       isFetchRunningRef.current = false
       if (!isUnmountedRef.current) setIsInitialized(true)
     }
-  }, [filterId, params?.id, getUniqueSourceAndDestinationIP, timeSettings, processIPData]);
-  
-  useEffect(() => {
-    fetchInitialDataRef.current = fetchInitialData
-  }, [fetchInitialData])
-
+  }, [filterId, params?.id, getUniqueSourceAndDestinationIP, processIPData]);
   // Listen for socket updates
   useEffect(() => {
     console.debug(`[socket] event - ${channel_name} listener isnt created yet`)
@@ -562,7 +537,7 @@ export default function TrafficMaps({ params, defaultValues }: Record<string, an
           { (
             <>
               <MapComponent
-                countryTrafficData={defaultValues.is_device_online ? mapData.countryTrafficData : { ipData: [] }}
+                countryTrafficData={mapData.countryTrafficData}
                 filterId={filterId}
               />
             </>
