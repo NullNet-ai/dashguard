@@ -475,18 +475,18 @@ const MapComponent = ({ countryTrafficData, filterId }: Record<string, any>) => 
               ? `${source_country.city}, ${source_country.country}`
               : source_country.country;
       
-            const geocodedCoords = await geocodeAddress(addressToGeocode);
-            if (geocodedCoords) {
-              ipAddressToCoordinates[source_ip] = geocodedCoords;
-              cityCoordinatesCache.current[cacheKey] = geocodedCoords;
-            } else {
-              // Generate ocean coordinates for IPs without location
-              ipAddressToCoordinates[source_ip] = getGuaranteedOceanCoordinates();
-            }
+            // const geocodedCoords = await geocodeAddress(addressToGeocode);
+            // if (geocodedCoords) {
+            //   ipAddressToCoordinates[source_ip] = geocodedCoords;
+            //   cityCoordinatesCache.current[cacheKey] = geocodedCoords;
+            // } else {
+            //   // Generate ocean coordinates for IPs without location
+            //   ipAddressToCoordinates[source_ip] = getGuaranteedOceanCoordinates();
+            // }
           }
         } else {
           // Explicitly handle "No IP Info"
-          ipAddressToCoordinates[source_ip] = getGuaranteedOceanCoordinates();
+          // ipAddressToCoordinates[source_ip] = getGuaranteedOceanCoordinates();
         }
       }
 
@@ -505,18 +505,18 @@ const MapComponent = ({ countryTrafficData, filterId }: Record<string, any>) => 
               ? `${destination_country.city}, ${destination_country.country}`
               : destination_country.country;
             
-            const geocodedCoords = await geocodeAddress(addressToGeocode);
-            if (geocodedCoords) {
-              ipAddressToCoordinates[destination_ip] = geocodedCoords;
-              cityCoordinatesCache.current[cacheKey] = geocodedCoords;
-            } else {
-              // Generate ocean coordinates for IPs without location
-              ipAddressToCoordinates[destination_ip] = getGuaranteedOceanCoordinates();
-            }
+            // const geocodedCoords = await geocodeAddress(addressToGeocode);
+            // if (geocodedCoords) {
+            //   ipAddressToCoordinates[destination_ip] = geocodedCoords;
+            //   cityCoordinatesCache.current[cacheKey] = geocodedCoords;
+            // } else {
+            //   // Generate ocean coordinates for IPs without location
+            //   ipAddressToCoordinates[destination_ip] = getGuaranteedOceanCoordinates();
+            // }
           }
         } else {
           // Generate ocean coordinates for IPs without location
-          ipAddressToCoordinates[destination_ip] = getGuaranteedOceanCoordinates();
+          // ipAddressToCoordinates[destination_ip] = getGuaranteedOceanCoordinates();
         }
       }
     }

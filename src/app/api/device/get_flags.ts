@@ -1,17 +1,24 @@
-import axios from 'axios'
+import flagsData from '../../../../public/flags.json'
 
-export async function getFlagDetails(country: string) {
+interface IFlagEntry {
+  flags: { png: string; svg: string; alt?: string }
+  name: { common: string; official: string }
+}
+
+export function getFlagDetails(country: string) {
   if (!country || typeof country !== 'string') {
-    console.error('Invalid country code:', country)
     return { flag: '/unknown-flag.svg', name: 'No IP Info', country: 'No IP Info' }
   }
 
-  try {
-    const data = await axios.get(`https://restcountries.com/v3.1/alpha/${country}`)
-    return { flag: data?.data?.[0]?.flags?.svg, name: data?.data?.[0]?.name?.common, country }
-  }
-  catch (error) {
-    console.error(`Failed to fetch flag details for country: ${country}`, error)
+  const countryLower = country.toLowerCase()
+  const match = (flagsData as IFlagEntry[]).find(entry => {
+    const code = entry.flags?.svg?.split('/').pop()?.replace('.svg', '') ?? ''
+    return code === countryLower
+  })
+
+  if (!match) {
     return { flag: null, name: null, country }
   }
+
+  return { flag: match.flags?.svg, name: match.name?.common, country }
 }
