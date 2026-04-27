@@ -142,7 +142,7 @@ const PieChartComponent = ({ defaultValues, interfaces }: IFormProps) => {
           bucket_size: '1s',
           timezone,
           device_id: defaultValues?.id,
-          time_range: getLastTimeStamp({ count: 60, unit: 'second', _now: new Date() }) as string[],
+          time_range: getLastTimeStamp({ count: 1, unit: 'second', _now: new Date(Date.now() - 10_000) }) as string[],
           interface_names: interfaces?.map((item: any) => item?.value),
         })
         const currentTraffic = Number(data) || 0
@@ -150,10 +150,22 @@ const PieChartComponent = ({ defaultValues, interfaces }: IFormProps) => {
         setTrafficData((prev) => {
           if (currentTraffic) {
             const maxTraffic = Math.max(currentTraffic * 1.1, prev.maxTraffic * 0.97, 100)
-            return { traffic: currentTraffic, previousTraffic: prev.traffic, maxTraffic }
+            return {
+              traffic: currentTraffic,
+              formattedTraffic: formatBytes(Math.round(currentTraffic), 2),
+              previousTraffic: prev.traffic,
+              maxTraffic
+            }
           }
           if (prev.traffic > 0) {
-            return { ...prev, traffic: prev.traffic - 1 }
+            const unitIndex = Math.max(0, Math.floor(Math.log(prev.traffic) / Math.log(1024)))
+            const decrement = 0.01 * Math.pow(1024, unitIndex)
+            const newTraffic = Math.max(0, prev.traffic - decrement)
+            return {
+              ...prev,
+              traffic: newTraffic,
+              formattedTraffic: formatBytes(newTraffic, 2)
+            }
           }
           return prev
         })
@@ -260,7 +272,8 @@ const PieChartComponent = ({ defaultValues, interfaces }: IFormProps) => {
           {/* Traffic value display */}
           <div className="absolute top-[160px] bg-background/80 rounded-lg px-4 py-2 backdrop-blur-sm">
             <div className="text-xl font-bold tabular-nums">
-              {formatBytes(Math.round(trafficData?.traffic), 2)}
+              {/* @ts-expect-error - No type yet */}
+              {trafficData?.formattedTraffic}
             </div>
             <div className="text-sm text-gray-500">
               Previous: {formatBytes(Math.round(trafficData?.previousTraffic), 2)}
