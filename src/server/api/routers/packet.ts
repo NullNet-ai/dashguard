@@ -468,7 +468,8 @@ export const packetRouter = createTRPCRouter({
   })).mutation(async ({ input, ctx }) => {
     const { device_id, bucket_size, time_range, timezone, interface_names } = input
 
-    const results = await Bluebird.map(_.chunk(interface_names, 4), async (chunkItem) => {
+    // @ts-expect-error - No type yet
+    const results = await Promise.all(interface_names.map(async (interface_name) => {
       try {
         const res = await ctx.dnaClient.aggregate({
           query: {
@@ -486,7 +487,7 @@ export const packetRouter = createTRPCRouter({
                 field: 'interface_name',
                 entity: 'connections',
                 operator: EOperator.EQUAL,
-                values: chunkItem,
+                values: [interface_name],
               },
               {
                 type: 'operator',
@@ -515,7 +516,7 @@ export const packetRouter = createTRPCRouter({
             ],
             joins: [],
             bucket_size,
-            limit: 1,
+            limit: 2,
             order: {
               order_by: 'bucket',
               order_direction: EOrderDirection.DESC,
@@ -526,12 +527,13 @@ export const packetRouter = createTRPCRouter({
   
         }).execute()
   
-        return res?.data?.[0]?.bandwidth || 0
+        return res?.data?.reduce((acc, curr) => acc + parseInt(curr.bandwidth || '0') || 0, 0)
       } catch (error) {
         return 0
       }
-    })
-    return results.reduce((sum, val) => sum + val, 0)
+    }))
+    const total = results.reduce((sum, val) => sum + val, 0)
+    return total
   }),
   getBandwidthOfSourceIPandDestinationIP: privateProcedure.input(z.object({ packet_data: z.any() })).query(async ({ input, ctx }) => {
     const { packet_data } = input

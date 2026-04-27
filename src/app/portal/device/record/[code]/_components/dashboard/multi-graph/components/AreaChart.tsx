@@ -95,14 +95,24 @@ const AreaChartComponent = ({ filteredData, interfaces }: any) => {
             <ChartTooltipContent
               indicator="dot"
               valueFormatter={formatTooltipValue}
-              labelFormatter={(value) => {
-                if (value.includes(':')) {
-                  return value; // Display time directly if it includes ':'
-                }
-                return new Date(value).toLocaleDateString('en-US', {
-                  month: 'short',
-                  day: 'numeric',
-                });
+              labelFormatter={(value, payload) => {
+                const total = payload?.reduce((sum, entry) => {
+                  const num = typeof entry.value === 'number' ? entry.value : Number(entry.value)
+                  return sum + (Number.isFinite(num) ? num : 0)
+                }, 0) ?? 0
+
+                const highest = payload?.reduce<{ num: number; key: string } | null>((max, entry) => {
+                  const num = typeof entry.value === 'number' ? entry.value : Number(entry.value)
+                  if (!Number.isFinite(num)) return max
+                  return !max || num > max.num ? { num, key: String(entry.dataKey) } : max
+                }, null)
+
+                const label = value.includes(':')
+                  ? value
+                  : new Date(value).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
+
+                const highestStr = highest ? ` | Top: ${highest.key} (${formatBytes(highest.num)})` : ''
+                return `${label} — Total: ${formatBytes(total)}${highestStr}`
               }}
             />
           }

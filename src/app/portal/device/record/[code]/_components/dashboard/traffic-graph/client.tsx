@@ -192,7 +192,7 @@ const { refetch: refetchTimeUnitandResolution } = api.cachedFilter.fetchCachedFi
     const epochAtEnqueue = queueEpochRef.current
     enqueueTask(async () => {
       console.debug('[pooling] getBandwidth')
-      const tr = timeRangeFormat() as any
+      const tr = getLastTimeStamp({count: 1, unit: 'minute', _now: new Date(Date.now() - 10_000), add_remaining_time: true }) as string[]
       const res = await getBandwidth.mutateAsync({
         bucket_size: resolution,
         time_range: tr,
