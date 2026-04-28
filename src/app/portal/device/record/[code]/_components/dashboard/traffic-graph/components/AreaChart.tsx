@@ -39,8 +39,9 @@ export const formatNumber = (num: number) => {
 }
 const AreaChartComponent = ({ filteredData }: { filteredData: Record<string, any>[] }) => {
   console.log("🚀 ~ AreaChartComponent ~ filteredData:", filteredData)
-  const formatTooltipValue = (value: unknown, item: any) => {
+  const formatTooltipValue = (value2: unknown, item: any) => {
     const packet = item.payload.packet
+    const value = item.payload.bandwidth2
     const numericValue = typeof value === 'number' ? value : Number(value)
     return `${Number.isFinite(numericValue)
       ? formatBytesTooltip(numericValue)
@@ -79,7 +80,21 @@ const AreaChartComponent = ({ filteredData }: { filteredData: Record<string, any
     }, [yAxisMin, yAxisMax, number_of_ticks])
   return (
     <ResponsiveContainer width="100%" height={300}>
-    <AreaChart data={filteredData}
+    <AreaChart data={filteredData.map(e => {
+      let { bandwidth } = e
+      const originalBandwidth = bandwidth
+      const [,firstTick] = yticks
+      if (firstTick) {
+        if (bandwidth !== 0 && bandwidth < firstTick) {
+          bandwidth = (firstTick * 0.2) - (bandwidth * 0.2)
+        }
+      }
+      return {
+        ...e,
+        bandwidth,
+        bandwidth2: originalBandwidth
+      }
+    })}
     height={300} margin={{ top: 20, right: 30, bottom: 20, left: 30 }}
     >
       <defs>
