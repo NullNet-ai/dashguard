@@ -148,6 +148,12 @@ export function generateTimeSeriesData(
   }
 
   let currentDate = new Date(endDate.getTime() - intervals * intervalMs)
+  if (resolution_unit === 'm') {
+    const snapped = snapToInterval(resolution_value, resolution_unit, currentDate)
+    const [hh, mm] = snapped.split(':').map(Number) as [number, number]
+    currentDate.setHours(hh, mm, 0, 0)
+  }
+  
   let timeSeriesArray: { time: string, bandwidth: string }[] = [];
 
   for (let i = 0; i <= intervals; i++) {
@@ -171,4 +177,42 @@ export function generateTimeSeriesData(
     // return timeSeriesArray.slice(-24)
   } 
   return timeSeriesArray;
+}
+
+/**
+ * Snap a time to the nearest lower interval mark.
+ * @param {number} resolution - e.g. 24
+ * @param {string} unit       - 'm' (minutes) | 'h' (hours) | 's' (seconds)
+ * @param {string|Date} startDate - e.g. "20:59", "2024-01-15T20:59:00", or a Date object
+ * @returns {string} - "HH:MM" of the closest lower interval
+ */
+function snapToInterval(resolution: number, unit: string, startDate: string | Date) {
+  // --- normalize input to total minutes from midnight ---
+  let totalMinutes;
+
+  if (typeof startDate === 'string' && /^\d{2}:\d{2}/.test(startDate)) {
+    const [h, m] = startDate.split(':').map(Number) as [number, number];
+    totalMinutes = h * 60 + m;
+  } else {
+    const d = new Date(startDate);
+    totalMinutes = d.getHours() * 60 + d.getMinutes();
+  }
+
+  // --- convert resolution to minutes ---
+  let resolutionInMinutes;
+  switch (unit) {
+    case 's': resolutionInMinutes = resolution / 60;  break;
+    case 'm': resolutionInMinutes = resolution;        break;
+    case 'h': resolutionInMinutes = resolution * 60;   break;
+    default:  throw new Error(`Unknown unit: "${unit}". Use 's', 'm', or 'h'.`);
+  }
+
+  // --- floor to nearest lower interval ---
+  const snapped = Math.floor(totalMinutes / resolutionInMinutes) * resolutionInMinutes;
+
+  // --- format back to HH:MM ---
+  const h = String(Math.floor(snapped / 60) % 24).padStart(2, '0');
+  const m = String(Math.round(snapped % 60)).padStart(2, '0');
+
+  return `${h}:${m}`;
 }
