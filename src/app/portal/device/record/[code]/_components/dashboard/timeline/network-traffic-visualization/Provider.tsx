@@ -142,7 +142,7 @@ export default function NetworkFlowProvider({ children, params }: IProps) {
    * each time the poll functions are redefined.
    */
   const pollRecentBandwidthRef = useRef<(hasNewIps?: boolean) => Promise<void>>(async () => {})
-  const pollTopBandwidthRef    = useRef<(hasNewIps?: boolean) => Promise<void>>(async () => {})
+  const pollTopBandwidthRef    = useRef<(newIps?: string[]) => Promise<void>>(async () => {})
   const pollRecentIPRef   = useRef<() => Promise<void>>(async () => {})
   const pollTopTrafficRef = useRef<() => Promise<void>>(async () => {})
 
@@ -473,8 +473,20 @@ export default function NetworkFlowProvider({ children, params }: IProps) {
       ])
       if (isUnmountedRef.current || generation !== filterGenerationRef.current) return
 
+      const previousTopIps = new Set(topTrafficIpsRef.current)
       topTrafficIpsRef.current = [...new Set([...topTrafficIpsRef.current, ...newIps])]
       saveIPsToCache(recentIpsRef.current, topTrafficIpsRef.current)
+
+      const trulyNewIps = newIps.filter(ip => !previousTopIps.has(ip))
+      if (trulyNewIps.length > 0) {
+        void pollTopBandwidthRef.current(trulyNewIps)
+      } else {
+        setSnapshot(prev => ({
+          ...prev,
+          topTrafficData: topTrafficBandwidthRef.current,
+          unique_top_traffic_ips: topTrafficIpsRef.current,
+        }))
+      }
     } catch (err) {
       console.error('[topTraffic] error:', err)
     } finally {
@@ -566,7 +578,7 @@ export default function NetworkFlowProvider({ children, params }: IProps) {
   }, [saveIPsToCache])
 
   /** Bandwidth poll for the Top Traffic section — runs every 3 s. */
-  const pollTopBandwidth = useCallback(async (hasNewIps: boolean = false) => {
+  const pollTopBandwidth = useCallback(async (newIps: string[] = []) => {
     if (isTopBandwidthRunningRef.current) return
     const generation = filterGenerationRef.current
     const settings = timeRef.current
@@ -583,9 +595,9 @@ export default function NetworkFlowProvider({ children, params }: IProps) {
 
       const bwResult: any = await getBandwidthTopRef.current.mutateAsync({
         device_id: paramsRef.current?.id || '',
-        time_range: hasNewIps ? timeRange : tr2 as any,
+        time_range: newIps.length > 0 ? timeRange : tr2 as any,
         bucket_size: settings.resolution,
-        source_ips: topTrafficIpsRef.current,
+        source_ips: newIps.length > 0 ? newIps : topTrafficIpsRef.current,
       })
       if (isUnmountedRef.current || generation !== filterGenerationRef.current) return
 
@@ -612,8 +624,9 @@ export default function NetworkFlowProvider({ children, params }: IProps) {
 
       const newEntries = incoming.filter(e => !existingMap.has(e.source_ip))
 
-      const sorted = withTotal([...updated, ...newEntries]
+      const total = withTotal([...updated, ...newEntries]
         .map(e => ({ ...e, result: e.result.slice(0, 60) })))
+      const sorted = total
         .sort((a, b) => {
           const byPackets = (b.total_active_packets ?? 0) - (a.total_active_packets ?? 0)
           return byPackets !== 0 ? byPackets : (b.total_bandwidths ?? 0) - (a.total_bandwidths ?? 0)
@@ -629,8 +642,8 @@ export default function NetworkFlowProvider({ children, params }: IProps) {
 
       setSnapshot(prev => ({
         ...prev,
-        topTrafficData:         sorted,
-        unique_top_traffic_ips: topTrafficIpsRef.current,
+        topTrafficData:         newIps.length > 0 ? sorted : total,
+        unique_top_traffic_ips: newIps.length > 0 ? topTrafficIpsRef.current : total.map(e => e.source_ip),
       }))
     } catch (err) {
       console.error('[topBandwidth] error:', err)
