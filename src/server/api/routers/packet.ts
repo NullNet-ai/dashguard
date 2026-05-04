@@ -706,34 +706,14 @@ export const packetRouter = createTRPCRouter({
     }
   }),
   getBandwidthOfSourceIP: privateProcedure.input(z.object({ device_id: z.string(), time_range: z.array(z.string()), bucket_size: z.string(), source_ips: z.array(z.string()), limit: z.number().optional(), use_chunks: z.boolean().optional().default(true) })).mutation(async ({ input, ctx }) => {
-    const { device_id, time_range, bucket_size = '1s', source_ips, limit = 60, use_chunks } = input
+    const { device_id, time_range, bucket_size = '1s', source_ips, limit = 60 } = input
 
-    const buildTimeChunks = (range: string[]): string[][] => {
-      const [start, end] = range
-      const startMs = new Date(start!).getTime()
-      const endMs = new Date(end!).getTime()
-      const oneHour = 60 * 60 * 1000
-      if (endMs - startMs <= oneHour) return [range]
-      const fmt = (d: Date) => d.toISOString().replace('T', ' ').slice(0, 19) + '+00'
-      const chunks: string[][] = []
-      let cur = startMs
-      while (cur < endMs) {
-        const next = Math.min(cur + oneHour, endMs)
-        chunks.push([fmt(new Date(cur)), fmt(new Date(next))])
-        cur = next
-      }
-      return chunks
-    }
-
-    const timeChunks = false // use_chunks
-    ? buildTimeChunks(time_range) : [time_range]
-
-    // return []
     const ips = await Bluebird.map(source_ips, async (source_ip: string) => {
-      const parallelStart = Date.now()
-      const chunkResults = await Bluebird.map(timeChunks, async (chunk) => {
-        const chunkStart = Date.now()
-        const res = await ctx.dnaClient.aggregate({
+      const ipInfoCacheKey = `ip_info:${source_ip}`
+      const cachedIpInfo = await ctx.redisClient.getCachedData(ipInfoCacheKey)
+
+      const [bandwidthData, ipInfoData] = await Promise.all([
+        ctx.dnaClient.aggregate({
           query: {
             entity: 'connections',
             aggregations: [
@@ -749,7 +729,7 @@ export const packetRouter = createTRPCRouter({
                 field: 'timestamp',
                 entity: 'connections',
                 operator: EOperator.IS_BETWEEN,
-                values: chunk,
+                values: time_range,
               },
               {
                 type: 'operator',
@@ -760,9 +740,7 @@ export const packetRouter = createTRPCRouter({
                 field: 'source_ip',
                 entity: 'connections',
                 operator: EOperator.EQUAL,
-                values: [
-                  source_ip,
-                ],
+                values: [source_ip],
               },
               {
                 type: 'operator',
@@ -786,38 +764,42 @@ export const packetRouter = createTRPCRouter({
             limit: limit || 60,
           },
           token: ctx.token.value,
+        }).execute().then(res => res?.data ?? []),
 
-        }).execute()
-        return res?.data ?? []
-      })
+        cachedIpInfo
+          ? Promise.resolve(cachedIpInfo)
+          : ctx.dnaClient
+              .findAll({
+                entity: 'ip_info',
+                token: ctx.token.value,
+                query: {
+                  advance_filters: [
+                    {
+                      type: 'criteria',
+                      field: 'ip',
+                      operator: EOperator.EQUAL,
+                      values: [source_ip],
+                    },
+                  ],
+                  order: {
+                    limit: 10,
+                    by_field: 'ip',
+                    by_direction: EOrderDirection.DESC,
+                  },
+                  pluck: ['country', 'region', 'city', 'ip'],
+                },
+              })
+              .execute()
+              .then(async (res) => {
+                const data = res?.data ?? []
+                await ctx.redisClient.cacheData(ipInfoCacheKey, data, 3_600_000)
+                return data
+              }),
+      ])
 
-      const combinedData = chunkResults.flat()
-
-      const ip_info = await ctx.dnaClient
-        .findAll({
-          entity: 'ip_info',
-          token: ctx.token.value,
-          query: {
-            advance_filters: [
-              {
-                type: 'criteria',
-                field: 'ip',
-                operator: EOperator.EQUAL,
-                values: [source_ip],
-              },
-            ],
-            order: {
-              limit: 10,
-              by_field: 'ip',
-              by_direction: EOrderDirection.DESC,
-            },
-            pluck: ['country', 'region', 'city', 'ip'],
-          },
-        })
-        .execute()
-      const flagDetails = await getFlagDetails(ip_info?.data?.[0]?.country)
-      return { source_ip, result: combinedData, ...flagDetails }
-    }, { concurrency: 240 })
+      const flagDetails = await getFlagDetails((ipInfoData as any[])?.[0]?.country)
+      return { source_ip, result: bandwidthData, ...flagDetails }
+    }, { concurrency: 5 })
 
     return { data: ips }
   }),
