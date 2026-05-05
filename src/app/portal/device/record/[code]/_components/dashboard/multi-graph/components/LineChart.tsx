@@ -47,14 +47,21 @@ export const formatNumber = (num: number) => {
 
 const LineChartComponent = ({ filteredData, interfaces }: any) => {
   const formatTooltipValue = (value: unknown, item: any) => {
-    const { payload, dataKey } = item
-    const packet = payload[`${dataKey}_packet`]
-    const numericValue = typeof value === 'number' ? value : Number(value)
-    return `${Number.isFinite(numericValue)
-      ? formatBytesTooltip(numericValue)
-      : String(value ?? '')} (${packet} Packet${packet > 1 ? 's' : ''})`
-  }
-  const { yAxisMax, yAxisMin } = useMemo(() => modifyAxis(filteredData || []), [filteredData]);
+    const { payload, dataKey } = item;
+    const packet = payload[`${dataKey}_packet`];
+    const originalValue = payload[`${dataKey}_original`] ?? value;
+    const numericValue =
+      typeof originalValue === 'number' ? originalValue : Number(originalValue);
+    return `${
+      Number.isFinite(numericValue)
+        ? formatBytesTooltip(numericValue)
+        : String(originalValue ?? '')
+    } (${packet} Packet${packet > 1 ? 's' : ''})`;
+  };
+  const { yAxisMax, yAxisMin } = useMemo(
+    () => modifyAxis(filteredData || []),
+    [filteredData],
+  );
 
   const number_of_ticks = useMemo(() => {
     return yAxisMax >= 100000 ? 10 : 5;
@@ -79,7 +86,20 @@ const LineChartComponent = ({ filteredData, interfaces }: any) => {
   return (
     <ResponsiveContainer width="100%" height={300}>
       <LineChart
-        data={filteredData}
+        data={filteredData.map((e: Record<string, any>) => {
+          const [, firstTick] = yticks;
+          if (!firstTick) return e;
+          const transformed: Record<string, any> = { ...e };
+          interfaces?.forEach((item: any) => {
+            const key = item.value;
+            const original = e[key];
+            transformed[`${key}_original`] = original;
+            if (original !== 0 && original < firstTick) {
+              transformed[key] = firstTick * 0.2 - original * 0.2;
+            }
+          });
+          return transformed;
+        })}
         height={300}
         margin={{ top: 20, right: 30, bottom: 20, left: 30 }}
       >

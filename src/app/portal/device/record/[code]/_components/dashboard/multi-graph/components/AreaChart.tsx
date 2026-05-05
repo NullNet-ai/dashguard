@@ -8,11 +8,13 @@ import { formatBytes } from '../../pie-chart/function/formatBytes'
 
 const AreaChartComponent = ({ filteredData, interfaces }: any) => {
   const formatTooltipValue = (value: unknown, item: any) => {
-    const { payload, dataKey } = item
-    const packet = payload[`${dataKey}_packet`]
-    const numericValue = typeof value === 'number' ? value : Number(value)
-    return `${Number.isFinite(numericValue) ? formatBytes(numericValue) : String(value ?? '')} (${packet} Packet${packet > 1 ? 's' : ''})`
-  }
+    const { payload, dataKey } = item;
+    const packet = payload[`${dataKey}_packet`];
+    const originalValue = payload[`${dataKey}_original`] ?? value;
+    const numericValue =
+      typeof originalValue === 'number' ? originalValue : Number(originalValue);
+    return `${Number.isFinite(numericValue) ? formatBytes(numericValue) : String(originalValue ?? '')} (${packet} Packet${packet > 1 ? 's' : ''})`;
+  };
   const sorted = sortInterface(interfaces);
   const { yAxisMax, yAxisMin } = modifyAxis(filteredData);
 
@@ -39,7 +41,20 @@ const AreaChartComponent = ({ filteredData, interfaces }: any) => {
   return (
     <ResponsiveContainer width="100%" height={300}>
       <AreaChart
-        data={filteredData}
+        data={filteredData.map((e: Record<string, any>) => {
+          const [, firstTick] = yticks;
+          if (!firstTick) return e;
+          const transformed: Record<string, any> = { ...e };
+          sorted?.forEach((item: any) => {
+            const key = item.value;
+            const original = e[key];
+            transformed[`${key}_original`] = original;
+            if (original !== 0 && original < firstTick) {
+              transformed[key] = firstTick * 0.2 - original * 0.2;
+            }
+          });
+          return transformed;
+        })}
         height={300}
         width={1870}
         margin={{ top: 20, right: 30, bottom: 20, left: 30 }} // Increased margin to prevent cutting
