@@ -1,0 +1,26 @@
+meta {
+  name: Create Store Version
+  type: http
+  seq: 6
+}
+
+post {
+  url: {{baseUrl}}/api/store/versions
+  body: json
+  auth: inherit
+}
+
+params:query {
+  ~pluck: id
+}
+
+body:json {
+  {
+      "latest_version": "https://github.com/NullNet-ai/wallguard/releases/tag/v0.1.8"
+  }
+  
+}
+
+settings {
+  encodeUrl: true
+}

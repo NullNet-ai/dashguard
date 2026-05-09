@@ -1,0 +1,374 @@
+meta {
+  name: Get Filter Suggestions copy
+  type: http
+  seq: 3
+}
+
+post {
+  url: {{baseUrl}}/api/store/{{defaultEntity}}/filter/suggestions
+  body: json
+  auth: inherit
+}
+
+body:json {
+  {
+    "pluck": [
+      "id",
+      "code",
+      "categories",
+      "status",
+      "created_date",
+      "created_time",
+      "created_by",
+      "updated_date",
+      "updated_time",
+      "updated_by",
+      "is_device_authorized",
+      "device_name",
+      "device_category",
+      "device_type",
+      "device_uuid",
+      "is_device_online"
+    ],
+    "pluck_object": {
+      "created_by_account_organizations": [
+        "id",
+        "contact_id"
+      ],
+      "created_by": [
+        "id",
+        "first_name",
+        "last_name"
+      ],
+      "updated_by_account_organizations": [
+        "id",
+        "contact_id"
+      ],
+      "updated_by": [
+        "id",
+        "first_name",
+        "last_name"
+      ],
+      "devices": [
+        "id",
+        "code",
+        "categories",
+        "status",
+        "created_date",
+        "created_time",
+        "created_by",
+        "updated_date",
+        "updated_time",
+        "updated_by",
+        "is_device_authorized",
+        "device_name",
+        "device_category",
+        "device_type",
+        "device_uuid",
+        "is_device_online"
+      ]
+    },
+    "pluck_group_object": {},
+    "advance_filters": [
+      {
+        "type": "criteria",
+        "field": "full_name",
+        "entity": "created_by",
+        "operator": "like",
+        "values": [
+          "Active"
+        ],
+        "is_search": true
+      },
+      {
+        "type": "operator",
+        "operator": "or"
+      },
+      {
+        "type": "criteria",
+        "field": "created_date_time",
+        "entity": "device",
+        "operator": "like",
+        "values": [
+          "Active"
+        ],
+        "is_search": true
+      },
+      {
+        "type": "operator",
+        "operator": "or"
+      },
+      {
+        "type": "criteria",
+        "field": "full_name",
+        "entity": "updated_by",
+        "operator": "like",
+        "values": [
+          "Active"
+        ],
+        "is_search": true
+      },
+      {
+        "type": "operator",
+        "operator": "or"
+      },
+      {
+        "type": "criteria",
+        "field": "updated_date_time",
+        "entity": "device",
+        "operator": "like",
+        "values": [
+          "Active"
+        ],
+        "is_search": true
+      },
+      {
+        "type": "operator",
+        "operator": "or"
+      },
+      {
+        "type": "criteria",
+        "field": "device_uuid",
+        "entity": "device",
+        "operator": "like",
+        "values": [
+          "Active"
+        ],
+        "is_search": true
+      },
+      {
+        "type": "operator",
+        "operator": "or"
+      },
+      {
+        "type": "criteria",
+        "field": "is_device_online",
+        "entity": "device",
+        "operator": "like",
+        "values": [
+          "Active"
+        ],
+        "is_search": true,
+        "parse_as": "text"
+      },
+      {
+        "type": "operator",
+        "operator": "or"
+      },
+      {
+        "type": "criteria",
+        "field": "device_type",
+        "entity": "device",
+        "operator": "like",
+        "values": [
+          "Active"
+        ],
+        "is_search": true
+      },
+      {
+        "type": "operator",
+        "operator": "or"
+      },
+      {
+        "type": "criteria",
+        "field": "device_category",
+        "entity": "device",
+        "operator": "like",
+        "values": [
+          "Active"
+        ],
+        "is_search": true
+      },
+      {
+        "type": "operator",
+        "operator": "or"
+      },
+      {
+        "type": "criteria",
+        "field": "device_name",
+        "entity": "device",
+        "operator": "like",
+        "values": [
+          "Active"
+        ],
+        "is_search": true
+      },
+      {
+        "type": "operator",
+        "operator": "or"
+      },
+      {
+        "type": "criteria",
+        "field": "is_device_authorized",
+        "entity": "device",
+        "operator": "like",
+        "values": [
+          "Active"
+        ],
+        "is_search": true,
+        "parse_as": "text"
+      },
+      {
+        "type": "operator",
+        "operator": "or"
+      },
+      {
+        "type": "criteria",
+        "field": "status",
+        "entity": "device",
+        "operator": "like",
+        "values": [
+          "Active"
+        ],
+        "is_search": true
+      },
+      {
+        "type": "operator",
+        "operator": "or"
+      },
+      {
+        "type": "criteria",
+        "field": "code",
+        "entity": "device",
+        "operator": "like",
+        "values": [
+          "Active"
+        ],
+        "is_search": true
+      },
+      {
+        "type": "operator",
+        "operator": "and"
+      },
+      {
+        "type": "criteria",
+        "field": "status",
+        "entity": "device",
+        "operator": "equal",
+        "values": [
+          "Active",
+          "Draft"
+        ]
+      }
+    ],
+    "offset": 0,
+    "limit": 100,
+    "joins": [
+      {
+        "type": "left",
+        "field_relation": {
+          "to": {
+            "alias": "created_by_account_organizations",
+            "entity": "account_organizations",
+            "field": "id"
+          },
+          "from": {
+            "entity": "devices",
+            "field": "created_by"
+          }
+        },
+        "nested": false
+      },
+      {
+        "type": "left",
+        "field_relation": {
+          "to": {
+            "alias": "created_by",
+            "entity": "contacts",
+            "field": "id"
+          },
+          "from": {
+            "entity": "created_by_account_organizations",
+            "field": "contact_id"
+          }
+        },
+        "nested": true
+      },
+      {
+        "type": "left",
+        "field_relation": {
+          "to": {
+            "alias": "updated_by_account_organizations",
+            "entity": "account_organizations",
+            "field": "id"
+          },
+          "from": {
+            "entity": "devices",
+            "field": "updated_by"
+          }
+        },
+        "nested": false
+      },
+      {
+        "type": "left",
+        "field_relation": {
+          "to": {
+            "alias": "updated_by",
+            "entity": "contacts",
+            "field": "id"
+          },
+          "from": {
+            "entity": "updated_by_account_organizations",
+            "field": "contact_id"
+          }
+        },
+        "nested": true
+      }
+    ],
+    "order_direction": "desc",
+    "order_by": "code",
+    "is_case_sensitive_sorting": false,
+    "multiple_sort": [],
+    "date_format": "mm/dd/YYYY",
+    "concatenate_fields": [
+      {
+        "fields": [
+          "first_name",
+          "last_name"
+        ],
+        "field_name": "full_name",
+        "separator": " ",
+        "entity": "contacts",
+        "aliased_entity": "created_by"
+      },
+      {
+        "fields": [
+          "first_name",
+          "last_name"
+        ],
+        "field_name": "full_name",
+        "separator": " ",
+        "entity": "contacts",
+        "aliased_entity": "updated_by"
+      },
+      {
+        "fields": [
+          "created_date",
+          "created_time"
+        ],
+        "field_name": "created_date_time",
+        "separator": " ",
+        "entity": "device"
+      },
+      {
+        "fields": [
+          "updated_date",
+          "updated_time"
+        ],
+        "field_name": "updated_date_time",
+        "separator": " ",
+        "entity": "device"
+      }
+    ],
+    "group_advance_filters": [],
+    "distinct_by": "",
+    "group_by": {},
+    "time_format": "HH24:MI"
+  }
+  
+}
+
+settings {
+  encodeUrl: true
+  timeout: 0
+}
