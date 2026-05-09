@@ -23,7 +23,12 @@ const CustomCreateButton = ({ entity }: { entity: string }) => {
 
   return (
     <div className="flex items-center justify-end">
-      <Button iconPlacement={'left'} Icon={PlusIcon} onClick={handleCreate}>
+      <Button
+        data-test-id="device-grid-create-button"
+        iconPlacement={'left'}
+        Icon={PlusIcon}
+        onClick={handleCreate}
+      >
         New
       </Button>
     </div>

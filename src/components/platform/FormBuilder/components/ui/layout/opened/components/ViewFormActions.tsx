@@ -55,7 +55,7 @@ const ViewFormActions = ({
       <SubmitForm
         saveForm={saveForm}
         data-test-id={testIDFormatter(
-          `${entityName ?? 'no_entity'}-wzrd-${formKey}-save-form-btn`,
+          `${entityName ?? 'no_entity'}-wizard-${formKey}-save-form-button`,
         )}
         form={form}
         formSchema={formSchema}
@@ -67,7 +67,7 @@ const ViewFormActions = ({
         saveForm={saveForm}
         form={form}
         data-test-id={testIDFormatter(
-          `${entityName ?? 'no_entity'}-wzrd-${formKey}-cancel-form-btn`,
+          `${entityName ?? 'no_entity'}-wizard-${formKey}-cancel-form-button`,
         )}
         formSchema={formSchema}
         isLoading={isButtonLoading}
@@ -75,7 +75,7 @@ const ViewFormActions = ({
       {enableViewFormEllipsis && <DropdownMenu>
         <DropdownMenuTrigger
           data-test-id={testIDFormatter(
-            `${entityName ?? 'no_entity'}-wzrd-${formKey}-more-actions-menu`,
+            `${entityName ?? 'no_entity'}-wizard-${formKey}-more-actions-menu`,
           )}
         >
           <EllipsisVertical className="h-4 w-4 text-muted-foreground" />
@@ -83,7 +83,7 @@ const ViewFormActions = ({
         <DropdownMenuContent align="end">
           <DropdownMenuItem
             data-test-id={testIDFormatter(
-              `${entityName ?? 'no_entity'}-wzrd-${formKey}-more-actions-clear-form`,
+              `${entityName ?? 'no_entity'}-wizard-${formKey}-more-actions-clear-form`,
             )}
             onClick={() => {
               const currentValues = form.getValues();
@@ -146,7 +146,7 @@ const ViewFormActions = ({
               <DropdownMenuItem
                 key={index}
                 data-test-id={testIDFormatter(
-                  `${entityName ?? 'no_entity'}-wzrd-${formKey}-more-actions-${camelCase(action.label)}`,
+                  `${entityName ?? 'no_entity'}-wizard-${formKey}-more-actions-${camelCase(action.label)}`,
                 )}
                 onClick={action.onClick}
                 className="flex gap-2"

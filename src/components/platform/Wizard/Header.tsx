@@ -147,7 +147,7 @@ export default function Header() {
           
           {currentStep > 1 && (
             <Button
-              data-test-id={testIDFormatter(`${entityName}-wzrd-prev-btn`)}
+              data-test-id={testIDFormatter(`${entityName}-wizard-previous-button`)}
               disabled={!enabled_prev || currentStep === 1 || prevLoading}
               variant={"outline"}
               loading={prevLoading}
@@ -166,7 +166,7 @@ export default function Header() {
           {process.env.NODE_ENV !== "production" && (
             <Button
               name="wizardDebugButton"
-              data-test-id={testIDFormatter(`${entityName}-wzrd-debug-btn`)}
+              data-test-id={testIDFormatter(`${entityName}-wizard-debug-button`)}
               size={"icon"}
               variant={"ghost"}
               className="m-auto h-6 w-6 rounded-full bg-rose-200"
@@ -180,7 +180,7 @@ export default function Header() {
             <div className="flex flex-row items-center">
               <Button
                 data-test-id={testIDFormatter(
-                  `${entityName}-wzrd-save-continue-btn`,
+                  `${entityName}-wizard-save-continue-button`,
                 )}
                 className="gap-1"
                 loading={saveContinueLoading}
@@ -228,7 +228,7 @@ export default function Header() {
             <>
               {currentStep > 1 && (
                 <Button
-                  data-test-id={testIDFormatter(`${entityName}-wzrd-skip-btn`)}
+                  data-test-id={testIDFormatter(`${entityName}-wizard-skip-button`)}
                   variant={"outline"}
                   loading={skipLoading}
                   size={"sm"}
@@ -246,7 +246,7 @@ export default function Header() {
               )}
 
               <Button
-                data-test-id={testIDFormatter(`${entityName}-wzrd-next-btn`)}
+                data-test-id={testIDFormatter(`${entityName}-wizard-next-button`)}
                 loading={nextLoading}
                 size={"sm"}
                 disabled={
@@ -264,7 +264,7 @@ export default function Header() {
       </div>
       {debugOn && <DebuggerComponent />}
       <Validation
-        dataTestId={testIDFormatter(`${entityName}-wzrd-validation-msg`)}
+        dataTestId={testIDFormatter(`${entityName}-wizard-validation-message`)}
         messages={errorMessage ?? {}}
       />
     </Card>

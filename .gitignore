@@ -58,3 +58,7 @@ dump.rdb
 
 # MCP config (contains secrets)
 .mcp.json
+
+# Playwright
+/playwright-report
+/test-results

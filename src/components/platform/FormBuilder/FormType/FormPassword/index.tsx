@@ -26,6 +26,7 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from '~/components/ui/popover';
+import { testIDFormatter } from '~/utils/formatter';
 
 import { type IPasswordStrength, type IProps } from './types';
 
@@ -57,6 +58,7 @@ export default function FormPassword({
     ? fieldConfig?.disabled || fieldConfig?.readonly
     : formRenderProps?.field?.disabled;
   const isReadonly = fieldConfig?.readonly;
+  const fieldNameTestId = testIDFormatter(fieldConfig.name);
   const [showPassword, setShowPassword] = useState(false);
 
   // State for password validation rules
@@ -219,9 +221,9 @@ export default function FormPassword({
     <FormItem>
       {/* Password Input Label */}
       <FormLabel
-        data-test-id={`${formKey}-lbl-${fieldConfig.name}`}
+        data-test-id={`${formKey}-label-${fieldNameTestId}`}
         required={fieldConfig?.required}
-        htmlFor={`${formKey}-inp-${fieldConfig.name}`}
+        htmlFor={`${formKey}-input-${fieldNameTestId}`}
       >
         {fieldConfig?.label}
       </FormLabel>
@@ -230,8 +232,8 @@ export default function FormPassword({
       <FormControl>
         <div className="group relative transition-all duration-200 focus-within:ring-2 focus-within:ring-primary/20 rounded-md">
           <Input
-            id={`${formKey}-inp-${fieldConfig.name}`}
-            data-test-id={`${formKey}-inp-${fieldConfig.name}`}
+            id={`${formKey}-input-${fieldNameTestId}`}
+            data-test-id={`${formKey}-input-${fieldNameTestId}`}
             type={showPassword ? 'text' : 'password'}
             {...formRenderProps.field}
             hasError={!!formRenderProps.fieldState.error}
@@ -244,7 +246,7 @@ export default function FormPassword({
             aria-invalid={!!formRenderProps.fieldState.error}
             aria-describedby={
               formRenderProps.fieldState.error
-                ? `${formKey}-err-msg-${fieldConfig.name}`
+                ? `${formKey}-error-message-${fieldNameTestId}`
                 : undefined
             }
             className="pr-24 transition-all duration-200"
@@ -256,7 +258,7 @@ export default function FormPassword({
             {formRenderProps?.field?.value && showPasswordGenerator && !isDisabled && !isReadonly && (
               <Button
                 className="mr-1 hover:bg-transparent focus-visible:ring-2 focus-visible:ring-primary transition-all duration-200"
-                data-test-id={`${formKey}-copy-pwd-btn-${fieldConfig.name}`}
+                data-test-id={`${formKey}-copy-password-button-${fieldNameTestId}`}
                 disabled={isDisabled}
                 Icon={ClipboardDocumentIcon}
                 size="sm"
@@ -276,7 +278,7 @@ export default function FormPassword({
                 <PopoverTrigger asChild>
                   <Button
                     className="mr-1 hover:bg-transparent focus-visible:ring-2 focus-visible:ring-primary transition-all duration-200"
-                    data-test-id={`${formKey}-generate-pwd-btn-${fieldConfig.name}`}
+                    data-test-id={`${formKey}-generate-password-button-${fieldNameTestId}`}
                     disabled={isDisabled}
                     Icon={ArrowPathIcon}
                     size="sm"
@@ -366,7 +368,7 @@ export default function FormPassword({
                     <Button 
                       className="w-full transition-all duration-200 hover:scale-[1.02] active:scale-[0.98]" 
                       onClick={generatePassword}
-                      data-test-id={`${formKey}-confirm-generate-pwd-btn-${fieldConfig.name}`}
+                      data-test-id={`${formKey}-confirm-generate-password-button-${fieldNameTestId}`}
                     >
                       Generate Password
                     </Button>
@@ -379,7 +381,7 @@ export default function FormPassword({
             {!isDisabled && !isReadonly && (
               <Button
                 className="mr-4 py-2 hover:bg-transparent focus-visible:ring-2 focus-visible:ring-primary transition-all duration-200"
-                data-test-id={`${formKey}-show-pwd-btn-${fieldConfig.name}`}
+                data-test-id={`${formKey}-show-password-button-${fieldNameTestId}`}
                 disabled={isDisabled}
                 Icon={showPassword ? EyeIcon : EyeSlashIcon}
                 size="sm"
@@ -427,8 +429,8 @@ export default function FormPassword({
 
       {!showPasswordStrengthBarAndValidations && (
         <FormMessage 
-          data-test-id={`${formKey}-err-msg-${fieldConfig.name}`}
-          id={`${formKey}-err-msg-${fieldConfig.name}`}
+          data-test-id={`${formKey}-error-message-${fieldNameTestId}`}
+          id={`${formKey}-error-message-${fieldNameTestId}`}
         />
       )}
 
@@ -471,8 +473,8 @@ export default function FormPassword({
           </div>
         ) : (
           <FormMessage
-            data-test-id={`${formKey}-err-msg-${fieldConfig.name}`}
-            id={`${formKey}-err-msg-${fieldConfig.name}`}
+            data-test-id={`${formKey}-error-message-${fieldNameTestId}`}
+            id={`${formKey}-error-message-${fieldNameTestId}`}
             isMultiple={hasComplexValidation}
           />
         ))}

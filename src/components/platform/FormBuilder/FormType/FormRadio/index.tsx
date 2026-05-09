@@ -13,6 +13,7 @@ import {
 import { RadioGroup, RadioGroupItem } from "~/components/ui/radio-group";
 import { type IRadioOptions, type IField } from "../../types";
 import { cn } from "~/lib/utils";
+import { testIDFormatter } from '~/utils/formatter';
 
 interface IProps {
   fieldConfig: IField;
@@ -32,6 +33,7 @@ export default function FormRadio({
   form,
   formKey,
 }: IProps) {
+  const fieldNameTestId = testIDFormatter(fieldConfig.name);
 
 
   const radioOptions = {
@@ -45,7 +47,7 @@ export default function FormRadio({
     <FormItem>
       <FormLabel
         required={fieldConfig?.required}
-        data-test-id={`${formKey}-lbl-${fieldConfig.name}`}
+        data-test-id={`${formKey}-label-${fieldNameTestId}`}
       >
         {fieldConfig.label}
       </FormLabel>
@@ -57,7 +59,7 @@ export default function FormRadio({
           render={({ field }) => (
             <RadioGroup
               {...field}
-              data-test-id={`${formKey}-rdio-${fieldConfig.name}`}
+              data-test-id={`${formKey}-radio-${fieldNameTestId}`}
               disabled={formRenderProps.field.disabled}
               onValueChange={(value) => {
                 formRenderProps.field.onChange(value === 'true' ? true : value === 'false' ? false : value);
@@ -66,6 +68,10 @@ export default function FormRadio({
               className={`${fieldConfig.radioOrientation === "vertical" && "flex-col"} flex gap-2`}
             >
               {radioOptions?.[fieldConfig?.id]?.map((option, index) => {
+                const optionValueTestId = testIDFormatter(
+                  String(option.value || option.label || index + 1),
+                );
+                const optionLabelTestId = testIDFormatter(String(option.label));
                 return (
                 <div key={index} className={`flex gap-2 ${fieldConfig.radioOrientation === "vertical" && option.renderComponent && "flex-col"}`}>
                   <FormItem
@@ -77,7 +83,7 @@ export default function FormRadio({
                     <FormControl>
                       <RadioGroupItem
                         value={String(option.value)}
-                        data-test-id={`${formKey}-opt-${index + 1}-${fieldConfig.name}`}
+                        data-test-id={`${formKey}-option-${optionValueTestId}-${fieldNameTestId}`}
                         className={cn(`${option.label === 'hidden' ? 'w-0 h-0 absolute opacity-0' : ''}`)}
                       />
                     </FormControl>
@@ -90,7 +96,7 @@ export default function FormRadio({
                     >
                       <FormLabel
                         className="font-normal"
-                        data-test-id={`${formKey}-lbl-${option.label}-${fieldConfig.name}`}
+                        data-test-id={`${formKey}-option-label-${optionLabelTestId}-${fieldNameTestId}`}
                       >
                         {option.label}
                       </FormLabel>
@@ -112,7 +118,7 @@ export default function FormRadio({
         />
       </FormControl>
       <FormMessage
-        data-test-id={`${formKey}-err-msg-${fieldConfig.name}`}
+        data-test-id={`${formKey}-error-message-${fieldNameTestId}`}
       />
     </FormItem>
   );
