@@ -1,0 +1,74 @@
+meta {
+  name: Aggregate Store Data
+  type: http
+  seq: 5
+}
+
+post {
+  url: {{baseUrl}}/api/store/aggregate
+  body: json
+  auth: inherit
+}
+
+body:json {
+  {
+      "advance_filters": [
+          {
+              "type": "criteria",
+              "field": "timestamp",
+              "entity": "connections",
+              "operator": "is_between",
+              "values": [
+                  "2026-05-05 01:47:02+00",
+                  "2026-05-05 01:48:02+00"
+              ]
+          },
+          {
+              "type": "operator",
+              "operator": "and"
+          },
+          {
+              "type": "criteria",
+              "field": "source_ip",
+              "entity": "connections",
+              "operator": "equal",
+              "values": [
+                  "64.255.201.63"
+              ]
+          },
+          {
+              "type": "operator",
+              "operator": "and"
+          },
+          {
+              "type": "criteria",
+              "field": "device_id",
+              "entity": "connections",
+              "operator": "equal",
+              "values": [
+                  "01KMP2VXN2XRF8TYYF26X4FB8D"
+              ]
+          }
+      ],
+      "joins": [],
+      "aggregations": [
+          {
+              "aggregation": "SUM",
+              "aggregate_on": "total_byte",
+              "bucket_name": "bandwidth"
+          }
+      ],
+      "order": {
+          "order_by": "bucket",
+          "order_direction": "desc"
+      },
+      "bucket_size": "1s",
+      "timezone": "Asia/Manila",
+      "entity": "connections",
+      "limit": 60
+  }
+}
+
+settings {
+  encodeUrl: true
+}
