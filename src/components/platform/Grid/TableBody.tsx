@@ -95,7 +95,7 @@ export default function MyTableBody({
     <>
       <TableBody
         className="overflow-y-auto"
-        data-test-id={testIDFormatter(`${state?.config.entity}-grd-tbl-tbody`)}
+        data-test-id={testIDFormatter(`${state?.config.entity}-grid-table-body`)}
       >
        
           {isLoading ? (
@@ -130,7 +130,7 @@ export default function MyTableBody({
                         visibleColumns={visibleColumns}
                         allExpandedRows={allExpandedRows}
                         gridLevel={gridLevel}
-                        data-test-id={testIDFormatter(`${state?.config.entity}-grd-tbl-tbody-row-${row.id + (index + 1)}`)}
+                        data-test-id={testIDFormatter(`${state?.config.entity}-grid-table-body-row-${row.id + (index + 1)}`)}
                         getParentCellSize={getParentCellSize}
                         isEndReached={isEndReached}
                         reachEnd={reachEnd}
@@ -144,7 +144,7 @@ export default function MyTableBody({
                     key={row.id + index}
                     data-state={row.getIsSelected() && 'selected'}
                     data-test-id={testIDFormatter(
-                      `${state?.config.entity}-grd-tbl-tbody-row-${row.id + (index + 1)}`,
+                      `${state?.config.entity}-grid-table-body-row-${row.id + (index + 1)}`,
                     )}
                   >
                     {row.getVisibleCells().map((cell, index) => {
@@ -196,7 +196,7 @@ export default function MyTableBody({
                           config={state?.config}
                           column_id={cell?.column?.id}
                           data-test-id={testIDFormatter(
-                            `${state?.config.entity}-grd-tbl-tbody-row-cell-${cell.column.id + '-' + (index + 1)}`,
+                            `${state?.config.entity}-grid-table-body-row-cell-${cell.column.id + '-' + (index + 1)}`,
                           )}
                           style={{
                             width: parentCellSize !== 0 ? parentCellSize - 25 : cell.column.getSize(),
@@ -217,7 +217,7 @@ export default function MyTableBody({
                               ) : (
                                 <div
                                   className="flex flex-row flex-wrap gap-y-1"
-                                  data-test-id={cell.column.id === 'expand' && `${testIDFormatter(`${state?.config.entity}-grd-expd`)}`}
+                                  data-test-id={cell.column.id === 'expand' && `${testIDFormatter(`${state?.config.entity}-grid-expanded`)}`}
                                 >
                                   {flexRender(
                                     cell.column.columnDef.cell,

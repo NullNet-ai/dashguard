@@ -11,6 +11,7 @@ import { ChevronDownIcon } from "lucide-react";
 import React, { type ElementType, useEffect, useState } from "react";
 import { usePopper } from "react-popper";
 import { cn } from "~/lib/utils";
+import { testIDFormatter } from '~/utils/formatter';
 import { Avatar, AvatarFallback, AvatarImage } from "./avatar";
 import InfiniteScroll from 'react-infinite-scroll-component';
 import { ulid } from 'ulid';
@@ -220,7 +221,7 @@ export function ComboSelect({
                 
                 // Fallback to clicking the create button if it exists
                 if (renderCreateOption) {
-                    const createButton = document.querySelector('[data-test-id$="-opt-create-new-"]') as HTMLButtonElement;
+                    const createButton = document.querySelector('[data-test-id*="-option-create-new-"]') as HTMLButtonElement;
                     if (createButton) {
                         createButton.click();
                     }
@@ -429,7 +430,7 @@ export function ComboSelect({
                                             onClick={()=> {
                                                 setOpen(false);
                                             }}
-                                            data-test-id={testId ? `${testId}-option-${option.value}` : undefined}
+                                            data-test-id={testId ? `${testId}-option-${testIDFormatter(String(option.value))}` : undefined}
                                         >
                                             {/* Left side container with avatar, status, checkmark and label */}
                                             <div className="flex items-center">

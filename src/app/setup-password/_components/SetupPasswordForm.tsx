@@ -77,7 +77,7 @@ const SetupPasswordForm = () => {
           className={
             'justify-center\\\\ !mt-8 flex h-auto w-full items-center rounded py-1.5 text-md font-semibold text-white shadow-sm'
           }
-          data-test-id='login-submit-btn'
+          data-test-id='login-submit-button'
           loading={isSubmitting}
           type='submit'
         >

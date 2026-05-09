@@ -120,7 +120,7 @@ export default function SearchDialog() {
         size="md"
         variant="softPrimary"
         onClick={() => handleOpenDialog()}
-        data-test-id={`${testIDFormatter(`${path1}-${path2}-srch-btn`)}`}
+        data-test-id={`${testIDFormatter(`${path1}-${path2}-search-button`)}`}
       >
         <SearchIcon className="size-4" />
         <span className="mr-1">Search</span>
@@ -155,7 +155,7 @@ export default function SearchDialog() {
                   autoFocus
                   className="h-12 w-full border-0 bg-transparent pl-11 pr-4 text-gray-900 placeholder:text-gray-400 focus:ring-0 sm:text-sm"
                   placeholder="Search..."
-                  data-test-id={`${testIDFormatter(`${path1}-${path2}-srch-input`)}`}
+                  data-test-id={`${testIDFormatter(`${path1}-${path2}-search-input`)}`}
                   value={query}
                   onChange={(event) => {
                     actions?.handleQuery(event.target.value);
