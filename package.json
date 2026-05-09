@@ -14,7 +14,8 @@
     "test": "dotenvx run --env-file=.orm.env -- ts-node ./test.ts",
     "clean": "rm -rf .next && rm -rf node_modules && rm -rf pnpm-lock.yaml && pnpm i",
     "test-local": "cypress open",
-    "prepare": "husky"
+    "prepare": "husky",
+    "sync:trae": "node scripts/sync-claude-to-trae.mjs"
   },
   "dependencies": {
     "@dna-platform/common-orm": "^1.1.152",
