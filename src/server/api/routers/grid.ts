@@ -268,7 +268,7 @@ export const gridRouter = createTRPCRouter({
               // @ts-expect-error - No type yet
               ? formatSorting(sorting)
               : [],
-          concatenate_fields: [...addCommonGridConcatenates(input?.entity)],
+          concatenate_fields: [...addCommonGridConcatenates(pluralize(input?.entity))],
         },
       });
       addCommonGridJoins(query, entity);
@@ -297,12 +297,14 @@ export const gridRouter = createTRPCRouter({
       }
 
       const formatted_items = items?.map((item: Record<string, any>) => {
-        const {
+        let {
           [pluralize(input?.entity)]: entity_data,
           created_by,
           updated_by,
           ...rest
         } = item;
+        if (Array.isArray(created_by)) created_by = created_by?.[0];
+        if (Array.isArray(updated_by)) updated_by = updated_by?.[0];
         return {
           ...entity_data,
           ...rest,
