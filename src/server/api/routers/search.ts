@@ -370,7 +370,7 @@ export const searchRouter = createTRPCRouter({
               ? formatSorting(sorting)
               : [],
           concatenate_fields: [
-            ...addCommonGridConcatenates(input?.entity),
+            ...addCommonGridConcatenates(pluralize(entity)),
             ...(entity === 'device_filter_rules' || entity === 'device_nat_rules'
               ? [{
                   fields: ['ipprotocol', 'protocol'],
