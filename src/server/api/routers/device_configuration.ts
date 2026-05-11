@@ -306,7 +306,7 @@ export const deviceConfigurationRouter = createTRPCRouter({
           token: ctx.token.value,
           query: {
             // @ts-expect-error - No type yet
-            advance_filters: createAdvancedFilter({ device_configuration_id: res.data[0].device_configurations.id }),
+            advance_filters: createAdvancedFilter({ device_configuration_id: res.data[0].id }),
             pluck: [
               'name',
               "device",
