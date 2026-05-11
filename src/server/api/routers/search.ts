@@ -311,9 +311,9 @@ export const searchRouter = createTRPCRouter({
               ...updatedFilter,
               values: updatedFilter.values?.map(v => {
                 if ('authorized'.toLowerCase().includes(v.toLowerCase())) {
-                  return true
+                  return 'true'
                 } else if ('unauthorized'.toLowerCase().includes(v.toLowerCase())) {
-                  return false
+                  return 'false'
                 }
                 return v
               }),
@@ -324,9 +324,9 @@ export const searchRouter = createTRPCRouter({
               ...updatedFilter,
               values: updatedFilter.values?.map(v => {
                 if ('online'.toLowerCase().includes(v.toLowerCase())) {
-                  return true
+                  return 'true'
                 } else if ('offline'.toLowerCase().includes(v.toLowerCase())) {
-                  return false
+                  return 'false'
                 }
                 return v
               }),
