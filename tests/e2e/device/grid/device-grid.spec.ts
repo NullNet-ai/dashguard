@@ -62,7 +62,9 @@ test.describe('Device Grid', () => {
       { term: 'Firewall', column: 'Category' },
       { term: 'firewall', column: 'Category' },
       { term: 'Online', column: 'Connection Status' },
+      { term: 'online', column: 'Connection Status' },
       { term: 'Offline', column: 'Connection Status' },
+      { term: 'offline', column: 'Connection Status' },
     ];
 
     test.beforeEach(async () => {
