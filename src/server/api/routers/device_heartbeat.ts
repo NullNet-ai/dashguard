@@ -1,11 +1,10 @@
-import { EOperator, EOrderDirection, type IAdvanceFilters } from '@dna-platform/common-orm'
+import { EOperator, EOrderDirection } from '@dna-platform/common-orm'
 import { z } from 'zod'
 
 import {
   createTRPCRouter,
   privateProcedure,
 } from '~/server/api/trpc'
-import { createAdvancedFilter } from '~/server/utils/transformAdvanceFilter'
 import moment from 'moment-timezone'
 import { createDefineRoutes } from '../baseCrud'
 
@@ -144,30 +143,50 @@ export const deviceHeartbeatsRouter = createTRPCRouter({
     })
   ).query(async ({ ctx, input }) => {
     const { device_id } = input
+    const timezone = Intl.DateTimeFormat().resolvedOptions().timeZone
 
-    const device_heartbeats = await ctx.dnaClient.findAll({
-      entity: 'device_heartbeats',
-      token: ctx.token.value,
+    const deviceHeartbeats = await ctx.dnaClient.aggregate({
+      // @ts-expect-error - No type yet
       query: {
-        pluck: ['id', 'timestamp', 'device_id'],
-        advance_filters: createAdvancedFilter({
-          status: 'Active',
-          device_id,
-        }) as IAdvanceFilters[],
+        entity: 'device_heartbeats',
+        aggregations: [
+          {
+            aggregation: 'COUNT',
+            aggregate_on: 'id',
+            bucket_name: 'count',
+          },
+        ],
+        advance_filters: [
+          {
+            type: 'criteria',
+            field: 'status',
+            entity: 'device_heartbeats',
+            operator: EOperator.EQUAL,
+            values: ['Active'],
+          },
+          {
+            type: 'operator',
+            operator: EOperator.AND,
+          },
+          {
+            type: 'criteria',
+            field: 'device_id',
+            entity: 'device_heartbeats',
+            operator: EOperator.EQUAL,
+            values: [device_id],
+          },
+        ],
+        bucket_size: '1s',
+        timezone,
+        limit: 1,
         order: {
-          by_field: 'timestamp',
-          limit: 1,
-          by_direction: EOrderDirection.DESC,
-          is_case_sensitive_sorting: true,
+          order_by: 'bucket',
+          order_direction: EOrderDirection.DESC,
         },
       },
+      token: ctx.token.value,
     }).execute()
 
-  
-
-
-
-
-    return device_heartbeats
+    return deviceHeartbeats
   }),
 })

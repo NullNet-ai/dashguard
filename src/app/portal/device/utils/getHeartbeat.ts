@@ -33,3 +33,24 @@ export const getLastMinutesTimeStamp = (minutes: number) => {
   
   return result
 }
+
+export const getHeartbeatTimestampMs = (heartbeatBucket?: string | null) => {
+  if (!heartbeatBucket) return NaN
+
+  const normalizedHeartbeatBucket = heartbeatBucket.includes('T')
+    ? heartbeatBucket
+    : heartbeatBucket.replace(' ', 'T')
+
+  return new Date(normalizedHeartbeatBucket).getTime()
+}
+
+export const isHeartbeatWithinSeconds = (
+  heartbeatBucket: string | null | undefined,
+  seconds: number,
+) => {
+  const heartbeatTimestampMs = getHeartbeatTimestampMs(heartbeatBucket)
+
+  if (!Number.isFinite(heartbeatTimestampMs)) return false
+
+  return Date.now() - heartbeatTimestampMs <= seconds * 1000
+}

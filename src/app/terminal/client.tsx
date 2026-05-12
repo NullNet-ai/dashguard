@@ -4,6 +4,7 @@ import { AttachAddon } from '@xterm/addon-attach'
 import { FitAddon } from '@xterm/addon-fit'
 import { useEffect, useState } from 'react'
 import { useXTerm } from 'react-xtermjs'
+import { isHeartbeatWithinSeconds } from '~/app/portal/device/utils/getHeartbeat'
 import { api } from '~/trpc/react'
 
 export default function WebTerminal() {
@@ -202,12 +203,11 @@ export default function WebTerminal() {
   }, [ref, instance])
 
   
-  const lastHeartbeatTimestamp = lastHeartbeat?.data?.[0]?.timestamp
-  
-  const lastHeartbeatMs = lastHeartbeatTimestamp ? new Date(lastHeartbeatTimestamp).getTime() : NaN
+  const lastHeartbeatTimestamp = lastHeartbeat?.data?.[0]?.bucket
   const isDeviceOfflineOrMissing =
     Boolean(deviceId) &&
-    !isLastHeartbeatLoading && !lastHeartbeatMs
+    !isLastHeartbeatLoading &&
+    !isHeartbeatWithinSeconds(lastHeartbeatTimestamp, 60)
 
   const isSessionTerminated =
     String(remoteAccessSessionStatus?.session_status || '').toLowerCase() === 'terminated'

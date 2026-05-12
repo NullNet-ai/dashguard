@@ -726,35 +726,19 @@ export const deviceRouter = createTRPCRouter({
             query: {
               pluck: [
                 'id',
-                'model',
                 'device_name',
                 'address_id',
                 'created_date',
                 'updated_date',
                 'categories',
-                'host_name',
                 'device_version',
                 'updated_time',
                 'created_time',
-                'ip_address',
                 'device_type',
                 'device_category'
               ],
               pluck_object: {
-                device: [
-                  'id',
-                  'model',
-                  'instance_name',
-                  'address_id',
-                  'created_date',
-                  'updated_date',
-                  'categories',
-                  'host_name',
-                  'device_version',
-                  'ip_address',
-                ],
-                addresses: ['id', 'country', 'city', 'state'],
-                device_heartbeats: ['id', 'device_id', 'timestamp'],
+
               },
               advance_filters: createAdvancedFilter({ id: id! }),
               order: {
@@ -885,7 +869,13 @@ export const deviceRouter = createTRPCRouter({
 
           return {
             configuration: item,
-            interfaces: interfaces.data,
+            interfaces: interfaces.data.map(e => {
+              return {
+                ...e,
+                device_interfaces: e,
+                device_interface_addresses: e?.device_interface_addresses?.[0] || {},
+              }
+            }),
           };
         },
       );

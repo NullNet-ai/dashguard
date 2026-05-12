@@ -110,11 +110,21 @@ export const recordRouter = createTRPCRouter({
 
       const { data } = response;
 
-      const {
+      let {
         created_by,
         updated_by,
         [pluralize(entity)]: entity_data,
       } = data?.[0] ?? {};
+
+      if (!entity_data)
+        entity_data = data?.[0];
+
+      if (Array.isArray(created_by))
+        created_by = created_by[0];
+      
+      if (Array.isArray(updated_by))
+        updated_by = updated_by[0];
+      
       const formatted_data = {
         ...response,
         data: {

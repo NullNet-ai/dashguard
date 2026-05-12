@@ -25,6 +25,17 @@ const RecordShellSummary = ({
   })
 
   const { data } = record ?? {}
+  const {
+    data: heartbeatRecord = { data: [{ bucket: '', count: 0 }] },
+  } = api.deviceHeartbeat.getLastHeartbeat.useQuery(
+    {
+      device_id: data?.id ?? '',
+    },
+    {
+      enabled: Boolean(data?.id),
+      refetchInterval: 1000,
+    },
+  )
 
   useRefetchRecord({
     refetch,
@@ -35,6 +46,7 @@ const RecordShellSummary = ({
     if (!data) return {}
     
     const interfacesArr = Array.isArray(data?.interfaces) ? data.interfaces : []
+    const lastHeartbeatBucket = heartbeatRecord?.data?.[0]?.bucket || ''
     const namedInterfaces = interfacesArr.reduce((acc: Record<string, string>, curr: any) => {
       const name = typeof curr?.name === 'string' ? curr.name.toLowerCase() : ''
       if (name) acc[name] = curr?.address ?? 'None'
@@ -48,9 +60,10 @@ const RecordShellSummary = ({
       version: data?.device_version,
       interfaces: interfacesArr,
       device_category: data?.device_category || 'None',
+      last_heartbeat_bucket: lastHeartbeatBucket,
       ...namedInterfaces,
     }
-  }, [data])
+  }, [data, heartbeatRecord])
 
   if (error) {
     console.error("Error fetching record summary", error)
@@ -76,12 +89,20 @@ const RecordShellSummary = ({
             {
               key: "Status",
               value: "status",
-              customValue: (data: any) => <RecordDeviceStatus device_id={data?.id} />
+              customValue: (data: any) => (
+                <RecordDeviceStatus
+                  lastHeartbeatBucket={data?.last_heartbeat_bucket}
+                />
+              )
             },
             {
               key: "Last Heartbeat",
               value: "last_heartbeat",
-              customValue: (data: any) => <RecordDeviceLastHeartbeat device_id={data?.id} />
+              customValue: (data: any) => (
+                <RecordDeviceLastHeartbeat
+                  lastHeartbeatBucket={data?.last_heartbeat_bucket}
+                />
+              )
             },
             {
               key: "Host Name",
