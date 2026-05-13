@@ -474,7 +474,7 @@ export const deviceRemoteAccessSessionRouter = createTRPCRouter({
       console.log('$ [deviceRemoteAccessSessionRouter] items', items);
 
       const formatted_items = items?.map((item: Record<string, any>) => {
-        const {
+        let {
           [baseEntity]: entity_data,
           created_by,
           devices,
@@ -482,6 +482,15 @@ export const deviceRemoteAccessSessionRouter = createTRPCRouter({
           updated_by,
           ...rest
         } = item
+
+        if (!entity_data)
+          entity_data = rest
+
+        if (Array.isArray(device_services))
+          device_services = device_services[0]
+
+        if (Array.isArray(devices))
+          devices = devices[0]
 
         const resolvedTunnelType = entity_data?.tunnel_type
 
