@@ -151,7 +151,6 @@ const ConfigurationRuleGrid = ({
     'device_configuration_id',
     'device_rule_status',
     'status',
-    'type',
     'policy',
     'protocol',
     'source_port_value',

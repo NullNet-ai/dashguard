@@ -254,7 +254,7 @@ export const searchRouter = createTRPCRouter({
               parse_as: 'text',
             }
           }
-          if (curr.field === 'protocol') {
+          if (curr.field === 'ipprotocol_protocol') {
             return [
               ...acc,
               ...(curr.values?.reduce((acc1, curr1) => {

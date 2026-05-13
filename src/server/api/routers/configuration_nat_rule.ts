@@ -82,9 +82,6 @@ export const deviceNatRuleRouter = createTRPCRouter({
         query: {
           track_total_records: true,
           pluck,
-          pluck_object:{
-            device_rules: pluck
-          },
           advance_filters: _advance_filters?.length
             ? [
               ..._advance_filters,

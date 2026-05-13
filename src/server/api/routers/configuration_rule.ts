@@ -149,9 +149,6 @@ export const deviceRuleRouter = createTRPCRouter({
         query: {
           track_total_records: true,
           pluck,
-          pluck_object:{
-            device_rules: pluck
-          },
           advance_filters: _advance_filters?.length
             ? [
               ..._advance_filters,
@@ -188,7 +185,7 @@ export const deviceRuleRouter = createTRPCRouter({
             concatenate_fields: [
             {
               fields: ['ipprotocol', 'protocol'],
-              field_name: 'protocol',
+              field_name: 'ipprotocol_protocol',
               separator: ' ',
               entity: 'device_filter_rules',
             },
