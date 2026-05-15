@@ -288,7 +288,7 @@ export const deviceRouter = createTRPCRouter({
               'device_category',
               'device_type',
               'device_name',
-              'device_os',
+              'device_operating_system',
               'is_device_authorized',
               'is_device_online',
               'address_id',
@@ -458,6 +458,9 @@ export const deviceRouter = createTRPCRouter({
               status: 'Active',
               device_id,
               device_code,
+              token: Array.from({ length: 16 }, () =>
+                Math.floor(Math.random() * 16).toString(16)
+              ).join('')
             },
             pluck: ['id', 'token'],
           },
