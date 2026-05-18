@@ -1,4 +1,5 @@
-"use client";
+"use client";;
+import { use } from "react";
 
 import { type z } from "zod";
 import { FormBuilder } from "~/components/platform/FormBuilder";
@@ -7,12 +8,20 @@ import { api } from "~/trpc/react";
 import { useToast } from "~/context/ToastProvider";
 import { contactDetailsSchema } from "~/server/zodSchema/contact/contactDetails";
 
-export default function Page({
-  params,
-  defaultValues,
-  selectOptions,
-  multiSelectOptions,
-}: any) {
+export default function Page(props: any) {
+  const params = use(
+    props.params as Promise<{
+      id: string;
+      shell_type?: "record" | "wizard";
+    }>,
+  );
+
+  const {
+    defaultValues,
+    selectOptions,
+    multiSelectOptions
+  } = props;
+
   const toast = useToast();
   const updateContact = api.contact.updateContactDetails.useMutation();
   const handleSave = async ({

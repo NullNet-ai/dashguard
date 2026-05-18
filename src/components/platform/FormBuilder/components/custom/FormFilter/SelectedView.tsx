@@ -22,7 +22,7 @@ export default function SelectedView({
   renderComponentSelected,
   entity
 }: {
-  renderComponentSelected?: (record: any) => JSX.Element;
+  renderComponentSelected?: (record: any) => React.JSX.Element;
   handleRemovedSelectedRecords: (records: any[]) => void;
   handleUpdateDisplayType: (type: SetStateAction<TDisplayType>) => void;
   records: any;

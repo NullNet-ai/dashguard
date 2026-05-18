@@ -6,13 +6,12 @@ import { api } from '~/trpc/server';
 
 import TabItems from './TabItems';
 import type { IPropsTabList } from './type';
-import { loadGetInitialProps } from 'next/dist/shared/lib/utils';
 
 const getSessionTabs = async (): Promise<{
   pathname: string
   newTabs: IPropsTabList[]
 }> => {
-  const headerList = headers();
+  const headerList = await headers();
   const pathname = headerList.get('x-pathname') || '';
   const [, portal, mainEntity, , ,] = pathname.split('/') || 'New Tab';
   const stateTabs = (await api.tab.getMainTabs()) as IPropsTabList[];

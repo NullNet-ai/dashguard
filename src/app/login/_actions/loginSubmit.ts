@@ -24,7 +24,7 @@ export default async function LoginSubmit({
   password: string;
   invitation_id?: string;
 }) {
-  const headerList = headers();
+  const headerList = await headers();
   const pathname = headerList.get('x-pathname') || '';
   const [, , id] = pathname.split('/');
   const loginDetailsResponse = await api.auth.login({

@@ -5,7 +5,7 @@ import { headers } from "next/headers";
 import arrangement from "../../menu/arrangement.json";
 export const menuRouter = createTRPCRouter({
   getMenuConfig: publicProcedure.query(async () => {
-    const headerList = headers();
+    const headerList = await headers();
     const pathName = headerList.get("x-pathname") || "";
 
     const menuItems = MENU as ISidebarMenu[];

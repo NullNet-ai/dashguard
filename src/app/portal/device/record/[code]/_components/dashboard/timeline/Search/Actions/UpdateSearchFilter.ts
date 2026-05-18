@@ -16,7 +16,7 @@ export async function UpdateSearchFilter({
   filterItemId?: string
   filter_type: string
 }) {
-  const headerList = headers()
+  const headerList = await headers()
   const pathName = headerList.get('x-pathname') || ''
   const searchParams = headerList.get('x-full-search-query-params') || ''
   // const urlSearchParams = new URLSearchParams(searchParams)

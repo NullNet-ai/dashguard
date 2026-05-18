@@ -6,7 +6,7 @@ import { redirect } from 'next/navigation'
 import { api } from '~/trpc/server'
 
 export async function NextPage() {
-  const headerList = headers()
+  const headerList = await headers()
   const pathname = headerList.get('x-pathname') || ''
   const fullSearchQueryParams
     = headerList.get('x-full-search-query-params') || ''

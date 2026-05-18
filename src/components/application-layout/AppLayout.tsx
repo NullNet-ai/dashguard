@@ -8,7 +8,7 @@ import HeaderContainer from './common/HeaderContainer'
 import Header from './Header'
 import SmartComponent, { SmartMobileComponent } from './SmartComponent'
 const AppLayout = async ({ children }: PropsWithChildren) => {
-  const headerList = headers()
+  const headerList = await headers()
   const pathname = headerList.get('x-pathname') || ''
   const [, , , app, ,] = pathname.split('/')
 

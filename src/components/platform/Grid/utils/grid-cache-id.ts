@@ -13,7 +13,7 @@ export const gridCacheId = async ({
   type: TReportDataType;
   gridKey?: string;
 }) => {
-  const headerList = headers();
+  const headerList = await headers();
   const pathName = headerList.get('x-pathname') || '';
   const gridTabId = headerList.get('x-grid-tab-id') || '';
   const _id = context.session.account.account_organization_id;

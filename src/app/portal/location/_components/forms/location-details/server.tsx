@@ -4,7 +4,7 @@ import BasicDetails from "./client";
 import FormBuilderPage from "./builder";
 
 const LocationDetailsServer = async () => {
-  const headerList = headers();
+  const headerList = await headers();
   const pathname = headerList.get("x-pathname") || "";
   const [, , main_entity, application, identifier] = pathname.split("/");
   const record = await api.record.getByCode({
@@ -13,7 +13,7 @@ const LocationDetailsServer = async () => {
     pluck_fields: ["id", "code", "location_name"],
   });
   const defaultValues = {
-    ...record?.data ?? {},
+    ...(record?.data ?? {}),
     location_name: record?.data?.location_name || "",
   };
   return (

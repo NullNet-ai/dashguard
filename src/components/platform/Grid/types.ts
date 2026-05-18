@@ -78,16 +78,16 @@ interface IActionConditionItem {
 
 export interface IRowExpansionOptions {
   expandPosition?: 'left' | 'right';
-  rowExpansionComponent?: ReactElement | ((rowData: any) => JSX.Element);
+  rowExpansionComponent?: ReactElement | ((rowData: any) => React.JSX.Element);
   icons?: {
     expandIcon?:
       | ReactElement
       | React.ComponentType<any>
-      | ((rowData: any) => JSX.Element);
+      | ((rowData: any) => React.JSX.Element);
     collapseIcon?:
       | ReactElement
       | React.ComponentType<any>
-      | ((rowData: any) => JSX.Element);
+      | ((rowData: any) => React.JSX.Element);
   };
 }
 
@@ -155,8 +155,8 @@ export interface IConfigGrid {
   viewMode?: 'table' | 'card';
   // for custom row expansion component
   rowExpansionBuilder?:
-    | ReactElement
-    | ((rowData: any, viewMode?: string) => JSX.Element);
+    | ReactElement<IExpansionComponentProps>
+    | ((props: IExpansionComponentProps) => React.ReactNode);
   // to hide/show checkbox
   enableRowSelection?: boolean;
   // to identify if grid is a child grid
@@ -176,7 +176,7 @@ export interface IConfigGrid {
       };
     };
   };
-  customRowAction?: React.FC<any>;
+  customRowAction?: (args: any) => React.ReactNode;
   isInfinite?: boolean;
   additionalData?: Record<string, any>;
   gridColumns?: Record<string, any>[];
@@ -192,8 +192,8 @@ export interface IConfigGrid {
     minHeight?: number;
     summaryWidth?: number;
   };
-  CustomRenderCardView?: (args: any) => JSX.Element;
-  CustomRenderCardParent?: (args: any) => JSX.Element;
+  CustomRenderCardView?: (args: any) => React.JSX.Element;
+  CustomRenderCardParent?: (args: any) => React.JSX.Element;
   enableCheckboxOnChange?: boolean;
   metadata?: any;
   customBulkButtonConfig?: ButtonProps &

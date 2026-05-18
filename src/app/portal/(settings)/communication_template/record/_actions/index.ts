@@ -2,7 +2,7 @@
 
 import { TStatus } from "./types";
 
-const handleChangeStatus = (
+const handleChangeStatus = async (
   status: TStatus,
   recordId: string,
   entityName: string,

@@ -18,7 +18,7 @@ export const cachedFilterRouter = createTRPCRouter({
       const { account } = ctx.session
       const { contact } = account
 
-      const headerList = headers();
+      const headerList = await headers();
       const pathName = headerList.get('x-pathname') || '';
       const [, , mainEntity, application, identifier] = pathName.split('/');
       let cached_data = await ctx.redisClient.getCachedData(`${type}_${contact.id}`)
@@ -40,7 +40,7 @@ export const cachedFilterRouter = createTRPCRouter({
   .mutation(async ({ input, ctx }) => {
     const { type, data: input_data } = input as any
     
-    const headerList = headers();
+    const headerList = await headers();
     const pathName = headerList.get('x-pathname') || '';
     const [, , mainEntity, application, identifier] = pathName.split('/');
     const { account } = ctx.session

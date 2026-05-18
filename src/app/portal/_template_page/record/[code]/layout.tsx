@@ -12,7 +12,7 @@ const Layout = async ({
   record_summary: React.ReactNode;
   children: React.ReactNode;
 }) => {
-  const headerList = headers();
+  const headerList = await headers();
   const pathname = headerList.get("x-pathname") || "";
   const [, , main_entity, , identifier] = pathname.split("/");
 

@@ -5,7 +5,7 @@ import { redirect } from "next/navigation";
 import { api } from "~/trpc/server";
 
 export async function PrevPage() {
-  const headerList = headers();
+  const headerList = await headers();
   const pathname = (headerList.get("x-pathname") || "").split('/');
   let [, , mainEntity, application = "wizard", identifier, currentStep] =
     pathname

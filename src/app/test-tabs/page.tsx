@@ -4,7 +4,7 @@ import { headers } from 'next/headers';
 import { id } from 'date-fns/locale';
 
 const getTabs = async () => {
-  const headerList = headers();
+  const headerList = await headers();
   const pathname = headerList.get('x-pathname') || '';
   const [, portal, mainEntity, , ,] = pathname.split('/') || 'New Tab';
   const stateTabs = (await api.tab.getMainTabs()) as any[];

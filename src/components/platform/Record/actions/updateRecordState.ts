@@ -13,7 +13,7 @@ export async function updateRecordState({
   entity: string;
   status: string;
 }) {
-  const headerList = headers();
+  const headerList = await headers();
   const pathName = headerList.get("x-pathname") || "";
   const searchParams = headerList.get("x-full-search-query-params") || "";
   const urlSearchParams = new URLSearchParams(searchParams);

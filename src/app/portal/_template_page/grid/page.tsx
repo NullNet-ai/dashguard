@@ -16,7 +16,7 @@ export default async function Page() {
   const { sorts, pagination, filters, groups } =
     (await getGridCacheData()) ?? {};
 
-  const headerList = headers();
+  const headerList = await headers();
   const pathname = headerList.get('x-pathname') || '';
   const [, , main_entity] = pathname.split('/');
 

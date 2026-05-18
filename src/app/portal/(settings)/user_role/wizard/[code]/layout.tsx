@@ -8,7 +8,7 @@ import roleWizardSummary from '../(summary)/wizard-summary-config'
 import { type IWizardLayoutProps } from '../types'
 
 const WizardLayout = async ({ children }: IWizardLayoutProps) => {
-  const headerList = headers()
+  const headerList = await headers()
   const pathname = headerList.get('x-pathname') || ''
   const [, , mainEntity, , identifier, currentStep] = pathname.split('/')
   const wizard_summary = roleWizardSummary()

@@ -4,7 +4,7 @@ import { redirect } from 'next/navigation';
 import { api } from '~/trpc/server';
 
 export const selectRecord = async (rows: any[]) => {
-  const headerList = headers();
+  const headerList = await headers();
   const pathname = headerList.get('x-pathname') || '';
   const [, portal, mainEntity] = pathname.split('/');
   const currentContext = '/' + portal + '/' + mainEntity;
@@ -16,7 +16,7 @@ export const selectRecord = async (rows: any[]) => {
 };
 
 export const removeRecord = async () => {
-  const headerList = headers();
+  const headerList = await headers();
   const pathname = headerList.get('x-pathname') || '';
   const [, portal, mainEntity] = pathname.split('/');
   const currentContext = '/' + portal + '/' + mainEntity;
@@ -34,7 +34,7 @@ export const savedRecord = async ({
   code: string;
   action_type: string;
 }) => {
-  const headerList = headers();
+  const headerList = await headers();
   const pathname = headerList.get('x-pathname') || '';
   const [, portal, mainEntity] = pathname.split('/');
   const currentContext = '/' + portal + '/' + mainEntity;

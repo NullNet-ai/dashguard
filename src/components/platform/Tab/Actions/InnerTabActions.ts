@@ -17,7 +17,7 @@ export const closeInnerClassTab = async ({
   const [, portal, mainEntity] = pathname.split('/') || 'New Tab';
   const currentContext = '/' + portal + '/' + mainEntity;
 
-  const headerList = headers();
+  const headerList = await headers();
   const currentPathname = headerList.get('x-pathname') || '';
 
   await api.tab.closeCurrentInnerClassTab({

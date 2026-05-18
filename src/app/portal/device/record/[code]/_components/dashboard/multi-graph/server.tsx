@@ -4,7 +4,7 @@ import { api } from '~/trpc/server'
 import InteractiveGraph from './client'
 
 const FormServerFetch = async () => {
-  const headerList = headers()
+  const headerList = await headers()
   const pathname = headerList.get('x-pathname') || ''
   const [, , main_entity, application, identifier] = pathname.split('/')
   const fetched_device =  await api.record.getByCode({

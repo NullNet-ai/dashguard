@@ -1,9 +1,8 @@
 "use client";
 import { startCase } from "lodash";
-import React from "react";
 import { ICustomPieChartLabelProps } from "../types";
 
-const CustomPieChartLabel: React.FC<ICustomPieChartLabelProps> = (props) => {
+function CustomPieChartLabel(props: ICustomPieChartLabelProps) {
   const RADIAN = Math.PI / 180;
   const {
     cx,
@@ -60,6 +59,6 @@ const CustomPieChartLabel: React.FC<ICustomPieChartLabelProps> = (props) => {
       </text>
     </g>
   );
-};
+}
 
 export default CustomPieChartLabel;

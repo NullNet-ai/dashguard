@@ -5,7 +5,7 @@ import { transformDataToOptions } from "./actions/utils";
 import { ConfirmationSummary } from '~/components/platform/ConfirmationForm';
 
 const FormServerFetch = async () => {
-  const headerList = headers();
+  const headerList = await headers();
   const pathname = headerList.get("x-pathname") || "";
   const [, , main_entity, application, identifier] = pathname.split("/");
 

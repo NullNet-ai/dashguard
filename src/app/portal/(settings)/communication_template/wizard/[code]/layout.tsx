@@ -8,9 +8,9 @@ import totalSteps from "../_config/totalSteps";
 import stepLabels from "../_config/stepLabels";
 import wizardCallbacks from './_actions/wizardCallbacks';
 
-const WizardLayout = (props: IWizardLayoutProps) => {
+const WizardLayout = async (props: IWizardLayoutProps) => {
   const { children } = props;
-  const headerList = headers();
+  const headerList = await headers();
   const pathname = headerList.get("x-pathname") || "";
   const [, , mainEntity, , identifier, currentStep] = pathname.split("/");
   const wizard_summary = WizardSummaryComponent();

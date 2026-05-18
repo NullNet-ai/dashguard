@@ -21,7 +21,10 @@ import {
 } from "~/components/ui/chart";
 
 interface IFormPieChartProps {
-  renderCustomPieChartLabel?: React.FC<any>;
+  renderCustomPieChartLabel?: Exclude<
+    React.ComponentProps<typeof Pie>["label"],
+    boolean | undefined
+  >;
   renderCustomPieChartTooltip?: React.FC<any>;
   entity: string;
   items: {

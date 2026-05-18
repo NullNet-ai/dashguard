@@ -16,7 +16,7 @@ import stepLabels from '../_config/stepLabels'
 
 const WizardLayout = async (props: IWizardLayoutProps) => {
   const { children } = props
-  const headerList = headers()
+  const headerList = await headers()
   const pathname = headerList.get('x-pathname') || ''
   let category = headerList.get('x-categories') || ''
   const [, , mainEntity, , identifier, currentStep] = pathname.split('/')

@@ -1,8 +1,8 @@
-import { headers } from 'next/headers'
+import { headers } from 'next/headers';
 import { ulid } from 'ulid'
 
 import { type ISearchItem } from '~/components/platform/Grid/Search/types'
-const headerList = headers()
+const headerList = await headers()
 const pathname = headerList.get('x-pathname') || ''
 const entity = pathname.split('/')[2]
 

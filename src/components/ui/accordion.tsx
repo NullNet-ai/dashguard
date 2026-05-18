@@ -45,12 +45,12 @@ const AccordionItem = React.forwardRef<
 AccordionItem.displayName = "AccordionItem";
 
 type IconTypeOption = "chevron" | "plus" | "chevronRight";
-type IconType = IconTypeOption | React.ReactElement;
+type IconType = IconTypeOption | React.ReactElement<{ className?: string }>;
 
 // Define types for open/close icon customization
 type IconStateProps = {
-  openIcon?: React.ReactElement;
-  closeIcon?: React.ReactElement;
+  openIcon?: React.ReactElement<{ className?: string }>;
+  closeIcon?: React.ReactElement<{ className?: string }>;
 };
 
 const AccordionTrigger = React.forwardRef<
@@ -126,7 +126,7 @@ const AccordionTrigger = React.forwardRef<
     let IconComponent: React.ReactNode;
     
     if (React.isValidElement(iconType)) {
-      IconComponent = React.cloneElement(iconType as React.ReactElement, {
+      IconComponent = React.cloneElement(iconType, {
         className: cn(
           "h-4 w-4 shrink-0", 
           `transition-transform ${transitionDurations[transitionDuration]}`,

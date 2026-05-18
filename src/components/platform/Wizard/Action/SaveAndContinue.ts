@@ -14,7 +14,7 @@ export async function SaveAndContinue({
   currentContext: string;
   defaultRecordTab?: string;
 }) {
-  const headerList = headers();
+  const headerList = await headers();
   const pathname = headerList.get("x-pathname") || "";
 
   await api.wizard.activator({

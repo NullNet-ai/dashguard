@@ -9,7 +9,7 @@ import RefreshButton from './RefreshButton';
 import { type InnerTabsProps } from './type';
 
 const getSessionTabs = async () => {
-  const headerList = headers();
+  const headerList = await headers();
   const pathname = headerList.get('x-pathname') || '';
   const fullSearchQueryParams =
     headerList.get('x-full-search-query-params') || '';
@@ -124,7 +124,7 @@ const getSessionTabs = async () => {
 
 const InnerTabs = async ({ variant = 'dropdown' }: InnerTabsProps) => {
   try {
-    const headerList = headers();
+    const headerList = await headers();
     const pathname = headerList.get('x-pathname') || '';
     const [, portal, mainEntity, application, identifier] = pathname.split('/') || [];
     

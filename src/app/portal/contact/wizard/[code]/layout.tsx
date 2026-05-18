@@ -11,7 +11,7 @@ import type { IWizardLayoutProps } from '../types'
 import wizardCallbacks from './_actions/wizardCallbacks'
 
 const WizardLayout = async ({ children }: IWizardLayoutProps) => {
-  const headerList = headers()
+  const headerList = await headers()
   const pathname = headerList.get('x-pathname') || ''
   const category = headerList.get('x-categories') || ''
   const [, , mainEntity, , identifier, currentStep] = pathname.split('/')

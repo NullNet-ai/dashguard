@@ -5,8 +5,8 @@ import SummaryClientContent from './SummaryClientContent'
 
 const RecordSummaryContent = async () => {
   try {
-    const headerList = headers()
-    const username = cookies().get('username')?.value || ''
+    const headerList = await headers()
+    const username = (await cookies()).get('username')?.value || ''
     const pathname = headerList.get('x-pathname') || ''
     const mainEntity = headerList.get('x-main-entity') || '';
     const [, , , , identifier] = pathname.split('/')

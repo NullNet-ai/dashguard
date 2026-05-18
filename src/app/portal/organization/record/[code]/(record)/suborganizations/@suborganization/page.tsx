@@ -8,15 +8,16 @@ import { getGridCacheData } from "~/components/platform/Grid/utils/grid-get-cach
 import { defaultSorting } from "../_config/sorting";
 import { ISearchItem } from "~/components/platform/Grid/Search/types";
 
-export default async function RecordTabContainer({
-  searchParams = {},
-}: {
-  searchParams?: {
-    page?: string;
-    perPage?: string;
-  };
-}): Promise<React.ReactElement | null> {
-  const headerList = headers();
+export default async function RecordTabContainer(
+  props: {
+    searchParams?: Promise<{
+      page?: string;
+      perPage?: string;
+    }>;
+  }
+): Promise<React.ReactElement | null> {
+  const searchParams = await props.searchParams;
+  const headerList = await headers();
   const pathname = headerList.get("x-pathname") || "";
   const [, , , , identifier] = pathname.split("/");
   const _pluck = [
@@ -50,8 +51,8 @@ export default async function RecordTabContainer({
     },
   ] as ISearchItem[];
   const { items = [], totalCount } = await api.grid.items({
-    current: +(searchParams.page ?? "0"),
-    limit: +(searchParams.perPage ?? "100"),
+    current: +(searchParams?.page ?? "0"),
+    limit: +(searchParams?.perPage ?? "100"),
     entity: "organization",
     pluck: _pluck,
     sorting: sorts?.sorting?.length ? sorts?.sorting : defaultSorting,

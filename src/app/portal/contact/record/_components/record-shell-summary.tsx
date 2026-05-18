@@ -19,8 +19,8 @@ const fields = {
   Address: "address",
 };
 
-export default function RecordShellSummary(props: TProps) {
-  const headerList = headers();
+export default async function RecordShellSummary(props: TProps) {
+  const headerList = await headers();
   const pathname = headerList.get("x-pathname") || "";
   const [, , mainEntity, ,] = pathname.split("/");
   return (

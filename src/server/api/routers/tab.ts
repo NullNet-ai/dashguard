@@ -396,7 +396,7 @@ export const tabRouter = createTRPCRouter({
       })
     )
     .query(async ({ input, ctx }) => {
-      const headerList = headers()
+      const headerList = await headers()
       const pathName = headerList.get('x-pathname') || ''
       const [, portal, mainEntity] = pathName.split('/')
       const current_context = '/' + portal + '/' + mainEntity
@@ -455,7 +455,7 @@ export const tabRouter = createTRPCRouter({
       const key = `entity-last-paths:${ctx.session.account.account_organization_id}`;
       
       // Get existing paths object or create a new one
-      const existingPaths = await ctx.redisClient.getCachedData(key) || {};
+      const existingPaths = (await ctx.redisClient.getCachedData(key)) || {};
       
       // Update the path for this entity
       const updatedPaths = {

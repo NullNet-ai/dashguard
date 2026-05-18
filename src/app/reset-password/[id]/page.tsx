@@ -7,7 +7,7 @@ import { api } from '~/trpc/server';
 import { isInvitationLinkExpired } from '~/utils/isInvitationLinkExpired';
 
 export default async function SetupPassword() {
-  const headerList = headers();
+  const headerList = await headers();
   const pathname = headerList.get('x-pathname') || '';
   const [, , id] = pathname.split('/');
   const record = await api.account.getInvitationAccountDetailsPublicly({

@@ -11,7 +11,7 @@ const handleChangeStatus = async (
   entityName: string,
   field_key: string,
 ) => {
-  const headerList = headers()
+  const headerList = await headers()
   const pathName = headerList.get('x-pathname') || ''
   await api.record.updateRecordStatus({
     id: recordId,

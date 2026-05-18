@@ -11,7 +11,7 @@ You installation code:
 `;
 
 const FormServerFetch = async () => {
-  const headerList = headers();
+  const headerList = await headers();
   const pathname = headerList.get('x-pathname') || '';
   const [, , , , identifier] = pathname.split('/');
 

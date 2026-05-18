@@ -7,8 +7,8 @@ interface headerTabType extends PropsWithChildren {
   tabs: ITabs[];
 }
 
-const HeaderTabs = ({ tabs }: headerTabType) => {
-  const headerList = headers();
+const HeaderTabs = async ({ tabs }: headerTabType) => {
+  const headerList = await headers();
   const pathname = headerList.get("x-pathname") || "";
   const [, , mainEntity, , identifier, tabName] = pathname.split("/");
 

@@ -19,7 +19,7 @@ export async function Create({
   currentContext?: string;
   is_from_grid: boolean;
 }) {
-  const headerList = headers();
+  const headerList = await headers();
   const pathname = headerList.get("x-pathname") || "";
   const [, , mainEntity] = pathname.split("/");
   const updated_path = pathname.replace(/\/\d+$/, "/1");

@@ -4,8 +4,8 @@ import React from 'react'
 
 import LinkTab from '~/components/platform/LinkTab'
 
-export default function Page() {
-  const headerList = headers()
+export default async function Page() {
+  const headerList = await headers()
   const pathname = headerList.get('x-full-pathname') || ''
 
   const tabs = [

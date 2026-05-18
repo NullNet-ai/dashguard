@@ -91,7 +91,7 @@ export type TStepsNavigationButtons = {
   };
 };
 export type TSummaryComponents = {
-  component: JSX.Element;
+  component: React.JSX.Element;
   label: string;
 };
 

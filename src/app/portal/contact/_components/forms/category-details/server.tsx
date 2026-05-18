@@ -4,7 +4,7 @@ import CategoryDetails from "./client";
 import { IDropdown } from "./types";
 
 const FormServerFetch = async () => {
-  const headerList = headers();
+  const headerList = await headers();
   const pathname = headerList.get("x-pathname") || "";
   const [, , main_entity, application, identifier] = pathname.split("/");
   const fetched_category_details = await api.record.getByCode({

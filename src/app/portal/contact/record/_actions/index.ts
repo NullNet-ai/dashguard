@@ -2,7 +2,7 @@
 
 import { TStatus } from "./types";
 
-const handleChangeStatus = (status: TStatus, recordId: string, entityName: string) => {
+const handleChangeStatus = async (status: TStatus, recordId: string, entityName: string) => {
   try {
     // const response = await changeContactStatus.mutateAsync({
     //   id: contact_id!,

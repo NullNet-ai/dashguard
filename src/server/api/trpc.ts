@@ -33,7 +33,7 @@ export const createTRPCContext = async (opts: {
   headers: Headers;
   token?: string;
 }) => {
-  const storeCookies = cookies();
+  const storeCookies = await cookies();
 
   return {
     redisClient,
@@ -156,7 +156,7 @@ const verificationMiddleware = t.middleware(async ({ ctx, next, path }) => {
   // const token = {
   //   value: ctx.token!,
   // };
-  const cookiesStore = cookies();
+  const cookiesStore = await cookies();
   const token = cookiesStore.get('token');
 
   if (!token) {

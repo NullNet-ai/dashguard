@@ -5,7 +5,7 @@ import { EOperator } from '@dna-platform/common-orm';
 import { EStatus } from '~/server/api/types';
 
 const FormServerFetch = async () => {
-  const headerList = headers();
+  const headerList = await headers();
   const pathname = headerList.get('x-pathname') || '';
   const [, , main_entity, application, identifier] = pathname.split('/');
 

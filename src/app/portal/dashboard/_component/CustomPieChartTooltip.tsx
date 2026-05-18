@@ -1,6 +1,5 @@
 "use client";
 
-import React from "react";
 import { IPayload } from "../types";
 import { startCase } from "lodash";
 import { DefaultTooltipContent } from "recharts";
@@ -13,9 +12,7 @@ interface ICustomPieChartTooltipProps {
   totalRecordsCount: number;
 }
 
-const CustomPieChartTooltip: React.FC<ICustomPieChartTooltipProps> = (
-  props,
-) => {
+function CustomPieChartTooltip(props: ICustomPieChartTooltipProps) {
   const { active, payload, separator, totalRecordsCount } = props;
 
   if (payload && payload.length && active) {
@@ -30,6 +27,6 @@ const CustomPieChartTooltip: React.FC<ICustomPieChartTooltipProps> = (
     );
   }
   return <DefaultTooltipContent {...props} />;
-};
+}
 
 export default CustomPieChartTooltip;

@@ -276,7 +276,7 @@ interface IField {
   isCustomFormField?: boolean;
   groupConfig?: {
     prefix?: string;
-    components?: ComponentType<any>[] | JSX.Element[];
+    components?: ComponentType<any>[] | React.JSX.Element[];
     defaultComponent?: ComponentType<any>;
   };
   codeEditorProps?: ICodeEditor & {
@@ -615,7 +615,7 @@ interface IPropsForms {
 
 interface IFieldFilterActions {
   onBlur?: () => void;
-  onFocus?: () => void;
+  onFocus?: (event: React.ChangeEvent<HTMLInputElement>) => void;
   handleSearch?: (search: string) => void;
   ref?: any;
 }

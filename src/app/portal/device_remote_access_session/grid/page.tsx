@@ -12,7 +12,7 @@ import gridColumns from './_config/columns';
 import { CustomRowActions } from './_components/CustomRowActions';
 
 export default async function Page() {
-  const headerList = headers();
+  const headerList = await headers();
   const pathname = headerList.get('x-pathname') || '';
   const [, , main_entity, ,] = pathname.split('/');
   const _pluck = [

@@ -47,7 +47,7 @@ export const saveRecordDetails = async (
 }
 
 export const selectRecord = async (rows: any[]) => {
-  const headerList = headers()
+  const headerList = await headers()
   const pathname = headerList.get('x-pathname') || ''
   const [, portal, mainEntity] = pathname.split('/')
   const currentContext = '/' + portal + '/' + mainEntity
@@ -59,7 +59,7 @@ export const selectRecord = async (rows: any[]) => {
 }
 
 export const removeRecord = async () => {
-  const headerList = headers()
+  const headerList = await headers()
   const pathname = headerList.get('x-pathname') || ''
   const [, portal, mainEntity] = pathname.split('/')
   const currentContext = '/' + portal + '/' + mainEntity
@@ -71,7 +71,7 @@ export const removeRecord = async () => {
 }
 
 export const closeCurrentInnerClassTab = async ({ code }: { code: string }) => {
-  const headerList = headers()
+  const headerList = await headers()
   const pathname = headerList.get('x-pathname') || ''
   const [, portal, mainEntity] = pathname.split('/')
   const currentContext = '/' + portal + '/' + mainEntity

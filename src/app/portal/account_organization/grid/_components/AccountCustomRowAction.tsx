@@ -140,7 +140,7 @@ export function AccountCustomRowAction({
 
   if (viewMode === 'card') {
     const renderDropdownItem = (
-      icon: JSX.Element,
+      icon: React.JSX.Element,
       label: string,
       onClick: () => void,
       color: string,

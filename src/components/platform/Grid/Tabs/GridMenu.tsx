@@ -17,7 +17,7 @@ interface IProps {
 
 const GridMenu = async ({ filter_id, tab }: IProps) => {
 
-  const headerList = headers();
+  const headerList = await headers();
   const pathname = headerList.get("x-pathname") || "";
   const [, , main_entity, , ] = pathname.split("/");
 

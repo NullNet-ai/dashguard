@@ -10,7 +10,7 @@ import { getGridCacheData } from '~/components/platform/Grid/utils/grid-get-cach
 import { gridDataResolver } from '~/components/platform/Grid/utils/gridDataResolver';
 
 export default async function UserRoleGridPage() {
-  const headerList = headers();
+  const headerList = await headers();
   const pathname = headerList.get('x-pathname') || '';
   const [, , main_entity, ,] = pathname.split('/');
   const _pluck = [

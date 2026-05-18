@@ -5,16 +5,15 @@ import { type NextRequest, NextResponse } from "next/server";
 
 export async function GET(
   _: NextRequest,
-  {
-    params,
-  }: {
-    params: { file_id: string };
-  },
+  props: {
+    params: Promise<{ file_id: string }>;
+  }
 ) {
+  const params = await props.params;
   const orm = ORM({
     storage_type: EClientDatabaseProvider.LOCAL,
   });
-  const cookieStore = cookies();
+  const cookieStore = await cookies();
   const { value: token = null } = cookieStore.get("token") || {};
 
   if (!token) {

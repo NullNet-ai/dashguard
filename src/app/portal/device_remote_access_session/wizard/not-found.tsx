@@ -2,8 +2,8 @@ import Image from 'next/image';
 import { Button } from '~/components/ui/button';
 import { headers } from 'next/headers';
 
-export default function NotFound() {
-  const headerList = headers();
+export default async function NotFound() {
+  const headerList = await headers();
   const pathname = headerList.get('x-pathname') || '';
   const [, , , , identifier] = pathname.split('/');
   return (

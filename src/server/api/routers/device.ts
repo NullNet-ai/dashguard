@@ -626,7 +626,7 @@ export const deviceRouter = createTRPCRouter({
         })
         .execute();
 
-      const cookieStore = cookies();
+      const cookieStore = await cookies();
       const cookieName = `encrypted_token_${id}`;
       if (find_res?.data?.[0]?.status?.toLowerCase() === 'active') {
         cookieStore.set(cookieName, '', { expires: new Date(0) });

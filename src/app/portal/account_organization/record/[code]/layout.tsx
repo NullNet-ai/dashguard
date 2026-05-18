@@ -8,7 +8,7 @@ import RecordWrapper from './_components/RecordWrapper'
 import ContentLoading from './loading'
 
 const Layout = async ({ children }: { children: React.ReactNode }) => {
-  const headerList = headers()
+  const headerList = await headers()
   const pathname = headerList.get('x-pathname') || ''
   const [, , main_entity, , identifier] = pathname.split('/')
 

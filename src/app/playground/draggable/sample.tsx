@@ -81,7 +81,7 @@ export default function Draggable() {
     name: "tasks",
   });
 
-  const formFields: { name: "name" | "priority"; label: string; component: ({ field }: any) => JSX.Element }[] = [
+  const formFields: { name: "name" | "priority"; label: string; component: ({ field }: any) => React.JSX.Element }[] = [
     {
       name: "name",
       label: "Task Name",

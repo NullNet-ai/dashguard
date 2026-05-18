@@ -406,7 +406,7 @@ export const recordRouter = createTRPCRouter({
       }),
     )
     .mutation(async ({ input, ctx }) => {
-      const headerList = headers();
+      const headerList = await headers();
       const pathName = headerList.get('x-pathname') || '';
       const [, , , , identifier] = pathName.split('/');
       const { id, entity, record_status, field_key } = input ?? {};

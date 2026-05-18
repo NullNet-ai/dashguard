@@ -11,11 +11,16 @@ import { api } from '~/trpc/react'
 
 import {
   type IField,
+  type IFieldFilterActions,
   type IFilterGridConfig,
   type ISearchParams,
   type TFormSchema,
 } from '../../../../FormBuilder/types'
 import Grid from '../../../../Grid/SubGrid'
+
+type FieldFilterChildProps = {
+  fieldFilterActions?: IFieldFilterActions
+}
 
 export default function FormInputGridWrapper({
   fieldConfig,
@@ -110,7 +115,7 @@ export default function FormInputGridWrapper({
 
   return (
     <Combobox>
-      {React.cloneElement(children, {
+      {React.cloneElement(children as React.ReactElement<FieldFilterChildProps>, {
         fieldFilterActions: {
           onBlur: close,
           onFocus: open,

@@ -16,7 +16,7 @@ interface Props {
 }
 
 const layout = async ({ children }: Props) => {
-  const cookieStore = cookies()
+  const cookieStore = await cookies()
   const sidebar_state = cookieStore.get('sidebar_state')
   const value = !sidebar_state?.value ? true : sidebar_state?.value === 'false'
 

@@ -71,7 +71,7 @@ export const gridFilterRouter = createTRPCRouter({
       const token = ctx?.token.value;
       const id = ctx?.session?.account?.contact?.id;
       const account_org_id = ctx?.session?.account?.account_organization_id;
-      const headerList = headers();
+      const headerList = await headers();
       const pathName = headerList.get('x-pathname') || '';
       const [, , mainEntity, application, identifier] = pathName.split('/');
       const { gridKey, ...rest } = input ?? {};
@@ -150,7 +150,7 @@ export const gridFilterRouter = createTRPCRouter({
     .mutation(async ({ ctx, input }) => {
       const token = ctx?.token.value;
       // const id = ctx?.session?.account?.contact?.id;
-      const headerList = headers();
+      const headerList = await headers();
       const pathName = headerList.get('x-pathname') || '';
       const [, , mainEntity, application] = pathName.split('/');
       const _tabMenuId = tabMenuId({
@@ -182,7 +182,7 @@ export const gridFilterRouter = createTRPCRouter({
     .mutation(async ({ ctx, input }) => {
       const token = ctx?.token.value;
 
-      const headerList = headers();
+      const headerList = await headers();
       const pathName = headerList.get('x-pathname') || '';
       const [, , mainEntity, application, identifier] = pathName.split('/');
 
@@ -267,7 +267,7 @@ export const gridFilterRouter = createTRPCRouter({
       }),
     )
     .mutation(async ({ ctx, input }) => {
-      const headerList = headers();
+      const headerList = await headers();
       const gridTabId = headerList.get('x-grid-tab-id') || '';
       const pathName = headerList.get('x-pathname') || '';
       const [, , mainEntity, application, indentifier] = pathName.split('/');
@@ -330,7 +330,7 @@ export const gridFilterRouter = createTRPCRouter({
       const token = ctx?.token.value;
       const id = ctx?.session?.account?.contact?.id;
 
-      const headerList = headers();
+      const headerList = await headers();
       const pathName = headerList.get('x-pathname') || '';
       const [, , mainEntity, application, identifier] = pathName.split('/');
 

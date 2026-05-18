@@ -41,15 +41,20 @@ const ButtonGroup = React.forwardRef<HTMLDivElement, ButtonGroupProps>(
     // Clone children to pass down variant, size, and borderRadius props
     const childrenWithProps = React.Children.map(children, (child) => {
       if (React.isValidElement(child)) {
-        return React.cloneElement(child, {
+        const typedChild = child as React.ReactElement<{
+          className?: string;
+          [key: string]: unknown;
+        }>;
+
+        return React.cloneElement(typedChild, {
           variant,
           size,
           borderRadius,
           className: cn(
             "rounded-none border-r border-border",
-            child.props.className
+            typedChild.props.className
           ),
-          ...child.props,
+          ...typedChild.props,
         });
       }
       return child;

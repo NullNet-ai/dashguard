@@ -2,14 +2,15 @@ import { headers } from "next/headers";
 import { redirect } from "next/navigation";
 import { api } from "~/trpc/server";
 
-export default async function Page({
-  params,
-}: {
-  params: {
-    code: string;
-  };
-}) {
-  const headerList = headers();
+export default async function Page(
+  props: {
+    params: Promise<{
+      code: string;
+    }>;
+  }
+) {
+  const params = await props.params;
+  const headerList = await headers();
   const pathname = headerList.get("x-pathname") || "";
   const [, , mainEntity, ,] = pathname.split("/");
   const stepDetails = await api.wizard.getTraverseStepped(

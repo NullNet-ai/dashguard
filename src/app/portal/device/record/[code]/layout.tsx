@@ -7,7 +7,7 @@ import ContentLoading from './loading'
 import RecordSummaryPage from './_record_summary';
 
 const Layout = async ({ children }: { children: React.ReactNode }) => {
-  const headerList = headers();
+  const headerList = await headers();
   const pathname = headerList.get("x-pathname") || "";
   const [, , main_entity, , identifier] = pathname.split("/");
 

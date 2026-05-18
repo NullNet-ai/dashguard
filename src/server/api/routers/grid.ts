@@ -122,7 +122,7 @@ export const gridRouter = createTRPCRouter({
       }),
     )
     .mutation(async ({  ctx }) => {
-      const headerList = headers();
+      const headerList = await headers();
       // const gridTabId = headerList.get('x-grid-tab-id') || '';
       const pathName = headerList.get('x-pathname') || '';
       const [, , mainEntity, application] = pathName.split('/');
@@ -317,7 +317,7 @@ export const gridRouter = createTRPCRouter({
       }),
     )
     .query(async ({ ctx, input }) => {
-      const headerList = headers();
+      const headerList = await headers();
       const gridTabId = headerList.get('x-grid-tab-id') || '';
       const pathName = headerList.get('x-pathname') || '';
       const [, , mainEntity, application, identifier] = pathName.split('/');
@@ -374,7 +374,7 @@ export const gridRouter = createTRPCRouter({
       }),
     )
     .mutation(async ({ ctx, input }) => {
-      const headerList = headers();
+      const headerList = await headers();
       const pathName = headerList.get('x-pathname') || '';
       const [, , mainEntity, application] = pathName.split('/');
       const _tabMenuId = tabMenuId({
@@ -415,7 +415,7 @@ export const gridRouter = createTRPCRouter({
   removeGridTab: privateProcedure
     .input(z.string())
     .mutation(async ({ input, ctx }) => {
-      const headerList = headers();
+      const headerList = await headers();
       const pathName = headerList.get('x-pathname') || '';
       const [, , mainEntity, application] = pathName.split('/');
       const _tabMenuId = tabMenuId({
@@ -495,7 +495,7 @@ export const gridRouter = createTRPCRouter({
       }),
     )
     .mutation(async ({ ctx, input }) => {
-      const headerList = headers();
+      const headerList = await headers();
       const pathName = headerList.get('x-pathname') || '';
       const [, , mainEntity, application] = pathName.split('/');
       const _tabMenuId = tabMenuId({
@@ -667,7 +667,7 @@ export const gridRouter = createTRPCRouter({
     )
     .mutation(async ({ ctx, input }) => {
       const { sorting } = input;
-      const headerList = headers();
+      const headerList = await headers();
       const pathName = headerList.get('x-pathname') || '';
       const searchQueryParams =
         headerList.get('x-full-search-query-params') || '';
@@ -738,7 +738,7 @@ export const gridRouter = createTRPCRouter({
     )
     .mutation(async ({ ctx, input }) => {
       const { filters } = input;
-      const headerList = headers();
+      const headerList = await headers();
 
       const pathName = headerList.get('x-pathname') || '';
       const [, , mainEntity, application, identifier] = pathName.split('/');
@@ -772,7 +772,7 @@ export const gridRouter = createTRPCRouter({
               tab?.group_advance_filters?.length > 0 ? [] : filters,
             default_filter: [],
             pagination: {
-              ...tab?.pagination ?? {},
+              ...(tab?.pagination ?? {}),
               current_page: 1
             }
           };
@@ -815,7 +815,7 @@ export const gridRouter = createTRPCRouter({
     )
     .mutation(async ({ ctx, input }) => {
       const { pagination } = input;
-      const headerList = headers();
+      const headerList = await headers();
       const pathName = headerList.get('x-pathname') || '';
       const searchQueryParams =
         headerList.get('x-full-search-query-params') || '';
@@ -862,7 +862,7 @@ export const gridRouter = createTRPCRouter({
         .optional(),
     )
     .query(async ({ ctx, input }) => {
-      const headerList = headers();
+      const headerList = await headers();
       const pathName = input?.pathname || headerList.get('x-pathname') || '';
       const searchQueryParams =
         headerList.get('x-full-search-query-params') || '';
@@ -993,7 +993,7 @@ export const gridRouter = createTRPCRouter({
       }),
     )
     .mutation(async ({ ctx, input }) => {
-      const headerList = headers();
+      const headerList = await headers();
       const pathName = headerList.get('x-pathname') || '';
       const [, , mainEntity, application] = pathName.split('/');
       if (application !== 'grid' || !mainEntity) return [];
@@ -1012,7 +1012,7 @@ export const gridRouter = createTRPCRouter({
       return updatedTabs;
     }),
   getGridTabs: privateProcedure.query(async ({ ctx }) => {
-    const headerList = headers();
+    const headerList = await headers();
     const pathName = headerList.get('x-pathname') || '';
     const [, , mainEntity, application] = pathName.split('/');
     if (application !== 'grid' || !mainEntity) return [];
@@ -1040,7 +1040,7 @@ export const gridRouter = createTRPCRouter({
     )
     .mutation(async ({ ctx, input }) => {
       const { grouping } = input;
-      const headerList = headers();
+      const headerList = await headers();
       const pathName = headerList.get('x-pathname') || '';
       const searchQueryParams =
         headerList.get('x-full-search-query-params') || '';
@@ -1106,7 +1106,7 @@ export const gridRouter = createTRPCRouter({
       }),
     )
     .query(async ({ ctx, input }) => {
-      const headerList = headers();
+      const headerList = await headers();
       // const gridTabId = headerList.get('x-grid-tab-id') || '';
       const pathName = input?.pathname || headerList.get('x-pathname') || '';
       const [, , _mainEntity, _application, _identifier] = pathName.split('/');

@@ -9,7 +9,7 @@ export default async function Invite({ searchParams }: any) {
   // if (!searchParams.token) {
   //   return redirect('/login');
   // }
-  const headerList = headers();
+  const headerList = await headers();
   const pathname = headerList.get('x-pathname') || '';
   const [, , id] = pathname.split('/');
   const record = await api.account.getInvitationAccountDetailsPublicly({
