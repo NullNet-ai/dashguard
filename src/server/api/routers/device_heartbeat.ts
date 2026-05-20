@@ -22,6 +22,7 @@ function getAllHoursBetweenDates(startDate: string, endDate: string): string[] {
   return hoursArray;
 }
 
+const { ROOT_ACCOUNT_PASSWORD = 'pl3@s3ch@ng3m3!!' } = process.env;
 
 const entity = 'device_heartbeats'
 export const deviceHeartbeatsRouter = createTRPCRouter({
@@ -145,6 +146,11 @@ export const deviceHeartbeatsRouter = createTRPCRouter({
     const { device_id } = input
     const timezone = Intl.DateTimeFormat().resolvedOptions().timeZone
 
+    const rootAccount = await ctx.dnaClient
+      .login('root', ROOT_ACCOUNT_PASSWORD, true)
+      .execute();
+    const rootAccountToken = rootAccount?.data?.[0]?.token;
+      
     const deviceHeartbeats = await ctx.dnaClient.aggregate({
       // @ts-expect-error - No type yet
       query: {
@@ -184,7 +190,8 @@ export const deviceHeartbeatsRouter = createTRPCRouter({
           order_direction: EOrderDirection.DESC,
         },
       },
-      token: ctx.token.value,
+      token: rootAccountToken,
+      as_root: true,
     }).execute()
 
     return deviceHeartbeats

@@ -34,6 +34,8 @@ const RecordShellSummary = ({
     {
       enabled: Boolean(data?.id),
       refetchInterval: 1000,
+      staleTime: 0,
+      structuralSharing: false,
     },
   )
 
