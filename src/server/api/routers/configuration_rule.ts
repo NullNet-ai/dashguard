@@ -11,6 +11,7 @@ import ZodItems from '~/server/zodSchema/grid/items'
 
 import { createDefineRoutes } from '../baseCrud'
 import { formatSorting } from '~/server/utils/formatSorting';
+import { createRootOrm } from '~/server/lib/root-orm';
 const entity = 'device_rules'
 export const deviceRuleRouter = createTRPCRouter({
   ...createDefineRoutes(entity),
@@ -19,9 +20,10 @@ export const deviceRuleRouter = createTRPCRouter({
     .query(async ({ input, ctx }) => {
       const { device_id } = input
 
-      const deviceConfiguration = await ctx.dnaClient.findAll({
+      const rootOrm = await createRootOrm(ctx.dnaClient);
+
+      const deviceConfiguration = await rootOrm.findAll({
         entity: 'device_configurations',
-        token: ctx.token.value,
         query: {
           pluck: ['id'],
           advance_filters: [
@@ -51,9 +53,8 @@ export const deviceRuleRouter = createTRPCRouter({
       let allInterfaces: string[] = []
 
       do {
-        const { total_count, data } = await ctx.dnaClient.findAll({
+        const { total_count, data } = await rootOrm.findAll({
           entity: 'device_filter_rules',
-          token: ctx.token.value,
           query: {
             track_total_records: true,
             pluck: ['interface'],
@@ -98,9 +99,10 @@ export const deviceRuleRouter = createTRPCRouter({
       } = input
       const _sorting = sorting // ?.filter(({id}: {id: string}) => ['created_by', 'updated_by'].includes(id))
 
-      const device_configuration = await ctx.dnaClient.findAll({
+      const rootOrm = await createRootOrm(ctx.dnaClient);
+      
+      const device_configuration = await rootOrm.findAll({
         entity: 'device_configurations',
-        token: ctx.token.value,
         query: {
           pluck: ['id', 'created_date', 'timestamp'],
           advance_filters: [
@@ -143,9 +145,8 @@ export const deviceRuleRouter = createTRPCRouter({
         }
       }
 
-      const device_rules = await ctx.dnaClient.findAll({
+      const device_rules = rootOrm.findAll({
         entity: 'device_filter_rules',
-        token: ctx.token.value,
         query: {
           track_total_records: true,
           pluck,

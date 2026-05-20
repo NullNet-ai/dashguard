@@ -12,6 +12,7 @@ import { createAdvancedFilter } from '~/server/utils/transformAdvanceFilter'
 import ZodItems from '~/server/zodSchema/grid/items'
 
 import { createDefineRoutes } from '../baseCrud'
+import { createRootOrm } from '~/server/lib/root-orm';
 const entity = 'aliases'
 export const deviceAliasRouter = createTRPCRouter({
   ...createDefineRoutes(entity),
@@ -33,9 +34,11 @@ export const deviceAliasRouter = createTRPCRouter({
       } = input
 
       const _sorting = sorting?.filter(({id}: {id: string}) => !['created_by', 'updated_by'].includes(id))
-      const device_configuration = await ctx.dnaClient.findAll({
+      
+      const rootOrm = await createRootOrm(ctx.dnaClient);
+      
+      const device_configuration = await rootOrm.findAll({
         entity: 'device_configurations',
-        token: ctx.token.value,
         query: {
           pluck: ['id', 'created_date', 'timestamp'],
           advance_filters: [
@@ -69,10 +72,9 @@ export const deviceAliasRouter = createTRPCRouter({
 
       const device_conf_id = device_configuration?.data?.[0]?.id as string
 
-      const device_aliases = await ctx.dnaClient
+      const device_aliases = await rootOrm
         .findAll({
           entity: 'aliases',
-          token: ctx.token.value,
           query: {
             track_total_records: true,
             pluck,

@@ -7,6 +7,7 @@ import {
 } from '~/server/api/trpc'
 import moment from 'moment-timezone'
 import { createDefineRoutes } from '../baseCrud'
+import { createRootOrm } from '~/server/lib/root-orm';
 
 
 function getAllHoursBetweenDates(startDate: string, endDate: string): string[] {
@@ -21,8 +22,6 @@ function getAllHoursBetweenDates(startDate: string, endDate: string): string[] {
 
   return hoursArray;
 }
-
-const { ROOT_ACCOUNT_PASSWORD = 'pl3@s3ch@ng3m3!!' } = process.env;
 
 const entity = 'device_heartbeats'
 export const deviceHeartbeatsRouter = createTRPCRouter({
@@ -45,8 +44,9 @@ export const deviceHeartbeatsRouter = createTRPCRouter({
 
     const hour_range = getAllHoursBetweenDates(_start,_end)
 
-    const res = await ctx.dnaClient.aggregate({
-      // @ts-expect-error - the type is not matching
+    const rootOrm = await createRootOrm(ctx.dnaClient);
+    
+    const res = await rootOrm.aggregate({
       query: {
         entity: 'device_heartbeats',
         aggregations: [
@@ -146,13 +146,10 @@ export const deviceHeartbeatsRouter = createTRPCRouter({
     const { device_id } = input
     const timezone = Intl.DateTimeFormat().resolvedOptions().timeZone
 
-    const rootAccount = await ctx.dnaClient
-      .login('root', ROOT_ACCOUNT_PASSWORD, true)
-      .execute();
-    const rootAccountToken = rootAccount?.data?.[0]?.token;
-      
-    const deviceHeartbeats = await ctx.dnaClient.aggregate({
-      // @ts-expect-error - No type yet
+   
+    const rootOrm = await createRootOrm(ctx.dnaClient);
+    
+    const deviceHeartbeats = await rootOrm.aggregate({
       query: {
         entity: 'device_heartbeats',
         aggregations: [
@@ -190,8 +187,6 @@ export const deviceHeartbeatsRouter = createTRPCRouter({
           order_direction: EOrderDirection.DESC,
         },
       },
-      token: rootAccountToken,
-      as_root: true,
     }).execute()
 
     return deviceHeartbeats
