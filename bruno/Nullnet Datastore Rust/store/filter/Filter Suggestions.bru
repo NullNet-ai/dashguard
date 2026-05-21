@@ -1,0 +1,465 @@
+meta {
+  name: Get Filter Suggestions
+  type: http
+  seq: 10
+}
+
+post {
+  url: {{baseUrl}}/api/store/{{defaultEntity}}/filter/suggestions
+  body: json
+  auth: inherit
+}
+
+body:json {
+  {
+    "pluck": [
+      "id",
+      "device_configuration_id",
+      "device_rule_status",
+      "status",
+      "type",
+      "policy",
+      "protocol",
+      "source_ip_value",
+      "source_port_value",
+      "source_addr",
+      "source_type",
+      "source_inversed",
+      "destination_ip_value",
+      "destination_port_value",
+      "destination_addr",
+      "destination_type",
+      "destination_inversed",
+      "description",
+      "created_by",
+      "updated_by",
+      "created_date",
+      "updated_date",
+      "disabled",
+      "interface",
+      "order",
+      "redirect_ip",
+      "redirect_port"
+    ],
+    "pluck_object": {
+      "created_by_account_organizations": [
+        "id",
+        "contact_id"
+      ],
+      "created_by": [
+        "id",
+        "first_name",
+        "last_name"
+      ],
+      "updated_by_account_organizations": [
+        "id",
+        "contact_id"
+      ],
+      "updated_by": [
+        "id",
+        "first_name",
+        "last_name"
+      ],
+      "device_nat_rules": [
+        "id",
+        "device_configuration_id",
+        "device_rule_status",
+        "status",
+        "type",
+        "policy",
+        "protocol",
+        "source_ip_value",
+        "source_port_value",
+        "source_addr",
+        "source_type",
+        "source_inversed",
+        "destination_ip_value",
+        "destination_port_value",
+        "destination_addr",
+        "destination_type",
+        "destination_inversed",
+        "description",
+        "created_by",
+        "updated_by",
+        "created_date",
+        "updated_date",
+        "disabled",
+        "interface",
+        "order",
+        "redirect_ip",
+        "redirect_port"
+      ]
+    },
+    "pluck_group_object": {},
+    "advance_filters": [
+      {
+        "type": "criteria",
+        "field": "first_name",
+        "entity": "created_by",
+        "operator": "like",
+        "values": [
+          "wan"
+        ],
+        "is_search": true
+      },
+      {
+        "type": "operator",
+        "operator": "or"
+      },
+      {
+        "type": "criteria",
+        "field": "created_date",
+        "entity": "device_nat_rules",
+        "operator": "like",
+        "values": [
+          "wan"
+        ],
+        "is_search": true
+      },
+      {
+        "type": "operator",
+        "operator": "or"
+      },
+      {
+        "type": "criteria",
+        "field": "first_name",
+        "entity": "updated_by",
+        "operator": "like",
+        "values": [
+          "wan"
+        ],
+        "is_search": true
+      },
+      {
+        "type": "operator",
+        "operator": "or"
+      },
+      {
+        "type": "criteria",
+        "field": "updated_date",
+        "entity": "device_nat_rules",
+        "operator": "like",
+        "values": [
+          "wan"
+        ],
+        "is_search": true
+      },
+      {
+        "type": "operator",
+        "operator": "or"
+      },
+      {
+        "type": "criteria",
+        "field": "description",
+        "entity": "device_nat_rules",
+        "operator": "like",
+        "values": [
+          "wan"
+        ],
+        "is_search": true
+      },
+      {
+        "type": "operator",
+        "operator": "or"
+      },
+      {
+        "type": "criteria",
+        "field": "redirect_port",
+        "entity": "device_nat_rules",
+        "operator": "like",
+        "values": [
+          "wan"
+        ],
+        "is_search": true,
+        "parse_as": "text"
+      },
+      {
+        "type": "operator",
+        "operator": "or"
+      },
+      {
+        "type": "criteria",
+        "field": "redirect_ip",
+        "entity": "device_nat_rules",
+        "operator": "like",
+        "values": [
+          "wan"
+        ],
+        "is_search": true
+      },
+      {
+        "type": "operator",
+        "operator": "or"
+      },
+      {
+        "type": "criteria",
+        "field": "destination_port_value",
+        "entity": "device_nat_rules",
+        "operator": "like",
+        "values": [
+          "wan"
+        ],
+        "is_search": true
+      },
+      {
+        "type": "operator",
+        "operator": "or"
+      },
+      {
+        "type": "criteria",
+        "field": "destination_ip_value",
+        "entity": "device_nat_rules",
+        "operator": "like",
+        "values": [
+          "wan"
+        ],
+        "is_search": true
+      },
+      {
+        "type": "operator",
+        "operator": "or"
+      },
+      {
+        "type": "criteria",
+        "field": "source_port_value",
+        "entity": "device_nat_rules",
+        "operator": "like",
+        "values": [
+          "wan"
+        ],
+        "is_search": true
+      },
+      {
+        "type": "operator",
+        "operator": "or"
+      },
+      {
+        "type": "criteria",
+        "field": "source_ip_value",
+        "entity": "device_nat_rules",
+        "operator": "like",
+        "values": [
+          "wan"
+        ],
+        "is_search": true
+      },
+      {
+        "type": "operator",
+        "operator": "or"
+      },
+      {
+        "type": "criteria",
+        "field": "protocol",
+        "entity": "device_nat_rules",
+        "operator": "like",
+        "values": [
+          "wan"
+        ],
+        "is_search": true
+      },
+      {
+        "type": "operator",
+        "operator": "or"
+      },
+      {
+        "type": "criteria",
+        "field": "interface",
+        "entity": "device_nat_rules",
+        "operator": "like",
+        "values": [
+          "wan"
+        ],
+        "is_search": true
+      },
+      {
+        "type": "operator",
+        "operator": "or"
+      },
+      {
+        "type": "criteria",
+        "field": "order",
+        "entity": "device_nat_rules",
+        "operator": "like",
+        "values": [
+          "wan"
+        ],
+        "is_search": true,
+        "parse_as": "text"
+      },
+      {
+        "type": "operator",
+        "operator": "or"
+      },
+      {
+        "type": "criteria",
+        "field": "disabled",
+        "entity": "device_nat_rules",
+        "operator": "like",
+        "values": [
+          "wan"
+        ],
+        "is_search": true,
+        "parse_as": "text"
+      },
+      {
+        "type": "operator",
+        "operator": "or"
+      },
+      {
+        "type": "criteria",
+        "field": "device_rule_status",
+        "entity": "device_nat_rules",
+        "operator": "like",
+        "values": [
+          "wan"
+        ],
+        "is_search": true
+      },
+      {
+        "type": "operator",
+        "operator": "or"
+      },
+      {
+        "type": "criteria",
+        "field": "status",
+        "entity": "device_nat_rules",
+        "operator": "like",
+        "values": [
+          "wan"
+        ],
+        "is_search": true
+      },
+      {
+        "type": "operator",
+        "operator": "and"
+      },
+      {
+        "type": "criteria",
+        "field": "status",
+        "entity": "device_nat_rules",
+        "operator": "equal",
+        "values": [
+          "Active",
+          "Draft"
+        ]
+      }
+    ],
+    "offset": 0,
+    "limit": 100,
+    "joins": [
+      {
+        "type": "left",
+        "field_relation": {
+          "to": {
+            "alias": "created_by_account_organizations",
+            "entity": "account_organizations",
+            "field": "id"
+          },
+          "from": {
+            "entity": "device_nat_rules",
+            "field": "created_by"
+          }
+        },
+        "nested": false
+      },
+      {
+        "type": "left",
+        "field_relation": {
+          "to": {
+            "alias": "created_by",
+            "entity": "contacts",
+            "field": "id"
+          },
+          "from": {
+            "entity": "created_by_account_organizations",
+            "field": "contact_id"
+          }
+        },
+        "nested": true
+      },
+      {
+        "type": "left",
+        "field_relation": {
+          "to": {
+            "alias": "updated_by_account_organizations",
+            "entity": "account_organizations",
+            "field": "id"
+          },
+          "from": {
+            "entity": "device_nat_rules",
+            "field": "updated_by"
+          }
+        },
+        "nested": false
+      },
+      {
+        "type": "left",
+        "field_relation": {
+          "to": {
+            "alias": "updated_by",
+            "entity": "contacts",
+            "field": "id"
+          },
+          "from": {
+            "entity": "updated_by_account_organizations",
+            "field": "contact_id"
+          }
+        },
+        "nested": true
+      }
+    ],
+    "order_direction": "asc",
+    "order_by": "order",
+    "is_case_sensitive_sorting": false,
+    "multiple_sort": [],
+    "date_format": "mm/dd/YYYY",
+    "concatenate_fields": [
+      {
+        "fields": [
+          "first_name",
+          "last_name"
+        ],
+        "field_name": "full_name",
+        "separator": " ",
+        "entity": "contacts",
+        "aliased_entity": "created_by"
+      },
+      {
+        "fields": [
+          "first_name",
+          "last_name"
+        ],
+        "field_name": "full_name",
+        "separator": " ",
+        "entity": "contacts",
+        "aliased_entity": "updated_by"
+      },
+      {
+        "fields": [
+          "created_date",
+          "created_time"
+        ],
+        "field_name": "created_date_time",
+        "separator": " ",
+        "entity": "device_nat_rules"
+      },
+      {
+        "fields": [
+          "updated_date",
+          "updated_time"
+        ],
+        "field_name": "updated_date_time",
+        "separator": " ",
+        "entity": "device_nat_rules"
+      }
+    ],
+    "group_advance_filters": [],
+    "distinct_by": "",
+    "group_by": {},
+    "time_format": "HH24:MI"
+  }
+}
+
+settings {
+  encodeUrl: true
+}

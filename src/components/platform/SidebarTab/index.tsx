@@ -95,17 +95,22 @@ export default function SidebarTab({
   refreshOnTabChangeTabs,
 }: SidebarTabProps) {
   const router = useRouter();
-  const [activeTab, setActiveTab] = useState<string>(() => {
-    if (typeof window !== 'undefined' && persistKey) {
-      const saved = window.localStorage.getItem(`tab-${persistKey}`);
-      if (saved && tabs.some((t) => t.id === saved)) return saved;
-    }
-    return defaultValue ?? tabs[0]?.id ?? '';
-  });
+  const [activeTab, setActiveTab] = useState<string>(
+    defaultValue ?? tabs[0]?.id ?? ''
+  );
 
   const [isCollapsed, setIsCollapsed] = useState<boolean>(() => true);
 
   const toggleCollapsed = useCallback(() => setIsCollapsed((prev) => !prev), []);
+
+  useEffect(() => {
+    if (!persistKey) return;
+    const saved = window.localStorage.getItem(`tab-${persistKey}`);
+    if (saved && tabs.some((t) => t.id === saved)) {
+      setActiveTab(saved);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [persistKey]);
 
   useEffect(() => {
     if (!persistKey) return;

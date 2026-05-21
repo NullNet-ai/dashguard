@@ -46,7 +46,7 @@ const FormHeader = (props: IFormHeaderProps) => {
       <CardDescription
         className="text-md font-semibold text-slate-800"
         data-test-id={testIDFormatter(
-          `${formProps?.entity ?? 'no_entity'}-wzrd-${formKey}-form-name`,
+          `${formProps?.entity ?? 'no_entity'}-wizard-${formKey}-form-name`,
         )}
       >
         {formLabel}{' '}
@@ -56,7 +56,7 @@ const FormHeader = (props: IFormHeaderProps) => {
         <DebugButton
           handleDebug={handleDebug}
           dataTestID={testIDFormatter(
-            `${formProps?.entity ?? 'no_entity'}-wzrd-${formKey}-debug-btn`,
+            `${formProps?.entity ?? 'no_entity'}-wizard-${formKey}-debug-button`,
           )}
         />
       )}
@@ -71,7 +71,7 @@ const FormHeader = (props: IFormHeaderProps) => {
                 onClick={() => handleUpdateDisplayType('form')}
                 size="icon"
                 data-test-id={testIDFormatter(
-                  `${formProps?.entity ?? 'no_entity'}-wzrd-${formKey}-lock-btn`,
+                  `${formProps?.entity ?? 'no_entity'}-wizard-${formKey}-lock-button`,
                 )}
               >
                 <LockIcon className="h-4 w-4 cursor-pointer rounded-full border text-gray-700" />
@@ -89,7 +89,7 @@ const FormHeader = (props: IFormHeaderProps) => {
                   (buttonConfig?.hideLockButton ? null : (
                     <UnlockButton
                       dataTestID={testIDFormatter(
-                        `${formProps?.entity ?? 'no_entity'}-wzrd-${formKey}-unlock-btn`,
+                        `${formProps?.entity ?? 'no_entity'}-wizard-${formKey}-unlock-button`,
                       )}
                       handleLock={handleLock}
                     />
@@ -104,7 +104,7 @@ const FormHeader = (props: IFormHeaderProps) => {
           filterGridConfig?.actionType === 'multi-select' && (
             <Button
               data-test-id={testIDFormatter(
-                `${formProps?.entity ?? 'no_entity'}-wzrd-${formKey}-form-filter-grd-add-btn`,
+                `${formProps?.entity ?? 'no_entity'}-wizard-${formKey}-form-filter-grid-add-button`,
               )}
               size="xs"
               type="button"
@@ -119,7 +119,7 @@ const FormHeader = (props: IFormHeaderProps) => {
         {enableAppendForm && (
           <Button
             data-test-id={testIDFormatter(
-              `${formProps?.entity ?? 'no_entity'}-wzrd-${formKey}-form-append-btn`,
+              `${formProps?.entity ?? 'no_entity'}-wizard-${formKey}-form-append-button`,
             )}
             size="xs"
             type="button"
@@ -138,7 +138,7 @@ const FormHeader = (props: IFormHeaderProps) => {
          */}
         <ShowHideForm
           data-test-id={testIDFormatter(
-            `${formProps?.entity ?? 'no_entity'}-wzrd-${formKey}-${open ? 'hide' : 'show'}-form-btn`,
+            `${formProps?.entity ?? 'no_entity'}-wizard-${formKey}-${open ? 'hide' : 'show'}-form-button`,
           )}
           handleOpen={handleOpen}
           hideAccordions={!!buttonConfig?.hideAccordions}

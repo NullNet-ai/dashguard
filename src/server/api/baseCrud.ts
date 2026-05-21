@@ -4,6 +4,7 @@ import { privateProcedure } from '~/server/api/trpc';
 import type Entities from '~/auto-generated/entities';
 type Entity = (typeof Entities)[number];
 import { get_meta_header } from '~/utils/request-header';
+import { getEntityCredentials } from '~/server/lib/root-orm';
 
 export const createDefineRoutes = (entity: Entity) => ({
   createDraftRecord: privateProcedure
@@ -16,10 +17,13 @@ export const createDefineRoutes = (entity: Entity) => ({
     )
     .mutation(async ({ ctx, input }) => {
       const meta_header = await get_meta_header();
+      const { token: createToken, as_root: createAsRoot } =
+        await getEntityCredentials(entity, ctx.dnaClient, ctx.token.value);
       const record = await ctx.dnaClient
         .create({
           entity,
-          token: ctx.token.value,
+          token: createToken,
+          as_root: createAsRoot,
           ...meta_header,
           mutation: {
             params: {
@@ -51,10 +55,13 @@ export const createDefineRoutes = (entity: Entity) => ({
     )
     .query(async ({ input, ctx }) => {
       if (!input?.id) return null;
+      const { token: getByIdToken, as_root: getByIdAsRoot } =
+        await getEntityCredentials(entity, ctx.dnaClient, ctx.token.value);
       const record = await ctx.dnaClient
         .findOne(input.id, {
           entity,
-          token: ctx.token.value,
+          token: getByIdToken,
+          as_root: getByIdAsRoot,
           query: {
             pluck: input.pluck_fields,
           },
@@ -74,10 +81,13 @@ export const createDefineRoutes = (entity: Entity) => ({
     )
     .mutation(async ({ input, ctx }) => {
       const meta_header = await get_meta_header();
+      const { token: deleteToken, as_root: deleteAsRoot } =
+        await getEntityCredentials(entity, ctx.dnaClient, ctx.token.value);
       const record = await ctx.dnaClient
         .update(input.id, {
           entity,
-          token: ctx.token.value,
+          token: deleteToken,
+          as_root: deleteAsRoot,
           ...meta_header,
           mutation: {
             params: {
@@ -111,10 +121,13 @@ export const createDefineRoutes = (entity: Entity) => ({
 
       // Note: Temporary fix. Real code commented
       try {
+        const { token: getByCodeToken, as_root: getByCodeAsRoot } =
+          await getEntityCredentials(entity, ctx.dnaClient, ctx.token.value);
         const record = await ctx.dnaClient
           .findByCode(input.code, {
             entity,
-            token: ctx.token.value,
+            token: getByCodeToken,
+            as_root: getByCodeAsRoot,
             query: {
               pluck: input.pluck_fields,
             },
@@ -144,10 +157,13 @@ export const createDefineRoutes = (entity: Entity) => ({
     .mutation(async ({ input, ctx }) => {
       const { id } = input;
       const meta_header = await get_meta_header();
+      const { token: archivedToken, as_root: archivedAsRoot } =
+        await getEntityCredentials(entity, ctx.dnaClient, ctx.token.value);
       const record = await ctx.dnaClient
         .update(id, {
           entity,
-          token: ctx.token.value,
+          token: archivedToken,
+          as_root: archivedAsRoot,
           ...meta_header,
           mutation: {
             params: {

@@ -1,13 +1,13 @@
-import { EOperator, EOrderDirection, type IAdvanceFilters } from '@dna-platform/common-orm'
+import { EOperator, EOrderDirection } from '@dna-platform/common-orm'
 import { z } from 'zod'
 
 import {
   createTRPCRouter,
   privateProcedure,
 } from '~/server/api/trpc'
-import { createAdvancedFilter } from '~/server/utils/transformAdvanceFilter'
 import moment from 'moment-timezone'
 import { createDefineRoutes } from '../baseCrud'
+import { createRootOrm } from '~/server/lib/root-orm';
 
 
 function getAllHoursBetweenDates(startDate: string, endDate: string): string[] {
@@ -22,7 +22,6 @@ function getAllHoursBetweenDates(startDate: string, endDate: string): string[] {
 
   return hoursArray;
 }
-
 
 const entity = 'device_heartbeats'
 export const deviceHeartbeatsRouter = createTRPCRouter({
@@ -45,8 +44,9 @@ export const deviceHeartbeatsRouter = createTRPCRouter({
 
     const hour_range = getAllHoursBetweenDates(_start,_end)
 
-    const res = await ctx.dnaClient.aggregate({
-      // @ts-expect-error - the type is not matching
+    const rootOrm = await createRootOrm(ctx.dnaClient);
+    
+    const res = await rootOrm.aggregate({
       query: {
         entity: 'device_heartbeats',
         aggregations: [
@@ -144,30 +144,51 @@ export const deviceHeartbeatsRouter = createTRPCRouter({
     })
   ).query(async ({ ctx, input }) => {
     const { device_id } = input
+    const timezone = Intl.DateTimeFormat().resolvedOptions().timeZone
 
-    const device_heartbeats = await ctx.dnaClient.findAll({
-      entity: 'device_heartbeats',
-      token: ctx.token.value,
+   
+    const rootOrm = await createRootOrm(ctx.dnaClient);
+    
+    const deviceHeartbeats = await rootOrm.aggregate({
       query: {
-        pluck: ['id', 'timestamp', 'device_id'],
-        advance_filters: createAdvancedFilter({
-          status: 'Active',
-          device_id,
-        }) as IAdvanceFilters[],
+        entity: 'device_heartbeats',
+        aggregations: [
+          {
+            aggregation: 'COUNT',
+            aggregate_on: 'id',
+            bucket_name: 'count',
+          },
+        ],
+        advance_filters: [
+          {
+            type: 'criteria',
+            field: 'status',
+            entity: 'device_heartbeats',
+            operator: EOperator.EQUAL,
+            values: ['Active'],
+          },
+          {
+            type: 'operator',
+            operator: EOperator.AND,
+          },
+          {
+            type: 'criteria',
+            field: 'device_id',
+            entity: 'device_heartbeats',
+            operator: EOperator.EQUAL,
+            values: [device_id],
+          },
+        ],
+        bucket_size: '1s',
+        timezone,
+        limit: 1,
         order: {
-          by_field: 'timestamp',
-          limit: 1,
-          by_direction: EOrderDirection.DESC,
-          is_case_sensitive_sorting: true,
+          order_by: 'bucket',
+          order_direction: EOrderDirection.DESC,
         },
       },
     }).execute()
 
-  
-
-
-
-
-    return device_heartbeats
+    return deviceHeartbeats
   }),
 })

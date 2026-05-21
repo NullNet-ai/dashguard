@@ -1,0 +1,29 @@
+meta {
+  name: Create Sync Endpoint
+  type: http
+  seq: 1
+}
+
+post {
+  url: {{baseUrl}}/api/sync_endpoints
+  body: json
+  auth: inherit
+}
+
+body:json {
+  {
+      "endpoint": {
+          "id":"{{syncEndpointId}}",
+          "name": "{{syncEndpointName}}",
+          "url": "{{appUrl}}",
+          "group_id": "{{syncEndpointGroupId}}",
+          "username": "{{syncEndpointUsername}}",
+          "password": "{{syncEndpointPassword}}",
+          "status": "Active"
+      }
+  }
+}
+
+settings {
+  encodeUrl: true
+}

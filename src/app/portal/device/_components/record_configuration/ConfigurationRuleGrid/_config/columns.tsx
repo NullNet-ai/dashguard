@@ -62,12 +62,12 @@ const gridColumns = [
   },
   {
     header: 'Protocol',
-    accessorKey: 'protocol',
+    accessorKey: 'ipprotocol_protocol',
     search_config: {
       operator: 'like',
     },
     cell: ({row}) => {
-      const [ipprotocol, protocol] = row.original?.protocol?.split(' ') || []
+      const [ipprotocol, protocol] = row.original?.ipprotocol_protocol?.split(' ') || []
       // @ts-expect-error - No type yet
       const ipProtocolMappedValue = {
         inet: 'IPv4',

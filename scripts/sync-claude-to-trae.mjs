@@ -1,0 +1,381 @@
+import { promises as fs } from 'node:fs';
+import path from 'node:path';
+
+const projectRoot = process.cwd();
+const claudeRoot = path.join(projectRoot, '.claude');
+const traeRoot = path.join(projectRoot, '.trae');
+
+const CLAUDE_RULES = path.join(claudeRoot, 'rules');
+const CLAUDE_SKILLS = path.join(claudeRoot, 'skills');
+const CLAUDE_COMMANDS = path.join(claudeRoot, 'commands');
+const CLAUDE_AGENTS = path.join(claudeRoot, 'agents');
+
+const TRAE_RULES = path.join(traeRoot, 'rules');
+const TRAE_SKILLS = path.join(traeRoot, 'skills');
+const TRAE_COMMANDS = path.join(traeRoot, 'commands');
+const TRAE_AGENTS = path.join(traeRoot, 'agents');
+
+const TS_GLOBS = [
+  '**/*.{ts,tsx,js,jsx,mts,cts,mjs,cjs}',
+  'src/**/*.{ts,tsx,js,jsx,mts,cts,mjs,cjs}',
+  'tests/**/*.{ts,tsx,js,jsx,mts,cts,mjs,cjs}',
+];
+
+const PLAYWRIGHT_GLOBS = [
+  'playwright.config.{ts,js,mts,mjs}',
+  'tests/e2e/**/*.{ts,tsx,js,jsx}',
+  '**/*.{spec,test}.{ts,tsx,js,jsx}',
+];
+
+async function pathExists(targetPath) {
+  try {
+    await fs.access(targetPath);
+    return true;
+  } catch {
+    return false;
+  }
+}
+
+async function ensureDir(dirPath) {
+  await fs.mkdir(dirPath, { recursive: true });
+}
+
+async function resetDir(dirPath) {
+  await fs.rm(dirPath, { recursive: true, force: true });
+  await ensureDir(dirPath);
+}
+
+function toPosix(targetPath) {
+  return targetPath.split(path.sep).join('/');
+}
+
+function titleFromFileName(fileName) {
+  const baseName = fileName.replace(/\.md$/i, '');
+  return baseName
+    .split(/[-_]/g)
+    .filter(Boolean)
+    .map((part) => part.charAt(0).toUpperCase() + part.slice(1))
+    .join(' ');
+}
+
+function serializeYamlValue(value, indent = '') {
+  if (Array.isArray(value)) {
+    return value.map((item) => `${indent}- ${JSON.stringify(item)}`).join('\n');
+  }
+
+  if (typeof value === 'boolean') {
+    return value ? 'true' : 'false';
+  }
+
+  return JSON.stringify(value);
+}
+
+function buildFrontmatter(fields) {
+  const lines = ['---'];
+
+  for (const [key, value] of Object.entries(fields)) {
+    if (value === undefined) {
+      continue;
+    }
+
+    if (Array.isArray(value)) {
+      lines.push(`${key}:`);
+      lines.push(serializeYamlValue(value, '  '));
+      continue;
+    }
+
+    lines.push(`${key}: ${serializeYamlValue(value)}`);
+  }
+
+  lines.push('---');
+  return `${lines.join('\n')}\n`;
+}
+
+async function readText(filePath) {
+  return fs.readFile(filePath, 'utf8');
+}
+
+async function writeText(filePath, content) {
+  await ensureDir(path.dirname(filePath));
+  await fs.writeFile(filePath, content);
+}
+
+async function listMarkdownFiles(dirPath) {
+  const entries = await fs.readdir(dirPath, { withFileTypes: true });
+  const results = [];
+
+  for (const entry of entries) {
+    const fullPath = path.join(dirPath, entry.name);
+
+    if (entry.isDirectory()) {
+      results.push(...(await listMarkdownFiles(fullPath)));
+      continue;
+    }
+
+    if (entry.isFile() && entry.name.toLowerCase().endsWith('.md')) {
+      results.push(fullPath);
+    }
+  }
+
+  return results.sort((left, right) => left.localeCompare(right));
+}
+
+async function copyTree(sourceDir, destDir) {
+  if (!(await pathExists(sourceDir))) {
+    return [];
+  }
+
+  const markdownFiles = await listMarkdownFiles(sourceDir);
+
+  for (const sourceFile of markdownFiles) {
+    const relativePath = path.relative(sourceDir, sourceFile);
+    const destFile = path.join(destDir, relativePath);
+    const content = await readText(sourceFile);
+    await writeText(destFile, content);
+  }
+
+  return markdownFiles.map((filePath) => toPosix(path.relative(sourceDir, filePath)));
+}
+
+function syncNotice(sourceRelativePath) {
+  return `> Synced from \`${sourceRelativePath}\` by \`pnpm sync:trae\`.\n> Edit the source under \`.claude/\` and rerun the sync script instead of editing this file by hand.\n`;
+}
+
+function wrapRuleContent({ sourceRelativePath, frontmatter, body }) {
+  return `${buildFrontmatter(frontmatter)}\n${syncNotice(sourceRelativePath)}\n${body.trim()}\n`;
+}
+
+async function buildCoreRules() {
+  const codingStyle = await readText(path.join(CLAUDE_RULES, 'common', 'coding-style.md'));
+  const security = await readText(path.join(CLAUDE_RULES, 'common', 'security.md'));
+  const testing = await readText(path.join(CLAUDE_RULES, 'common', 'testing.md'));
+  const gitWorkflow = await readText(path.join(CLAUDE_RULES, 'common', 'git-workflow.md'));
+  const agents = await readText(path.join(CLAUDE_RULES, 'common', 'agents.md'));
+
+  const projectBasics = [
+    '# Project Basics',
+    '',
+    syncNotice('.claude/rules/common/coding-style.md + .claude/rules/common/agents.md').trimEnd(),
+    '',
+    'Use this rule as the always-on baseline for everyday work in this repository.',
+    '',
+    '## Canonical Configuration',
+    '',
+    '- `.claude/` remains the source of truth for Claude-style setup.',
+    '- `.trae/` is the Trae-facing compatibility mirror generated by `pnpm sync:trae`.',
+    '- Root `CLAUDE.md` and `AGENTS.md` provide lightweight bootstrap context for Trae.',
+    '',
+    '## Coding Style',
+    '',
+    codingStyle.trim(),
+    '',
+    '## Agent Workflow',
+    '',
+    agents.trim(),
+    '',
+  ].join('\n');
+
+  await writeText(
+    path.join(TRAE_RULES, 'core', 'project-basics.md'),
+    `${buildFrontmatter({ alwaysApply: true })}\n${projectBasics}`
+  );
+
+  await writeText(
+    path.join(TRAE_RULES, 'core', 'security.md'),
+    wrapRuleContent({
+      sourceRelativePath: '.claude/rules/common/security.md',
+      frontmatter: { alwaysApply: true },
+      body: security,
+    })
+  );
+
+  await writeText(
+    path.join(TRAE_RULES, 'core', 'testing.md'),
+    wrapRuleContent({
+      sourceRelativePath: '.claude/rules/common/testing.md',
+      frontmatter: { alwaysApply: true },
+      body: testing,
+    })
+  );
+
+  await writeText(
+    path.join(TRAE_RULES, 'core', 'git-workflow.md'),
+    wrapRuleContent({
+      sourceRelativePath: '.claude/rules/common/git-workflow.md',
+      frontmatter: { alwaysApply: true },
+      body: gitWorkflow,
+    })
+  );
+}
+
+async function buildScopedRules({ sourceSubdir, destSubdir, frontmatterFactory }) {
+  const sourceDir = path.join(CLAUDE_RULES, sourceSubdir);
+  const files = await listMarkdownFiles(sourceDir);
+
+  for (const sourceFile of files) {
+    const relativePath = path.relative(sourceDir, sourceFile);
+    const destFile = path.join(TRAE_RULES, destSubdir, relativePath);
+    const body = await readText(sourceFile);
+    const sourceRelativePath = `.claude/rules/${toPosix(path.join(sourceSubdir, relativePath))}`;
+
+    await writeText(
+      destFile,
+      wrapRuleContent({
+        sourceRelativePath,
+        frontmatter: frontmatterFactory(relativePath),
+        body,
+      })
+    );
+  }
+
+  return files.map((filePath) => toPosix(path.relative(sourceDir, filePath)));
+}
+
+async function buildRulesReadme({ typescriptRules, playwrightRules }) {
+  const content = [
+    '# Trae Rules Mirror',
+    '',
+    'This directory contains the Trae-facing rules generated from the canonical Claude setup in `.claude/rules/`.',
+    '',
+    '## Rule Layout',
+    '',
+    '- `core/` contains always-on project guidance derived from the Claude common rules.',
+    '- `typescript/` contains file-scoped TypeScript and JavaScript guidance.',
+    '- `playwright/` contains Playwright-focused test guidance.',
+    '',
+    '## Source of Truth',
+    '',
+    '- Edit `.claude/rules/**`.',
+    '- Run `pnpm sync:trae`.',
+    '- Avoid editing generated mirror files by hand.',
+    '',
+    '## Mirrored Files',
+    '',
+    '### TypeScript',
+    '',
+    ...typescriptRules.map((rulePath) => `- \`${rulePath}\``),
+    '',
+    '### Playwright',
+    '',
+    ...playwrightRules.map((rulePath) => `- \`${rulePath}\``),
+    '',
+  ].join('\n');
+
+  await writeText(path.join(TRAE_RULES, 'README.md'), `${content}\n`);
+}
+
+async function buildSkillsReadme(skillPaths) {
+  const content = [
+    '# Trae Skills Mirror',
+    '',
+    'This directory mirrors Claude skills from `.claude/skills/` for Trae-compatible usage.',
+    '',
+    '## Source of Truth',
+    '',
+    '- Edit `.claude/skills/**`.',
+    '- Run `pnpm sync:trae` to refresh this mirror.',
+    '',
+    '## Mirrored Skills',
+    '',
+    ...skillPaths.map((skillPath) => `- \`${skillPath}\``),
+    '',
+  ].join('\n');
+
+  await writeText(path.join(TRAE_SKILLS, 'README.md'), `${content}\n`);
+}
+
+async function buildCommandsReadme(commandPaths) {
+  const content = [
+    '# Trae Commands Mirror',
+    '',
+    'This directory mirrors slash-command style markdown from `.claude/commands/`.',
+    '',
+    '## Notes',
+    '',
+    '- Commands stay grouped by their existing folders.',
+    '- If your Trae build does not auto-discover these files, use them as the in-repo compatibility source documented in `.trae/README.md`.',
+    '- Edit `.claude/commands/**` and rerun `pnpm sync:trae` to refresh the mirror.',
+    '',
+    '## Mirrored Commands',
+    '',
+    ...commandPaths.map((commandPath) => `- \`${commandPath}\``),
+    '',
+  ].join('\n');
+
+  await writeText(path.join(TRAE_COMMANDS, 'README.md'), `${content}\n`);
+}
+
+async function buildAgentsReadme(agentPaths) {
+  const content = [
+    '# Trae Agents Mirror',
+    '',
+    'This directory stores import-ready agent prompt files mirrored from `.claude/agents/`.',
+    '',
+    '## Recommended Import Setup',
+    '',
+    '- **Name**: use the file basename in Title Case.',
+    '- **Prompt**: paste the mirrored file contents.',
+    '- **Callable by other agents**: enable only when the agent is a reusable specialist.',
+    '- **Suggested built-in tools**: Read, Edit, Terminal, Preview, and Web Search only when needed.',
+    '',
+    '## Mirrored Agents',
+    '',
+    ...agentPaths.map((agentPath) => {
+      const identifier = path.basename(agentPath, '.md');
+      const title = titleFromFileName(path.basename(agentPath));
+      return `- \`${agentPath}\` → name: ${title}, identifier: \`${identifier}\``;
+    }),
+    '',
+    'Edit `.claude/agents/**` and rerun `pnpm sync:trae` to refresh these import-ready files.',
+    '',
+  ].join('\n');
+
+  await writeText(path.join(TRAE_AGENTS, 'README.md'), `${content}\n`);
+}
+
+async function main() {
+  if (!(await pathExists(claudeRoot))) {
+    throw new Error('Expected a .claude directory at the project root.');
+  }
+
+  await resetDir(TRAE_RULES);
+  await resetDir(TRAE_SKILLS);
+  await resetDir(TRAE_COMMANDS);
+  await resetDir(TRAE_AGENTS);
+
+  await buildCoreRules();
+
+  const typescriptRules = await buildScopedRules({
+    sourceSubdir: 'typescript',
+    destSubdir: 'typescript',
+    frontmatterFactory: () => ({
+      alwaysApply: false,
+      globs: TS_GLOBS,
+    }),
+  });
+
+  const playwrightRules = await buildScopedRules({
+    sourceSubdir: 'playwright',
+    destSubdir: 'playwright',
+    frontmatterFactory: () => ({
+      alwaysApply: false,
+      globs: PLAYWRIGHT_GLOBS,
+    }),
+  });
+
+  const skillPaths = await copyTree(CLAUDE_SKILLS, TRAE_SKILLS);
+  const commandPaths = await copyTree(CLAUDE_COMMANDS, TRAE_COMMANDS);
+  const agentPaths = await copyTree(CLAUDE_AGENTS, TRAE_AGENTS);
+
+  await buildRulesReadme({ typescriptRules, playwrightRules });
+  await buildSkillsReadme(skillPaths);
+  await buildCommandsReadme(commandPaths);
+  await buildAgentsReadme(agentPaths);
+
+  console.log('Synced Claude configuration into .trae/');
+}
+
+main().catch((error) => {
+  console.error(error);
+  process.exitCode = 1;
+});

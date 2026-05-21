@@ -51,10 +51,10 @@ const SideUserInfo = ({
 
   return (
     <DropdownMenu>
-      <DropdownMenuTrigger className="grid place-items-center px-2 hover:ring-0 active:ring-0">
+      <DropdownMenuTrigger asChild>
         <div
           className={cn(
-            `flex cursor-pointer items-center gap-2 px-1 py-1.5 text-left text-sm`,
+            `flex grid cursor-pointer place-items-center items-center gap-2 px-1 px-2 py-1.5 text-left text-sm hover:ring-0 active:ring-0`,
             `${(open || openMobile) && mobile ? 'w-full' : ''} `,
           )}
         >

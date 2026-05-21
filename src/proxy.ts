@@ -1,7 +1,7 @@
 import { NextResponse, type NextRequest } from 'next/server'
 import { mainEntities } from './middleware-alias-entities'
 
-export async function middleware(request: NextRequest) {
+export async function proxy(request: NextRequest) {
   const requestHeaders = new Headers(request.headers)
   requestHeaders.set('x-pathname', request.nextUrl.pathname)
   requestHeaders.set(

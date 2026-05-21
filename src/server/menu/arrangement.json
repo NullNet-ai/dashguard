@@ -1,7 +1,6 @@
 {
   "order": [
     "device",
-    "remote_access",
-    "settings"
+    "remote_access"
   ]
 }

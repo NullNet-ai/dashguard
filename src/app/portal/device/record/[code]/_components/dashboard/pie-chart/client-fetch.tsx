@@ -14,7 +14,7 @@ const FormClientFetch = ({interfaces }: IFormProps) => {
   //This is an unnecessary fetching of data ??
   const {data: fetched_device} = api.record.getByCode.useQuery({
     id: identifier!,
-    pluck_fields: ["id", "code", "status", "device_status"],
+    pluck_fields: ["id", "code", "status"],
     main_entity: main_entity!,
   })
   

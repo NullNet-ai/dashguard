@@ -254,7 +254,7 @@ export const searchRouter = createTRPCRouter({
               parse_as: 'text',
             }
           }
-          if (curr.field === 'protocol') {
+          if (curr.field === 'ipprotocol_protocol') {
             return [
               ...acc,
               ...(curr.values?.reduce((acc1, curr1) => {
@@ -311,9 +311,9 @@ export const searchRouter = createTRPCRouter({
               ...updatedFilter,
               values: updatedFilter.values?.map(v => {
                 if ('authorized'.toLowerCase().includes(v.toLowerCase())) {
-                  return true
+                  return 'true'
                 } else if ('unauthorized'.toLowerCase().includes(v.toLowerCase())) {
-                  return false
+                  return 'false'
                 }
                 return v
               }),
@@ -324,9 +324,9 @@ export const searchRouter = createTRPCRouter({
               ...updatedFilter,
               values: updatedFilter.values?.map(v => {
                 if ('online'.toLowerCase().includes(v.toLowerCase())) {
-                  return true
+                  return 'true'
                 } else if ('offline'.toLowerCase().includes(v.toLowerCase())) {
-                  return false
+                  return 'false'
                 }
                 return v
               }),
@@ -370,7 +370,7 @@ export const searchRouter = createTRPCRouter({
               ? formatSorting(sorting)
               : [],
           concatenate_fields: [
-            ...addCommonGridConcatenates(input?.entity),
+            ...addCommonGridConcatenates(pluralize(entity)),
             ...(entity === 'device_filter_rules' || entity === 'device_nat_rules'
               ? [{
                   fields: ['ipprotocol', 'protocol'],

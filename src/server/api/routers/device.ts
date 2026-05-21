@@ -6,6 +6,7 @@ import { createAdvancedFilter } from '~/server/utils/transformAdvanceFilter';
 import Bluebird from 'bluebird'
 import { WallGuardApi } from '~/utils/wallguard-api';
 import { authorizeDevice } from '~/app/api/device/authorize_device';
+import { createRootOrm } from '~/server/lib/root-orm';
 
 const entity = 'devices';
 const { ROOT_ACCOUNT_PASSWORD = 'pl3@s3ch@ng3m3!!' } = process.env;
@@ -288,12 +289,11 @@ export const deviceRouter = createTRPCRouter({
               'device_category',
               'device_type',
               'device_name',
-              'device_os',
+              'device_operating_system',
               'is_device_authorized',
               'is_device_online',
               'address_id',
               'status',
-              'device_status'
             ],
             advance_filters: createAdvancedFilter({ code: code! }),
             order: {
@@ -459,6 +459,9 @@ export const deviceRouter = createTRPCRouter({
               status: 'Active',
               device_id,
               device_code,
+              token: Array.from({ length: 16 }, () =>
+                Math.floor(Math.random() * 16).toString(16)
+              ).join('')
             },
             pluck: ['id', 'token'],
           },
@@ -518,10 +521,11 @@ export const deviceRouter = createTRPCRouter({
         // is_remote_access_enabled
        } = input;
 
-      const response = await ctx.dnaClient
+      const rootOrm = await createRootOrm(ctx.dnaClient);
+      
+      const response = await rootOrm
         .findAll({
           entity: 'device_instances',
-          token: ctx.token.value,
           query: {
             pluck: ['id'],
             advance_filters: createAdvancedFilter({ device_id: id, status: 'Active' }),
@@ -718,6 +722,8 @@ export const deviceRouter = createTRPCRouter({
         id = res.data[0]?.id;
       }
 
+      const rootOrm = await createRootOrm(ctx.dnaClient);
+
       const res = await Promise.all([
         ctx.dnaClient
           .findAll({
@@ -726,35 +732,19 @@ export const deviceRouter = createTRPCRouter({
             query: {
               pluck: [
                 'id',
-                'model',
                 'device_name',
                 'address_id',
                 'created_date',
                 'updated_date',
                 'categories',
-                'host_name',
                 'device_version',
                 'updated_time',
                 'created_time',
-                'ip_address',
                 'device_type',
                 'device_category'
               ],
               pluck_object: {
-                device: [
-                  'id',
-                  'model',
-                  'instance_name',
-                  'address_id',
-                  'created_date',
-                  'updated_date',
-                  'categories',
-                  'host_name',
-                  'device_version',
-                  'ip_address',
-                ],
-                addresses: ['id', 'country', 'city', 'state'],
-                device_heartbeats: ['id', 'device_id', 'timestamp'],
+
               },
               advance_filters: createAdvancedFilter({ id: id! }),
               order: {
@@ -766,10 +756,9 @@ export const deviceRouter = createTRPCRouter({
           })
           .execute(),
 
-        await ctx.dnaClient
+        await rootOrm
           .findAll({
             entity: 'device_groups',
-            token: ctx.token.value,
             query: {
               pluck_object: {
                 device_group_settings: ['id', 'name'],
@@ -803,10 +792,9 @@ export const deviceRouter = createTRPCRouter({
       const fetchConfiguration = await Bluebird.map(
         device?.data,
         async (item: Record<string, any>) => {
-          const configurations = await ctx.dnaClient
+          const configurations = await rootOrm
             .findAll({
               entity: 'device_configurations',
-              token: ctx.token.value,
               query: {
                 advance_filters: createAdvancedFilter({ device_id: item?.id }),
                 pluck: [
@@ -843,10 +831,9 @@ export const deviceRouter = createTRPCRouter({
         async (item) => {
           if (!item) return null; // Handle case where there is no configuration
 
-          const interfaces = await ctx.dnaClient
+          const interfaces = await rootOrm
             .findAll({
               entity: 'device_interfaces',
-              token: ctx.token.value,
               query: {
                 advance_filters: createAdvancedFilter({
                   device_configuration_id: item.id,
@@ -885,7 +872,13 @@ export const deviceRouter = createTRPCRouter({
 
           return {
             configuration: item,
-            interfaces: interfaces.data,
+            interfaces: interfaces.data.map(e => {
+              return {
+                ...e,
+                device_interfaces: e,
+                device_interface_addresses: e?.device_interface_addresses?.[0] || {},
+              }
+            }),
           };
         },
       );

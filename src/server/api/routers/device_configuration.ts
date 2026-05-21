@@ -10,6 +10,7 @@ import {
 
 import { createDefineRoutes } from '../baseCrud'
 import { createAdvancedFilter } from '~/server/utils/transformAdvanceFilter'
+import { createRootOrm } from '~/server/lib/root-orm';
 const entity = 'device_configurations'
 export const deviceConfigurationRouter = createTRPCRouter({
   ...createDefineRoutes(entity),
@@ -21,10 +22,12 @@ export const deviceConfigurationRouter = createTRPCRouter({
     )
 
     .query(async ({ input, ctx }) => {
-      const res = await ctx.dnaClient
+
+      const rootOrm = await createRootOrm(ctx.dnaClient);
+
+      const res = await rootOrm
         .findAll({
           entity,
-          token: ctx.token.value,
           query: {
             pluck_object: {
               device_configurations: [
@@ -96,10 +99,12 @@ export const deviceConfigurationRouter = createTRPCRouter({
     )
     .query(async ({ input, ctx }) => {
       const { code } = input
-      const res = await ctx.dnaClient
+
+      const rootOrm = await createRootOrm(ctx.dnaClient);
+
+      const res = await rootOrm
         .findAll({
           entity: 'devices',
-          token: ctx.token.value,
           query: {
             pluck: ['id', 'code', 'updated_date', 'updated_time', 'updated_by', 'created_date', 'created_time', 'created_by'],
             pluck_object: {
@@ -215,10 +220,12 @@ export const deviceConfigurationRouter = createTRPCRouter({
     }),
   )
   .query(async ({ input, ctx }) => {
-    const res = await ctx.dnaClient
+
+    const rootOrm = await createRootOrm(ctx.dnaClient);
+    
+    const res = await rootOrm
       .findAll({
         entity,
-        token: ctx.token.value,
         query: {
 
           pluck_object: {
@@ -300,13 +307,12 @@ export const deviceConfigurationRouter = createTRPCRouter({
         return []
       }
 
-      const deviceInterfaces = await ctx.dnaClient
+      const deviceInterfaces = await rootOrm
         .findAll({
           entity: 'device_interfaces',
-          token: ctx.token.value,
           query: {
             // @ts-expect-error - No type yet
-            advance_filters: createAdvancedFilter({ device_configuration_id: res.data[0].device_configurations.id }),
+            advance_filters: createAdvancedFilter({ device_configuration_id: res.data[0].id }),
             pluck: [
               'name',
               "device",

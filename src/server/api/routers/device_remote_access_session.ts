@@ -10,6 +10,7 @@ import { formatString } from '~/server/utils/formatString'
 import { addCommonGridJoins, addCommonGridPluckObject } from '~/server/utils/queryBuilder'
 import { createAdvancedFilter } from '~/server/utils/transformAdvanceFilter'
 import ZodItems from '~/server/zodSchema/grid/items'
+import { createRootOrm } from '~/server/lib/root-orm';
 
 const entity = 'device_remote_access_sessions'
 const remote_type = ['console', 'shell']
@@ -82,10 +83,11 @@ export const deviceRemoteAccessSessionRouter = createTRPCRouter({
         realDeviceId = device?.data?.[0]?.id || ''
       }
 
-      const res = await ctx.dnaClient
+      const rootOrm = await createRootOrm(ctx.dnaClient);
+      
+      const res = await rootOrm
         .findAll({
           entity: 'device_tunnels',
-          token: ctx.token.value,
           query: {
             pluck: ['id', 'service_id', 'tunnel_type', 'status', 'device_id'],
             advance_filters: createAdvancedFilter({
@@ -131,10 +133,11 @@ export const deviceRemoteAccessSessionRouter = createTRPCRouter({
         realDeviceId = device?.data?.[0]?.id || ''
       }
 
-      const res = await ctx.dnaClient
+      const rootOrm = await createRootOrm(ctx.dnaClient);
+
+      const res = await rootOrm
         .findAll({
           entity: 'device_remote_access_sessions',
-          token: ctx.token.value,
           query: {
             pluck: ['id', 'code', 'remote_access_session', 'remote_access_type'],
             advance_filters: createAdvancedFilter({ device_id: realDeviceId }),
@@ -185,10 +188,11 @@ export const deviceRemoteAccessSessionRouter = createTRPCRouter({
         realDeviceId = device?.data?.[0]?.id || ''
       }
 
-      const res = await ctx.dnaClient
+      const rootOrm = await createRootOrm(ctx.dnaClient);
+
+      const res = await rootOrm
         .findAll({
           entity: 'device_services',
-          token: ctx.token.value,
           query: {
             pluck: ['id', 'address', 'port', 'protocol', 'program'],
             advance_filters: createAdvancedFilter({ device_id: realDeviceId, status: 'Active' }),
@@ -349,9 +353,10 @@ export const deviceRemoteAccessSessionRouter = createTRPCRouter({
             : EOrderDirection.ASC
           : EOrderDirection.DESC
 
-      const query = ctx.dnaClient.findAll({
+      const rootOrm = await createRootOrm(ctx.dnaClient);
+
+      const query = rootOrm.findAll({
         entity: baseEntity,
-        token: ctx.token.value,
         query: {
           track_total_records: true,
           pluck: input.pluck,
@@ -442,10 +447,10 @@ export const deviceRemoteAccessSessionRouter = createTRPCRouter({
                 field: 'service_id',
               },
             },
-          })
+          });
       }
 
-      addCommonGridJoins(query, baseEntity)
+      addCommonGridJoins(query, baseEntity);
 
       if (input.grouping?.length) {
         query.groupBy({
@@ -456,11 +461,11 @@ export const deviceRemoteAccessSessionRouter = createTRPCRouter({
         });
       }
 
-      const { total_count: totalCount = 1, data: items }
-      = await query.execute()
+      const { total_count: totalCount = 1, data: items } =
+      await query.execute()
       
       // Calculate total number of pages
-      const totalPages = Math.ceil(totalCount / limit)
+      const totalPages = Math.ceil(totalCount / limit);
 
       if (input.grouping?.length) {
         return {
@@ -474,7 +479,7 @@ export const deviceRemoteAccessSessionRouter = createTRPCRouter({
       console.log('$ [deviceRemoteAccessSessionRouter] items', items);
 
       const formatted_items = items?.map((item: Record<string, any>) => {
-        const {
+        let {
           [baseEntity]: entity_data,
           created_by,
           devices,
@@ -482,6 +487,15 @@ export const deviceRemoteAccessSessionRouter = createTRPCRouter({
           updated_by,
           ...rest
         } = item
+
+        if (!entity_data)
+          entity_data = rest
+
+        if (Array.isArray(device_services))
+          device_services = device_services[0]
+
+        if (Array.isArray(devices))
+          devices = devices[0]
 
         const resolvedTunnelType = entity_data?.tunnel_type
 
@@ -520,10 +534,11 @@ export const deviceRemoteAccessSessionRouter = createTRPCRouter({
       const token = ctx.token.value
       const { device_id, remote_access_type, device_service_id } = input
 
-      const response = await ctx.dnaClient
+      const rootOrm = await createRootOrm(ctx.dnaClient);
+      
+      const response = await rootOrm
         .findAll({
           entity: 'device_instances',
-          token: ctx.token.value,
           query: {
             pluck: ['id'],
             advance_filters: createAdvancedFilter({ device_id, status: 'Active' }),

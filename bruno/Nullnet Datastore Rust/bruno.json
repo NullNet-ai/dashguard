@@ -1,0 +1,9 @@
+{
+  "version": "1",
+  "name": "Nullnet Datastore Rust",
+  "type": "collection",
+  "ignore": [
+    "node_modules",
+    ".git"
+  ]
+}

@@ -11,6 +11,7 @@ import ZodItems from '~/server/zodSchema/grid/items'
 
 import { createDefineRoutes } from '../baseCrud'
 import { formatSorting } from '~/server/utils/formatSorting';
+import { createRootOrm } from '~/server/lib/root-orm';
 const entity = 'device_rules'
 export const deviceNatRuleRouter = createTRPCRouter({
   ...createDefineRoutes(entity),
@@ -31,9 +32,10 @@ export const deviceNatRuleRouter = createTRPCRouter({
       } = input
       const _sorting = sorting // ?.filter(({id}: {id: string}) => ['created_by', 'updated_by'].includes(id))
 
-      const device_configuration = await ctx.dnaClient.findAll({
+      const rootOrm = await createRootOrm(ctx.dnaClient);
+
+      const device_configuration = await rootOrm.findAll({
         entity: 'device_configurations',
-        token: ctx.token.value,
         query: {
           pluck: ['id', 'created_date', 'timestamp'],
           advance_filters: [
@@ -76,15 +78,11 @@ export const deviceNatRuleRouter = createTRPCRouter({
         }
       }
 
-      const device_rules = await ctx.dnaClient.findAll({
+      const device_rules = rootOrm.findAll({
         entity: 'device_nat_rules',
-        token: ctx.token.value,
         query: {
           track_total_records: true,
           pluck,
-          pluck_object:{
-            device_rules: pluck
-          },
           advance_filters: _advance_filters?.length
             ? [
               ..._advance_filters,

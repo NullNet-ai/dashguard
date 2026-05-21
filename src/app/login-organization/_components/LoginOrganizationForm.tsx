@@ -95,7 +95,7 @@ const LoginOrganizationForm = ({ defaultValues, selectOptions }: any) => {
             </Button>
             <Button
               className="flex h-auto w-full items-center justify-center gap-3 rounded py-1.5 text-md font-semibold shadow-sm"
-              data-test-id="login-submit-btn"
+              data-test-id="login-submit-button"
               loading={isSubmitting}
               type="submit"
               variant={'default'}
