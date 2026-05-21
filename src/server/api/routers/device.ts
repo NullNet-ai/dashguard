@@ -876,7 +876,8 @@ export const deviceRouter = createTRPCRouter({
               return {
                 ...e,
                 device_interfaces: e,
-                  e?.device_interface_addresses?.[0] || {},
+                device_interface_addresses: e?.device_interface_addresses?.[0] || {},
+              }
             }),
           };
         },

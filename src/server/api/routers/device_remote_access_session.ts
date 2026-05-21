@@ -462,7 +462,7 @@ export const deviceRemoteAccessSessionRouter = createTRPCRouter({
       }
 
       const { total_count: totalCount = 1, data: items } =
-      = await query.execute()
+      await query.execute()
       
       // Calculate total number of pages
       const totalPages = Math.ceil(totalCount / limit);
