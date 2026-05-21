@@ -872,6 +872,7 @@ export const deviceRouter = createTRPCRouter({
 
           return {
             configuration: item,
+            // @ts-expect-error - No type yet
             interfaces: interfaces.data.map(e => {
               return {
                 ...e,

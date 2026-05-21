@@ -32,9 +32,7 @@ export default function SelectExistingRemoteAccess(props: IFormProps) {
     try {
       const { remote_access_id } = data
       let remote_access = remote_accesses?.find((item: Record<string, any>) => item.value === remote_access_id) || {}
-      // @ts-expect-error - No type yet
       const remote_access_type = remote_access?.remote_access_type || ''
-      // @ts-expect-error - No type yet
       const device_id = record_data?.id || remote_access?.device_id || ''
 
       const res = await createUpdate.mutateAsync({

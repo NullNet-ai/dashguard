@@ -123,7 +123,6 @@ export const deviceConfigurationRouter = createTRPCRouter({
                 code,
               ],
             }],
-            // @ts-expect-error - order is not defined
             order: {
               by_field: 'created_date',
               by_direction: EOrderDirection.DESC,
@@ -311,7 +310,6 @@ export const deviceConfigurationRouter = createTRPCRouter({
         .findAll({
           entity: 'device_interfaces',
           query: {
-            // @ts-expect-error - No type yet
             advance_filters: createAdvancedFilter({ device_configuration_id: res.data[0].id }),
             pluck: [
               'name',
@@ -336,7 +334,6 @@ export const deviceConfigurationRouter = createTRPCRouter({
         return []
       }
 
-      // @ts-expect-error - No type yet
       const drpdwn_optn = data.map((item: {
         name: string
         device: string

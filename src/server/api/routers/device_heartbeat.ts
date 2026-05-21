@@ -90,6 +90,7 @@ export const deviceHeartbeatsRouter = createTRPCRouter({
     }).execute()
 
     const time_status = hour_range.map((hour) => {
+      // @ts-expect-error - No type yet
       const found = res.data?.find(r => r.bucket === hour)
       return { hour: found?.bucket || hour, heartbeats: found?.count ? 100 : 0 }
     })

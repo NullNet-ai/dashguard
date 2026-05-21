@@ -1015,7 +1015,9 @@ export const accountRouter = createTRPCRouter({
               contact_emails: ['email', 'is_primary'],
               contact_phone_numbers: [
                 'raw_phone_number',
+                // @ts-expect-error - No type yet
                 'iso_code',
+                // @ts-expect-error - No type yet
                 'country_code',
                 'is_primary',
               ],

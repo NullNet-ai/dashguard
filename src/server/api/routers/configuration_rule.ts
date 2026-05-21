@@ -74,6 +74,7 @@ export const deviceRuleRouter = createTRPCRouter({
         if (totalCount === null) totalCount = total_count ?? 0
         const pageInterfaces = (data ?? [] as Record<string, unknown>[])
           .map((r: Record<string, unknown>) => r.interface)
+          // @ts-expect-error - No type yet
           .filter((networkInterface): networkInterface is string => typeof networkInterface === 'string')
         allInterfaces = [...allInterfaces, ...pageInterfaces]
         startsAt += PAGE_SIZE
@@ -217,6 +218,7 @@ export const deviceRuleRouter = createTRPCRouter({
         };
       }
 
+      // @ts-expect-error - No type yet
       const groupedItems = items.reduce((acc, curr) => {
         if (curr.interface === 'wan') {
           return {

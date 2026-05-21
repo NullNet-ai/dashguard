@@ -224,6 +224,7 @@ export default function RemoteAccessDetails(props: IFormProps) {
     if (!formRef.current) return
     if (!Array.isArray(filteredDeviceServices) || filteredDeviceServices.length !== 1) return
 
+    // @ts-expect-error - No type yet
     const onlyOptionValue = filteredDeviceServices?.[0]?.value
     if (!onlyOptionValue) return
 
@@ -345,6 +346,7 @@ export default function RemoteAccessDetails(props: IFormProps) {
             value: 'ui',
           },
         ],
+        // @ts-expect-error - No type yet
         device_service_id: filteredDeviceServices,
       }}
       formSaveIcon={(
