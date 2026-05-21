@@ -116,7 +116,7 @@ export default function AppSideBar(config: ISideBarProps) {
   const mobileView = (open && isMobile) || openMobile || (open && !openMobile)
 
   if (screenType !== screen && screen) {
-    Cookies.set('screen-type', `${screen}`, { expires: 7 })
+    Cookies.set('screen-type', `${screen}`, { expires: 7 });
   }
 
   const sidebarIsOpen = isMobile ? openMobile : open;
@@ -279,33 +279,21 @@ export default function AppSideBar(config: ISideBarProps) {
             <SidebarMenuItem>
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
-                  {open
-                    ? (
-                      <div
-                        className={cn(`${open ? 'w-full border-b opacity-100 py-2' : 'h-0 w-0 opacity-0'} `)}
-                      >
-                        <SidebarMenuButton
-                          data-test-id="sdnavmenu-ftr-btn"
-                          size="lg"
-                          className="h-12 w-full p-1 data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground"
-                        >
-                          {footerComponent}
-                          <ChevronUpDownIcon className="ml-auto size-4" />
-                        </SidebarMenuButton>
-                      </div>
-                    )
-                    : (
-                      <div
-                        className={cn(
-                          `cursor-pointer ${!open ? 'w-full opacity-100 flex' : 'h-0 w-0 opacity-0'}`,
-                          {
-                            'justify-center': !sidebarIsOpen
-                          }
-                        )}
-                      >
-                        {footerComponent}
-                      </div>
+                  <SidebarMenuButton
+                    data-test-id="sdnavmenu-ftr-btn"
+                    size="lg"
+                    className={cn(
+                      'h-12 p-1 data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground',
+                      open
+                        ? 'w-full border-b py-2 opacity-100'
+                        : cn('flex w-full cursor-pointer opacity-100', {
+                            'justify-center': !sidebarIsOpen,
+                          }),
                     )}
+                  >
+                    {footerComponent}
+                    {open && <ChevronUpDownIcon className="ml-auto size-4" />}
+                  </SidebarMenuButton>
                 </DropdownMenuTrigger>
                 <Button
                   variant="ghost"
