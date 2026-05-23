@@ -153,6 +153,7 @@ export const deviceHeartbeatsRouter = createTRPCRouter({
     const deviceHeartbeats = await rootOrm.aggregate({
       query: {
         entity: 'device_heartbeats',
+        no_caching: true,
         aggregations: [
           {
             aggregation: 'COUNT',

@@ -277,6 +277,7 @@ export const deviceRouter = createTRPCRouter({
       const response = await ctx.dnaClient
         .findAll({
           entity: 'devices',
+          no_caching: true,
           token: ctx.token.value,
           query: {
             pluck: [
