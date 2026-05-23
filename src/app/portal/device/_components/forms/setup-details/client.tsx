@@ -120,8 +120,9 @@ const Step = ({ number, title, isLast = false, children, color = 'slate' }: Step
   );
 };
 
-const SetupDetails: React.FC<{ identifier: string }> = ({
+const SetupDetails: React.FC<{ identifier: string; remoteAccessUrl?: string }> = ({
   identifier,
+  remoteAccessUrl,
 }) => {
 
   const [installationKey, setInstallationKey] = React.useState('');
@@ -206,7 +207,7 @@ const SetupDetails: React.FC<{ identifier: string }> = ({
 
   const joinCode = installationKey || '<installation-code>';
   const wallguardDownloadUrl = version?.latest_version || '<wallguard_download_url>';
-  const controlChannelUrl = toControlChannelUrl(process.env.NEXT_PUBLIC_REMOTE_ACCESS_URL);
+  const controlChannelUrl = toControlChannelUrl(remoteAccessUrl);
 
   const steps = React.useMemo<StepData[]>(
     () => [

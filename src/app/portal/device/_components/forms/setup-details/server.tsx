@@ -9,6 +9,7 @@ const FormServerFetch = async () => {
   return (
     <SetupDetails
       identifier={identifier!}
+      remoteAccessUrl={process.env.REMOTE_ACCESS_URL}
     />
   );
 };
