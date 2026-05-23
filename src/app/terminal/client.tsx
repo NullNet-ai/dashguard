@@ -204,10 +204,11 @@ export default function WebTerminal() {
 
   
   const lastHeartbeatTimestamp = lastHeartbeat?.data?.[0]?.bucket
-  const isDeviceOfflineOrMissing =
-    Boolean(deviceId) &&
-    !isLastHeartbeatLoading &&
-    !isHeartbeatWithinSeconds(lastHeartbeatTimestamp, 60)
+  // const isDeviceOfflineOrMissing =
+  //   Boolean(deviceId) &&
+  //   !isLastHeartbeatLoading &&
+  //   !isHeartbeatWithinSeconds(lastHeartbeatTimestamp, 60)
+  const isDeviceOfflineOrMissing = false
 
   const isSessionTerminated =
     String(remoteAccessSessionStatus?.session_status || '').toLowerCase() === 'terminated'
