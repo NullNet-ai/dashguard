@@ -232,6 +232,7 @@ export const gridRouter = createTRPCRouter({
 
       const query = ctx.dnaClient.findAll({
         entity,
+        no_caching: true,
         token: ctx.token.value,
         query: {
           pluck: input.pluck,
