@@ -95,6 +95,7 @@ const InteractiveGraph = ({
       time_range: getLastTimeStamp({count: 1, unit: 'minute', _now: new Date(Date.now() - 10_000), add_remaining_time: true }) as string[],
       interface_names: interfaces?.map((item: any) => item?.value),
     })
+    console.log("🚀 ~ InteractiveGraph ~ res:", res)
     
     
     setPacketsIP((prev) => {

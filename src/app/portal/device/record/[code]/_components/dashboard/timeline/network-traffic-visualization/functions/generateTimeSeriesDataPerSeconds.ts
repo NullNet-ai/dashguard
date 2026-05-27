@@ -105,7 +105,7 @@ export function generateTimeSeriesData(
   // Build a map for fast lookup
   const bucketMap: Record<string, any> = {};
   sampleData.forEach((item: any) => {
-    bucketMap[item.bucket] = item.bandwidth;
+    bucketMap[item.bucket.replace('T', ' ')] = item.bandwidth;
   });
 
   // Calculate number of intervals (inclusive)

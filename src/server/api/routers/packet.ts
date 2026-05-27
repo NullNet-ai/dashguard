@@ -307,7 +307,7 @@ export const packetRouter = createTRPCRouter({
     const timestamps = getAllTimestampsBetweenDates(_start, _end, unit, value).slice(-60)
 
     const result = timestamps.map((item) => {
-      const data = res?.data.find((element: any) => element.bucket?.includes(item))
+      const data = res?.data.find((element: any) => element.bucket?.replace('T', ' ')?.includes(item))
       if (data) {
         const bandwidth = typeof data.bandwidth === 'string' ? parseInt(data.bandwidth, 10) : (data.bandwidth ?? 0)
         return { bucket: item, bandwidth, bandwidth_formatted: bandwidth.toLocaleString('en-US'), packet: data.packet }
@@ -375,7 +375,7 @@ export const packetRouter = createTRPCRouter({
             ],
             joins: [],
             bucket_size,
-            // limit: 2,
+            limit: 1,
             order: {
               order_by: 'bucket',
               order_direction: EOrderDirection.DESC,
@@ -407,7 +407,8 @@ export const packetRouter = createTRPCRouter({
           
 
           const same_val = val?.find((element: any) => {
-            return element.bucket === item})
+            return element.bucket.replace('T', ' ') === item
+          })
           return {
             ...acc,
             [key]: same_val?.bandwidth || 0,
