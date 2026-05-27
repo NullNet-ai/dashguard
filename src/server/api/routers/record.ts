@@ -215,13 +215,26 @@ export const recordRouter = createTRPCRouter({
 
     const accountOrganizations = accounts.data?.reduce(
       (orgs: any, account: any) => {
-        const {
+        let {
           account_organizations,
           contacts,
           organizations,
           user_roles,
           external_contacts,
         } = account ?? {};
+
+        if (Array.isArray(contacts)) {
+          contacts = contacts[0];
+        }
+
+        if (Array.isArray(organizations)) {
+          organizations = organizations[0];
+        }
+
+        if (Array.isArray(user_roles)) {
+          user_roles = user_roles[0];
+        }
+        
         const firstname = `${contacts?.first_name || external_contacts?.first_name}`;
         const lastname = `${contacts?.last_name || external_contacts?.last_name}`;
         if (organizations?.id === response?.organization_id) {
