@@ -21,7 +21,7 @@ const CodeRow = ({
   variant = 'slate',
 }: {
   value: string;
-  variant?: 'amber' | 'blue' | 'green' | 'slate' | 'purple';
+   variant?: 'amber' | 'blue' | 'green' | 'slate' | 'purple' | 'rose' | 'teal' | 'orange' | 'indigo' | 'cyan';
 }) => {
   const styles = React.useMemo(() => {
     switch (variant) {
@@ -33,6 +33,16 @@ const CodeRow = ({
         return 'border-emerald-200 bg-emerald-50 text-emerald-900';
       case 'purple':
         return 'border-violet-200 bg-violet-50 text-violet-900';
+      case 'rose':
+        return 'border-rose-200 bg-rose-50 text-rose-900';
+      case 'teal':
+        return 'border-teal-200 bg-teal-50 text-teal-900';
+      case 'orange':
+        return 'border-orange-200 bg-orange-50 text-orange-900';
+      case 'indigo':
+        return 'border-indigo-200 bg-indigo-50 text-indigo-900';
+      case 'cyan':
+        return 'border-cyan-200 bg-cyan-50 text-cyan-900';
       case 'slate':
       default:
         return 'border-slate-200 bg-slate-50 text-slate-900';
@@ -77,7 +87,7 @@ interface StepProps {
   number: number;
   title: string;
   isLast?: boolean;
-  color?: 'amber' | 'blue' | 'green' | 'slate' | 'purple';
+  color?: 'amber' | 'blue' | 'green' | 'slate' | 'purple' | 'rose' | 'teal' | 'orange' | 'indigo' | 'cyan';
   children: React.ReactNode;
 }
 
@@ -98,6 +108,16 @@ const Step = ({ number, title, isLast = false, children, color = 'slate' }: Step
         return { badgeClasses: 'bg-emerald-200 text-slate-700 ring-emerald-300/50', lineClasses: 'bg-emerald-300/30' };
       case 'purple':
         return { badgeClasses: 'bg-violet-200 text-slate-700 ring-violet-300/50', lineClasses: 'bg-violet-300/30' };
+      case 'rose':
+        return { badgeClasses: 'bg-rose-200 text-slate-700 ring-rose-300/50', lineClasses: 'bg-rose-300/30' };
+      case 'teal':
+        return { badgeClasses: 'bg-teal-200 text-slate-700 ring-teal-300/50', lineClasses: 'bg-teal-300/30' };
+      case 'orange':
+        return { badgeClasses: 'bg-orange-200 text-slate-700 ring-orange-300/50', lineClasses: 'bg-orange-300/30' };
+      case 'indigo':
+        return { badgeClasses: 'bg-indigo-200 text-slate-700 ring-indigo-300/50', lineClasses: 'bg-indigo-300/30' };
+      case 'cyan':
+        return { badgeClasses: 'bg-cyan-200 text-slate-700 ring-cyan-300/50', lineClasses: 'bg-cyan-300/30' };
       case 'slate':
       default:
         return { badgeClasses: 'bg-slate-200 text-slate-700 ring-slate-300/50', lineClasses: 'bg-slate-300/30' };
@@ -119,6 +139,205 @@ const Step = ({ number, title, isLast = false, children, color = 'slate' }: Step
     </div>
   );
 };
+
+function getSteps(
+  deviceType: string,
+  downloadCommand: string,
+  controlChannelUrl: string,
+  joinCode: string,
+  versionStr: string,
+): StepData[] {
+  const type = deviceType.toLowerCase();
+
+  if (type === 'linux') {
+    return [
+      {
+        title: 'Download the package',
+        color: 'amber',
+        jsx: <CodeRow variant="amber" value={downloadCommand} />,
+      },
+      {
+        title: 'Install the package',
+        color: 'blue',
+        jsx: (
+          <CodeRow
+            variant="blue"
+            value={`sudo apt install ./wallguard_${versionStr}_amd64.deb`}
+          />
+        ),
+      },
+      {
+        title: 'Start the WallGuard Agent',
+        color: 'green',
+        jsx: (
+          <CodeRow
+            variant="green"
+            value={`sudo wallguard-cli start --control-channel-url=${controlChannelUrl} --platform=generic`}
+          />
+        ),
+      },
+      {
+        title: 'Verify the installation',
+        color: 'teal',
+        jsx: <CodeRow variant="teal" value="sudo wallguard-cli version" />,
+      },
+      {
+        title: 'Complete the setup',
+        color: 'purple',
+        jsx: (
+          <CodeRow
+            variant="purple"
+            value={`sudo wallguard-cli join ${joinCode}`}
+          />
+        ),
+      },
+    ];
+  }
+
+  if (type === 'windows') {
+    return [
+      {
+        title: 'Download NPCAP (Powershell)',
+        color: 'amber',
+        jsx: (
+          <CodeRow
+            variant="amber"
+            value={`Invoke-WebRequest -Uri "https://npcap.com/dist/npcap-1.80.exe" -OutFile "C:\\Users\\$env:USERNAME\\Downloads\\npcap-installer.exe" -UseBasicParsing`}
+          />
+        ),
+      },
+      {
+        title: 'Install NPCAP (Powershell)',
+        color: 'orange',
+        jsx: (
+          <CodeRow
+            variant="orange"
+            value={`Start-Process "C:\\Users\\$env:USERNAME\\Downloads\\npcap-installer.exe" -Wait`}
+          />
+        ),
+      },
+      {
+        title: 'Download VC Runtime (Powershell)',
+        color: 'rose',
+        jsx: (
+          <CodeRow
+            variant="rose"
+            value={`Invoke-WebRequest -Uri "https://aka.ms/vs/17/release/vc_redist.x64.exe" -OutFile "C:\\Users\\$env:USERNAME\\Downloads\\vc_redist.x64.exe" -UseBasicParsing`}
+          />
+        ),
+      },
+      {
+        title: 'Install VC Runtime (Powershell)',
+        color: 'indigo',
+        jsx: (
+          <CodeRow
+            variant="indigo"
+            value={`Start-Process "C:\\Users\\$env:USERNAME\\Downloads\\vc_redist.x64.exe" -ArgumentList "/install /quiet /norestart" -Wait`}
+          />
+        ),
+      },
+      {
+        title: 'Download the package (Powershell)',
+        color: 'cyan',
+        jsx: <CodeRow variant="cyan" value={downloadCommand} />,
+      },
+      {
+        title: 'Install the package (Powershell)',
+        color: 'blue',
+        jsx: (
+          <CodeRow
+            variant="blue"
+            value={`Start-Process msiexec.exe -ArgumentList "/i \`"$env:USERPROFILE\\Downloads\\wallguard-${versionStr}-x86_64.msi\`"" -Wait`}
+          />
+        ),
+      },
+      {
+        title: 'Start the WallGuard Agent (CMD [Run as Administrator])',
+        color: 'green',
+        jsx: (
+          <CodeRow
+            variant="green"
+            value={`wallguard-cli start --control-channel-url=${controlChannelUrl} --platform=generic`}
+          />
+        ),
+      },
+      {
+        title: 'Verify the installation (CMD [Run as Administrator])',
+        color: 'teal',
+        jsx: <CodeRow variant="teal" value="wallguard-cli version" />,
+      },
+      {
+        title: 'Complete the setup (CMD [Run as Administrator])',
+        color: 'purple',
+        jsx: (
+          <CodeRow variant="purple" value={`wallguard-cli join ${joinCode}`} />
+        ),
+      },
+    ];
+  }
+
+  return [
+    {
+      title: 'Download the package',
+      color: 'amber',
+      jsx: <CodeRow variant="amber" value={downloadCommand} />,
+    },
+    {
+      title: 'Install the package',
+      color: 'blue',
+      jsx: <CodeRow variant="blue" value="pkg add wallguard.pkg" />,
+    },
+    {
+      title: 'Start the WallGuard Agent',
+      color: 'green',
+      jsx: (
+        <CodeRow
+          variant="green"
+          value={`wallguard-cli start --control-channel-url=${controlChannelUrl} --platform=pfsense`}
+        />
+      ),
+    },
+    {
+      title: 'Verify the installation',
+      color: 'teal',
+      jsx: <CodeRow variant="teal" value="wallguard-cli version" />,
+    },
+    {
+      title: 'Complete the setup',
+      color: 'purple',
+      jsx: (
+        <CodeRow variant="purple" value={`wallguard-cli join ${joinCode}`} />
+      ),
+    },
+  ];
+}
+
+function getDeviceTypeText(deviceType: string): {
+  subtitle: string;
+  shellHint: string;
+} {
+  switch (deviceType.toLowerCase()) {
+    case 'linux':
+      return {
+        subtitle:
+          'Follow these steps to install and set up the WallGuard agent on your Linux system.',
+        shellHint: 'Run these commands in your Linux terminal',
+      };
+    case 'windows':
+      return {
+        subtitle:
+          'Follow these steps to install and set up the WallGuard agent on your Windows system.',
+        shellHint:
+          'Run these commands in PowerShell (and CMD as Administrator for step 7)',
+      };
+    default:
+      return {
+        subtitle:
+          'Follow these steps to install and set up the WallGuard agent on your pfSense system.',
+        shellHint: 'Run these commands in your pfSense SSH shell',
+      };
+  }
+}
 
 const SetupDetails: React.FC<{ identifier: string; remoteAccessUrl?: string }> = ({
   identifier,
@@ -206,73 +425,40 @@ const SetupDetails: React.FC<{ identifier: string; remoteAccessUrl?: string }> =
   }, [device?.device_name && device?.device_type]);
 
   const joinCode = installationKey || '<installation-code>';
-  const wallguardDownloadUrl = version?.latest_version || '<wallguard_download_url>';
+  const versionStr = version?.latest_version ?? '';
+  // @ts-expect-error - No type yet
+  const deviceType = (device?.device_type?.trim() ?? '') as string;
+  let packageName: string;
+  if (deviceType.toLowerCase() === 'pfsense') {
+    packageName = `wallguard-${versionStr}.pkg`;
+  } else if (deviceType.toLowerCase() === 'linux') {
+    packageName = `wallguard-${versionStr}_amd64.deb`;
+  } else if (deviceType.toLowerCase() === 'windows') {
+    packageName = `wallguard-${versionStr}-x86_64.msi`;
+  } else {
+    packageName = versionStr ? `wallguard-${versionStr}.pkg` : '';
+  }
+  const wallguardDownloadUrl =
+    versionStr && packageName
+      ? `https://github.com/NullNet-ai/wallguard/releases/download/v${versionStr}/${packageName}`
+      : '';
+  const isWindows = deviceType.toLowerCase() === 'windows';
+  const downloadCommand = isWindows
+    ? `Invoke-WebRequest -Uri ${wallguardDownloadUrl} -OutFile "$env:USERPROFILE\\Downloads\\wallguard-${versionStr}-x86_64.msi" -UseBasicParsing`
+    : `curl -o wallguard.pkg -L ${wallguardDownloadUrl}`;
   const controlChannelUrl = toControlChannelUrl(remoteAccessUrl);
+  const { subtitle, shellHint } = getDeviceTypeText(deviceType);
 
   const steps = React.useMemo<StepData[]>(
-    () => [
-      {
-        title: 'Download the package',
-        color: 'amber',
-        jsx: (
-          <>
-            <CodeRow
-              variant="amber"
-              value={`curl -o wallguard.pkg -L ${wallguardDownloadUrl}`}
-            />
-            {/* <div className="space-y-1 text-xs text-slate-500">
-              <div>Make sure the package version points to the latest available WallGuard agent.</div>
-              <div className="break-all">
-                Example value of wallguard_download_url: <a
-                  href="https://github.com/NullNet-ai/wallguard/releases/download/v0.1.8/wallguard-0.1.8.pkg"
-                  target="_blank"
-                  rel="noreferrer"
-                  className="text-slate-700 underline underline-offset-2"
-                >
-                  https://github.com/NullNet-ai/wallguard/releases/download/v0.1.8/wallguard-0.1.8.pkg
-                </a>
-              </div>
-              <div>
-                Download Releases:{' '}
-                <a
-                  href="https://github.com/NullNet-ai/wallguard/releases"
-                  target="_blank"
-                  rel="noreferrer"
-                  className="text-slate-700 underline underline-offset-2"
-                >
-                  https://github.com/NullNet-ai/wallguard/releases
-                </a>
-              </div>
-            </div> */}
-          </>
-        ),
-      },
-      { title: 'Install the package', color: 'blue', jsx: <CodeRow variant="blue" value="pkg add wallguard.pkg" /> },
-      {
-        title: 'Start the WallGuard Agent',
-        color: 'green',
-        jsx: (
-          <CodeRow
-            variant="green"
-            value={`wallguard-cli start --control-channel-url=${controlChannelUrl} --platform=pfsense`}
-          />
-        ),
-      },
-      {
-        title: 'Verify the installation',
-        color: 'slate',
-        jsx: (
-          <>
-            <CodeRow variant="slate" value="wallguard-cli version" />
-            {/* <div className="text-xs text-slate-500">
-              Example value of control_channel_url: wallguard-proxy.nullnet.dnaqa.net:50051
-            </div> */}
-          </>
-        ),
-      },
-      { title: 'Complete the setup', color: 'purple', jsx: <CodeRow variant="purple" value={`wallguard-cli join ${joinCode}`} /> },
-    ],
-    [wallguardDownloadUrl, controlChannelUrl, joinCode]
+    () =>
+      getSteps(
+        deviceType,
+        downloadCommand,
+        controlChannelUrl,
+        joinCode,
+        versionStr,
+      ),
+    [deviceType, downloadCommand, controlChannelUrl, joinCode, versionStr],
   );
 
   return (
@@ -288,11 +474,9 @@ const SetupDetails: React.FC<{ identifier: string; remoteAccessUrl?: string }> =
               Download and install the WallGuard Package on pfSense
             </div> */}
           <div className="">
-            <div className="text-sm text-slate-600">
-              Follow these steps to install and set up the WallGuard agent on your pfSense system.
-            </div>
+            <div className="text-sm text-slate-600">{subtitle}</div>
             <div className="flex items-center gap-1 text-sm text-slate-600">
-              Run these commands in your pfSense SSH shell
+              {shellHint}
               <CircleCheck size={13} fill='#7FCEAB' className='text-white'/>
             </div>
           </div>
