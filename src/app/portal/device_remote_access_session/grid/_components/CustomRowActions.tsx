@@ -12,7 +12,7 @@ export const CustomRowActions = ({ row }: { row: any }) => {
   const disconnectRemoteAccess = api.deviceRemoteAccessSession.disconnectDeviceRemoteAccess.useMutation()
   const createUpdate = api.deviceRemoteAccessSession.createUpdateDeviceRemoteAccessSessions.useMutation()
 
-  const remote_access = ['ssh', 'tty']
+  const remote_access = ['ssh', 'tty', 'rd']
 
   const handleOpenSideDrawer = async () => {
       if(remote_access?.includes(tunnel_type?.toLowerCase())) {
@@ -20,6 +20,7 @@ export const CustomRowActions = ({ row }: { row: any }) => {
         const wsUrl = {
           ssh: `wss://${remote_access_session}.${process.env.NEXT_PUBLIC_REMOTE_ACCESS_API_URL?.replace('https://', '')}/wallguard/gateway/ssh`,
           tty: `wss://${remote_access_session}.${process.env.NEXT_PUBLIC_REMOTE_ACCESS_API_URL?.replace('https://', '')}/wallguard/gateway/tty`,
+          rd: `ws://${process.env.NEXT_PUBLIC_REMOTE_ACCESS_API_IP?.replace('https://', '')}/wallguard/gateway/rd?tunnel_id=${remote_access_session}`,
         }[tunnel_type]
         const sessionKey = `terminal_session_${Date.now()}_${Math.random().toString(36)
           .substring(2, 9)}`
@@ -28,7 +29,11 @@ export const CustomRowActions = ({ row }: { row: any }) => {
         localStorage.setItem('current_terminal_session', sessionKey)
         localStorage.setItem('device_id', device_id)
         
-        window.open(`/terminal`, '_blank')
+        if (tunnel_type === 'rd') {
+          window.open(`/rd`, '_blank')
+        } else {
+          window.open(`/terminal`, '_blank')
+        }
       } else {
         window.open(`https://${remote_access_session}.${process.env.NEXT_PUBLIC_REMOTE_ACCESS_URL?.replace('https://', '')}/`, '_blank')
       }

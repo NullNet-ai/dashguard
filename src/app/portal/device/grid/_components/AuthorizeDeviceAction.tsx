@@ -79,7 +79,7 @@ export default function AuthorizeDeviceAction(
     <TooltipProvider>
       {is_device_online && (
         <Tooltip delayDuration={0}>
-          <TooltipTrigger asChild>
+          <TooltipTrigger>
             <Button
               data-test-id="device-remote-access-button"
               disabled={disabled}
