@@ -357,6 +357,7 @@ export const deviceRemoteAccessSessionRouter = createTRPCRouter({
 
       const query = rootOrm.findAll({
         entity: baseEntity,
+        no_caching: true,
         query: {
           track_total_records: true,
           pluck: input.pluck,

@@ -77,17 +77,16 @@ export default function RemoteAccessDetails(props: IFormProps) {
       return services.filter((e: any) => e.item?.protocol === 'ssh')
     } else if (remoteAccessType === 'tty') {
       return services.filter((e: any) => e.item?.protocol === 'tty')
-    }
-
-    if (remoteAccessType === 'ui') {
+    } else if (remoteAccessType === 'ui') {
       return services.filter((e: any) => {
         const protocol = e.item?.protocol
         if (protocol !== 'http' && protocol !== 'https') return false
         return true
       })
+    } else if (remoteAccessType === 'rd') {
+      return services.filter((e: any) => e.item?.protocol === 'rd');
     }
-
-    return services
+    return [];
   }, [deviceServices, remoteAccessType, uiTunnelServiceIds])
 
   const handleSave = async ({
@@ -108,13 +107,14 @@ export default function RemoteAccessDetails(props: IFormProps) {
 
         toast.success('Remote Access submitted successfully')
 
-        const remote_access = ['ssh', 'tty']
+        const remote_access = ['ssh', 'tty', 'rd'];
 
         if (remote_access?.includes(remote_access_type)) {
           const wsUrl = {
             ssh: `wss://${remote_access_session}.${process.env.NEXT_PUBLIC_REMOTE_ACCESS_API_URL?.replace('https://', '')}/wallguard/gateway/ssh`,
             tty: `wss://${remote_access_session}.${process.env.NEXT_PUBLIC_REMOTE_ACCESS_API_URL?.replace('https://', '')}/wallguard/gateway/tty`,
-          }[remote_access_type]
+            rd: `ws://${process.env.NEXT_PUBLIC_REMOTE_ACCESS_API_IP?.replace('https://', '')}/wallguard/gateway/rd?tunnel_id=${remote_access_session}`,
+          }[remote_access_type];
 
           const sessionKey = `terminal_session_${Date.now()}_${Math.random().toString(36)
             .substring(2, 9)}`
@@ -129,12 +129,12 @@ export default function RemoteAccessDetails(props: IFormProps) {
           // Set a flag in localStorage to reload the previous tab
           localStorage.setItem('reload_previous_tab', 'true');
 
-
-          window.open(`/terminal`, '_blank')
-
-          
-        }
-        else {
+          if (remote_access_type === 'rd') {
+            window.open('/rd', '_blank');
+          } else {
+            window.open(`/terminal`, '_blank');
+          }
+        } else {
           // Set a flag in localStorage to reload the previous tab
           localStorage.setItem('reload_previous_tab', 'true');
 
@@ -344,6 +344,10 @@ export default function RemoteAccessDetails(props: IFormProps) {
           {
             label: 'UI',
             value: 'ui',
+          },
+          {
+            label: 'RD',
+            value: 'rd',
           },
         ],
         // @ts-expect-error - No type yet
