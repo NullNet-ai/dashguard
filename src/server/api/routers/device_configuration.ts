@@ -310,7 +310,7 @@ export const deviceConfigurationRouter = createTRPCRouter({
         .findAll({
           entity: 'device_interfaces',
           query: {
-            advance_filters: createAdvancedFilter({ device_configuration_id: res.data[0].id }),
+            advance_filters: createAdvancedFilter({ device_configuration_id: res.data[0]?.id }),
             pluck: [
               'name',
               "device",
@@ -327,7 +327,6 @@ export const deviceConfigurationRouter = createTRPCRouter({
         .execute();
         
 
-      console.log("### ~ deviceInterfaces:", deviceInterfaces.data)
       const data = deviceInterfaces.data // res?.data?.[0]?.device_interfaces
 
       if (!data) {

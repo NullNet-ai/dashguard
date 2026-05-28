@@ -79,7 +79,7 @@ export default function AuthorizeDeviceAction(
     <TooltipProvider>
       {is_device_online && (
         <Tooltip delayDuration={0}>
-          <TooltipTrigger>
+          <TooltipTrigger asChild>
             <Button
               data-test-id="device-remote-access-button"
               disabled={disabled}
@@ -91,11 +91,11 @@ export default function AuthorizeDeviceAction(
                 className="inline-block h-4 w-4 bg-current text-success [mask-image:url('/remote_access.png')] [mask-position:center] [mask-repeat:no-repeat] [mask-size:contain]"
               />
             </Button>
-            <TooltipContent side="left">
-              <div className="text-sm">
-                <span className="text-justify">{'Remote Access'}</span>
-              </div>
-            </TooltipContent>
+            <TooltipContent side="left">                                                                                                                                                         
+              <div className="text-sm">                                                                                                                                                          
+                <span className="text-justify">{'Remote Access'}</span>                                                                                                                          
+              </div>                                                                                                                                                                             
+            </TooltipContent> 
           </TooltipTrigger>
         </Tooltip>
       )}
