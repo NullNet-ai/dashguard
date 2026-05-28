@@ -3,15 +3,19 @@ import { headers } from 'next/headers';
 import DeviceCategory from './client';
 
 const optionsByCategory: Record<string, string[]> = {
-  Firewall: ['PFSense', 'OPNSense'],
+  Firewall: ['PFSense'
+    // 'OPNSense'
+  ],
   'AppGuard Client': [
-    'ExpressJS',
-    'NextJS',
-    'Nginx',
-    'Actix',
-    'Axum',
-    'Rocket',
-    'SMTP',
+    'Linux',
+    'Windows'
+    // 'ExpressJS',
+    // 'NextJS',
+    // 'Nginx',
+    // 'Actix',
+    // 'Axum',
+    // 'Rocket',
+    // 'SMTP',
   ],
   'Load Balancer': [],
 };

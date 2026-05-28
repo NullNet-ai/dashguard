@@ -67,10 +67,10 @@ export default function DeviceCategory({ params, defaultValues }: IFormProps) {
             label: 'Firewall',
             value: 'Firewall',
           },
-          {
-            label: 'Load Balancer',
-            value: 'Load Balancer',
-          },
+          // {
+          //   label: 'Load Balancer',
+          //   value: 'Load Balancer',
+          // },
         ],
       }}
       selectOptions={{
