@@ -432,7 +432,7 @@ const SetupDetails: React.FC<{ identifier: string; remoteAccessUrl?: string }> =
   if (deviceType.toLowerCase() === 'pfsense') {
     packageName = `wallguard-${versionStr}.pkg`;
   } else if (deviceType.toLowerCase() === 'linux') {
-    packageName = `wallguard-${versionStr}_amd64.deb`;
+    packageName = `wallguard_${versionStr}_amd64.deb`;
   } else if (deviceType.toLowerCase() === 'windows') {
     packageName = `wallguard-${versionStr}-x86_64.msi`;
   } else {
