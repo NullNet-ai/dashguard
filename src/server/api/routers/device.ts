@@ -114,6 +114,7 @@ export const deviceRouter = createTRPCRouter({
         ...accountDetails,
         data: [
           {
+            devices: accountDetails.data[0],
             ...accountDetails?.data?.[0],
             account_organizations: {
               ...accountDetails?.data?.[0]?.account_organizations,
