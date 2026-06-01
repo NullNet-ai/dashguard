@@ -20,7 +20,7 @@ import {
 import { createDraftDevice } from '../actions/createDeviceDraft';
 import { useToast } from '~/context/ToastProvider';
 
-type StepColor = 'amber' | 'green' | 'blue' | 'slate';
+type StepColor = 'amber' | 'green' | 'blue' | 'slate' | 'purple';
 
 const InstallStep = ({
   number,
@@ -51,6 +51,11 @@ const InstallStep = ({
         return {
           badgeClasses: 'bg-blue-200 text-slate-700 ring-blue-300/50',
           lineClasses: 'bg-blue-300/30',
+        };
+      case 'purple':
+        return {
+          badgeClasses: 'bg-purple-200 text-slate-700 ring-purple-300/50',
+          lineClasses: 'bg-purple-300/30',
         };
       default:
         return {
@@ -106,6 +111,8 @@ const CodeSnippet = ({
         return 'border-emerald-200 bg-emerald-50 text-emerald-900';
       case 'blue':
         return 'border-blue-200 bg-blue-50 text-blue-900';
+      case 'purple':
+        return 'border-purple-200 bg-purple-50 text-purple-900';
       default:
         return 'border-slate-200 bg-slate-50 text-slate-900';
     }
@@ -189,9 +196,10 @@ const CustomCreateButton = ({ entity }: { entity: string }) => {
     setTimeout(() => setCopiedKey(null), 2000);
   };
 
-  const freebsdCmd = `pkg install -y bash curl jq python3 2>/dev/null; curl -fsSL '${installUrl}' > /tmp/cd.sh && bash /tmp/cd.sh --platform=pfsense; rm -f /tmp/cd.sh`;
+  const freebsdCmd = `pkg install -y bash curl jq python3 2>/dev/null; curl -fsSL '${installUrl}' > /tmp/create-device.sh && bash /tmp/create-device.sh --platform=pfsense; rm -f /tmp/create-device.sh`;
   const linuxCmd = `sudo bash <(curl -sL '${installUrl}')`;
   const winCmd = `Set-ExecutionPolicy Bypass -Scope Process -Force; irm '${windowsUrl}' | iex`;
+  const macosCmd = `curl -fsSL '${installUrl}' > /tmp/create-device.sh && sudo bash /tmp/create-device.sh --platform=macos; rm -f /tmp/create-device.sh`;
 
   return (
     <div className="flex items-center justify-end gap-2">
@@ -236,6 +244,9 @@ const CustomCreateButton = ({ entity }: { entity: string }) => {
               </TabsTrigger>
               <TabsTrigger value="windows" className="flex-1">
                 Windows
+              </TabsTrigger>
+              <TabsTrigger value="macos" className="flex-1">
+                macOS
               </TabsTrigger>
             </TabsList>
 
@@ -296,6 +307,27 @@ const CustomCreateButton = ({ entity }: { entity: string }) => {
                   value={winCmd}
                   variant="blue"
                   snippetKey="windows"
+                  copiedKey={copiedKey}
+                  onCopy={handleCopy}
+                />
+              </InstallStep>
+            </TabsContent>
+
+            <TabsContent value="macos" className="mt-3">
+              <InstallStep
+                number={1}
+                title="Run the installer"
+                color="purple"
+                isLast
+              >
+                <p className="mb-2 text-xs text-muted-foreground">
+                  Open Terminal and run as sudo. Homebrew must be installed for
+                  dependency auto-install.
+                </p>
+                <CodeSnippet
+                  value={macosCmd}
+                  variant="purple"
+                  snippetKey="macos"
                   copiedKey={copiedKey}
                   onCopy={handleCopy}
                 />
