@@ -146,6 +146,8 @@ auto_install_tool() {
     yum install -y "${pkg}" >/dev/null 2>&1
   elif check_exists apk; then
     apk add --no-cache "${pkg}" >/dev/null 2>&1
+  elif check_exists brew; then
+    brew install "${pkg}" >/dev/null 2>&1
   elif check_exists pkg; then
     pkg install -y "${pkg}" >/dev/null 2>&1
   else
@@ -260,6 +262,12 @@ revert_agent() {
         && log "pkg delete: OK" \
         || log "pkg delete exited $? (may not have been installed)"
       ;;
+    Darwin)
+      log "Removing macOS wallguard files..."
+      pkgutil --forget com.nullnet.wallguard 2>&1 || true
+      rm -f /usr/local/bin/wallguard-cli 2>/dev/null || true
+      log "macOS wallguard files removed"
+      ;;
     MINGW*|CYGWIN*|MSYS*)
       log "Running: WMI uninstall wallguard"
       powershell.exe -Command "Get-WmiObject -Class Win32_Product | Where-Object { \$_.Name -like '*wallguard*' } | ForEach-Object { \$_.Uninstall() }" 2>&1 \
@@ -356,6 +364,7 @@ detect_platform() {
     FreeBSD)               echo "pfsense" ;;
     Linux)                 echo "linux" ;;
     MINGW*|CYGWIN*|MSYS*)  echo "windows" ;;
+    Darwin)                echo "macos" ;;
     *)                     echo "pfsense" ;;
   esac
 }
@@ -430,6 +439,10 @@ auto_detect_defaults() {
       windows)
         DEVICE_CATEGORY="${DEVICE_CATEGORY:-Appguard Client}"
         DEVICE_TYPE="${DEVICE_TYPE:-Windows}"
+        ;;
+      macos)
+        DEVICE_CATEGORY="${DEVICE_CATEGORY:-Appguard Client}"
+        DEVICE_TYPE="${DEVICE_TYPE:-macOS}"
         ;;
       pfsense|*)
         DEVICE_CATEGORY="${DEVICE_CATEGORY:-Firewall}"
@@ -585,7 +598,7 @@ if [[ -n "${STATE_FILE}" ]] && [[ -f "${STATE_FILE}" ]]; then
         log "State file removed: ${STATE_FILE}"
       fi
       log_important "=== Revert complete — restarting from scratch ==="
-      STEP_COMPLETED=0; DEVICE_ID=""; DEVICE_CODE=""; ADDRESS_ID=""; INSTALL_TOKEN=""
+      STEP_COMPLETED=0; DEVICE_ID=""; DEVICE_CODE=""; ADDRESS_ID=""; INSTALL_TOKEN=""; WALLGUARD_VERSION=""
       ;;
     *)
       load_state
@@ -619,14 +632,14 @@ log "Root token obtained"
 # Auto-fetch latest Wallguard version if not provided
 if [[ -z "$WALLGUARD_VERSION" ]]; then
   log "Fetching latest Wallguard version from store..."
-  ver_resp=$(store_post "store/versions/filter" '{"pluck":["latest_version"],"limit":1}')
+  ver_resp=$(store_post "store/versions/filter?no_caching=true" '{"pluck":["latest_version"],"limit":1}')
   WALLGUARD_VERSION=$(echo "$ver_resp" | jq -r '.data[0].latest_version // ""')
   if [[ -z "$WALLGUARD_VERSION" ]]; then
     log_important "ERROR: Could not fetch Wallguard version from API. Specify --wallguard-version=VER manually."
     exit 1
   fi
-  log "Wallguard version: $WALLGUARD_VERSION"
 fi
+log "Wallguard version: $WALLGUARD_VERSION"
 
 # ---------------------------------------------------------------------------
 # Step 2 — Create Draft Device
@@ -761,6 +774,78 @@ case "$PLATFORM" in
     download "${MSI_URL}" "${TEMP_DIR}/${MSI}"
     log "Running: msiexec /i ${MSI} /quiet /wait"
     powershell.exe -Command "Start-Process msiexec.exe -ArgumentList '/i','${TEMP_DIR}/${MSI}','/quiet','/wait' -Wait"
+    log "Running: wallguard-cli start --control-channel-url=${REMOTE_ACCESS_URL}:50051 --platform=generic"
+    wallguard-cli start --control-channel-url="${REMOTE_ACCESS_URL}:50051" --platform=generic
+    sleep 1
+    log "Running: wallguard-cli version"
+    wallguard-cli version
+    log "Running: wallguard-cli status"
+    _wg_status=$(wallguard-cli status 2>/dev/null || echo "Unknown")
+    log "Wallguard status: ${_wg_status}"
+    if [[ "${_wg_status}" != "IDLE" ]]; then
+      log "Status is not IDLE — running: wallguard-cli leave"
+      wallguard-cli leave 2>&1 || true
+      log "Running: wallguard-cli stop"
+      wallguard-cli stop 2>&1 || true
+      log "Running: wallguard-cli start --control-channel-url=${REMOTE_ACCESS_URL}:50051"
+      wallguard-cli start --control-channel-url="${REMOTE_ACCESS_URL}:50051" --platform=generic
+      sleep 1
+    fi
+    log "Running: wallguard-cli join ${INSTALL_TOKEN}"
+    wallguard-cli join "$INSTALL_TOKEN"
+    ;;
+  macos)
+    # Build the DMG filename and GitHub releases download URL
+    DMG="wallguard-${WALLGUARD_VERSION}-macos.dmg"
+    DMG_URL="https://github.com/NullNet-ai/wallguard/releases/download/v${WALLGUARD_VERSION}/${DMG}"
+
+    # Download the DMG into the temp directory
+    download "${DMG_URL}" "${TEMP_DIR}/${DMG}"
+
+    # Create the mount point directory and attach the DMG (hidden from Finder)
+    log "Mounting DMG..."
+    MOUNT_POINT="${TEMP_DIR}/wallguard-mount"
+    mkdir -p "${MOUNT_POINT}"
+    hdiutil attach "${TEMP_DIR}/${DMG}" -nobrowse -quiet -mountpoint "${MOUNT_POINT}" || {
+      log_important "ERROR: failed to mount DMG"
+      exit 1
+    }
+
+    # Prefer the .pkg installer if present; fall back to copying the raw binary
+    PKG_FILE=$(find "${MOUNT_POINT}" -name "*.pkg" 2>/dev/null | head -1 || true)
+    if [[ -n "${PKG_FILE}" ]]; then
+      # Use macOS native installer for proper system-wide installation
+      log "Running: installer -pkg ${PKG_FILE} -target /"
+      installer -pkg "${PKG_FILE}" -target /
+    else
+      # Locate both binaries independently so each lands at the correct destination
+      CLI_BIN=$(find "${MOUNT_POINT}" -type f -name "wallguard-cli" 2>/dev/null | head -1 || true)
+      AGENT_BIN=$(find "${MOUNT_POINT}" -type f -name "wallguard" 2>/dev/null | head -1 || true)
+
+      # Abort if wallguard-cli is missing (it is required for all downstream commands)
+      if [[ -z "${CLI_BIN}" ]]; then
+        log_important "ERROR: could not find wallguard-cli binary in DMG."
+        hdiutil detach "${MOUNT_POINT}" -quiet 2>/dev/null || true
+        exit 1
+      fi
+
+      # Install wallguard-cli
+      log "Copying wallguard-cli from ${CLI_BIN}..."
+      cp "${CLI_BIN}" /usr/local/bin/wallguard-cli
+      chmod +x /usr/local/bin/wallguard-cli
+
+      # Install wallguard agent binary if present
+      if [[ -n "${AGENT_BIN}" ]]; then
+        log "Copying wallguard from ${AGENT_BIN}..."
+        cp "${AGENT_BIN}" /usr/local/bin/wallguard
+        chmod +x /usr/local/bin/wallguard
+      else
+        log "wallguard agent binary not found in DMG — skipping"
+      fi
+    fi
+
+    # Unmount the DMG; non-fatal since installation already completed
+    hdiutil detach "${MOUNT_POINT}" -quiet || true
     log "Running: wallguard-cli start --control-channel-url=${REMOTE_ACCESS_URL}:50051 --platform=generic"
     wallguard-cli start --control-channel-url="${REMOTE_ACCESS_URL}:50051" --platform=generic
     sleep 1

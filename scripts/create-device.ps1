@@ -211,7 +211,7 @@ Write-Log 'Root token obtained'
 
 if (-not $WallguardVersion) {
     Write-Log 'Fetching latest Wallguard version...'
-    $verResp = Invoke-StorePost 'store/versions/filter' @{ pluck = @('latest_version'); limit = 1 }
+    $verResp = Invoke-StorePost 'store/versions/filter?no_caching=true' @{ pluck = @('latest_version'); limit = 1 }
     $WallguardVersion = $verResp.data[0].latest_version
     if (-not $WallguardVersion) {
         Write-LogImportant 'ERROR: Could not fetch Wallguard version. Use -WallguardVersion parameter.'
