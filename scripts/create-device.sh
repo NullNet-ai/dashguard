@@ -123,6 +123,34 @@ SCRIPT_NAME="create-device"
 # check_exists — returns 0 if named binary is on PATH
 check_exists() { type "$1" >/dev/null 2>&1; }
 
+# macos_brew_install — resolves brew even when sudo strips Homebrew from PATH,
+# then installs Homebrew itself if it is not present at all.
+macos_brew_install() {
+  local pkg="$1"
+
+  # sudo strips /opt/homebrew/bin (Apple Silicon) and /usr/local/bin (Intel) from PATH.
+  # Source brew shellenv from the known install locations so subsequent calls work.
+  for prefix in /opt/homebrew /usr/local; do
+    if [[ -x "${prefix}/bin/brew" ]]; then
+      eval "$("${prefix}/bin/brew" shellenv 2>/dev/null)" || true
+      break
+    fi
+  done
+
+  if ! check_exists brew; then
+    # Homebrew is not installed — install it non-interactively
+    echo "Homebrew not found — installing Homebrew (this may take a minute)..."
+    NONINTERACTIVE=1 /bin/bash -c \
+      "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)" || return 1
+    # Re-source after install (Apple Silicon lands in /opt/homebrew)
+    for prefix in /opt/homebrew /usr/local; do
+      [[ -x "${prefix}/bin/brew" ]] && eval "$("${prefix}/bin/brew" shellenv 2>/dev/null)" && break
+    done
+  fi
+
+  check_exists brew && brew install "${pkg}"
+}
+
 # auto_install_tool — tries to install a missing tool via the available package manager
 auto_install_tool() {
   local tool="$1"
@@ -146,6 +174,8 @@ auto_install_tool() {
     yum install -y "${pkg}" >/dev/null 2>&1
   elif check_exists apk; then
     apk add --no-cache "${pkg}" >/dev/null 2>&1
+  elif [[ "$(uname -s)" == "Darwin" ]]; then
+    macos_brew_install "${pkg}"
   elif check_exists brew; then
     brew install "${pkg}" >/dev/null 2>&1
   elif check_exists pkg; then
