@@ -123,32 +123,43 @@ SCRIPT_NAME="create-device"
 # check_exists — returns 0 if named binary is on PATH
 check_exists() { type "$1" >/dev/null 2>&1; }
 
-# macos_brew_install — resolves brew even when sudo strips Homebrew from PATH,
-# then installs Homebrew itself if it is not present at all.
+# macos_brew_install — installs a package via Homebrew on macOS.
+# Homebrew refuses to run as root, so we delegate to the real user ($SUDO_USER).
 macos_brew_install() {
   local pkg="$1"
 
-  # sudo strips /opt/homebrew/bin (Apple Silicon) and /usr/local/bin (Intel) from PATH.
-  # Source brew shellenv from the known install locations so subsequent calls work.
+  # Resolve the real (non-root) user — required because Homebrew rejects root.
+  local real_user="${SUDO_USER:-}"
+  if [[ -z "${real_user}" ]]; then
+    real_user=$(logname 2>/dev/null || id -un)
+  fi
+  if [[ "${real_user}" == "root" ]] || [[ -z "${real_user}" ]]; then
+    echo "Cannot install via Homebrew: unable to determine a non-root user." >&2
+    return 1
+  fi
+
+  # Locate brew in the known macOS install paths (sudo strips these from PATH).
+  local brew_bin=""
   for prefix in /opt/homebrew /usr/local; do
     if [[ -x "${prefix}/bin/brew" ]]; then
-      eval "$("${prefix}/bin/brew" shellenv 2>/dev/null)" || true
+      brew_bin="${prefix}/bin/brew"
       break
     fi
   done
 
-  if ! check_exists brew; then
-    # Homebrew is not installed — install it non-interactively
-    echo "Homebrew not found — installing Homebrew (this may take a minute)..."
-    NONINTERACTIVE=1 /bin/bash -c \
-      "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)" || return 1
-    # Re-source after install (Apple Silicon lands in /opt/homebrew)
+  if [[ -z "${brew_bin}" ]]; then
+    # Homebrew is not installed — install it non-interactively as the real user
+    echo "Homebrew not found — installing Homebrew as ${real_user} (this may take a minute)..."
+    sudo -u "${real_user}" /bin/bash -c \
+      'NONINTERACTIVE=1 /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"' || return 1
     for prefix in /opt/homebrew /usr/local; do
-      [[ -x "${prefix}/bin/brew" ]] && eval "$("${prefix}/bin/brew" shellenv 2>/dev/null)" && break
+      [[ -x "${prefix}/bin/brew" ]] && brew_bin="${prefix}/bin/brew" && break
     done
+    [[ -z "${brew_bin}" ]] && return 1
   fi
 
-  check_exists brew && brew install "${pkg}"
+  echo "Installing ${pkg} via Homebrew as ${real_user}..."
+  sudo -u "${real_user}" "${brew_bin}" install "${pkg}"
 }
 
 # auto_install_tool — tries to install a missing tool via the available package manager
