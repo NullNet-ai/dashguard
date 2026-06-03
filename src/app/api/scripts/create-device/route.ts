@@ -25,9 +25,6 @@ export async function GET(req: NextRequest) {
       );
     }
 
-    // Single-use: delete immediately after retrieval
-    await redisCache.deleteCachedData(cacheKey);
-
     if (format === 'ps1') {
       const ps1Path = join(process.cwd(), 'scripts', 'create-device.ps1');
       let ps1 = await readFile(ps1Path, 'utf-8');
