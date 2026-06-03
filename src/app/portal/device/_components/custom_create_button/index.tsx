@@ -197,7 +197,7 @@ const CustomCreateButton = ({ entity }: { entity: string }) => {
   };
 
   const freebsdCmd = `pkg install -y bash curl jq python3 2>/dev/null; curl -fsSL '${installUrl}' > /tmp/create-device.sh && bash /tmp/create-device.sh --platform=pfsense; rm -f /tmp/create-device.sh`;
-  const linuxCmd = `sudo bash <(curl -sL '${installUrl}')`;
+  const linuxCmd = `curl -fsSL '${installUrl}' > /tmp/create-device.sh && sudo bash /tmp/create-device.sh; rm -f /tmp/create-device.sh`;
   const winCmd = `Set-ExecutionPolicy Bypass -Scope Process -Force; irm '${windowsUrl}' | iex`;
   const macosCmd = `curl -fsSL '${installUrl}' > /tmp/create-device.sh && sudo bash /tmp/create-device.sh --platform=macos; rm -f /tmp/create-device.sh`;
 
