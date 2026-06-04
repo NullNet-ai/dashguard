@@ -3,7 +3,7 @@
 #
 # End-to-end script that creates a dashguard device via the Nullnet Datastore
 # store API (no Next.js / tRPC involved) and installs the Wallguard agent.
-# Run this script directly ON the target server (pfSense, Linux, or Windows).
+# Run this script directly ON the target server (pfSense, Linux, macOS, or Windows).
 #
 # Flow:
 #   1. Authenticate (user + root)
@@ -34,13 +34,13 @@
 #
 # Optional:
 #   --device-name=NAME           Override auto-detected name (defaults to hostname)
-#   --device-category=CAT        Override auto-detected category (Firewall | AppGuard Client)
-#   --device-type=TYPE           Override auto-detected type (PFSense | Linux | Windows)
+#   --device-category=CAT        Override auto-detected category (Firewall | Appguard Client)
+#   --device-type=TYPE           Override auto-detected type (PFSense | Linux | macOS | Windows)
 #   --address-city=CITY          Override auto-detected city
 #   --address-country=COUNTRY    Override auto-detected country
 #   --address-country-code=CODE  Override auto-detected country code (e.g. PH)
 #   --wallguard-version=VER      Override auto-fetched version (e.g. 1.1.10)
-#   --platform=PLATFORM          pfsense | linux | windows (auto-detected if omitted)
+#   --platform=PLATFORM          pfsense | linux | macos | windows (auto-detected if omitted)
 #
 # Advanced overrides:
 #   --email=EMAIL                Provide org account email (skips prompt)
@@ -56,7 +56,8 @@
 #   -h, --help                   Show this help
 #
 # Platform notes:
-#   Linux   — requires apt-get; installs .deb package; run with sudo
+#   Linux   — supports apt-get / dnf / yum / apk; installs .deb package; run with sudo
+#   macOS   — requires Homebrew (auto-installs if missing); installs .dmg package; run with sudo
 #   FreeBSD — requires pkg; installs .pkg package; run as root (pfSense shell)
 #   Windows — requires PowerShell; installs NPCAP + VC Runtime + .msi; run as Administrator
 #             Open an elevated PowerShell or Git Bash and run:
@@ -69,6 +70,10 @@
 # Examples — Windows (elevated PowerShell / Git Bash):
 #   bash create-device.sh                               # auto-detect all, prompts for credentials
 #   bash create-device.sh --device-name=WinHost-01 --platform=windows
+#
+# Examples — macOS (Terminal with sudo):
+#   sudo bash create-device.sh                          # (Recommended) auto-detect all, prompts for credentials
+#   sudo bash create-device.sh --device-name=MacBook-01 --wallguard-version=1.1.10
 
 set -euo pipefail
 
