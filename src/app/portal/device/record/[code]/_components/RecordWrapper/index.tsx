@@ -15,7 +15,13 @@ const Wrapper = ({
   record_summary,
   entity_code,
   entity_name,
+  device_category,
 }: IProps) => {
+  const filteredTabs =
+    device_category === 'Appguard Client'
+      ? tabs.filter((t) => t.id !== 'configuration')
+      : tabs;
+
   return (
     <RecordProvider
       config={{
@@ -33,7 +39,7 @@ const Wrapper = ({
               minSize={25}
               className="flex flex-col gap-2 min-h-60 flex-grow-[6] bg-transparent"
             >
-              <HeaderTabs tabs={tabs} tab_items_left_slot={
+              <HeaderTabs tabs={filteredTabs} tab_items_left_slot={
                 <RemoteAccessActionButton
                   identifier={entity_code}
                   main_entity={entity_name!}

@@ -67,6 +67,8 @@ const RecordShellSummary = ({
     }
   }, [data, heartbeatRecord])
 
+  const isAppguardClient = data?.device_category === 'Appguard Client';
+
   if (error) {
     console.error("Error fetching record summary", error)
   }
@@ -104,13 +106,17 @@ const RecordShellSummary = ({
                 <RecordDeviceLastHeartbeat
                   lastHeartbeatBucket={data?.last_heartbeat_bucket}
                 />
-              )
+              ),
             },
-            {
-              key: "Host Name",
-              value: "hostname",
-              truncated: () => ({ string_limit: 35, path: ['value'] })
-            },
+            ...(!isAppguardClient
+              ? [
+                  {
+                    key: "Host Name",
+                    value: "hostname",
+                    truncated: () => ({ string_limit: 35, path: ['value'] })
+                  },
+                ]
+              : []),
             {
               key: "Wallguard Version",
               value: "version",
@@ -118,24 +124,34 @@ const RecordShellSummary = ({
             },
           ]
         },
-        {
-          header_title: "Interfaces",
-          scrollable: true,
-          defaultVisibleCount: 3,
-          items: [...deviceData.interfaces].sort((a: any, b: any) => {
-            const order = ['wan', 'lan']
-            const ai = order.indexOf(a?.name?.toLowerCase())
-            const bi = order.indexOf(b?.name?.toLowerCase())
-            if (ai !== -1 && bi !== -1) return ai - bi
-            if (ai !== -1) return -1
-            if (bi !== -1) return 1
-            return (a?.name ?? '').localeCompare(b?.name ?? '', undefined, { numeric: true })
-          }).map(e => ({
-            key: e?.name?.toUpperCase(),
-            value: e?.address,
-            truncated: () => ({ string_limit: 35, path: ['value'] })
-          }))
-        },
+        ...(!isAppguardClient
+          ? [
+              {
+                header_title: 'Interfaces',
+                scrollable: true,
+                defaultVisibleCount: 3,
+                items: [...deviceData.interfaces]
+                  .sort((a: any, b: any) => {
+                    const order = ['wan', 'lan'];
+                    const ai = order.indexOf(a?.name?.toLowerCase());
+                    const bi = order.indexOf(b?.name?.toLowerCase());
+                    if (ai !== -1 && bi !== -1) return ai - bi;
+                    if (ai !== -1) return -1;
+                    if (bi !== -1) return 1;
+                    return (a?.name ?? '').localeCompare(
+                      b?.name ?? '',
+                      undefined,
+                      { numeric: true },
+                    );
+                  })
+                  .map((e) => ({
+                    key: e?.name?.toUpperCase(),
+                    value: e?.address,
+                    truncated: () => ({ string_limit: 35, path: ['value'] }),
+                  }))
+              },
+            ]
+          : [])
       ]}
     />
   )

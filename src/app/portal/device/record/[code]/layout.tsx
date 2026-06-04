@@ -33,6 +33,7 @@ const Layout = async ({ children }: { children: React.ReactNode }) => {
       "created_time",
       "updated_date",
       "updated_time",
+      'device_category',
     ],
   });
 
@@ -55,6 +56,9 @@ const Layout = async ({ children }: { children: React.ReactNode }) => {
     <RecordWrapper
     entity_code={identifier!}
     entity_name={main_entity!}
+    device_category={
+      record_details.data.device_category as string | undefined
+    }
     record={<Suspense fallback={<ContentLoading />}>{children}</Suspense>}
     record_summary={
       <Suspense fallback={<ContentLoading />}>

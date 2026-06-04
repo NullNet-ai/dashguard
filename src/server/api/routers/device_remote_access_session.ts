@@ -178,6 +178,7 @@ export const deviceRemoteAccessSessionRouter = createTRPCRouter({
         const device = await ctx.dnaClient
           .findAll({
             entity: 'devices',
+            no_caching: true,
             token: ctx.token.value,
             query: {
               pluck: ['id'],

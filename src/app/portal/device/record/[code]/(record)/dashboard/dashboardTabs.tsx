@@ -37,11 +37,12 @@ export default async function DashboardTabs() {
   const fetched_device = identifier
     ? await api.record.getByCode({
         id: identifier!,
-        pluck_fields: ['is_device_online'],
+        pluck_fields: ['is_device_online', 'device_category'],
         main_entity: main_entity!,
       })
     : null;
   const isDeviceOnline = fetched_device?.data?.is_device_online;
+  const deviceCategory = fetched_device?.data?.device_category;
 
   const tabs = [
     {
@@ -62,7 +63,7 @@ export default async function DashboardTabs() {
             </div>
           }
         >
-          <InteractiveGraph />
+          {deviceCategory === 'Firewall' && <InteractiveGraph />}
 
           <div className="mt-2">
             <TrafficGraph />
