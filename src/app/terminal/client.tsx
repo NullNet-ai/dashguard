@@ -57,7 +57,7 @@ export default function WebTerminal() {
 
   const { data: lastHeartbeat, isLoading: isLastHeartbeatLoading } =
     api.deviceHeartbeat.getLastHeartbeat.useQuery(
-      { device_id: deviceId },
+      { device_id: deviceId, timezone: Intl.DateTimeFormat().resolvedOptions().timeZone, },
       { enabled: Boolean(deviceId), refetchInterval: 1000 },
     )
 

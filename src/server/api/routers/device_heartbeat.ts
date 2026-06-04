@@ -142,10 +142,11 @@ export const deviceHeartbeatsRouter = createTRPCRouter({
   getLastHeartbeat: privateProcedure.input(
     z.object({
       device_id: z.string(),
+      timezone: z.string(),
     })
   ).query(async ({ ctx, input }) => {
-    const { device_id } = input
-    const timezone = Intl.DateTimeFormat().resolvedOptions().timeZone
+    const { device_id, timezone } = input
+    // const timezone = timezone || Intl.DateTimeFormat().resolvedOptions().timeZone
     console.log("🚀 ~ device_heartbeat ~ getLastHeartbeat ~ timezone:", timezone)
 
    

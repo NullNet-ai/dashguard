@@ -30,6 +30,7 @@ const RecordShellSummary = ({
   } = api.deviceHeartbeat.getLastHeartbeat.useQuery(
     {
       device_id: data?.id ?? '',
+      timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
     },
     {
       enabled: Boolean(data?.id),
