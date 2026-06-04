@@ -11,6 +11,10 @@ export default function GridDeviceStatus({
   lastHeartbeatBucket?: string
   onlineThresholdSeconds?: number
 }) {
+
+  console.log('🚀  GridDeviceStatus ~ current timezone, current time:', Intl.DateTimeFormat().resolvedOptions().timeZone, new Date())
+  console.log("🚀 ~ GridDeviceStatus ~ lastHeartbeatBucket:", lastHeartbeatBucket)
+
   const status = useMemo(() => {
     if (!lastHeartbeatBucket) return null
     return isHeartbeatWithinSeconds(lastHeartbeatBucket, onlineThresholdSeconds)

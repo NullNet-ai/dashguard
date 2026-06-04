@@ -146,6 +146,7 @@ export const deviceHeartbeatsRouter = createTRPCRouter({
   ).query(async ({ ctx, input }) => {
     const { device_id } = input
     const timezone = Intl.DateTimeFormat().resolvedOptions().timeZone
+    console.log("🚀 ~ device_heartbeat ~ getLastHeartbeat ~ timezone:", timezone)
 
    
     const rootOrm = await createRootOrm(ctx.dnaClient);

@@ -41,6 +41,7 @@ export const getHeartbeatTimestampMs = (heartbeatBucket?: string | null) => {
     ? heartbeatBucket
     : heartbeatBucket.replace(' ', 'T')
 
+  console.log("🚀 ~ getHeartbeatTimestampMs ~ normalizedHeartbeatBucket:", normalizedHeartbeatBucket)
   return new Date(normalizedHeartbeatBucket).getTime()
 }
 
@@ -49,6 +50,8 @@ export const isHeartbeatWithinSeconds = (
   seconds: number,
 ) => {
   const heartbeatTimestampMs = getHeartbeatTimestampMs(heartbeatBucket)
+  console.log("🚀 ~ isHeartbeatWithinSeconds ~ heartbeatTimestampMs:", heartbeatTimestampMs)
+  
 
   if (!Number.isFinite(heartbeatTimestampMs)) return false
 
