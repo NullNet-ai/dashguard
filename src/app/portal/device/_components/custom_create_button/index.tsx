@@ -150,12 +150,22 @@ const CodeSnippet = ({
   );
 };
 
+function formatTtl(seconds: number): string {
+  if (seconds % 3600 === 0) {
+    const h = seconds / 3600;
+    return `${h} hour${h !== 1 ? 's' : ''}`;
+  }
+  if (seconds % 60 === 0) return `${seconds / 60} minutes`;
+  return `${seconds} seconds`;
+}
+
 const CustomCreateButton = ({ entity }: { entity: string }) => {
   const toast = useToast();
 
   const [dialogOpen, setDialogOpen] = useState(false);
   const [installUrl, setInstallUrl] = useState('');
   const [windowsUrl, setWindowsUrl] = useState('');
+  const [expiresIn, setExpiresIn] = useState<number>(7200);
   const [loadingInstall, setLoadingInstall] = useState(false);
   const [copiedKey, setCopiedKey] = useState<string | null>(null);
 
@@ -182,6 +192,7 @@ const CustomCreateButton = ({ entity }: { entity: string }) => {
       const data = await res.json();
       setInstallUrl(data.url);
       setWindowsUrl(data.windowsUrl);
+      setExpiresIn(data.expiresIn);
       setDialogOpen(true);
     } catch {
       toast.error('Failed to generate install command');
@@ -229,8 +240,8 @@ const CustomCreateButton = ({ entity }: { entity: string }) => {
             <DialogDescription>
               Automatically creates a Device Record, then installs and runs the
               Wallguard Agent on the target server. Run the command below on the
-              server you want to register. The link expires in 1 hour and is
-              single-use.
+              server you want to register. The link expires in{' '}
+              {formatTtl(expiresIn)}.
             </DialogDescription>
           </DialogHeader>
 

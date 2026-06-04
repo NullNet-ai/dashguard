@@ -3,7 +3,10 @@ import { cookies } from 'next/headers';
 import { NextRequest, NextResponse } from 'next/server';
 import redisCache from '~/server/redis/cache';
 
-const TOKEN_TTL_SECONDS = 7200; // 2 hours
+const TOKEN_TTL_SECONDS = parseInt(
+  process.env.INSTALL_TOKEN_TTL_SECONDS ?? '7200',
+  10,
+);
 
 export async function POST(req: NextRequest) {
   const cookieStore = await cookies();
