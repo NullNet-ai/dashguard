@@ -54,7 +54,7 @@ const SideUserInfo = ({
       <DropdownMenuTrigger asChild>
         <div
           className={cn(
-            `flex grid cursor-pointer place-items-center items-center gap-2 px-1 px-2 py-1.5 text-left text-sm hover:ring-0 active:ring-0`,
+            `flex cursor-pointer items-center gap-2 px-2 py-1.5 text-left text-sm hover:ring-0 active:ring-0`,
             `${(open || openMobile) && mobile ? 'w-full' : ''} `,
           )}
         >
