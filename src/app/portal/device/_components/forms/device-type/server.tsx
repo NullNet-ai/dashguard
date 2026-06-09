@@ -3,12 +3,14 @@ import { headers } from 'next/headers';
 import DeviceCategory from './client';
 
 const optionsByCategory: Record<string, string[]> = {
-  Firewall: ['PFSense'
+  Firewall: [
+    'PFSense',
     // 'OPNSense'
   ],
   'AppGuard Client': [
     'Linux',
-    'Windows'
+    'Windows',
+    'Mac OS',
     // 'ExpressJS',
     // 'NextJS',
     // 'Nginx',
@@ -29,8 +31,8 @@ const FormServerFetch = async () => {
     code: identifier!,
   });
 
-  if (typeof fetched_device === "undefined") {
-    return <>FUCK YOU</>
+  if (typeof fetched_device === 'undefined') {
+    return <>FUCK YOU</>;
   }
 
   // @ts-expect-error - No type yet

@@ -276,6 +276,41 @@ function getSteps(
     ];
   }
 
+  if (type === 'mac os') {
+    return [
+      {
+        title: 'Download and run the install script',
+        color: 'amber',
+        jsx: <CodeRow variant="amber" value={downloadCommand} />,
+      },
+      {
+        title: 'Start the WallGuard Agent',
+        color: 'green',
+        jsx: (
+          <CodeRow
+            variant="green"
+            value={`sudo wallguard-cli start --control-channel-url=${controlChannelUrl} --platform=generic`}
+          />
+        ),
+      },
+      {
+        title: 'Verify the installation',
+        color: 'teal',
+        jsx: <CodeRow variant="teal" value="sudo wallguard-cli version" />,
+      },
+      {
+        title: 'Complete the setup',
+        color: 'purple',
+        jsx: (
+          <CodeRow
+            variant="purple"
+            value={`sudo wallguard-cli join ${joinCode}`}
+          />
+        ),
+      },
+    ];
+  }
+
   return [
     {
       title: 'Download the package',
@@ -329,6 +364,12 @@ function getDeviceTypeText(deviceType: string): {
           'Follow these steps to install and set up the WallGuard agent on your Windows system.',
         shellHint:
           'Run these commands in PowerShell (and CMD as Administrator for step 7)',
+      };
+    case 'mac os':
+      return {
+        subtitle:
+          'Follow these steps to install and set up the WallGuard agent on your macOS system.',
+        shellHint: 'Run these commands in your macOS Terminal',
       };
     default:
       return {
