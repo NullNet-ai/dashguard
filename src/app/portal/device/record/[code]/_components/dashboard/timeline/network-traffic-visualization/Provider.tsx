@@ -287,9 +287,9 @@ export default function NetworkFlowProvider({ children, params }: IProps) {
    */
   const performInitialLoad = useCallback(async (generation: number, fid: string, settings: ITimeSettings) => {
     const timeRange = getLastTimeStamp({ count: settings.time_count, unit: settings.time_unit, add_remaining_time: false,
-      _now: new Date(new Date(Date.now() - 320_000))
+      _now: new Date(new Date(Date.now() - 10_000))
     }) as any
-    const tr2 = getLastTimeStamp({ count: 1, unit: 'minute', add_remaining_time: false, _now: new Date(new Date(Date.now() - 320_000)) }) as any
+    const tr2 = getLastTimeStamp({ count: 1, unit: 'minute', add_remaining_time: false, _now: new Date(new Date(Date.now() - 10_000)) }) as any
 
     if (isUnmountedRef.current || generation !== filterGenerationRef.current) return
 
@@ -408,9 +408,9 @@ export default function NetworkFlowProvider({ children, params }: IProps) {
     isRecentIPRunningRef.current = true
     try {
       const tr = getLastTimeStamp({ count: settings.time_count, unit: settings.time_unit, add_remaining_time: false,
-        _now: new Date(Date.now() - 320_000),
+        _now: new Date(Date.now() - 10_000),
       }) as any
-      const tr2 = getLastTimeStamp({ count: 1, unit: 'minute', add_remaining_time: false, _now: new Date(Date.now() - 320_000) }) as any
+      const tr2 = getLastTimeStamp({ count: 1, unit: 'minute', add_remaining_time: false, _now: new Date(Date.now() - 10_000) }) as any
 
       const newIps = await Promise.race([
         getUniqueIpRef.current.mutateAsync({
@@ -458,9 +458,9 @@ export default function NetworkFlowProvider({ children, params }: IProps) {
     isTopTrafficRunningRef.current = true
     try {
       const tr = getLastTimeStamp({ count: settings.time_count, unit: settings.time_unit, add_remaining_time: false,
-        _now: new Date(Date.now() - 320_000),
+        _now: new Date(Date.now() - 10_000),
       }) as any
-      const tr2 = getLastTimeStamp({ count: 1, unit: 'minute', add_remaining_time: false, _now: new Date(Date.now() - 320_000) }) as any
+      const tr2 = getLastTimeStamp({ count: 1, unit: 'minute', add_remaining_time: false, _now: new Date(Date.now() - 10_000) }) as any
 
       const newIps = await Promise.race([
         getUniqueIpTopRef.current.mutateAsync({
@@ -504,10 +504,10 @@ export default function NetworkFlowProvider({ children, params }: IProps) {
     isRecentBandwidthRunningRef.current = true
     try {
       const timeRange = getLastTimeStamp({ count: settings.time_count, unit: settings.time_unit, add_remaining_time: false,
-        _now: new Date(Date.now() - 320_000)
+        _now: new Date(Date.now() - 10_000)
       })
       const tr2 = getLastTimeStamp({ count: 1, unit: 'minute', add_remaining_time: false,
-        _now: new Date(Date.now() - 320_000)
+        _now: new Date(Date.now() - 10_000)
       })
 
       const bwResult: any = await getBandwidthRef.current.mutateAsync({
@@ -518,7 +518,7 @@ export default function NetworkFlowProvider({ children, params }: IProps) {
       })
       if (isUnmountedRef.current || generation !== filterGenerationRef.current) return
 
-      const endDate        = new Date(Date.now() - 320_000)
+      const endDate        = new Date(Date.now() - 10_000)
       const timeUnitMs     = settings.time_unit === 'hour' ? 3_600_000 : settings.time_unit === 'minute' ? 60_000 : 1_000
       const pruneThreshold = endDate.getTime() - settings.time_count * timeUnitMs * 2
 
@@ -587,10 +587,10 @@ export default function NetworkFlowProvider({ children, params }: IProps) {
     isTopBandwidthRunningRef.current = true
     try {
       const timeRange = getLastTimeStamp({ count: settings.time_count, unit: settings.time_unit, add_remaining_time: false,
-        _now: new Date(Date.now() - 320_000)
+        _now: new Date(Date.now() - 10_000)
       })
       const tr2 = getLastTimeStamp({ count: 1, unit: 'minute', add_remaining_time: false,
-        _now: new Date(Date.now() - 320_000),
+        _now: new Date(Date.now() - 10_000),
       })
 
       const bwResult: any = await getBandwidthTopRef.current.mutateAsync({
@@ -601,7 +601,7 @@ export default function NetworkFlowProvider({ children, params }: IProps) {
       })
       if (isUnmountedRef.current || generation !== filterGenerationRef.current) return
 
-      const endDate        = new Date(Date.now() - 320_000)
+      const endDate        = new Date(Date.now() - 10_000)
       const timeUnitMs     = settings.time_unit === 'hour' ? 3_600_000 : settings.time_unit === 'minute' ? 60_000 : 1_000
       const pruneThreshold = endDate.getTime() - settings.time_count * timeUnitMs * 2
 
