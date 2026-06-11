@@ -375,7 +375,7 @@ export const packetRouter = createTRPCRouter({
             ],
             joins: [],
             bucket_size,
-            limit: 1,
+            limit: 60,
             order: {
               order_by: 'bucket',
               order_direction: EOrderDirection.DESC,
