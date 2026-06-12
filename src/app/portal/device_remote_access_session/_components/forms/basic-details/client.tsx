@@ -47,29 +47,6 @@ export default function RemoteAccessDetails(props: IFormProps) {
     },
   )
 
-  const { data: deviceTunnels } = api.deviceRemoteAccessSession.fetchDeviceTunnels.useQuery(
-    {
-      limit: 500,
-      device_code: deviceCode,
-      device_id: effectiveDeviceId,
-      tunnel_types: ['http', 'https'],
-      status: 'Active',
-    },
-    {
-      refetchInterval: 60_000,
-      enabled: !!effectiveDeviceId,
-    },
-  )
-
-  const uiTunnelServiceIds = useMemo(() => {
-    const tunnels = Array.isArray(deviceTunnels) ? deviceTunnels : []
-    return new Set(
-      tunnels
-        .map((t: any) => t?.service_id)
-        .filter(Boolean),
-    )
-  }, [deviceTunnels])
-
   const filteredDeviceServices = useMemo(() => {
     const services = Array.isArray(deviceServices) ? deviceServices : []
 
@@ -80,14 +57,26 @@ export default function RemoteAccessDetails(props: IFormProps) {
     } else if (remoteAccessType === 'ui') {
       return services.filter((e: any) => {
         const protocol = e.item?.protocol
-        if (protocol !== 'http' && protocol !== 'https') return false
-        return true
+        return protocol === 'http' || protocol === 'https'
       })
     } else if (remoteAccessType === 'rd') {
-      return services.filter((e: any) => e.item?.protocol === 'rd');
+      return services.filter((e: any) => e.item?.protocol === 'rd')
     }
-    return [];
-  }, [deviceServices, remoteAccessType, uiTunnelServiceIds])
+    return []
+  }, [deviceServices, remoteAccessType])
+
+  const availableRemoteAccessTypes = useMemo(() => {
+    const services = Array.isArray(deviceServices) ? deviceServices : []
+    const types = new Set<string>()
+    for (const s of services) {
+      const proto = (s as any).item?.protocol
+      if (proto === 'ssh') types.add('ssh')
+      else if (proto === 'tty') types.add('tty')
+      else if (proto === 'http' || proto === 'https') types.add('ui')
+      else if (proto === 'rd') types.add('rd')
+    }
+    return types
+  }, [deviceServices])
 
   const handleSave = async ({
     data,
@@ -333,23 +322,11 @@ export default function RemoteAccessDetails(props: IFormProps) {
       selectOptions={{
         device_id: devices ?? [],
         remote_access_type: [
-          {
-            label: 'SSH',
-            value: 'ssh',
-          },
-          {
-            label: 'TTY',
-            value: 'tty',
-          },
-          {
-            label: 'UI',
-            value: 'ui',
-          },
-          {
-            label: 'RD',
-            value: 'rd',
-          },
-        ],
+          { label: 'SSH', value: 'ssh' },
+          { label: 'TTY', value: 'tty' },
+          { label: 'UI', value: 'ui' },
+          { label: 'RD', value: 'rd' },
+        ].filter(opt => availableRemoteAccessTypes.has(opt.value)),
         // @ts-expect-error - No type yet
         device_service_id: filteredDeviceServices,
       }}
