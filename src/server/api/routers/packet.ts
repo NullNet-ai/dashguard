@@ -550,7 +550,10 @@ export const packetRouter = createTRPCRouter({
       const { device_id, bucket_size, time_range, timezone, interface_names } =
         input;
 
-      // @ts-expect-error - No type yet
+      if (!interface_names) {
+        return [];
+      }
+
       const results = await Promise.all(
         interface_names.map(async (interface_name) => {
           try {
