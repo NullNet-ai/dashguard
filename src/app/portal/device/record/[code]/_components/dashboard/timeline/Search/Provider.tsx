@@ -118,12 +118,12 @@ export default function GraphSearchProvider({
 
   const { time_count = null, time_unit = null } = time || {};
 
-  // @ts-expect-error - No type yet
   const { data, refetch } = api?.[router as 'packet']?.[
     resolver as 'filterPackets'
   ].useQuery(
     {
       ...search_params,
+      // @ts-ignorepect-error - time_range is not defined in the type
       time_range: getLastTimeStamp({
         count: time_count,
         unit: time_unit as 'minute',
