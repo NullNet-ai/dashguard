@@ -84,10 +84,15 @@
       "Bash(rtk playwright *)",
       "mcp__plugin_everything-claude-code_playwright__browser_navigate",
       "Bash(find /Users/dna-shem/Desktop/Programming/Projects/Nullnet/Gitlab/dashguard/src/app/portal/device/record/[code]/\\\\\\(record\\\\\\) -type f -name \"*.tsx\")",
-      "Bash(grep -v \"^--$\")"
+      "Bash(grep -v \"^--$\")",
+      "Bash(pnpm build)",
+      "Bash(pnpm local)"
     ],
     "additionalDirectories": [
       "/Users/dna-shem"
     ]
+  },
+  "enabledPlugins": {
+    "greptile@claude-plugins-official": true
   }
 }
