@@ -1,0 +1,168 @@
+meta {
+  name: Filter Store Device
+  type: http
+  seq: 1
+}
+
+post {
+  url: {{baseUrl}}/api/store/devices/filter
+  body: json
+  auth: inherit
+}
+
+body:json {
+  {
+    "pluck": [
+      "code",
+      "is_device_author1ized"
+    ],
+    "pluck_object": {
+      "created_by_account_organizations": [
+        "id",
+        "contact_id"
+      ],
+      "created_by": [
+        "id",
+        "first_name",
+        "last_name"
+      ],
+      "updated_by_account_organizations": [
+        "id",
+        "contact_id"
+      ],
+      "updated_by": [
+        "id",
+        "first_name",
+        "last_name"
+      ],
+      "devices": [
+        "code",
+        "is_device_authorized"
+      ]
+    },
+    "pluck_group_object": {},
+    "advance_filters": [],
+    "offset": 0,
+    "limit": 100,
+    "joins": [
+      {
+        "type": "left",
+        "field_relation": {
+          "to": {
+            "alias": "created_by_account_organizations",
+            "entity": "account_organizations",
+            "field": "id"
+          },
+          "from": {
+            "entity": "devices",
+            "field": "created_by"
+          }
+        },
+        "nested": false
+      },
+      {
+        "type": "left",
+        "field_relation": {
+          "to": {
+            "alias": "created_by",
+            "entity": "contacts",
+            "field": "id"
+          },
+          "from": {
+            "entity": "created_by_account_organizations",
+            "field": "contact_id"
+          }
+        },
+        "nested": true
+      },
+      {
+        "type": "left",
+        "field_relation": {
+          "to": {
+            "alias": "updated_by_account_organizations",
+            "entity": "account_organizations",
+            "field": "id"
+          },
+          "from": {
+            "entity": "devices",
+            "field": "updated_by"
+          }
+        },
+        "nested": false
+      },
+      {
+        "type": "left",
+        "field_relation": {
+          "to": {
+            "alias": "updated_by",
+            "entity": "contacts",
+            "field": "id"
+          },
+          "from": {
+            "entity": "updated_by_account_organizations",
+            "field": "contact_id"
+          }
+        },
+        "nested": true
+      }
+    ],
+    "order_direction": "desc",
+    "order_by": "is_device_authorized",
+    "is_case_sensitive_sorting": true,
+    "multiple_sort": [],
+    "date_format": "mm/dd/YYYY",
+    "concatenate_fields": [
+      {
+        "fields": [
+          "first_name",
+          "last_name"
+        ],
+        "field_name": "full_name",
+        "separator": " ",
+        "entity": "contacts",
+        "aliased_entity": "created_by"
+      },
+      {
+        "fields": [
+          "first_name",
+          "last_name"
+        ],
+        "field_name": "full_name",
+        "separator": " ",
+        "entity": "contacts",
+        "aliased_entity": "updated_by"
+      },
+      {
+        "fields": [
+          "created_date",
+          "created_time"
+        ],
+        "field_name": "created_date_time",
+        "separator": " ",
+        "entity": "devices"
+      },
+      {
+        "fields": [
+          "updated_date",
+          "updated_time"
+        ],
+        "field_name": "updated_date_time",
+        "separator": " ",
+        "entity": "devices"
+      }
+    ],
+    "group_advance_filters": [],
+    "distinct_by": "",
+    "time_format": "HH24:MI"
+  }
+}
+
+vars:pre-request {
+  baseUrl: https://store.appguard.ai
+  defaultEntity: versions
+}
+
+settings {
+  encodeUrl: true
+  timeout: 0
+}
