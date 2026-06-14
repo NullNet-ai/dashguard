@@ -341,7 +341,7 @@ export const deviceRemoteAccessSessionRouter = createTRPCRouter({
       const resolvedOrderByField =
         sorting?.length === 1
           ? singleSort?.type === 'boolean'
-            ? 'code'
+            ? singleSortKey
             : typeof singleSortKey === 'string' && singleSortKey.includes('.')
               ? singleSortKey
               : singleSortKey || 'code'

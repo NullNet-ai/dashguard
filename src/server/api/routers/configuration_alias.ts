@@ -122,8 +122,9 @@ export const deviceAliasRouter = createTRPCRouter({
                   : (input.current || 1) * (input.limit || 100)
                     - (input.limit || 100),
               limit: input.limit || 1,
-              by_field: 'code',
-              by_direction: EOrderDirection.DESC,
+              // @ts-expect-error - No type yet
+              by_field: _sorting?.[0]?.name,
+              by_direction: _sorting?.[0]?.desc ? EOrderDirection.DESC : EOrderDirection.ASC,
             },
             // multiple_sort: _sorting?.length
             // ? formatSorting(_sorting, 'aliases', is_case_sensitive_sorting)
