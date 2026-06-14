@@ -14,6 +14,7 @@ export interface IState {
     searchableFields: ISearchableField[];
   };
   rawItems: Record<string, any>[];
+  isLoading: boolean;
 }
 
 export interface IAction {

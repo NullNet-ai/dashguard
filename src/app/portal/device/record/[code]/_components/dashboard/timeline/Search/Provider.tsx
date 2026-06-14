@@ -53,6 +53,7 @@ export default function GraphSearchProvider({
 
   const [searchItems, setSearchItems] = useState<ISearchItem[]>([]);
   const [rawItems, setRawItems] = useState<ISearchItem[]>();
+  const [isLoading, setIsLoading] = useState(false);
   const [open, setOpen] = useState(false);
   const [search_params, setSearchParams] = useState({});
   const [filterId, setFilterID] = useState('01JNQ9WPA2JWNTC27YCTCYC1FE');
@@ -168,9 +169,14 @@ export default function GraphSearchProvider({
 
       if (!_query) return;
 
-      const { data }: any = await refetch();
-      if (data?._query == _query) {
-        setRawItems(data?.items);
+      setIsLoading(true);
+      try {
+        const { data }: any = await refetch();
+        if (data?._query == _query) {
+          setRawItems(data?.items);
+        }
+      } finally {
+        setIsLoading(false);
       }
     };
     refetchSearchOption();
@@ -261,6 +267,7 @@ export default function GraphSearchProvider({
       searchableFields,
     },
     rawItems,
+    isLoading,
   } as IState;
   const actions = {
     handleQuery,

@@ -205,7 +205,7 @@ export default function IPSearch() {
               static={true}
             >
               <li className="p-2">
-                <SearchResult results={results} />
+                <SearchResult results={state?.isLoading ? null : results} />
               </li>
             </ComboboxOptions>
           )}

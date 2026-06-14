@@ -98,11 +98,13 @@ export default function View() {
             <li className="p-2">
               <SearchResult
                 results={
-                  (transformSearchData(
-                    items,
-                    debouncedSearchInput,
-                    searchableFields as ISearchableField[],
-                  ) as ISearchItemResult[]) || null
+                  state?.isLoading
+                    ? null
+                    : (transformSearchData(
+                        items,
+                        debouncedSearchInput,
+                        searchableFields as ISearchableField[],
+                      ) as ISearchItemResult[]) || null
                 }
               />
             </li>

@@ -191,11 +191,13 @@ export default function SearchDialog() {
                     <h2 className="mb-2 mt-1 px-3 text-xs font-semibold text-gray-500">
                       <SearchResult
                         results={
-                          (transformSearchData(
-                            items,
-                            debouncedSearchInput,
-                            searchableFields,
-                          ) as ISearchItemResult[]) || null
+                          state?.isLoading
+                            ? null
+                            : (transformSearchData(
+                                items,
+                                debouncedSearchInput,
+                                searchableFields,
+                              ) as ISearchItemResult[]) || null
                         }
                         closeDialog={handleCloseDialog}
                       />

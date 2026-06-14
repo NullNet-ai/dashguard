@@ -778,8 +778,10 @@ export const packetRouter = createTRPCRouter({
                     field: 'source_ip',
                     entity: 'connections',
                     operator: EOperator.LIKE,
-                    values: [ipSearchValue],
+                    values: [query],
                     parse_as: 'text',
+                    // @ts-ignorepect-error - match_pattern is not defined in the type
+                    match_pattern: isPartialIp ? 'prefix' : 'contains',
                   },
                   { type: 'operator', operator: EOperator.AND },
                   {
