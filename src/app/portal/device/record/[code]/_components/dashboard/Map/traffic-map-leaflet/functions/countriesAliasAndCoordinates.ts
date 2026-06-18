@@ -2,7 +2,7 @@
 export const COUNTRY_ALIASES: Record<string, string> = {
   "United States": "United States of America",
   "Russia": "Russian Federation",
-  "South Korea": "Korea, Republic of",
+  "South Korea": "South Korea",
   "North Korea": "Korea, Democratic People's Republic of",
   "Vietnam": "Viet Nam",
   "Syria": "Syrian Arab Republic",
@@ -21,7 +21,7 @@ export const COUNTRY_ALIASES: Record<string, string> = {
   "Palestine": "Palestinian Territory",
   "Macau": "Macao",
   "Taiwan": "Taiwan, Province of China",
-  "Hong Kong": "Hong Kong SAR",
+  "Hong Kong": "Hong Kong",
   "Hongkong": "Hong Kong",
   "UK": "United Kingdom",
   "Singapore": "Singapore",
