@@ -826,7 +826,7 @@ export const packetRouter = createTRPCRouter({
                   field: 'country',
                   entity: 'ip_infos',
                   operator: EOperator.LIKE,
-                  values: [`${query}%`],
+                  values: [query],
                 },
               ],
               order: {
