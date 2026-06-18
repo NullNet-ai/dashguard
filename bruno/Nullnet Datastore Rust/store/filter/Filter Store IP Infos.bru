@@ -1,0 +1,58 @@
+meta {
+  name: Filter Store IP Infos
+  type: http
+  seq: 5
+}
+
+post {
+  url: {{baseUrl}}/api/store/root/ip_infos/filter
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJhY2NvdW50Ijp7ImFjY291bnRfaWQiOiJyb290IiwiYWNjb3VudF9vcmdhbml6YXRpb25faWQiOiIwMUpNM0dUV0NIUjNDTTJOUDg1QzBRMktOMSIsImFjY291bnRfc3RhdHVzIjoiQWN0aXZlIiwiY29udGFjdCI6e30sImRldmljZSI6e30sImlkIjoiMDFKTTNHVFdDSFIzQ00yTlA4NUMwUTJLTjEiLCJpc19yb290X2FjY291bnQiOnRydWUsIm9yZ2FuaXphdGlvbiI6eyJjYXRlZ29yaWVzIjpbIlJvb3QiLCJQZXJzb25hbCJdLCJjb2RlIjpudWxsLCJpZCI6IjAxSlNONFhBMkMzQTdSSE4zTU5aWkpHQlIzIiwibmFtZSI6IlJvb3QgUGVyc29uYWwgT3JnYW5pemF0aW9uIiwib3JnYW5pemF0aW9uX2lkIjoiMDFKU040WEEyQzNBN1JITjNNTlpaSkdCUjMiLCJwYXJlbnRfb3JnYW5pemF0aW9uX2lkIjpudWxsLCJzdGF0dXMiOiJBY3RpdmUifSwib3JnYW5pemF0aW9uX2lkIjoiMDFKU040WEEyQzNBN1JITjNNTlpaSkdCUjMiLCJwcm9maWxlIjp7ImFjY291bnRfaWQiOiJyb290IiwiY2F0ZWdvcmllcyI6W10sImNvZGUiOm51bGwsImVtYWlsIjoicm9vdCIsImZpcnN0X25hbWUiOm51bGwsImlkIjoiMDFKTTNHVFdDSFIzQ00yTlA4NUMwUTJLTjEiLCJsYXN0X25hbWUiOm51bGwsIm9yZ2FuaXphdGlvbl9pZCI6IjAxSlNONFhBMkMzQTdSSE4zTU5aWkpHQlIzIiwic3RhdHVzIjoiQWN0aXZlIn0sInJvbGVfaWQiOm51bGwsInJvbGVfbmFtZSI6bnVsbCwic2Vuc2l0aXZpdHlfbGV2ZWwiOm51bGx9LCJleHAiOjE3ODE4MzAyMjAsImlhdCI6MTc4MTc0MzgyMCwicHJldmlvdXNseV9sb2dnZWRfaW4iOm51bGwsInJvbGVfbmFtZSI6IiIsInNlbnNpdGl2aXR5X2xldmVsIjpudWxsLCJzZXNzaW9uSUQiOiIiLCJzaWduZWRfaW5fYWNjb3VudCI6eyJhY2NvdW50X2lkIjoicm9vdCIsImFjY291bnRfb3JnYW5pemF0aW9uX2lkIjoiMDFKTTNHVFdDSFIzQ00yTlA4NUMwUTJLTjEiLCJhY2NvdW50X3N0YXR1cyI6IkFjdGl2ZSIsImNvbnRhY3QiOnt9LCJkZXZpY2UiOnt9LCJpZCI6IjAxSk0zR1RXQ0hSM0NNMk5QODVDMFEyS04xIiwiaXNfcm9vdF9hY2NvdW50Ijp0cnVlLCJvcmdhbml6YXRpb24iOnsiY2F0ZWdvcmllcyI6WyJSb290IiwiUGVyc29uYWwiXSwiY29kZSI6bnVsbCwiaWQiOiIwMUpTTjRYQTJDM0E3UkhOM01OWlpKR0JSMyIsIm5hbWUiOiJSb290IFBlcnNvbmFsIE9yZ2FuaXphdGlvbiIsIm9yZ2FuaXphdGlvbl9pZCI6IjAxSlNONFhBMkMzQTdSSE4zTU5aWkpHQlIzIiwicGFyZW50X29yZ2FuaXphdGlvbl9pZCI6bnVsbCwic3RhdHVzIjoiQWN0aXZlIn0sIm9yZ2FuaXphdGlvbl9pZCI6IjAxSlNONFhBMkMzQTdSSE4zTU5aWkpHQlIzIiwicHJvZmlsZSI6eyJhY2NvdW50X2lkIjoicm9vdCIsImNhdGVnb3JpZXMiOltdLCJjb2RlIjpudWxsLCJlbWFpbCI6InJvb3QiLCJmaXJzdF9uYW1lIjpudWxsLCJpZCI6IjAxSk0zR1RXQ0hSM0NNMk5QODVDMFEyS04xIiwibGFzdF9uYW1lIjpudWxsLCJvcmdhbml6YXRpb25faWQiOiIwMUpTTjRYQTJDM0E3UkhOM01OWlpKR0JSMyIsInN0YXR1cyI6IkFjdGl2ZSJ9LCJyb2xlX2lkIjpudWxsLCJyb2xlX25h
+}
+
+body:json {
+  {
+    "pluck": [
+      "ip",
+      "country"
+    ],
+    "pluck_object": {},
+    "pluck_group_object": {},
+    "advance_filters": [
+      {
+        "type": "criteria",
+        "field": "country",
+        "entity": "ip_infos",
+        "operator": "like",
+        "values": [
+          "canada%"
+        ]
+      }
+    ],
+    "offset": 0,
+    "limit": 20,
+    "joins": [],
+    "order_direction": "desc",
+    "order_by": "ip_infos.code",
+    "is_case_sensitive_sorting": false,
+    "multiple_sort": [],
+    "date_format": "mm/dd/YYYY",
+    "concatenate_fields": [],
+    "group_advance_filters": [],
+    "distinct_by": "",
+    "time_format": "HH24:MI"
+  }
+}
+
+vars:pre-request {
+  baseUrl: https://store.appguard.ai
+}
+
+settings {
+  encodeUrl: true
+  timeout: 0
+}
