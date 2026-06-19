@@ -1,6 +1,7 @@
 "use client";
 
 import { type ColumnDef } from "@tanstack/react-table";
+import moment from "moment";
 import StatusCell from "~/components/ui/status-cell";
 import AuthorizationCell from '../_components/AuthorizationCell';
 import GridDeviceOnlineBadge from '../GridDeviceOnlineBadge';
@@ -81,7 +82,14 @@ const gridColumns = [
       field: "updated_date_time",
       operator: 'like',
       custom_filter_field: 'updated_date',
-    }
+    },
+    cell: ({ row }) => {
+      const raw = row?.original?.updated_date_time as string | undefined;
+      if (!raw) return null;
+      const parsed = moment.utc(raw, 'MM/DD/YYYY HH:mm');
+      if (!parsed.isValid()) return <span>{raw}</span>;
+      return <span>{parsed.local().format('MM/DD/YYYY HH:mm')}</span>;
+    },
   },
   {
     header: 'Updated By',
@@ -103,6 +111,13 @@ const gridColumns = [
       field: 'created_date_time',
       operator: 'like',
       custom_filter_field: 'created_date',
+    },
+    cell: ({ row }) => {
+      const raw = row?.original?.created_date_time as string | undefined;
+      if (!raw) return null;
+      const parsed = moment.utc(raw, 'MM/DD/YYYY HH:mm');
+      if (!parsed.isValid()) return <span>{raw}</span>;
+      return <span>{parsed.local().format('MM/DD/YYYY HH:mm')}</span>;
     },
   },
   {
