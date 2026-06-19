@@ -93,7 +93,7 @@ Copy `.env-example` to `.env.local`. Key variables:
 
 ## Key Conventions
 
-- `device_category` drives conditional rendering (AppGuard Client vs Firewall/PFSense)
+- `device_category` drives conditional rendering (Appguard Client vs Firewall/PFSense)
 - Record pages use `export const dynamic = 'force-dynamic'` — no static generation
 - Status checks (`Draft`, `Pending`) in record layouts redirect to `notFound()` before rendering
 - `~/utils/request-header.ts` has `setMetaHeader` for ORM mutation context

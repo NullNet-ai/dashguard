@@ -7,7 +7,7 @@ const optionsByCategory: Record<string, string[]> = {
     'PFSense',
     // 'OPNSense'
   ],
-  'AppGuard Client': [
+  'Appguard Client': [
     'Linux',
     'Windows',
     'Mac OS',

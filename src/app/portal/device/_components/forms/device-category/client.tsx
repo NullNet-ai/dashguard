@@ -60,8 +60,8 @@ export default function DeviceCategory({ params, defaultValues }: IFormProps) {
       radioOptions={{
         device_category: [
           {
-            label: 'AppGuard Client',
-            value: 'AppGuard Client',
+            label: 'Appguard Client',
+            value: 'Appguard Client',
           },
           {
             label: 'Firewall',

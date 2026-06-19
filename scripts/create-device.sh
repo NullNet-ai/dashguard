@@ -427,7 +427,7 @@ Always targets the production environment.
 
 Optional:
   --device-name=NAME           Override auto-detected name (defaults to hostname)
-  --device-category=CAT        Override auto-detected category (Firewall | AppGuard Client)
+  --device-category=CAT        Override auto-detected category (Firewall | Appguard Client)
   --device-type=TYPE           Override auto-detected type (PFSense | Linux | Windows)
   --address-city=CITY          Override auto-detected city
   --address-country=COUNTRY    Override auto-detected country
