@@ -1,7 +1,7 @@
 'use client'
 
 import { usePathname, useSearchParams } from 'next/navigation';
-import { useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import Grid from '~/components/platform/Grid';
 import { getGridCacheData } from '~/components/platform/Grid/utils/grid-get-cache-data';
 import { gridDataResolver } from '~/components/platform/Grid/utils/gridDataResolver';
@@ -85,6 +85,23 @@ export default function Page() {
   useEffect(() => {
     fetchData(gridParams);
   }, [gridParams]);
+
+  const handleFetchRecords = useCallback(
+    (newArgs?: any) => {
+      fetchData(newArgs);
+      if (newArgs?.grouping !== undefined) {
+        getGridCacheData({
+          pathname: fullPathname,
+          defaultSorting: defaultSorting,
+          entity: main_entity ?? 'device',
+          application: 'grid',
+        }).then((freshData) => {
+          if (freshData) setGridCacheData(freshData);
+        });
+      }
+    },
+    [fetchData, fullPathname, main_entity],
+  );
 
   const OnlineDeviceArchiveDialog = ({
     row,
@@ -225,7 +242,7 @@ export default function Page() {
             `/portal/${edit?.entity}/record/${edit?.code}/dashboard`,
           );
         },
-        onFetchRecords: fetchData,
+        onFetchRecords: handleFetchRecords,
       }}
       customCreateButton={<CustomCreateButton entity={main_entity!} />}
     />
