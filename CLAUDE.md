@@ -98,6 +98,7 @@ Copy `.env-example` to `.env.local`. Key variables:
 - Status checks (`Draft`, `Pending`) in record layouts redirect to `notFound()` before rendering
 - `~/utils/request-header.ts` has `setMetaHeader` for ORM mutation context
 - `tsconfig.json` enables `noUncheckedIndexedAccess` — array/object index access always returns `T | undefined`; use optional chaining or explicit guards throughout
+- **Dates**: use `moment` / `moment-timezone` for all date manipulation and formatting — never raw `new Date()` for arithmetic or display. `new Date()` is only acceptable as a seed passed directly into moment (e.g. `moment(new Date())`)
 
 <!-- ECC -->
 
