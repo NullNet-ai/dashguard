@@ -331,7 +331,7 @@ do_revert() {
   log_important "=== Revert started ==="
   if [[ -n "${DEVICE_ID:-}" ]]; then
     log "Deleting device via API: ${DEVICE_ID} (${DEVICE_CODE:-})"
-    store_patch_root "store/root/devices/${DEVICE_ID}" '{"status":"Deleted"}' >/dev/null 2>&1 \
+    store_patch_root "store/root/devices/${DEVICE_ID}" '{"status":"Deleted","tombstone":1}' >/dev/null 2>&1 \
       && log "Device deleted OK" \
       || log_important "Could not auto-delete device — remove ${DEVICE_CODE:-$DEVICE_ID} manually in the portal."
   else
@@ -632,7 +632,7 @@ if [[ -n "${STATE_FILE}" ]] && [[ -f "${STATE_FILE}" ]]; then
       log_important "=== Revert + restart ==="
       if [[ -n "${DEVICE_ID:-}" ]]; then
         log "Deleting device via API: ${DEVICE_ID} (${DEVICE_CODE:-})"
-        store_patch_root "store/root/devices/${DEVICE_ID}" '{"status":"Deleted"}' >/dev/null 2>&1 \
+        store_patch_root "store/root/devices/${DEVICE_ID}" '{"status":"Deleted","tombstone":1}' >/dev/null 2>&1 \
           && log "Device deleted OK" \
           || log_important "Could not auto-delete device — continuing anyway."
       else
