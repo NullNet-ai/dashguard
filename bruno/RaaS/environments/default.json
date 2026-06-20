@@ -1,0 +1,11 @@
+{
+  "name": "default",
+  "variables": [
+    {
+      "name": "raas",
+      "value": "http://localhost:8080",
+      "type": "text",
+      "enabled": true
+    }
+  ]
+}

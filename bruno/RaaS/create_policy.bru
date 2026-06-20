@@ -1,0 +1,22 @@
+meta {
+  name: create policy
+  type: http
+  seq: 2
+}
+
+post {
+  url: {{raas}}/api/policy
+  body: json
+  auth: none
+}
+
+body:json {
+  {
+    "hypertable": "public.test_hypertables",
+    "drop_after": "30 days",
+    "schedule_interval": "1 day",
+    "initial_start": "2026-06-20T00:00:00Z",
+    "timezone": "UTC",
+    "if_not_exists": false
+  }
+}
