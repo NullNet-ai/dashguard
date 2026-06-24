@@ -18,12 +18,17 @@ import CustomCreateButton from '../_components/custom_create_button';
 import gridColumns, { TO_HIDE_COLUMNS_WHEN_MOBILE } from './_config/columns';
 import defaultSorting from './_config/sorting';
 import AuthorizeDeviceAction from './_components/AuthorizeDeviceAction';
-import { ArchiveX } from 'lucide-react';
+import { ArchiveX, Loader2 } from 'lucide-react';
 
 export default function Page() {
   const router = useRouter();
   const toast = useToast();
   const _navigate = api.wizard.getCurrentStep.useMutation();
+  const utils = api.useUtils();
+  const createSessionMutation =
+    api.deviceRemoteAccessSession.createUpdateDeviceRemoteAccessSessions.useMutation();
+  const archiveRecordMutation = api.grid.archiveRecord.useMutation();
+  const [isArchiving, setIsArchiving] = useState(false);
 
   const pathname = usePathname();
   const searchParams = useSearchParams();
@@ -115,6 +120,8 @@ export default function Page() {
       setOpen && setOpen(false);
     };
 
+    const isLoading = isArchiving;
+
     return (
       <Dialog
         open={!!open}
@@ -150,17 +157,24 @@ export default function Page() {
               Cancel
             </Button>
             <Button
-              onClick={() => {
+              onClick={async () => {
+                setIsArchiving(true);
+                try {
                 if (config?.archiveCustomAction) {
-                  config?.archiveCustomAction(row.original);
+                    await config.archiveCustomAction(row.original);
                 } else {
                   handleArchive({ row, config });
                 }
+                } finally {
+                  setIsArchiving(false);
                 handleClose();
+                }
               }}
+              disabled={isLoading}
               variant="destructive"
-              className="mr-2"
+              className="mr-2 flex items-center gap-2"
             >
+              {isLoading ? <Loader2 className="h-4 w-4 animate-spin" /> : null}
               Archive
             </Button>
           </DialogFooter>
@@ -191,6 +205,73 @@ export default function Page() {
         defaultShownColumns: ['created_date', 'updated_date'],
         hideColumnsOnMobile: TO_HIDE_COLUMNS_WHEN_MOBILE,
         archiveDialogCustomComponent: OnlineDeviceArchiveDialog,
+        archiveCustomAction: async (record: Record<string, any>) => {
+          try {
+            const services =
+              await utils.deviceRemoteAccessSession.fetchDeviceServices.fetch({
+                device_id: record.id,
+                limit: 100,
+              });
+
+            const firstTtyService = (
+              Array.isArray(services) ? (services as any[]) : []
+            ).find((s: any) => s.item?.protocol === 'tty');
+
+            if (firstTtyService) {
+              const res = await createSessionMutation.mutateAsync({
+                device_id: record.id,
+                remote_access_type: 'tty',
+                category: 'tty',
+                device_service_id: firstTtyService.value,
+              });
+
+              const remote_access_session = (
+                res?.data?.[0] as Record<string, any>
+              )?.remote_access_session;
+
+              if (res?.success && remote_access_session) {
+                const wsUrl = `wss://${remote_access_session}.${process.env.NEXT_PUBLIC_REMOTE_ACCESS_API_URL?.replace('https://', '')}/wallguard/gateway/tty`;
+
+                await new Promise<void>((resolve) => {
+                  const ws = new WebSocket(wsUrl);
+                  const fallback = setTimeout(() => {
+                    ws.close();
+                    resolve();
+                  }, 5000);
+
+                  ws.onopen = () => {
+                    ws.send('wallguard-cli leave\r');
+                    setTimeout(() => {
+                      clearTimeout(fallback);
+                      ws.close();
+                      resolve();
+                    }, 2000);
+                  };
+                  ws.onerror = () => {
+                    clearTimeout(fallback);
+                    resolve();
+                  };
+                  ws.onclose = () => {
+                    clearTimeout(fallback);
+                    resolve();
+                  };
+                });
+              }
+            }
+          } catch (err) {
+            console.error(
+              '[archiveCustomAction] wallguard-cli leave failed',
+              err,
+            );
+          }
+
+          const result = await archiveRecordMutation.mutateAsync({
+            entity: main_entity!,
+            id: record.id,
+          });
+          handleFetchRecords();
+          return result as Record<string, any>;
+        },
         searchConfig: {
           router: 'grid',
           resolver: 'items',
