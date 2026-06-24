@@ -1,11 +1,11 @@
 meta {
-  name: Filter Store IP Infos
+  name: Aggregate Store Data Connections
   type: http
-  seq: 5
+  seq: 3
 }
 
 post {
-  url: {{baseUrl}}/api/store/root/ip_infos/filter
+  url: https://store.appguard.ai/api/store/root/aggregate
   body: json
   auth: bearer
 }
@@ -16,19 +16,15 @@ auth:bearer {
 
 body:json {
   {
-    "pluck": [
-      "ip",
-      "country"
-    ],
-    "pluck_object": {},
-    "pluck_group_object": {},
     "advance_filters": [
       {
         "type": "criteria",
-        "field": "ip",
-        "operator": "equal",
+        "field": "timestamp",
+        "entity": "connections",
+        "operator": "is_between",
         "values": [
-          "34.36.31.173"
+          "2026-06-23 13:53:00+00",
+          "2026-06-23 13:54:20+00"
         ]
       },
       {
@@ -37,30 +33,44 @@ body:json {
       },
       {
         "type": "criteria",
-        "field": "country",
+        "field": "source_ip",
+        "entity": "connections",
         "operator": "equal",
         "values": [
-          "US"
+          "3.230.105.35"
+        ]
+      },
+      {
+        "type": "operator",
+        "operator": "and"
+      },
+      {
+        "type": "criteria",
+        "field": "device_id",
+        "entity": "connections",
+        "operator": "equal",
+        "values": [
+          "01KVS4X3V695AE267298XNVJZV"
         ]
       }
     ],
-    "offset": 0,
-    "limit": 1,
     "joins": [],
-    "order_direction": "desc",
-    "order_by": "ip_infos.ip",
-    "is_case_sensitive_sorting": false,
-    "multiple_sort": [],
-    "date_format": "mm/dd/YYYY",
-    "concatenate_fields": [],
-    "group_advance_filters": [],
-    "distinct_by": "",
-    "time_format": "HH24:MI"
+    "aggregations": [
+      {
+        "aggregation": "SUM",
+        "aggregate_on": "total_byte",
+        "bucket_name": "bandwidth"
+      }
+    ],
+    "order": {
+      "order_by": "bucket",
+      "order_direction": "desc"
+    },
+    "bucket_size": "1s",
+    "timezone": "Asia/Manila",
+    "entity": "connections",
+    "limit": 60
   }
-}
-
-vars:pre-request {
-  baseUrl: https://store.appguard.ai
 }
 
 settings {
