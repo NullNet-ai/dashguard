@@ -165,6 +165,7 @@ const CustomCreateButton = ({ entity }: { entity: string }) => {
   const [dialogOpen, setDialogOpen] = useState(false);
   const [installUrl, setInstallUrl] = useState('');
   const [windowsUrl, setWindowsUrl] = useState('');
+  const [freebsdUrl, setFreebsdUrl] = useState('');
   const [expiresIn, setExpiresIn] = useState<number>(7200);
   const [loadingInstall, setLoadingInstall] = useState(false);
   const [copiedKey, setCopiedKey] = useState<string | null>(null);
@@ -192,6 +193,7 @@ const CustomCreateButton = ({ entity }: { entity: string }) => {
       const data = await res.json();
       setInstallUrl(data.url);
       setWindowsUrl(data.windowsUrl);
+      setFreebsdUrl(data.freebsdUrl);
       setExpiresIn(data.expiresIn);
       setDialogOpen(true);
     } catch {
@@ -207,10 +209,10 @@ const CustomCreateButton = ({ entity }: { entity: string }) => {
     setTimeout(() => setCopiedKey(null), 2000);
   };
 
-  const freebsdCmd = `pkg install -y bash curl jq python3 2>/dev/null; curl -fsSL '${installUrl}' > /tmp/create-device.sh && bash /tmp/create-device.sh --platform=pfsense; rm -f /tmp/create-device.sh`;
-  const linuxCmd = `curl -fsSL '${installUrl}' > /tmp/create-device.sh && bash /tmp/create-device.sh; rm -f /tmp/create-device.sh`;
+  const freebsdCmd = `sh -c "$(fetch -qo - '${freebsdUrl}')"`;
+  const linuxCmd = `sudo bash -c "$(curl -fsSL '${installUrl}')"`;
   const winCmd = `Set-ExecutionPolicy Bypass -Scope Process -Force; irm '${windowsUrl}' | iex`;
-  const macosCmd = `curl -fsSL '${installUrl}' > /tmp/create-device.sh && bash /tmp/create-device.sh; rm -f /tmp/create-device.sh`;
+  const macosCmd = `sudo bash -c "$(curl -fsSL '${installUrl}')"`;
 
   return (
     <div className="flex items-center justify-end gap-2">

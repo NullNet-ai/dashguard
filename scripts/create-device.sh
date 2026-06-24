@@ -15,7 +15,7 @@
 #   7. Poll until the device reports online
 #   8. Activate the device (status → Active)
 #
-# Requirements: curl, jq, python3
+# Requirements: curl, jq
 #
 # Usage:
 #   sudo bash create-device.sh [OPTIONS]     # Recommended — no chmod needed, runs as root
@@ -116,7 +116,11 @@ LOG_FILENAME=""
 QUIET=false
 DISABLE_TLS_VERIFICATION=false
 
-# Resume / revert state file (set to "" to disable state tracking)
+# Fresh install: when true, an existing incomplete run is reverted and re-run from
+# scratch instead of auto-continuing. Default false = auto-continue where it left off.
+FRESH_INSTALL="${FRESH_INSTALL:-false}"
+
+# Resume state file (set to "" to disable state tracking)
 STATE_FILE="${STATE_FILE:-./.create-device.state}"
 
 # ---------------------------------------------------------------------------
@@ -172,7 +176,6 @@ auto_install_tool() {
   local tool="$1"
   local pkg
   case "${tool}" in
-    python3) pkg="python3" ;;
     curl)    pkg="curl" ;;
     jq)      pkg="jq" ;;
     nc)      pkg="netcat-openbsd" ;;
@@ -326,26 +329,6 @@ revert_agent() {
   esac
 }
 
-# do_revert — undo API resources, uninstall agent, then remove state and exit
-do_revert() {
-  log_important "=== Revert started ==="
-  if [[ -n "${DEVICE_ID:-}" ]]; then
-    log "Deleting device via API: ${DEVICE_ID} (${DEVICE_CODE:-})"
-    store_patch_root "store/root/devices/${DEVICE_ID}" '{"status":"Deleted","tombstone":1}' >/dev/null 2>&1 \
-      && log "Device deleted OK" \
-      || log_important "Could not auto-delete device — remove ${DEVICE_CODE:-$DEVICE_ID} manually in the portal."
-  else
-    log "No device ID in state — skipping API deletion"
-  fi
-  revert_agent
-  if [[ -n "${STATE_FILE}" ]]; then
-    rm -f "${STATE_FILE}"
-    log "State file removed: ${STATE_FILE}"
-  fi
-  log_important "=== Revert complete ==="
-  exit 0
-}
-
 # assert_field — exits if a jq-extracted value is empty or "null"
 assert_field() {
   local val="$1" label="$2"
@@ -434,6 +417,11 @@ Optional:
   --address-country-code=CODE  Override auto-detected country code (e.g. PH)
   --wallguard-version=VER      Override auto-fetched version (e.g. 1.1.10)
   --platform=PLATFORM          pfsense | linux | windows (auto-detected if omitted)
+  --fresh, --reinstall         Revert a prior incomplete run and reinstall from scratch
+
+Re-runs:
+  If a previous run failed partway, simply re-run the same command — it auto-continues
+  from the last completed step. Use --fresh to discard that progress and start over.
 
 Advanced overrides:
   --email=EMAIL                Provide org account email (skips prompt)
@@ -529,6 +517,7 @@ while [[ $# -gt 0 ]]; do
     --poll-interval=*)          POLL_INTERVAL="${1#*=}" ;;
     --poll-timeout=*)           POLL_TIMEOUT="${1#*=}" ;;
     --log-file=*)               LOG_FILENAME="${1#*=}" ;;
+    --fresh|--reinstall)        FRESH_INSTALL=true ;;
     --quiet)                    QUIET=true ;;
     --disable-tls-verification) DISABLE_TLS_VERIFICATION=true ;;
     -h|--help)                  usage; exit 0 ;;
@@ -556,7 +545,7 @@ if [[ -n "${LOG_FILENAME}" ]] && [ -f "${LOG_FILENAME}" ]; then
 fi
 
 # 1. Required tools — fail before any network call
-check_exists_fatal curl jq python3
+check_exists_fatal curl jq
 
 # 2. Required credentials — fail if unset
 check_set EMAIL
@@ -604,13 +593,6 @@ ADDRESS_ID=""
 INSTALL_TOKEN=""
 
 if [[ -n "${STATE_FILE}" ]] && [[ -f "${STATE_FILE}" ]]; then
-  log_important "Incomplete run detected (${STATE_FILE})."
-  printf "  [c] Continue from last completed step (default)\n"
-  printf "  [r] Revert — delete created resources and exit\n"
-  printf "  [s] Revert then start fresh — clean up and re-run from scratch\n"
-  read -rp "Choice [c/r/s]: " _resume_choice 2>/dev/null || _resume_choice="c"
-  _resume_choice="${_resume_choice:-c}"
-
   _do_reauth_root() {
     log "Re-authenticating (root) for revert..."
     _ra=$(curl -sf --connect-timeout 10 --max-time 30 -X POST "$API/organizations/auth?is_root=true" \
@@ -620,36 +602,31 @@ if [[ -n "${STATE_FILE}" ]] && [[ -f "${STATE_FILE}" ]]; then
     ROOT_TOKEN=$(echo "$_ra" | jq -r '.data.token // .data.access_token // .token // .access_token')
   }
 
-  case "${_resume_choice}" in
-    r|R)
-      load_state
-      _do_reauth_root
-      do_revert  # exits after revert
-      ;;
-    s|S)
-      load_state
-      _do_reauth_root
-      log_important "=== Revert + restart ==="
-      if [[ -n "${DEVICE_ID:-}" ]]; then
-        log "Deleting device via API: ${DEVICE_ID} (${DEVICE_CODE:-})"
-        store_patch_root "store/root/devices/${DEVICE_ID}" '{"status":"Deleted","tombstone":1}' >/dev/null 2>&1 \
-          && log "Device deleted OK" \
-          || log_important "Could not auto-delete device — continuing anyway."
-      else
-        log "No device ID in state — skipping API deletion"
-      fi
-      revert_agent
-      if [[ -n "${STATE_FILE}" ]]; then
-        rm -f "${STATE_FILE}"
-        log "State file removed: ${STATE_FILE}"
-      fi
-      log_important "=== Revert complete — restarting from scratch ==="
-      STEP_COMPLETED=0; DEVICE_ID=""; DEVICE_CODE=""; ADDRESS_ID=""; INSTALL_TOKEN=""; WALLGUARD_VERSION=""
-      ;;
-    *)
-      load_state
-      ;;
-  esac
+  if [[ "${FRESH_INSTALL}" == "true" ]]; then
+    # --fresh: revert the prior incomplete run, then re-run from scratch.
+    load_state
+    _do_reauth_root
+    log_important "=== --fresh: cleaning prior incomplete run ==="
+    if [[ -n "${DEVICE_ID:-}" ]]; then
+      log "Deleting device via API: ${DEVICE_ID} (${DEVICE_CODE:-})"
+      store_patch_root "store/root/devices/${DEVICE_ID}" '{"status":"Deleted","tombstone":1}' >/dev/null 2>&1 \
+        && log "Device deleted OK" \
+        || log_important "Could not auto-delete device — continuing anyway."
+    else
+      log "No device ID in state — skipping API deletion"
+    fi
+    revert_agent
+    if [[ -n "${STATE_FILE}" ]]; then
+      rm -f "${STATE_FILE}"
+      log "State file removed: ${STATE_FILE}"
+    fi
+    STEP_COMPLETED=0; DEVICE_ID=""; DEVICE_CODE=""; ADDRESS_ID=""; INSTALL_TOKEN=""; WALLGUARD_VERSION=""
+    log_important "=== Clean slate — starting fresh install ==="
+  else
+    # Default: auto-continue from the last completed step (no prompt).
+    load_state
+    log_important "Incomplete run detected — auto-continuing from step ${STEP_COMPLETED} (pass --fresh to reinstall from scratch)."
+  fi
 fi
 
 # ---------------------------------------------------------------------------
@@ -757,7 +734,9 @@ if [[ "${STEP_COMPLETED}" -lt 6 ]]; then
   existing_token=$(echo "$filter_resp" | jq -r '.data[0].token // empty')
   if [ -z "$existing_token" ]; then
     log "No existing code — creating one..."
-    hex_token=$(python3 -c "import secrets; print(secrets.token_hex(8))")
+    # 16 random hex chars from the OS CSPRNG. Uses base `od`/`/dev/urandom`
+    # (present on FreeBSD, Linux, and macOS) so no python3 dependency is needed.
+    hex_token=$(od -vAn -N8 -tx1 /dev/urandom | tr -d ' \n')
     code_resp=$(store_post "store/installation_codes?pluck=id,token" \
       "{\"status\":\"Active\",\"device_id\":\"$DEVICE_ID\",\"device_code\":\"$DEVICE_CODE\",\"token\":\"$hex_token\"}")
     INSTALL_TOKEN=$(echo "$code_resp" | jq -r '.data[0].token')

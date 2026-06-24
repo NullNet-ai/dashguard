@@ -3,6 +3,7 @@ import { join } from 'path';
 import { cookies } from 'next/headers';
 import { NextRequest, NextResponse } from 'next/server';
 import redisCache from '~/server/redis/cache';
+import { buildInstallBase } from './_url';
 
 // Safely quote a value for use in a bash single-quoted string
 const bashQuote = (s: string) => `'${s.replace(/'/g, "'\\''")}'`;
@@ -23,6 +24,34 @@ export async function GET(req: NextRequest) {
         { message: 'Invalid or expired install token' },
         { status: 401 },
       );
+    }
+
+    if (format === 'bootstrap') {
+      // pfSense/FreeBSD one-command installer. The base shell is /bin/sh (not bash)
+      // and lacks bash/curl/jq, so this POSIX-sh wrapper installs the deps first,
+      // then re-fetches and execs the bash installer via command substitution
+      // (keeps stdin attached to the terminal for any interactive prompts).
+      const installBase = buildInstallBase(req);
+      if (!installBase) {
+        return NextResponse.json({ message: 'Invalid host' }, { status: 400 });
+      }
+      const innerUrl = `${installBase}/api/scripts/create-device?token=${installToken}`;
+
+      const sh = [
+        '#!/bin/sh',
+        'pkg install -y bash curl jq >/dev/null 2>&1 || true',
+        `exec bash -c "$(fetch -qo - '${innerUrl}')" create-device.sh --platform=pfsense`,
+        '',
+      ].join('\n');
+
+      return new NextResponse(sh, {
+        headers: {
+          'Content-Type': 'text/plain; charset=utf-8',
+          'Content-Disposition':
+            'inline; filename="create-device-bootstrap.sh"',
+          'Cache-Control': 'no-store',
+        },
+      });
     }
 
     if (format === 'ps1') {

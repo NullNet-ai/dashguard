@@ -2,6 +2,7 @@ import { randomBytes } from 'crypto';
 import { cookies } from 'next/headers';
 import { NextRequest, NextResponse } from 'next/server';
 import redisCache from '~/server/redis/cache';
+import { buildInstallBase } from '../_url';
 
 const TOKEN_TTL_SECONDS = parseInt(
   process.env.INSTALL_TOKEN_TTL_SECONDS ?? '7200',
@@ -36,11 +37,19 @@ export async function POST(req: NextRequest) {
     TOKEN_TTL_SECONDS,
   );
 
-  const proto = req.headers.get('x-forwarded-proto') ?? 'https';
-  const host = req.headers.get('host') ?? '';
-  const base = `${proto}://${host}/api/scripts/create-device?token=${installToken}`;
+  const installBase = buildInstallBase(req);
+  if (!installBase) {
+    return NextResponse.json({ message: 'Invalid host' }, { status: 400 });
+  }
+  const base = `${installBase}/api/scripts/create-device?token=${installToken}`;
   const url = base;
   const windowsUrl = `${base}&format=ps1`;
+  const freebsdUrl = `${base}&format=bootstrap`;
 
-  return NextResponse.json({ url, windowsUrl, expiresIn: TOKEN_TTL_SECONDS });
+  return NextResponse.json({
+    url,
+    windowsUrl,
+    freebsdUrl,
+    expiresIn: TOKEN_TTL_SECONDS,
+  });
 }
