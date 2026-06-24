@@ -59,6 +59,8 @@ export default function NetworkFlowProvider({ children, params }: IProps) {
   const eventEmitter = useEventEmitter()
   const [filterId, setFilterID] = useState('01JNQ9WPA2JWNTC27YCTCYC1FE')
   const [searchBy, setSearchBy] = useState()
+  const [reloadTrigger, setReloadTrigger] = useState(0);
+  const skipIPCacheRef = useRef(false)
   const [time, setTime] = useState<ITimeSettings | null>(null)
   const [isInitialized, setIsInitialized] = useState(false)
   const [token, setToken] = React.useState<string | null>(null)
@@ -303,11 +305,12 @@ export default function NetworkFlowProvider({ children, params }: IProps) {
     let ips: string[]
     let topIps: string[]
 
-    if ((!searchByRef.current || searchByRef.current.length === 0) && cachedIPs?.data) {
+    if ((!searchByRef.current || searchByRef.current.length === 0) && cachedIPs?.data && !skipIPCacheRef.current) {
       // Cache hit — use cached IPs directly, skip getUniqueSourceIP queries
       ips    = cachedIPs.data.recent_ips
       topIps = cachedIPs.data.top_ips
     } else {
+      skipIPCacheRef.current = false
       // Cache miss — discover IPs from the data store
       const [fetchedIps, fetchedTopIps] = await Promise.all([
         getUniqueIpRef.current.mutateAsync({
@@ -715,7 +718,7 @@ export default function NetworkFlowProvider({ children, params }: IProps) {
       if (!settings) return
       await performInitialLoadRef.current(generation, fid, settings)
     })()
-  }, [filterId, (searchBy ?? [])?.length])
+  }, [filterId, reloadTrigger])
 
   useEffect(() => {
     if (!eventEmitter) return
@@ -729,6 +732,26 @@ export default function NetworkFlowProvider({ children, params }: IProps) {
     const setSBy = (data: any) => {
       setSearchBy(data)
     }
+
+    const onSearchLoading = () => {
+      filterGenerationRef.current += 1
+      skipIPCacheRef.current = true
+      isRecentBandwidthRunningRef.current = false
+      isTopBandwidthRunningRef.current    = false
+      isRecentIPRunningRef.current        = false
+      isTopTrafficRunningRef.current      = false
+      recentBandwidthRef.current          = []
+      topTrafficBandwidthRef.current      = []
+      recentIpsRef.current                = []
+      topTrafficIpsRef.current            = []
+      setIsInitialized(false);
+      setSnapshot((prev) => ({ ...prev, loading: true }));
+    };
+
+    const onSearchCommitted = (data: any) => {
+      setSearchBy(data);
+      setReloadTrigger((t) => t + 1);
+    };
 
     const handleRefresh = async (data: boolean) => {
       if (!data) return
@@ -753,10 +776,14 @@ export default function NetworkFlowProvider({ children, params }: IProps) {
 
     eventEmitter.on(`timeline_filter_id`, setFID)
     eventEmitter.on('timeline_search', setSBy)
+    eventEmitter.on('timeline_search_committed', onSearchCommitted);
+    eventEmitter.on('timeline_search_loading', onSearchLoading);
     eventEmitter.on('should_refresh_timeline_filter', handleRefresh)
     return () => {
       eventEmitter.off(`timeline_filter_id`, setFID)
       eventEmitter.off(`timeline_search`, setSBy)
+      eventEmitter.off('timeline_search_committed', onSearchCommitted)
+      eventEmitter.off('timeline_search_loading', onSearchLoading)
       eventEmitter.off('should_refresh_timeline_filter', handleRefresh)
     }
   }, [eventEmitter, filterId])

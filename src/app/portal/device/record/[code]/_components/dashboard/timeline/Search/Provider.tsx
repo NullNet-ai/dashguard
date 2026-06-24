@@ -204,34 +204,43 @@ export default function GraphSearchProvider({
       },
     ] as ISearchItem[];
     setSearchItems(updateSearchItems);
+    eventEmitter.emit('timeline_search_loading', true);
 
     await UpdateSearchFilter({
       filters: updateSearchItems,
       filterItemId: filterItem.id,
       filter_type,
     });
+
+    eventEmitter.emit('timeline_search_committed', updateSearchItems);
   };
 
   const handleRemoveSearchItem = async (filterItem: ISearchItem) => {
     setQuery('');
     const updatedSearchItems = removeSearchItems(searchItems, filterItem);
     setSearchItems(updatedSearchItems);
+    eventEmitter.emit('timeline_search_loading', true);
 
     await UpdateSearchFilter({
       filters: updatedSearchItems,
       filterItemId: filterItem.id,
       filter_type,
     });
+
+    eventEmitter.emit('timeline_search_committed', updatedSearchItems);
   };
 
   const handleClearSearchItems = async () => {
     setQuery('');
     setSearchItems([]);
+    eventEmitter.emit('timeline_search_loading', true);
 
     await UpdateSearchFilter({
       filters: [],
       filter_type,
     });
+
+    eventEmitter.emit('timeline_search_committed', [])
   };
 
   const { data: cached_search_items = [] } =
