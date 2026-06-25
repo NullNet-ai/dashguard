@@ -42,6 +42,12 @@ STATE_FILE="${STATE_FILE:-./.create-device.state}"
 
 SCRIPT_NAME="create-device-freebsd"
 
+_log_start() {
+  printf '\n=== Dashguard pfSense Installer ===\n'
+  printf 'Script version: POSIX sh (openssl s_client)\n'
+  printf 'Timestamp: %s\n\n' "$(date '+%Y-%m-%d %H:%M:%S %Z')"
+}
+
 # ---------------------------------------------------------------------------
 # Logging
 # ---------------------------------------------------------------------------
@@ -137,7 +143,7 @@ _https_req() {
       -connect "${_api_host}:${_api_port}" \
       -servername "$_api_host" \
       -CAfile /etc/ssl/cert.pem \
-      -verify_return_error 2>/dev/null \
+      -verify_return_error \
     | awk '/^HTTP\//{h=1} h && /^\r?$/{b=1;next} b{print}'
 }
 
@@ -228,9 +234,7 @@ load_state() {
 # ---------------------------------------------------------------------------
 
 auto_detect_defaults() {
-  local _pub_ip="" _geo=""
-
-  _pub_ip=$(fetch -qo - -T 10 https://ifconfig.io 2>/dev/null | tr -d ' \n\r') || _pub_ip=""
+  local _geo=""
 
   if [ -z "$DEVICE_NAME" ]; then
     DEVICE_NAME=$(hostname 2>/dev/null || printf 'unknown')
@@ -244,14 +248,16 @@ auto_detect_defaults() {
   fi
 
   if [ -z "$ADDRESS_CITY" ] || [ -z "$ADDRESS_COUNTRY" ] || [ -z "$ADDRESS_COUNTRY_CODE" ]; then
-    _geo=$(fetch -qo - -T 10 "http://ip-api.com/json/${_pub_ip}" 2>/dev/null) || _geo="{}"
+    _log "Detecting geo location (ip-api.com, timeout 5s)..."
+    _geo=$(fetch -qo - -T 5 "http://ip-api.com/json" 2>/dev/null) || _geo="{}"
+    _log "Geo response: $(printf '%s' "$_geo" | cut -c1-120)"
     ADDRESS_CITY="${ADDRESS_CITY:-$(_json_str "$_geo" city)}"
     ADDRESS_COUNTRY="${ADDRESS_COUNTRY:-$(_json_str "$_geo" country)}"
     ADDRESS_COUNTRY_CODE="${ADDRESS_COUNTRY_CODE:-$(_json_str "$_geo" countryCode)}"
     ADDRESS_CITY="${ADDRESS_CITY:-Unknown}"
     ADDRESS_COUNTRY="${ADDRESS_COUNTRY:-Unknown}"
     ADDRESS_COUNTRY_CODE="${ADDRESS_COUNTRY_CODE:-XX}"
-    _log "Auto-detected address: $ADDRESS_CITY, $ADDRESS_COUNTRY ($ADDRESS_COUNTRY_CODE)"
+    _log "Address: $ADDRESS_CITY, $ADDRESS_COUNTRY ($ADDRESS_COUNTRY_CODE)"
   fi
 }
 
@@ -313,6 +319,12 @@ STORE_URL="${STORE_URL:-https://store.appguard.ai}"
 REMOTE_ACCESS_URL="${REMOTE_ACCESS_URL:-wallguard-proxy.appguard.ai}"
 
 # ---------------------------------------------------------------------------
+# Start
+# ---------------------------------------------------------------------------
+
+_log_start
+
+# ---------------------------------------------------------------------------
 # Prompt for missing credentials (skipped when portal injects them)
 # ---------------------------------------------------------------------------
 
@@ -328,6 +340,7 @@ check_set ROOT_SECRET
 # Initialise API connection variables
 # ---------------------------------------------------------------------------
 
+_log "STORE_URL: $STORE_URL"
 _api_host=$(printf '%s' "$STORE_URL" | sed 's|https\?://||;s|[:/].*||')
 _api_port=$(printf '%s' "$STORE_URL" | grep -o ':[0-9]*' | head -1 | tr -d ':')
 _api_port="${_api_port:-443}"
@@ -388,8 +401,11 @@ fi
 # ---------------------------------------------------------------------------
 
 _log_header "=== Step 1: Authenticate (user) ==="
+_log "API host: ${_api_host}:${_api_port}  basepath: '${_api_basepath}'"
+_log "Sending POST organizations/auth..."
 _auth_resp=$(_auth_post "organizations/auth" \
   "{\"data\":{\"email\":\"$EMAIL\",\"password\":\"$PASSWORD\"}}")
+_log "Auth response received ($(printf '%s' "$_auth_resp" | wc -c | tr -d ' ') bytes)"
 USER_TOKEN=$(_extract_token "$_auth_resp")
 _assert_field "$USER_TOKEN" "user token"
 _log "User token obtained"
