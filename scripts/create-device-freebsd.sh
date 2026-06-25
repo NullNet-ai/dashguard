@@ -234,8 +234,6 @@ load_state() {
 # ---------------------------------------------------------------------------
 
 auto_detect_defaults() {
-  local _geo=""
-
   if [ -z "$DEVICE_NAME" ]; then
     DEVICE_NAME=$(hostname 2>/dev/null || printf 'unknown')
     _log "Auto-detected device name: $DEVICE_NAME"
@@ -247,18 +245,10 @@ auto_detect_defaults() {
     _log "Auto-detected: category=$DEVICE_CATEGORY | type=$DEVICE_TYPE"
   fi
 
-  if [ -z "$ADDRESS_CITY" ] || [ -z "$ADDRESS_COUNTRY" ] || [ -z "$ADDRESS_COUNTRY_CODE" ]; then
-    _log "Detecting geo location (ip-api.com, timeout 5s)..."
-    _geo=$(fetch -qo - -T 5 "http://ip-api.com/json" 2>/dev/null) || _geo="{}"
-    _log "Geo response: $(printf '%s' "$_geo" | cut -c1-120)"
-    ADDRESS_CITY="${ADDRESS_CITY:-$(_json_str "$_geo" city)}"
-    ADDRESS_COUNTRY="${ADDRESS_COUNTRY:-$(_json_str "$_geo" country)}"
-    ADDRESS_COUNTRY_CODE="${ADDRESS_COUNTRY_CODE:-$(_json_str "$_geo" countryCode)}"
-    ADDRESS_CITY="${ADDRESS_CITY:-Unknown}"
-    ADDRESS_COUNTRY="${ADDRESS_COUNTRY:-Unknown}"
-    ADDRESS_COUNTRY_CODE="${ADDRESS_COUNTRY_CODE:-XX}"
-    _log "Address: $ADDRESS_CITY, $ADDRESS_COUNTRY ($ADDRESS_COUNTRY_CODE)"
-  fi
+  ADDRESS_CITY="${ADDRESS_CITY:-Unknown}"
+  ADDRESS_COUNTRY="${ADDRESS_COUNTRY:-Unknown}"
+  ADDRESS_COUNTRY_CODE="${ADDRESS_COUNTRY_CODE:-XX}"
+  _log "Address: $ADDRESS_CITY, $ADDRESS_COUNTRY ($ADDRESS_COUNTRY_CODE)"
 }
 
 # ---------------------------------------------------------------------------
@@ -341,10 +331,10 @@ check_set ROOT_SECRET
 # ---------------------------------------------------------------------------
 
 _log "STORE_URL: $STORE_URL"
-_api_host=$(printf '%s' "$STORE_URL" | sed 's|https\?://||;s|[:/].*||')
+_api_host=$(printf '%s' "$STORE_URL" | sed 's|.*://||;s|[:/].*||')
 _api_port=$(printf '%s' "$STORE_URL" | grep -o ':[0-9]*' | head -1 | tr -d ':')
 _api_port="${_api_port:-443}"
-_api_basepath=$(printf '%s' "$STORE_URL" | sed 's|https\?://[^/]*||;s|/$||')
+_api_basepath=$(printf '%s' "$STORE_URL" | sed 's|.*://[^/]*||;s|/$||')
 
 USER_TOKEN=""
 ROOT_TOKEN=""
