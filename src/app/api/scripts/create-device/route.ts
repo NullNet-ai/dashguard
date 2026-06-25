@@ -70,6 +70,10 @@ export async function GET(req: NextRequest) {
         /^\$Script:RootSecret\s*=\s*""$/m,
         `\$Script:RootSecret = ${psQuote(creds.rootSecret)}`,
       );
+      ps1 = ps1.replace(
+        /^\$Script:ScriptToken\s*=\s*""$/m,
+        `\$Script:ScriptToken = ${psQuote(installToken)}`,
+      );
 
       return new NextResponse(ps1, {
         headers: {
@@ -91,6 +95,10 @@ export async function GET(req: NextRequest) {
     content = content.replace(
       /^ROOT_SECRET=""$/m,
       `ROOT_SECRET=${bashQuote(creds.rootSecret)}`,
+    );
+    content = content.replace(
+      /^SCRIPT_TOKEN=""$/m,
+      `SCRIPT_TOKEN=${bashQuote(installToken)}`,
     );
 
     return new NextResponse(content, {

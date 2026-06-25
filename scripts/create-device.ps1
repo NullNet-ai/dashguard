@@ -30,9 +30,10 @@ param(
 # ---------------------------------------------------------------------------
 # Credential placeholders — injected at serve time by the Dashguard API
 # ---------------------------------------------------------------------------
-$Script:Email      = ""
-$Script:Password   = ""
-$Script:RootSecret = ""
+$Script:Email        = ""
+$Script:Password     = ""
+$Script:RootSecret   = ""
+$Script:ScriptToken  = ""
 
 # ---------------------------------------------------------------------------
 # Configuration
@@ -43,6 +44,10 @@ if (-not $RemoteAccessUrl) { $RemoteAccessUrl = 'wallguard-proxy.appguard.ai' }
 $Script:API       = "$StoreUrl/api"
 $Script:UserToken = ''
 $Script:RootToken = ''
+$StepCompleted    = 0
+$DeviceId         = ''
+$DeviceCode       = ''
+$AddressId        = ''
 
 $ErrorActionPreference = 'Stop'
 
@@ -221,42 +226,95 @@ if (-not $WallguardVersion) {
 }
 
 # ---------------------------------------------------------------------------
+# Step 1c — Check if script_token already tied to a device
+# ---------------------------------------------------------------------------
+if ($Script:ScriptToken -and $StepCompleted -lt 2) {
+    Write-LogHeader '=== Step 1c: Check existing device for this install token ==='
+    $stResp = Invoke-StorePost 'store/devices/filter' @{
+        pluck           = @('id', 'code', 'status', 'address_id', 'device_category', 'device_name', 'device_type')
+        advance_filters = @(@{ type = 'criteria'; field = 'script_token'; operator = 'equal'; values = @($Script:ScriptToken) })
+        limit           = 1
+    }
+    $stStatus = $stResp.data[0].status
+    if ($stStatus -eq 'Active') {
+        Write-LogImportant 'ERROR: A device is already Active for this install token. Aborting.'
+        exit 1
+    } elseif ($stStatus -eq 'Draft') {
+        $DeviceId   = $stResp.data[0].id
+        $DeviceCode = $stResp.data[0].code
+        if (-not $DeviceId -or -not $DeviceCode) { Write-LogImportant 'ERROR: No device id/code in resumed device'; exit 1 }
+        $stDtype = $stResp.data[0].device_type
+        $stDcat  = $stResp.data[0].device_category
+        $stAddr  = $stResp.data[0].address_id
+        if ($stDtype) {
+            $StepCompleted = 5
+        } elseif ($stDcat) {
+            $StepCompleted = 4
+        } elseif ($stAddr) {
+            $AddressId     = $stAddr
+            $StepCompleted = 3
+        } else {
+            $StepCompleted = 2
+        }
+        Write-LogImportant "Resuming Draft device: $DeviceCode ($DeviceId) — continuing from step $($StepCompleted + 1)"
+    }
+}
+
+# ---------------------------------------------------------------------------
 # Step 2 — Create Draft Device
 # ---------------------------------------------------------------------------
-Write-LogHeader '=== Step 2: Create draft device ==='
-$createResp = Invoke-StorePost 'store/devices?pluck=id,code' @{ status = 'Draft' }
-$DeviceId   = $createResp.data[0].id
-$DeviceCode = $createResp.data[0].code
-if (-not $DeviceId -or -not $DeviceCode) { Write-LogImportant 'ERROR: No device id/code in response'; exit 1 }
-Write-Log "Device ID   : $DeviceId"
-Write-Log "Device Code : $DeviceCode"
+if ($StepCompleted -lt 2) {
+    Write-LogHeader '=== Step 2: Create draft device ==='
+    $createBody = @{ status = 'Draft' }
+    if ($Script:ScriptToken) { $createBody['script_token'] = $Script:ScriptToken }
+    $createResp = Invoke-StorePost 'store/devices?pluck=id,code' $createBody
+    $DeviceId   = $createResp.data[0].id
+    $DeviceCode = $createResp.data[0].code
+    if (-not $DeviceId -or -not $DeviceCode) { Write-LogImportant 'ERROR: No device id/code in response'; exit 1 }
+    Write-Log "Device ID   : $DeviceId"
+    Write-Log "Device Code : $DeviceCode"
+} else {
+    Write-Log "Step 2 skipped — Device: $DeviceCode ($DeviceId)"
+}
 
 # ---------------------------------------------------------------------------
 # Step 3 — Create Address
 # ---------------------------------------------------------------------------
-Write-LogHeader '=== Step 3: Create address ==='
-$addrResp = Invoke-StorePost 'store/addresses?pluck=id' @{
-    city         = $AddressCity
-    country      = $AddressCountry
-    country_code = $AddressCountryCode
+if ($StepCompleted -lt 3) {
+    Write-LogHeader '=== Step 3: Create address ==='
+    $addrResp = Invoke-StorePost 'store/addresses?pluck=id' @{
+        city         = $AddressCity
+        country      = $AddressCountry
+        country_code = $AddressCountryCode
+    }
+    $AddressId = $addrResp.data[0].id
+    if (-not $AddressId) { Write-LogImportant 'ERROR: No address id in response'; exit 1 }
+    Write-Log "Address ID  : $AddressId"
+} else {
+    Write-Log "Step 3 skipped — Address: $AddressId"
 }
-$AddressId = $addrResp.data[0].id
-if (-not $AddressId) { Write-LogImportant 'ERROR: No address id in response'; exit 1 }
-Write-Log "Address ID  : $AddressId"
 
 # ---------------------------------------------------------------------------
 # Step 4 — Set Category + Address
 # ---------------------------------------------------------------------------
-Write-LogHeader '=== Step 4: Set device category and link address ==='
-Invoke-StorePatch "store/devices/$DeviceId" @{ device_category = $DeviceCategory; address_id = $AddressId }
-Write-Log "Category: $DeviceCategory  |  Address linked"
+if ($StepCompleted -lt 4) {
+    Write-LogHeader '=== Step 4: Set device category and link address ==='
+    Invoke-StorePatch "store/devices/$DeviceId" @{ device_category = $DeviceCategory; address_id = $AddressId }
+    Write-Log "Category: $DeviceCategory  |  Address linked"
+} else {
+    Write-Log 'Step 4 skipped — category/address already linked'
+}
 
 # ---------------------------------------------------------------------------
 # Step 5 — Set Name + Type
 # ---------------------------------------------------------------------------
-Write-LogHeader '=== Step 5: Set device type and name ==='
-Invoke-StorePatch "store/devices/$DeviceId" @{ device_name = $DeviceName; device_type = $DeviceType }
-Write-Log "Name: $DeviceName  |  Type: $DeviceType"
+if ($StepCompleted -lt 5) {
+    Write-LogHeader '=== Step 5: Set device type and name ==='
+    Invoke-StorePatch "store/devices/$DeviceId" @{ device_name = $DeviceName; device_type = $DeviceType }
+    Write-Log "Name: $DeviceName  |  Type: $DeviceType"
+} else {
+    Write-Log 'Step 5 skipped — name/type already set'
+}
 
 # ---------------------------------------------------------------------------
 # Step 6 — Installation Code

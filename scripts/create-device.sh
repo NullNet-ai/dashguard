@@ -93,6 +93,7 @@ REMOTE_ACCESS_URL=""
 EMAIL=""
 PASSWORD=""
 ROOT_SECRET=""
+SCRIPT_TOKEN=""
 
 # Auto-detected from platform + public IP; override if needed.
 DEVICE_NAME=""
@@ -665,11 +666,46 @@ fi
 log "Wallguard version: $WALLGUARD_VERSION"
 
 # ---------------------------------------------------------------------------
+# Step 1c — Check if script_token is already tied to a device
+# ---------------------------------------------------------------------------
+if [[ -n "${SCRIPT_TOKEN}" ]] && [[ "${STEP_COMPLETED}" -lt 2 ]]; then
+  log_header "=== Step 1c: Check existing device for this install token ==="
+  st_resp=$(store_post "store/devices/filter" \
+    "{\"pluck\":[\"id\",\"code\",\"status\",\"address_id\",\"device_category\",\"device_name\",\"device_type\"],\"advance_filters\":[{\"type\":\"criteria\",\"field\":\"script_token\",\"operator\":\"equal\",\"values\":[\"$SCRIPT_TOKEN\"]}],\"limit\":1}")
+  st_status=$(echo "$st_resp" | jq -r '.data[0].status // empty')
+
+  if [[ "$st_status" == "Active" ]]; then
+    log_important "ERROR: A device is already Active for this install token. Aborting."
+    exit 1
+  elif [[ "$st_status" == "Draft" ]]; then
+    DEVICE_ID=$(echo "$st_resp" | jq -r '.data[0].id')
+    DEVICE_CODE=$(echo "$st_resp" | jq -r '.data[0].code')
+    assert_field "$DEVICE_ID"   "device id (resumed)"
+    assert_field "$DEVICE_CODE" "device code (resumed)"
+    _st_dtype=$(echo "$st_resp" | jq -r '.data[0].device_type // empty')
+    _st_dcat=$(echo "$st_resp"  | jq -r '.data[0].device_category // empty')
+    _st_addr=$(echo "$st_resp"  | jq -r '.data[0].address_id // empty')
+    if [[ -n "${_st_dtype}" ]]; then
+      STEP_COMPLETED=5
+    elif [[ -n "${_st_dcat}" ]]; then
+      STEP_COMPLETED=4
+    elif [[ -n "${_st_addr}" ]]; then
+      ADDRESS_ID="${_st_addr}"
+      STEP_COMPLETED=3
+    else
+      STEP_COMPLETED=2
+    fi
+    log_important "Resuming Draft device: $DEVICE_CODE ($DEVICE_ID) — continuing from step $((STEP_COMPLETED + 1))"
+    save_state
+  fi
+fi
+
+# ---------------------------------------------------------------------------
 # Step 2 — Create Draft Device
 # ---------------------------------------------------------------------------
 if [[ "${STEP_COMPLETED}" -lt 2 ]]; then
   log_header "=== Step 2: Create draft device ==="
-  create_resp=$(store_post "store/devices?pluck=id,code" '{"status":"Draft"}')
+  create_resp=$(store_post "store/devices?pluck=id,code" "{\"status\":\"Draft\",\"script_token\":\"$SCRIPT_TOKEN\"}")
   DEVICE_ID=$(echo "$create_resp" | jq -r '.data[0].id')
   DEVICE_CODE=$(echo "$create_resp" | jq -r '.data[0].code')
   assert_field "$DEVICE_ID"   "device id"
