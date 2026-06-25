@@ -80,12 +80,12 @@ _log_important() {
 
 # Extract string value  "key":"val" -> val
 _json_str() {
-  printf '%s' "$1" | sed 's/.*"'"$2"'":"\([^"]*\)".*/\1/;t done;d;:done'
+  printf '%s' "$1" | sed -n 's/.*"'"$2"'":"\([^"]*\)".*/\1/p'
 }
 
 # Extract raw (unquoted) value  "key":val -> val  (booleans, numbers, null)
 _json_raw() {
-  printf '%s' "$1" | sed 's/.*"'"$2"'":\([^,}{]*\).*/\1/;t done;d;:done' | tr -d ' '
+  printf '%s' "$1" | sed -n 's/.*"'"$2"'":\([^,}{]*\).*/\1/p' | tr -d ' '
 }
 
 # .data[0].key -- string value
