@@ -39,7 +39,12 @@ export async function GET(req: NextRequest) {
 
       const sh = [
         '#!/bin/sh',
-        'pkg-static install -y bash curl jq || pkg install -y bash curl jq || true',
+        '_FCONF=/usr/local/etc/pkg/repos/FreeBSD.conf',
+        '[ -d /usr/share/keys/pkg ] \\',
+        '  && echo \'FreeBSD: { url: "pkg+https://pkg.FreeBSD.org/${ABI}/quarterly", mirror_type: "srv", signature_type: "fingerprints", fingerprints: "/usr/share/keys/pkg", enabled: yes }\' > "$_FCONF" \\',
+        '  || echo \'FreeBSD: { url: "https://pkg.FreeBSD.org/${ABI}/quarterly", signature_type: "none", enabled: yes }\' > "$_FCONF"',
+        'pkg-static install -y bash curl jq || true',
+        'rm -f "$_FCONF"',
         'BASH=/usr/local/bin/bash',
         '[ -x "$BASH" ] || { echo "ERROR: bash not found after pkg install. Run: pkg install -y bash" >&2; exit 1; }',
         `exec "$BASH" -c "$(fetch -qo - '${innerUrl}')" create-device.sh --platform=pfsense`,
