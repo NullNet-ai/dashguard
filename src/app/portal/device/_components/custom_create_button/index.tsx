@@ -209,7 +209,7 @@ const CustomCreateButton = ({ entity }: { entity: string }) => {
     setTimeout(() => setCopiedKey(null), 2000);
   };
 
-  const freebsdCmd = `sh -c "$(fetch -qo - '${freebsdUrl}')"`;
+  const freebsdCmd = `fetch -qo - '${freebsdUrl}' | sh`;
   const linuxCmd = `sudo bash -c "$(curl -fsSL '${installUrl}')"`;
   const winCmd = `Set-ExecutionPolicy Bypass -Scope Process -Force; irm '${windowsUrl}' | iex`;
   const macosCmd = `sudo bash -c "$(curl -fsSL '${installUrl}')"`;
