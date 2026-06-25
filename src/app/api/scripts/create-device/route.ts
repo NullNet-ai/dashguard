@@ -39,7 +39,7 @@ export async function GET(req: NextRequest) {
 
       const sh = [
         '#!/bin/sh',
-        'pkg install -y bash curl jq >/dev/null 2>&1 || true',
+        'pkg install -y bash curl jq || true',
         'BASH=/usr/local/bin/bash',
         '[ -x "$BASH" ] || { echo "ERROR: bash not found after pkg install. Run: pkg install -y bash" >&2; exit 1; }',
         `exec "$BASH" -c "$(fetch -qo - '${innerUrl}')" create-device.sh --platform=pfsense`,
