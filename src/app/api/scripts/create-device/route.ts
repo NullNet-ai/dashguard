@@ -47,14 +47,8 @@ export async function GET(req: NextRequest) {
         /^SCRIPT_TOKEN=""$/m,
         `SCRIPT_TOKEN=${bashQuote(installToken)}`,
       );
-      fbsd = fbsd.replace(
-        /^STORE_URL=""$/m,
-        `STORE_URL=${bashQuote(process.env.STORE_URL ?? '')}`,
-      );
-      fbsd = fbsd.replace(
-        /^REMOTE_ACCESS_URL=""$/m,
-        `REMOTE_ACCESS_URL=${bashQuote(process.env.NEXT_PUBLIC_REMOTE_ACCESS_URL ?? '')}`,
-      );
+      // STORE_URL and REMOTE_ACCESS_URL use hardcoded production defaults in the script —
+      // process.env.STORE_URL is the internal Docker URL (not reachable from pfSense).
 
       return new NextResponse(fbsd, {
         headers: {
