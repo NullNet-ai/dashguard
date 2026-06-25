@@ -55,20 +55,23 @@ _log_start() {
 _log() {
   local _line
   _line="$(date '+%Y-%m-%d %H:%M:%S %Z') [${SCRIPT_NAME}] $*"
-  [ "$QUIET" = "false" ] && printf '%s\n' "$_line"
-  [ -n "$LOG_FILENAME" ] && printf '%s\n' "$_line" >> "$LOG_FILENAME"
+  if [ "$QUIET" = "false" ]; then printf '%s\n' "$_line"; fi
+  if [ -n "$LOG_FILENAME" ]; then printf '%s\n' "$_line" >> "$LOG_FILENAME"; fi
+  return 0
 }
 
 _log_header() {
-  [ "$QUIET" = "false" ] && printf '\n%s\n\n' "$*"
-  [ -n "$LOG_FILENAME" ] && printf '\n%s\n\n' "$*" >> "$LOG_FILENAME"
+  if [ "$QUIET" = "false" ]; then printf '\n%s\n\n' "$*"; fi
+  if [ -n "$LOG_FILENAME" ]; then printf '\n%s\n\n' "$*" >> "$LOG_FILENAME"; fi
+  return 0
 }
 
 _log_important() {
   local _line
   _line="$(date '+%Y-%m-%d %H:%M:%S %Z') [${SCRIPT_NAME}] ---> $*"
   printf '%s\n' "$_line"
-  [ -n "$LOG_FILENAME" ] && printf '%s\n' "$_line" >> "$LOG_FILENAME"
+  if [ -n "$LOG_FILENAME" ]; then printf '%s\n' "$_line" >> "$LOG_FILENAME"; fi
+  return 0
 }
 
 # ---------------------------------------------------------------------------
