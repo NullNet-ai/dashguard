@@ -271,8 +271,8 @@ const CustomCreateButton = ({ entity }: { entity: string }) => {
                 isLast
               >
                 <p className="mb-2 text-xs text-muted-foreground">
-                  Run from the pfSense CLI as root. Automatically installs bash
-                  and required tools.
+                  Run from the pfSense CLI as root. No additional dependencies
+                  required.
                 </p>
                 <CodeSnippet
                   value={freebsdCmd}

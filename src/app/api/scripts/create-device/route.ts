@@ -3,7 +3,6 @@ import { join } from 'path';
 import { cookies } from 'next/headers';
 import { NextRequest, NextResponse } from 'next/server';
 import redisCache from '~/server/redis/cache';
-import { buildInstallBase } from './_url';
 
 // Safely quote a value for use in a bash single-quoted string
 const bashQuote = (s: string) => `'${s.replace(/'/g, "'\\''")}'`;
@@ -27,35 +26,40 @@ export async function GET(req: NextRequest) {
     }
 
     if (format === 'bootstrap') {
-      // pfSense/FreeBSD one-command installer. The base shell is /bin/sh (not bash)
-      // and lacks bash/curl/jq, so this POSIX-sh wrapper installs the deps first,
-      // then re-fetches and execs the bash installer via command substitution
-      // (keeps stdin attached to the terminal for any interactive prompts).
-      const installBase = buildInstallBase(req);
-      if (!installBase) {
-        return NextResponse.json({ message: 'Invalid host' }, { status: 400 });
-      }
-      const innerUrl = `${installBase}/api/scripts/create-device?token=${installToken}`;
+      // pfSense/FreeBSD one-command installer — pure POSIX sh, no bash/curl/jq required.
+      // Serves create-device-freebsd.sh with credentials pre-injected.
+      const fbsdPath = join(
+        process.cwd(),
+        'scripts',
+        'create-device-freebsd.sh',
+      );
+      let fbsd = await readFile(fbsdPath, 'utf-8');
+      fbsd = fbsd.replace(/^EMAIL=""$/m, `EMAIL=${bashQuote(creds.email)}`);
+      fbsd = fbsd.replace(
+        /^PASSWORD=""$/m,
+        `PASSWORD=${bashQuote(creds.password)}`,
+      );
+      fbsd = fbsd.replace(
+        /^ROOT_SECRET=""$/m,
+        `ROOT_SECRET=${bashQuote(creds.rootSecret)}`,
+      );
+      fbsd = fbsd.replace(
+        /^SCRIPT_TOKEN=""$/m,
+        `SCRIPT_TOKEN=${bashQuote(installToken)}`,
+      );
+      fbsd = fbsd.replace(
+        /^STORE_URL=""$/m,
+        `STORE_URL=${bashQuote(process.env.STORE_URL ?? '')}`,
+      );
+      fbsd = fbsd.replace(
+        /^REMOTE_ACCESS_URL=""$/m,
+        `REMOTE_ACCESS_URL=${bashQuote(process.env.NEXT_PUBLIC_REMOTE_ACCESS_URL ?? '')}`,
+      );
 
-      const sh = [
-        '#!/bin/sh',
-        '_FCONF=/usr/local/etc/pkg/repos/FreeBSD.conf',
-        '[ -d /usr/share/keys/pkg ] \\',
-        '  && echo \'FreeBSD: { url: "pkg+https://pkg.FreeBSD.org/${ABI}/quarterly", mirror_type: "srv", signature_type: "fingerprints", fingerprints: "/usr/share/keys/pkg", enabled: yes }\' > "$_FCONF" \\',
-        '  || echo \'FreeBSD: { url: "https://pkg.FreeBSD.org/${ABI}/quarterly", signature_type: "none", enabled: yes }\' > "$_FCONF"',
-        'pkg-static install -y bash curl jq || true',
-        'rm -f "$_FCONF"',
-        'BASH=/usr/local/bin/bash',
-        '[ -x "$BASH" ] || { echo "ERROR: bash not found after pkg install. Run: pkg install -y bash" >&2; exit 1; }',
-        `exec "$BASH" -c "$(fetch -qo - '${innerUrl}')" create-device.sh --platform=pfsense`,
-        '',
-      ].join('\n');
-
-      return new NextResponse(sh, {
+      return new NextResponse(fbsd, {
         headers: {
           'Content-Type': 'text/plain; charset=utf-8',
-          'Content-Disposition':
-            'inline; filename="create-device-bootstrap.sh"',
+          'Content-Disposition': 'inline; filename="create-device-freebsd.sh"',
           'Cache-Control': 'no-store',
         },
       });
