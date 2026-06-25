@@ -230,7 +230,7 @@ load_state() {
 auto_detect_defaults() {
   local _pub_ip="" _geo=""
 
-  _pub_ip=$(fetch -qo - https://ifconfig.io 2>/dev/null | tr -d ' \n\r') || _pub_ip=""
+  _pub_ip=$(fetch -qo - -T 10 https://ifconfig.io 2>/dev/null | tr -d ' \n\r') || _pub_ip=""
 
   if [ -z "$DEVICE_NAME" ]; then
     DEVICE_NAME=$(hostname 2>/dev/null || printf 'unknown')
@@ -244,7 +244,7 @@ auto_detect_defaults() {
   fi
 
   if [ -z "$ADDRESS_CITY" ] || [ -z "$ADDRESS_COUNTRY" ] || [ -z "$ADDRESS_COUNTRY_CODE" ]; then
-    _geo=$(fetch -qo - "http://ip-api.com/json/${_pub_ip}" 2>/dev/null) || _geo="{}"
+    _geo=$(fetch -qo - -T 10 "http://ip-api.com/json/${_pub_ip}" 2>/dev/null) || _geo="{}"
     ADDRESS_CITY="${ADDRESS_CITY:-$(_json_str "$_geo" city)}"
     ADDRESS_COUNTRY="${ADDRESS_COUNTRY:-$(_json_str "$_geo" country)}"
     ADDRESS_COUNTRY_CODE="${ADDRESS_COUNTRY_CODE:-$(_json_str "$_geo" countryCode)}"
