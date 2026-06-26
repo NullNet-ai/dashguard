@@ -2,14 +2,16 @@
 
 import { AttachAddon } from '@xterm/addon-attach'
 import { FitAddon } from '@xterm/addon-fit'
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react';
 import { useXTerm } from 'react-xtermjs'
 import { isHeartbeatWithinSeconds } from '~/app/portal/device/utils/getHeartbeat'
 import { api } from '~/trpc/react'
 
 export default function WebTerminal() {
   const { instance, ref } = useXTerm()
-  const fitAddon = new FitAddon()
+  const fitAddonRef = useRef<FitAddon | null>(null);
+  if (!fitAddonRef.current) fitAddonRef.current = new FitAddon();
+  const socketRef = useRef<WebSocket | null>(null); // stable socket for resize handler
   const [socket, setSocket] = useState<WebSocket | null>(null) // Track WebSocket instance
   const [isReconnecting, setIsReconnecting] = useState(false)
   const [isConnectionClosed, setIsConnectionClosed] = useState(false) // Track WebSocket connection status
@@ -118,6 +120,16 @@ export default function WebTerminal() {
     }
   }
 
+  // The WallGuard gateway is a raw byte passthrough with no resize control
+  // channel, so the only way to set the server PTY winsize is to type the
+  // command into the shell. Leading space skips shell history (HISTCONTROL=ignorespace).
+  const syncPtySize = (cols: number, rows: number) => {
+    if (!cols || !rows) return;
+    if (socketRef.current?.readyState === WebSocket.OPEN) {
+      socketRef.current.send(` stty rows ${rows} cols ${cols}\r`);
+    }
+  };
+
   const initializeWebSocket = (wsUrl?: string) => {
     const currentSessionKey = localStorage.getItem('current_terminal_session')
     if (!currentSessionKey && !wsUrl) {
@@ -144,7 +156,11 @@ export default function WebTerminal() {
         setIsConnectionClosed(false) // Reset connection status when connected
         setConnectionEndReason(null)
         setIsReconnecting(false)
-      }
+        // Wait for the shell prompt before injecting the resize command.
+        setTimeout(() => {
+          if (instance) syncPtySize(instance.cols, instance.rows);
+        }, 800);
+      };
 
       newSocket.onerror = (error) => {
         console.error('WebSocket error:', error)
@@ -185,23 +201,34 @@ export default function WebTerminal() {
   }, [instance])
 
   useEffect(() => {
-    // Load the fit addon
-    instance?.loadAddon(fitAddon)
+    if (!instance || !ref.current) return;
+    const fit = fitAddonRef.current!;
+    instance.loadAddon(fit);
 
-    const handleResize = () => fitAddon.fit()
+    const doFit = () => {
+      try {
+        fit.fit();
+      } catch {}
+    };
 
-    // Fit terminal when component mounts
-    if (ref.current) {
-      handleResize()
-    }
+    // Fit once the container has its real laid-out width
+    const raf = requestAnimationFrame(doFit);
 
-    // Handle resize event
-    window.addEventListener('resize', handleResize)
+    // Refit on initial layout + any container/window size change
+    const ro = new ResizeObserver(() => doFit());
+    ro.observe(ref.current);
+
+    // When xterm's grid changes, push the new size to the server PTY.
+    const onResize = instance.onResize(({ cols, rows }) => {
+      syncPtySize(cols, rows);
+    });
+
     return () => {
-      window.removeEventListener('resize', handleResize)
-    }
-  }, [ref, instance])
-
+      cancelAnimationFrame(raf);
+      ro.disconnect();
+      onResize.dispose();
+    };
+  }, [instance]);
   
   const lastHeartbeatTimestamp = lastHeartbeat?.data?.[0]?.bucket
   // const isDeviceOfflineOrMissing =
