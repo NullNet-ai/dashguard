@@ -18,70 +18,62 @@ const FormSchema = z.object({
   address_country: z.string().min(1, 'Country is required'),
 });
 
+type CountryEntry = { name: string; iso2?: string; cities?: string[] };
+
 export default function DeviceLocation({ params, defaultValues }: IFormProps) {
   const toast = useToast();
   const utils = api.useUtils();
 
   const updateDeviceCategory = api.device.updateDeviceCategory.useMutation();
 
-  const [countryCitiesData, setCountryCitiesData] = useState<
-    Record<string, { code?: string; cities?: string[] }> | null
-  >(null);
+  const [countriesData, setCountriesData] = useState<CountryEntry[] | null>(
+    null,
+  );
 
   useEffect(() => {
     let isActive = true;
-
     const load = async () => {
       try {
-        const res = await fetch('/countries.json', {
-          cache: 'force-cache',
-        });
-
-        if (!res.ok) throw new Error('Failed to fetch countries and cities');
-
-        const data = (await res.json()) as Record<
-          string,
-          { code?: string; cities?: string[] }
-        >;
-
-        if (isActive) setCountryCitiesData(data);
-      } catch (_error) {
-        if (isActive) setCountryCitiesData({});
+        const res = await fetch(
+          '/countries-states-cities-database/countries+cities.json',
+          { cache: 'force-cache' },
+        );
+        if (!res.ok) throw new Error();
+        const data = (await res.json()) as CountryEntry[];
+        if (isActive) setCountriesData(data);
+      } catch {
+        if (isActive) setCountriesData([]);
       }
     };
-
     void load();
-
     return () => {
       isActive = false;
     };
-  }, [toast]);
+  }, []);
 
   const addressCountryOptions = useMemo((): ISelectOptions[] => {
-    if (!countryCitiesData) return [];
+    if (!countriesData) return [];
+    return [...countriesData]
+      .sort((a, b) => a.name.localeCompare(b.name))
+      .map((c) => ({ label: c.name, value: c.name }));
+  }, [countriesData]);
 
-    return Object.keys(countryCitiesData)
-      .filter(Boolean)
-      .sort((a, b) => a.localeCompare(b))
-      .map((countryName) => ({
-        label: countryName,
-        value: countryName,
-      }));
-  }, [countryCitiesData]);
+  const countryMap = useMemo(() => {
+    const m = new Map<string, CountryEntry>();
+    for (const c of countriesData ?? []) m.set(c.name, c);
+    return m;
+  }, [countriesData]);
 
   const buildCityOptionsForCountryName = useCallback(
     (countryName: string | undefined | null): ISelectOptions[] => {
       if (!countryName) return [];
-      if (!countryCitiesData) return [];
-
-      const cities = countryCitiesData[countryName]?.cities ?? [];
-
-      return Array.from(new Set(cities))
+      const cities = countryMap.get(countryName)?.cities ?? [];
+      return [...new Set(cities)]
         .filter(Boolean)
         .sort((a, b) => a.localeCompare(b))
-        .map((cityName) => ({ label: cityName, value: cityName }));
+        .map((name) => ({ label: name, value: name }));
     },
-    [countryCitiesData],
+    [countryMap],
   );
 
   const [addressCityOptions, setAddressCityOptions] = useState<ISelectOptions[]>(
@@ -96,7 +88,6 @@ export default function DeviceLocation({ params, defaultValues }: IFormProps) {
 
   useEffect(() => {
     const countryName = defaultValues?.address_country;
-
     setIsAddressCityDisabled(!countryName);
     setAddressCityOptions(buildCityOptionsForCountryName(countryName));
   }, [
@@ -107,14 +98,12 @@ export default function DeviceLocation({ params, defaultValues }: IFormProps) {
   const handleSave = async ({
     data,
   }: IHandleSubmit<z.infer<typeof FormSchema>>) => {
-    console.log("🚀 ~ handleSave ~ data:", data)
-    console.log("🚀 ~ handleSave ~ countryCitiesData:", countryCitiesData)
     try {
       await updateDeviceCategory.mutateAsync({
         id: params.id,
         ...data,
         address_country_code:
-          countryCitiesData?.[data.address_country]?.code ?? undefined,
+          countryMap.get(data.address_country)?.iso2 ?? undefined,
       });
       await utils.device.getAccountSetUpDetailsByDeviceCode.invalidate();
     } catch (error) {
@@ -170,6 +159,14 @@ export default function DeviceLocation({ params, defaultValues }: IFormProps) {
         required: true,
         disabled: isAddressCityDisabled,
         selectSearchable: true,
+        selectConfig: {
+          infiniteScroll: {
+            enabled: true,
+            initialLimit: 50,
+            loadMoreStep: 50,
+            hasMore: true,
+          },
+        },
         fieldStyle: {
           gridColumn: '2 / span 1',
           gridRow: '1 / span 1',

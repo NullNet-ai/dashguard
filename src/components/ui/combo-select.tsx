@@ -194,6 +194,16 @@ export function ComboSelect({
 
     const uniqueKey = ulid()
 
+  // Sync newItems with filtered results when search query changes (infiniteScroll mode only)
+  useEffect(() => {
+    if (!infiniteScroll?.enabled) return;
+    setNewItems(filteredOptions.slice(0, initialLimit));
+    setHasMoreData(filteredOptions.length > initialLimit);
+    setDisplayLimit(initialLimit);
+    // filteredOptions is a new array every render; depend on query + options + initialLimit
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [query, options, initialLimit]);
+
     const inputReadOnly = !searchable || readOnly || disabled;
 
           // Handle key down events in the input
