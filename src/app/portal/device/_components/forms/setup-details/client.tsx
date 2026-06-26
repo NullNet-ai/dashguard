@@ -320,7 +320,9 @@ function getSteps(
     {
       title: 'Install the package',
       color: 'blue',
-      jsx: <CodeRow variant="blue" value="pkg add wallguard.pkg" />,
+      jsx: (
+        <CodeRow variant="blue" value={`pkg add wallguard-${versionStr}.pkg`} />
+      ),
     },
     {
       title: 'Start the WallGuard Agent',
@@ -484,9 +486,12 @@ const SetupDetails: React.FC<{ identifier: string; remoteAccessUrl?: string }> =
       ? `https://github.com/NullNet-ai/wallguard/releases/download/v${versionStr}/${packageName}`
       : '';
   const isWindows = deviceType.toLowerCase() === 'windows';
+  const isPfSense = deviceType.toLowerCase() === 'pfsense';
   const downloadCommand = isWindows
     ? `Invoke-WebRequest -Uri ${wallguardDownloadUrl} -OutFile "$env:USERPROFILE\\Downloads\\wallguard-${versionStr}-x86_64.msi" -UseBasicParsing`
-    : `curl -o wallguard.pkg -L ${wallguardDownloadUrl}`;
+    : isPfSense
+      ? `fetch -o ${packageName} '${wallguardDownloadUrl}'`
+      : `curl -fsSL -o ${packageName} '${wallguardDownloadUrl}'`;
   const controlChannelUrl = toControlChannelUrl(remoteAccessUrl);
   const { subtitle, shellHint } = getDeviceTypeText(deviceType);
 
