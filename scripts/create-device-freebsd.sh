@@ -1,10 +1,19 @@
 #!/bin/sh
 # create-device-freebsd.sh
 #
-# pfSense / FreeBSD installer — pure POSIX sh, no bash/curl/jq required.
-# Uses /bin/sh + fetch (GET) + openssl s_client (POST/PATCH) + awk/sed.
+# TLDR: Registers + activates a pfSense device in the Dashguard portal.
 #
-# Served with credentials pre-injected by the portal (format=bootstrap).
+# Steps:
+#   1  Auth user + root tokens
+#   2  Fetch latest Wallguard version
+#   3  Resume or create Draft device (idempotent via script_token + state file)
+#   4  Create address, set category / name / type
+#   5  Get or create install code
+#   6  Download + install Wallguard .pkg, join agent
+#   7  Poll until online, activate device to Active
+#
+# Pure POSIX sh — no bash/curl/jq. Uses fetch (GET) + openssl s_client (POST/PATCH).
+# Credentials injected at serve time by portal (format=bootstrap).
 # Run as root:  fetch -qo - 'URL?token=X&format=bootstrap' | sh
 
 set -eu
@@ -80,12 +89,12 @@ _log_important() {
 
 # Extract string value  "key":"val" -> val
 _json_str() {
-  printf '%s' "$1" | sed -n 's/.*"'"$2"'":"\([^"]*\)".*/\1/p'
+  printf '%s' "$1" | sed -n 's/.*"'"$2"'":"\([^"]*\)".*/\1/p' | head -1
 }
 
 # Extract raw (unquoted) value  "key":val -> val  (booleans, numbers, null)
 _json_raw() {
-  printf '%s' "$1" | sed -n 's/.*"'"$2"'":\([^,}{]*\).*/\1/p' | tr -d ' '
+  printf '%s' "$1" | sed -n 's/.*"'"$2"'":\([^,}{]*\).*/\1/p' | tr -d ' ' | head -1
 }
 
 # .data[0].key -- string value
@@ -564,8 +573,13 @@ if [ "$STEP_COMPLETED" -lt 7 ]; then
 
   _pkg_url="https://github.com/NullNet-ai/wallguard/releases/download/v${WALLGUARD_VERSION}/wallguard-${WALLGUARD_VERSION}.pkg"
   download "$_pkg_url" "${TEMP_DIR}/wallguard.pkg"
-  _log "Running: pkg add ${TEMP_DIR}/wallguard.pkg"
-  pkg add "${TEMP_DIR}/wallguard.pkg"
+  # ponytail: tar extract skips +POST_INSTALL; flow only needs binaries on PATH
+  _log "Extracting: ${TEMP_DIR}/wallguard.pkg -> /"
+  tar -xf "${TEMP_DIR}/wallguard.pkg" -C / --exclude '+*'
+  command -v wallguard-cli >/dev/null 2>&1 || {
+    _log_important "ERROR: wallguard-cli not found after extracting package"
+    exit 1
+  }
 
   _log "Running: wallguard-cli start --control-channel-url=${REMOTE_ACCESS_URL}:50051 --platform=pfsense"
   wallguard-cli start --control-channel-url="${REMOTE_ACCESS_URL}:50051" --platform=pfsense
