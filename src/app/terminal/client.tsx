@@ -13,6 +13,7 @@ export default function WebTerminal() {
   if (!fitAddonRef.current) fitAddonRef.current = new FitAddon();
   const socketRef = useRef<WebSocket | null>(null); // stable socket for resize handler
   const [socket, setSocket] = useState<WebSocket | null>(null) // Track WebSocket instance
+  const [isInitializing, setIsInitializing] = useState(true);
   const [isReconnecting, setIsReconnecting] = useState(false)
   const [isConnectionClosed, setIsConnectionClosed] = useState(false) // Track WebSocket connection status
   const [connectionEndReason, setConnectionEndReason] = useState<'unexpected_end' | 'session_expired' | null>(null)
@@ -150,6 +151,7 @@ export default function WebTerminal() {
       socket?.close()
       // @ts-expect-error - No type yet
       const newSocket = new WebSocket(websocketUrl || wsUrl)
+      socketRef.current = newSocket;
 
       newSocket.onopen = () => {
         instance?.write('\x1b[32mConnected to terminal server\x1b[0m\r\n')
@@ -159,7 +161,8 @@ export default function WebTerminal() {
         // Wait for the shell prompt before injecting the resize command.
         setTimeout(() => {
           if (instance) syncPtySize(instance.cols, instance.rows);
-        }, 800);
+          setIsInitializing(false);
+        }, 1500);
       };
 
       newSocket.onerror = (error) => {
@@ -168,13 +171,16 @@ export default function WebTerminal() {
         setConnectionEndReason('session_expired')
         setIsConnectionClosed(true)
         setIsReconnecting(false)
-      }
+        setIsInitializing(false);
+      };
 
       newSocket.onclose = () => {
+        socketRef.current = null;
         instance?.write('\x1b[33mConnection closed\x1b[0m\r\n')
         setIsConnectionClosed(true) // Set connection status to closed dynamically
         setConnectionEndReason((prev) => (prev === 'session_expired' ? prev : 'unexpected_end'))
         setIsReconnecting(false)
+        setIsInitializing(false);
         // localStorage.removeItem('current_terminal_session')
       }
 
@@ -260,11 +266,13 @@ export default function WebTerminal() {
   return (
     <div className="relative h-screen w-screen">
       <div ref={ref as React.RefObject<HTMLDivElement>} style={{ width: '100%', height: '100%' }} />
-      {shouldShowPopup ? (
-        <div className="absolute inset-0 flex flex-col justify-center items-center bg-gray-800/95">
-          <p className="text-white text-lg mb-4">
-            {popupMessage}
-          </p>
+      {isInitializing ? (
+        <div className="absolute inset-0 flex flex-col items-center justify-center bg-gray-800/95">
+          <div className="h-8 w-8 animate-spin rounded-full border-4 border-white border-t-transparent" />
+        </div>
+      ) : shouldShowPopup ? (
+        <div className="absolute inset-0 flex flex-col items-center justify-center bg-gray-800/95">
+          <p className="mb-4 text-lg text-white">{popupMessage}</p>
           {shouldShowReconnectButton ? (
             <button
               onClick={handleReconnect}
