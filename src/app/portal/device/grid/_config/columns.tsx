@@ -56,6 +56,29 @@ const gridColumns = [
     },
   },
   {
+    header: 'Connection Types',
+    accessorKey: 'connection_types',
+    sortKey: 'device_services.protocol',
+    search_config: {
+      entity: 'device_services',
+      field: 'protocol',
+      operator: 'like',
+    },
+    cell: ({ row }) => {
+      const types = row?.original?.connection_types ?? [];
+      if (!Array.isArray(types) || types.length === 0) return null;
+      const ORDER: Record<string, number> = { ssh: 0, tty: 1, ui: 2, rd: 3 };
+      const sorted = [...types].sort(
+        (a, b) => (ORDER[a] ?? 99) - (ORDER[b] ?? 99),
+      );
+      return (
+        <div>
+          {sorted.map((t: string) => String(t).toUpperCase()).join(', ')}
+        </div>
+      );
+    },
+  },
+  {
     header: 'Connection Status',
     accessorKey: 'is_device_online',
     enableSorting: true,

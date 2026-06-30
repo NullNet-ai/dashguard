@@ -1,12 +1,25 @@
 import { createTRPCRouter, privateProcedure } from '~/server/api/trpc';
 import { createDefineRoutes } from '../baseCrud';
 import { z } from 'zod';
-import { EOperator, EOrderDirection } from '@dna-platform/common-orm';
+import {
+  EOperator,
+  EOrderDirection,
+  type IAdvanceFilters,
+  type IGroupAdvanceFilters,
+} from '@dna-platform/common-orm';
 import { createAdvancedFilter } from '~/server/utils/transformAdvanceFilter';
 import Bluebird from 'bluebird'
 import { WallGuardApi } from '~/utils/wallguard-api';
 import { authorizeDevice } from '~/app/api/device/authorize_device';
 import { createRootOrm } from '~/server/lib/root-orm';
+import {
+  addCommonGridConcatenates,
+  addCommonGridJoins,
+  addCommonGridPluckObject,
+} from '~/server/utils/queryBuilder';
+import { formatSorting } from '~/server/utils/formatSorting';
+import ZodItems from '~/server/zodSchema/grid/items';
+import pluralize from 'pluralize';
 
 const entity = 'devices';
 const { ROOT_ACCOUNT_PASSWORD = 'pl3@s3ch@ng3m3!!' } = process.env;
@@ -462,8 +475,8 @@ export const deviceRouter = createTRPCRouter({
               device_id,
               device_code,
               token: Array.from({ length: 16 }, () =>
-                Math.floor(Math.random() * 16).toString(16)
-              ).join('')
+                Math.floor(Math.random() * 16).toString(16),
+              ).join(''),
             },
             pluck: ['id', 'token'],
           },
@@ -942,5 +955,141 @@ export const deviceRouter = createTRPCRouter({
       if (!response.success) {
         throw new Error('Failed to update device')
       }
+    }),
+  mainGrid: privateProcedure.input(ZodItems).query(async ({ input, ctx }) => {
+    const {
+      limit = 50,
+      current = 1,
+      advance_filters: _advance_filters = [],
+      entity: inputEntity,
+      sorting = [],
+      group_advance_filters: _group_advance_filters = [],
+    } = input;
+
+    const baseEntity = inputEntity || 'devices';
+    const pluralEntity = pluralize(baseEntity);
+
+    const rootOrm = await createRootOrm(ctx.dnaClient);
+
+    const query = rootOrm.findAll({
+      entity: baseEntity,
+      no_caching: true,
+      query: {
+        pluck: input.pluck,
+        track_total_records: true,
+        pluck_object: {
+          ...addCommonGridPluckObject(),
+          [pluralEntity]: input.pluck,
+        },
+        pluck_group_object: {
+          device_services: ['protocol', 'status'],
+        },
+        advance_filters: [...(_advance_filters as IAdvanceFilters[])],
+        group_advance_filters: _group_advance_filters as IGroupAdvanceFilters<
+          string | number
+        >[],
+        order: {
+          starts_at:
+            (input.current || 0) === 0
+              ? 0
+              : (input.current || 1) * (input.limit || 100) -
+                (input.limit || 100),
+          limit: input.limit || 1,
+          by_field:
+            sorting?.length === 1
+              ? ((sorting[0] as any)?.sort_key ?? sorting[0]?.id)
+              : 'code',
+          by_direction:
+            sorting?.length === 1
+              ? sorting[0]?.desc
+                ? EOrderDirection.DESC
+                : EOrderDirection.ASC
+              : EOrderDirection.DESC,
+          is_case_sensitive_sorting: true,
+        },
+        multiple_sort:
+          sorting?.length && sorting.length > 1
+            ? // @ts-expect-error - No type yet
+              formatSorting(sorting)
+            : [],
+        concatenate_fields: [...addCommonGridConcatenates(pluralEntity)],
+      },
+    });
+
+    query.join({
+      type: 'left',
+      field_relation: {
+        to: { entity: 'device_services', field: 'device_id' },
+        from: { entity: baseEntity, field: 'id' },
+      },
+    });
+
+    addCommonGridJoins(query, baseEntity);
+
+    if (input.grouping?.length) {
+      query.groupBy({
+        query: {
+          fields: input.grouping,
+          has_count: true,
+        },
+      });
+    }
+
+    const { total_count: totalCount = 1, data: items } = await query.execute();
+    const totalPages = Math.ceil(totalCount / (limit || 100));
+
+    if (input.grouping?.length) {
+      return { totalCount, items, currentPage: 0, totalPages };
+    }
+
+    const protocolToType = (p?: string) =>
+      p === 'ssh'
+        ? 'ssh'
+        : p === 'tty'
+          ? 'tty'
+          : p === 'http' || p === 'https'
+            ? 'ui'
+            : p === 'rd'
+              ? 'rd'
+              : null;
+
+    const formatted_items = items?.map((item: Record<string, any>) => {
+      let {
+        [pluralEntity]: entity_data,
+        device_services_protocols,
+        device_services_statuses,
+        created_by,
+        updated_by,
+        ...rest
+      } = item;
+
+      if (Array.isArray(created_by)) created_by = created_by?.[0];
+      if (Array.isArray(updated_by)) updated_by = updated_by?.[0];
+
+      const protocols: string[] = device_services_protocols ?? [];
+      const statuses: string[] = device_services_statuses ?? [];
+      const activeProtocols = protocols.filter(
+        (_: string, i: number) => statuses[i] === 'Active',
+      );
+      const mappedTypes = activeProtocols
+        .map((p: string) => protocolToType(p))
+        .filter((t: string | null) => t !== null);
+      const connection_types = [...new Set(mappedTypes)];
+
+      return {
+        ...entity_data,
+        ...rest,
+        connection_types,
+        created_by: created_by?.full_name ?? '',
+        updated_by: updated_by?.full_name ?? '',
+      };
+    });
+
+    return {
+      totalCount,
+      items: formatted_items,
+      currentPage: current,
+      totalPages,
+    };
     }),
 });

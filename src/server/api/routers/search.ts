@@ -22,6 +22,7 @@ import ZodSearchSuggestions from '~/server/zodSchema/grid/searchSuggestions';
 import { searchSuggestionTransformer } from '~/components/platform/Grid/Search/utils/searchSuggestionTransformer';
 import { formatPhoneNumber } from '~/utils/formatter';
 import { capitalize } from 'lodash';
+import { getRootCredentials } from '~/server/lib/root-orm';
 const protocolValueToLabel = {
   'inet/any': 'IPv4/*',
   'inet/tcp': 'IPv4/TCP',
@@ -423,6 +424,146 @@ export const searchRouter = createTRPCRouter({
         return updatedSuggestion
       });
       
+      return { items: suggestions };
+    }),
+  deviceSearch: privateProcedure
+    .input(ZodSearchSuggestions)
+    .mutation(async ({ input, ctx }) => {
+      let {
+        advance_filters: _advance_filters = [],
+        sorting,
+        group_advance_filters: _group_advance_filters = [],
+        searchable_fields = [],
+      } = input;
+
+      // Hardcoded: this resolver is only for the device entity.
+      // Root credentials are required because device is a root-managed entity.
+      const entity = 'device';
+
+      _advance_filters = _advance_filters.map((e) => {
+        let updatedFilter = e;
+        if (
+          e.field === 'is_device_authorized' ||
+          e.field === 'is_device_online'
+        ) {
+          updatedFilter = { ...e, parse_as: 'text' };
+        }
+        if (e.field === 'is_device_authorized') {
+          updatedFilter = {
+            ...updatedFilter,
+            values: updatedFilter.values?.map((v) => {
+              if ('authorized'.toLowerCase().includes(v.toLowerCase()))
+                return 'true';
+              if ('unauthorized'.toLowerCase().includes(v.toLowerCase()))
+                return 'false';
+              return v;
+            }),
+          };
+        } else if (e.field === 'is_device_online') {
+          updatedFilter = {
+            ...updatedFilter,
+            values: updatedFilter.values?.map((v) => {
+              if ('online'.toLowerCase().includes(v.toLowerCase()))
+                return 'true';
+              if ('offline'.toLowerCase().includes(v.toLowerCase()))
+                return 'false';
+              return v;
+            }),
+          };
+        }
+        return updatedFilter;
+      });
+      const { token: rootToken } = await getRootCredentials(ctx.dnaClient);
+
+      const pluck_object = {
+        ...addCommonGridPluckObject(),
+        [pluralize(entity)]: input.pluck,
+        device_services: ['protocol', 'status'],
+      };
+
+      const query = ctx.dnaClient
+        .searchSuggestions({
+          entity,
+          token: rootToken,
+          as_root: true,
+          query: {
+            pluck: input.pluck,
+            track_total_records: true,
+            pluck_object,
+            advance_filters: [...(_advance_filters as IAdvanceFilters[])],
+            group_advance_filters:
+              _group_advance_filters as IGroupAdvanceFilters<string | number>[],
+            order: {
+              starts_at:
+                (input.current || 0) === 0
+                  ? 0
+                  : (input.current || 1) * (input.limit || 100) -
+                    (input.limit || 100),
+              limit: input.limit || 1,
+              by_field:
+                input?.sorting?.length === 1 ? input.sorting[0]?.id : 'code',
+              by_direction:
+                input?.sorting?.length === 1
+                  ? input.sorting[0]?.desc
+                    ? EOrderDirection.DESC
+                    : EOrderDirection.ASC
+                  : EOrderDirection.DESC,
+            },
+            multiple_sort:
+              sorting?.length && sorting?.length > 1
+                ? // @ts-expect-error - No type yet
+                  formatSorting(sorting)
+                : [],
+            concatenate_fields: [
+              ...addCommonGridConcatenates(pluralize(entity)),
+            ],
+          },
+        })
+        .join({
+          type: 'left',
+          field_relation: {
+            to: { entity: 'device_services', field: 'device_id' },
+            from: { entity, field: 'id' },
+          },
+        });
+
+      addCommonGridJoins(query, entity);
+
+      const { data: items } = await query.execute();
+
+      const suggestions = searchSuggestionTransformer(
+        items,
+        searchable_fields,
+      )
+      // @ts-expect-error - No type yet
+      .map((e) => {
+        let updatedSuggestion = e;
+        if (e.field === 'is_device_authorized') {
+          updatedSuggestion = {
+            ...e,
+            display_value:
+              e.values?.[0] === 'true' ? 'Authorized' : 'Unauthorized',
+          };
+        } else if (e.field === 'is_device_online') {
+          updatedSuggestion = {
+            ...e,
+            display_value: e.values?.[0] === 'true' ? 'Online' : 'Offline',
+          };
+        } else if (e.field === 'protocol') {
+          updatedSuggestion = {
+            ...e,
+            label: 'Connection Types',
+            display_value: Array.isArray(e.values)
+              ? e.values
+                  .map((v: unknown) =>
+                    typeof v === 'string' ? v.toUpperCase() : v,
+                  )
+                  .join(', ')
+              : e.display_value,
+          };
+        }
+        return updatedSuggestion;
+      });
       return { items: suggestions };
     }),
   aliasSearch: privateProcedure

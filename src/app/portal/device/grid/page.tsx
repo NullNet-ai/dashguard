@@ -84,7 +84,11 @@ export default function Page() {
     });
   }, [gridCacheData, main_entity]);
 
-  const { fetchData, data: grid_data, isLoading } = useFetchGridData(gridParams);
+  const {
+    fetchData,
+    data: grid_data,
+    isLoading,
+  } = useFetchGridData(gridParams, { router: 'device', resolver: 'mainGrid' });
   const { items = [], totalCount = 0 } = (grid_data || {}) as any;
 
   useEffect(() => {
@@ -273,8 +277,8 @@ export default function Page() {
           return result as Record<string, any>;
         },
         searchConfig: {
-          router: 'grid',
-          resolver: 'items',
+          router: 'device',
+          resolver: 'mainGrid',
           query_params: {
             entity: main_entity!,
             pluck: _pluck,
@@ -285,8 +289,8 @@ export default function Page() {
           defaultSorting,
         },
         searchSuggestionConfig: {
-          router:'search',
-          resolver: 'searchSuggestions',
+          router: 'search',
+          resolver: 'deviceSearch',
         },
         customRowAction: AuthorizeDeviceAction,
         rowClickCustomAction: ({ row }) => {
