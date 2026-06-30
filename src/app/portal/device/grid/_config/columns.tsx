@@ -20,20 +20,20 @@ const gridColumns = [
       return <StatusCell value={value} />;
     },
   },
-  {
-    header: 'Authorized',
-    accessorKey: 'is_device_authorized',
-    enableColumnFilter: false,
-    enableSorting: true,
-    enableResizing: false,
-    sort_config: {
-      type: 'boolean',
-    },
-    cell: ({ row }) => {
-      const authorized = row?.original?.is_device_authorized ?? false;
-      return <AuthorizationCell authorized={authorized} />;
-    },
-  },
+  // {
+  //   header: 'Authorized',
+  //   accessorKey: 'is_device_authorized',
+  //   enableColumnFilter: false,
+  //   enableSorting: true,
+  //   enableResizing: false,
+  //   sort_config: {
+  //     type: 'boolean',
+  //   },
+  //   cell: ({ row }) => {
+  //     const authorized = row?.original?.is_device_authorized ?? false;
+  //     return <AuthorizationCell authorized={authorized} />;
+  //   },
+  // },
   {
     header: 'Name',
     accessorKey: 'device_name',
