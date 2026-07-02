@@ -1,0 +1,53 @@
+meta {
+  name: Filter Store Contacts
+  type: http
+  seq: 10
+}
+
+post {
+  url: {{baseUrl}}/api/store/contacts/filter
+  body: json
+  auth: inherit
+}
+
+body:json {
+  {
+    "pluck": [
+      "id",
+      "code",
+      "status"
+    ],
+    "pluck_object": {},
+    "pluck_group_object": {},
+    "advance_filters": [
+      {
+        "type": "criteria",
+        "field": "code",
+        "operator": "equal",
+        "values": [
+          "CO000005"
+        ]
+      }
+    ],
+    "offset": 0,
+    "limit": 10,
+    "joins": [],
+    "is_case_sensitive_sorting": false,
+    "multiple_sort": [],
+    "date_format": "mm/dd/YYYY",
+    "concatenate_fields": [],
+    "group_advance_filters": [],
+    "distinct_by": "",
+    "time_format": "HH24:MI"
+  }
+}
+
+vars:pre-request {
+  baseUrl: https://store.appguard.ai
+  defaultEntity: versions
+}
+
+settings {
+  encodeUrl: true
+  timeout: 0
+}

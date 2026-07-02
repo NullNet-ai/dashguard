@@ -7,7 +7,7 @@ import { api } from '~/trpc/react';
 import SummaryClientContent from './SummaryClientContent';
 import { useEventEmitter } from '~/context/EventEmitterProvider';
 
-const RecordSummaryContent = ({ children, image_placeholder, header_center_slot, is_show_header_tab }: any) => {
+const RecordSummaryContent = ({ children, image_placeholder, header_center_slot, is_show_header_tab, actions }: any) => {
   const eventEmitter = useEventEmitter();
   const pathname = usePathname();
   const token = (getCookie('token') as string) || '';
@@ -47,9 +47,9 @@ const RecordSummaryContent = ({ children, image_placeholder, header_center_slot,
   );
 
   useEffect(() => {
-      eventEmitter.on('record:summary_content', () => {
-        recordRefetch();
-      });
+    eventEmitter.on('record:summary_content', () => {
+      recordRefetch();
+    });
     return () => {
       eventEmitter.off('record:summary_content', recordRefetch);
     };
@@ -72,6 +72,7 @@ const RecordSummaryContent = ({ children, image_placeholder, header_center_slot,
       image_placeholder={image_placeholder}
       header_center_slot={header_center_slot}
       is_show_header_tab={is_show_header_tab}
+      actions={actions}
     >
       {children}
     </SummaryClientContent>

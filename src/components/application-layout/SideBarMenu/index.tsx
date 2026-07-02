@@ -15,8 +15,10 @@ const getInitials = (name: string) => {
 };
 
 export default async function SideBarMenu() {
-  const mainConfig = await MainMenuConfig();
-  const accountOrganization =  await api.record.getSessionInfo();
+  const accountOrganization = await api.record.getSessionInfo();
+  const mainConfig = await MainMenuConfig(
+    accountOrganization?.current_organization?.role,
+  );
   const { account_name, username, organization } = accountOrganization?.current_organization ?? {}
   const initials = getInitials(account_name);
   const cookieStore = await cookies(); // Access cookies

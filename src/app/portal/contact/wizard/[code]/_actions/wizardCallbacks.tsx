@@ -3,10 +3,9 @@
 import { toast } from 'sonner';
 
 import { type ICallbackHandler } from '~/components/platform/Wizard/type';
+import { showTempPassword } from '~/components/platform/TempPasswordDialog';
 
 import { updateAccountStatus } from '.';
-import { handleEvent } from '~/server/events';
-import { EEventType } from '~/server/events/types';
 
 const wizardCallbacks = {
   onClickWizardSave: async ({ data, next, socketClient }: any) => {
@@ -14,20 +13,12 @@ const wizardCallbacks = {
       const response = await updateAccountStatus(data);
 
       if (response) {
-        // socketClient.publish({
-        //   type:
-        //     response?.accountRecord?.categories[0] === 'Internal User'
-        //       ? 'ACCOUNT_INVITE_INTERNAL'
-        //       : 'ACCOUNT_INVITE_EXTERNAL',
-        //   payload: response,
-        // });
-         await handleEvent(
-          response?.accountRecord?.categories[0] === 'Internal User'
-            ? EEventType.ACCOUNT_INVITE_INTERNAL
-            : EEventType.ACCOUNT_INVITE_EXTERNAL,
-          response,
-        );
-        await next('Account is created successfully and invitation is sent');
+        if (response.temp_password) {
+          await showTempPassword(response.temp_password);
+          await next('Account created. Temporary password was displayed.');
+        } else {
+          await next('Account is already set up and is now active.');
+        }
         return;
       }
       await next();

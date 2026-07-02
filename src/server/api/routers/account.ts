@@ -131,6 +131,7 @@ export const accountRouter = createTRPCRouter({
       const contactData = await ctx.dnaClient
         .findAll({
           entity: 'contacts',
+          no_caching: true,
           token: ctx.token.value,
           query: {
             advance_filters: createAdvancedFilter({
@@ -161,10 +162,11 @@ export const accountRouter = createTRPCRouter({
       const accounts = await ctx.dnaClient
         .findAll({
           entity: 'account_organizations',
+          no_caching: true,
           token: ctx.token.value,
           query: {
             advance_filters: createAdvancedFilter({
-              contact_id: contactData?.data?.[0]?.contacts?.id,
+              contact_id: contactData?.data?.[0]?.id,
             }),
             pluck: ['id', 'email', 'role_id', 'contact_id', 'status'],
           },
@@ -174,12 +176,12 @@ export const accountRouter = createTRPCRouter({
         ...(accounts.data[0] ?? {}),
         email: accounts.data[0]?.email
           ? accounts.data[0]?.email
-          : contactData?.data?.[0]?.contact_emails?.email,
+          : contactData?.data?.[0]?.contact_emails?.[0]?.email,
       };
 
       return {
         contact: {
-          ...contactData?.data?.[0]?.contacts,
+          ...contactData?.data?.[0],
         },
         account: accountData,
       };
@@ -190,6 +192,7 @@ export const accountRouter = createTRPCRouter({
       const userRole = await ctx.dnaClient
         .findAll({
           entity: 'user_role',
+          no_caching: true,
           token: ctx.token.value,
           query: {
             pluck: ['id', 'role'],
@@ -304,10 +307,10 @@ export const accountRouter = createTRPCRouter({
         })
         .execute();
       const accountOrg = accounts.data[0] ?? {};
-
+      
       return {
-        ...accountOrg?.account_organizations,
-        role: accountOrg?.user_roles?.role,
+        ...accountOrg,
+        role: accountOrg?.user_roles?.[0]?.role,
       };
     }),
   fetchGridData: privateProcedure
@@ -350,10 +353,10 @@ export const accountRouter = createTRPCRouter({
                     (input.limit || 100),
               limit: input.limit || 1,
             },
-            multiple_sort: input.sorting?.length
-            // @ts-expect-error - No type yet
-              ? formatSorting(input.sorting)
-              : [],
+            // multiple_sort: input.sorting?.length
+            // // @ts-expect-error - No type yet
+            //   ? formatSorting(input.sorting)
+            //   : [],
             concatenate_fields: [
               ...addCommonGridConcatenates(input?.entity)
             ],

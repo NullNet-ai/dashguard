@@ -1,0 +1,205 @@
+meta {
+  name: Filter Store Account Organizations
+  type: http
+  seq: 8
+}
+
+post {
+  url: {{baseUrl}}/api/store/account_organizations/filter
+  body: json
+  auth: inherit
+}
+
+body:json {
+  {
+    "pluck": [
+      "id"
+    ],
+    "pluck_object": {
+      "created_by_account_organizations": [
+        "id",
+        "contact_id"
+      ],
+      "created_by": [
+        "id",
+        "first_name",
+        "last_name"
+      ],
+      "updated_by_account_organizations": [
+        "id",
+        "contact_id"
+      ],
+      "updated_by": [
+        "id",
+        "first_name",
+        "last_name"
+      ],
+      "account_organizations": [
+        "id",
+        "email",
+        "status",
+        "code",
+        "categories",
+        "account_organization_status",
+        "created_date",
+        "created_time",
+        "updated_date",
+        "updated_time",
+        "created_by",
+        "updated_by",
+        "contact_id"
+      ],
+      "contacts": [
+        "id",
+        "first_name",
+        "last_name"
+      ]
+    },
+    "pluck_group_object": {},
+    "advance_filters": [
+      {
+        "type": "criteria",
+        "field": "status",
+        "operator": "equal",
+        "values": [
+          "Active",
+          "Draft"
+        ]
+      }
+    ],
+    "offset": 300,
+    "limit": 100,
+    "joins": [
+      {
+        "type": "left",
+        "field_relation": {
+          "to": {
+            "entity": "contacts",
+            "field": "id"
+          },
+          "from": {
+            "entity": "account_organizations",
+            "field": "contact_id"
+          }
+        },
+        "nested": false
+      },
+      {
+        "type": "self",
+        "field_relation": {
+          "to": {
+            "entity": "account_organizations",
+            "field": "id"
+          },
+          "from": {
+            "alias": "created_by_account_organizations",
+            "entity": "account_organizations",
+            "field": "created_by"
+          }
+        },
+        "nested": false
+      },
+      {
+        "type": "left",
+        "field_relation": {
+          "to": {
+            "alias": "created_by",
+            "entity": "contacts",
+            "field": "id"
+          },
+          "from": {
+            "entity": "account_organizations",
+            "field": "contact_id"
+          }
+        },
+        "nested": true
+      },
+      {
+        "type": "self",
+        "field_relation": {
+          "to": {
+            "entity": "account_organizations",
+            "field": "id"
+          },
+          "from": {
+            "alias": "updated_by_account_organizations",
+            "entity": "account_organizations",
+            "field": "updated_by"
+          }
+        },
+        "nested": false
+      },
+      {
+        "type": "left",
+        "field_relation": {
+          "to": {
+            "alias": "updated_by",
+            "entity": "contacts",
+            "field": "id"
+          },
+          "from": {
+            "entity": "account_organizations",
+            "field": "contact_id"
+          }
+        },
+        "nested": true
+      }
+    ],
+    "is_case_sensitive_sorting": false,
+    
+    "date_format": "mm/dd/YYYY",
+    "concatenate_fields": [
+      {
+        "fields": [
+          "first_name",
+          "last_name"
+        ],
+        "field_name": "full_name",
+        "separator": " ",
+        "entity": "contacts",
+        "aliased_entity": "created_by"
+      },
+      {
+        "fields": [
+          "first_name",
+          "last_name"
+        ],
+        "field_name": "full_name",
+        "separator": " ",
+        "entity": "contacts",
+        "aliased_entity": "updated_by"
+      },
+      {
+        "fields": [
+          "created_date",
+          "created_time"
+        ],
+        "field_name": "created_date_time",
+        "separator": " ",
+        "entity": "account_organizations"
+      },
+      {
+        "fields": [
+          "updated_date",
+          "updated_time"
+        ],
+        "field_name": "updated_date_time",
+        "separator": " ",
+        "entity": "account_organizations"
+      }
+    ],
+    "group_advance_filters": [],
+    "distinct_by": "",
+    "time_format": "HH24:MI"
+  }
+}
+
+vars:pre-request {
+  baseUrl: https://store.appguard.ai
+  defaultEntity: versions
+}
+
+settings {
+  encodeUrl: true
+  timeout: 0
+}

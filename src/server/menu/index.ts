@@ -11,11 +11,11 @@
 
 const menu = [
   // account_organization,
-  // contact,
+  contact,
   // dashboard,
   device,
   device_remote_access_session,
-  // settings,
+  settings,
   // organization,
   // location,
   // calendar,

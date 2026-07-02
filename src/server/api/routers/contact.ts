@@ -43,7 +43,12 @@ export const contactRouter = createTRPCRouter({
     .input(contactDetailsSchema)
     .mutation(async ({ input, ctx }) => {
       const meta_header = await get_meta_header()
-      const { id = '', address_id, details = {}, ...rest } = input;
+      const {
+        id = '',
+        address_id,
+        // details = {},
+        ...rest
+      } = input;
       
 
       let _address_id = address_id || null;
@@ -138,42 +143,42 @@ export const contactRouter = createTRPCRouter({
         return address;
       };
 
-      if (Object.values(details).length || _address_id) {
-        const address = await getAddressByContactId(_address_id, id);
+      // if (Object.values(details).length || _address_id) {
+      //   const address = await getAddressByContactId(_address_id, id);
 
-        if (address?.id) {
-          await updateAddress('address', { ...details, id: address?.id }, [
-            'id',
-            'address',
-            'address_line_one',
-            'address_line_two',
-            'latitude',
-            'longitude',
-            'place_id',
-            'street_number',
-            'street',
-            'region',
-            'region_code',
-            'country_code',
-          ]);
-        } else {
-          const address = await insertAddress('address', details, [
-            'id',
-            'address',
-            'address_line_one',
-            'address_line_two',
-            'latitude',
-            'longitude',
-            'place_id',
-            'street_number',
-            'street',
-            'region',
-            'region_code',
-            'country_code',
-          ]);
-          if (address) _address_id = address?.id;
-        }
-      }
+      //   if (address?.id) {
+      //     await updateAddress('address', { ...details, id: address?.id }, [
+      //       'id',
+      //       'address',
+      //       'address_line_one',
+      //       'address_line_two',
+      //       'latitude',
+      //       'longitude',
+      //       'place_id',
+      //       'street_number',
+      //       'street',
+      //       'region',
+      //       'region_code',
+      //       'country_code',
+      //     ]);
+      //   } else {
+      //     const address = await insertAddress('address', details, [
+      //       'id',
+      //       'address',
+      //       'address_line_one',
+      //       'address_line_two',
+      //       'latitude',
+      //       'longitude',
+      //       'place_id',
+      //       'street_number',
+      //       'street',
+      //       'region',
+      //       'region_code',
+      //       'country_code',
+      //     ]);
+      //     if (address) _address_id = address?.id;
+      //   }
+      // }
 
       return ctx.dnaClient
         .update(id, {
@@ -267,10 +272,10 @@ export const contactRouter = createTRPCRouter({
             // by_field: "created_date",
             // by_direction: EOrderDirection.ASC,
           },
-          multiple_sort: input.sorting?.length
-            // @ts-expect-error - No type yet
-            ? formatSorting(input.sorting)
-            : [],
+          // multiple_sort: input.sorting?.length
+          //   // @ts-expect-error - No type yet
+          //   ? formatSorting(input.sorting)
+          //   : [],
           concatenate_fields: [...addCommonGridConcatenates(input?.entity)],
         },
       })
@@ -338,7 +343,50 @@ export const contactRouter = createTRPCRouter({
       });
     }
 
-    const { total_count: totalCount = 1, data: items } = await query.execute();
+    const { total_count: totalCount = 1, data: rawItems } =
+      await query.execute();
+
+    const items = await Bluebird.map(rawItems, async (item: any) => {
+      const contactId = item?.id;
+      if (!contactId) return { ...item, roles: [] };
+      const acctOrgs = await ctx.dnaClient
+        .findAll({
+          entity: 'account_organizations',
+          token: ctx.token.value,
+          query: {
+            pluck_object: {
+              user_roles: ['role'],
+              account_organizations: ['id'],
+            },
+            advance_filters: createAdvancedFilter({ contact_id: contactId }),
+          },
+        })
+        .join({
+          type: 'left',
+          field_relation: {
+            to: {
+              entity: 'user_roles',
+              field: 'id',
+            },
+            from: {
+              entity: 'account_organizations',
+              field: 'role_id',
+            },
+          },
+        })
+        .execute();
+      const roles = [
+        ...new Set(
+          (acctOrgs.data ?? [])
+            .map((d: any) => {
+              console.log("🚀 ~ d:", JSON.stringify(d))
+              return d?.user_roles?.[0]?.role
+            })
+            .filter(Boolean),
+        ),
+      ];
+      return { ...item, roles };
+    });
 
     const totalPages = Math.ceil(totalCount / (input.limit || 100));
     if (input.grouping?.length) {
@@ -369,6 +417,7 @@ export const contactRouter = createTRPCRouter({
     }
     const formatted_items = items.reduce(
       (acc: Record<string, string>[], item: Record<string, any>) => {
+        console.log("🚀 ~ item:", item)
         const {
           contacts,
           contact_emails,
@@ -377,6 +426,7 @@ export const contactRouter = createTRPCRouter({
           updated_by,
           roles,
           organizations,
+          ...rest
         } = item;
 
         const emails = pick(contact_emails, ['emails', 'is_primaries']);
@@ -388,7 +438,7 @@ export const contactRouter = createTRPCRouter({
         ]);
 
         const existing_contact = acc?.find(
-          (acc_item: any) => acc_item?.id === contacts?.id,
+          (acc_item: any) => acc_item?.id === rest?.id,
         );
 
         if (existing_contact) return acc;
@@ -447,6 +497,7 @@ export const contactRouter = createTRPCRouter({
           {
             roles,
             organization: [...new Set(organizationNames)],
+            ...rest,
             ...contacts,
             ...emails,
             ...phones,
@@ -752,7 +803,7 @@ export const contactRouter = createTRPCRouter({
 
       // Suppose to create once only
       const insert = async (entity: string, data: any, pluck: string[]) => {
-      
+        
         const record = await ctx.dnaClient
           .create({
             entity,
@@ -937,7 +988,7 @@ export const contactRouter = createTRPCRouter({
         code = '',
         address_id,
         ...rest
-      } = contact?.contacts || {};
+      } = contact || {};
 
       const phones = await getRecordByContactId(
         'contact_phone_number',
@@ -1060,32 +1111,33 @@ export const contactRouter = createTRPCRouter({
           entity: ENTITY,
           token: ctx.token.value,
           query: {
+            pluck: input.pluck_fields,
             pluck_object: {
-              addresses: input.address_pluck_fields || ['address'],
+              // addresses: input.address_pluck_fields || ['address'],
               contacts: input.pluck_fields,
             },
             advance_filters,
           },
         })
-        .join({
-          type: 'left',
-          field_relation: {
-            to: {
-              entity: 'address',
-              field: 'id',
-            },
-            from: {
-              entity: ENTITY,
-              field: 'address_id',
-            },
-          },
-        })
+        // .join({
+        //   type: 'left',
+        //   field_relation: {
+        //     to: {
+        //       entity: 'address',
+        //       field: 'id',
+        //     },
+        //     from: {
+        //       entity: ENTITY,
+        //       field: 'address_id',
+        //     },
+        //   },
+        // })
         .execute();
 
       const [contact] = record?.data || [];
       const { addresses = {}, contacts } = contact || {};
       const data = {
-        ...(contacts || {}),
+        ...(contact || {}),
         ...(input?.address_pluck_fields?.length
           ? { address: addresses }
           : addresses),
