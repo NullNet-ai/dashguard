@@ -107,6 +107,7 @@ ADDRESS_COUNTRY_CODE=""
 
 # Auto-fetched from the store API after auth; override if needed.
 WALLGUARD_VERSION=""
+WALLGUARD_VERSION_EXPLICIT=false
 PLATFORM=""
 
 POLL_INTERVAL=3
@@ -628,13 +629,6 @@ if [[ -n "${STATE_FILE}" ]] && [[ -f "${STATE_FILE}" ]]; then
     load_state
     log_important "Incomplete run detected — auto-continuing from step ${STEP_COMPLETED} (pass --fresh to reinstall from scratch)."
   fi
-fi
-
-# A resumed state file may have cached a stale WALLGUARD_VERSION from a prior run.
-# Always re-fetch the latest version from the store unless the user passed
-# --wallguard-version explicitly.
-if [[ "${WALLGUARD_VERSION_EXPLICIT}" != "true" ]]; then
-  WALLGUARD_VERSION=""
 fi
 
 # A resumed state file may have cached a stale WALLGUARD_VERSION from a prior run.
