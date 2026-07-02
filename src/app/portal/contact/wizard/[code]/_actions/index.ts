@@ -11,7 +11,16 @@ export const updateAccountStatus = async (data: any) => {
       const result = await api.account.createInvitationRecord({
         account_code: accountOrg.code,
       });
-      return result;
+
+      const activation = await api.auth.adminActivateContactAccount({
+        account_organization_id: result.account_record_id,
+      });
+
+      await api.account.archiveAccountInvitation({
+        id: result.account_record_id,
+      });
+
+      return { ...result, ...activation };
     }
     return null;
   } catch (error) {

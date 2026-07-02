@@ -15,7 +15,7 @@ import { Badge } from '~/components/ui/badge';
 import { RecordContext, useRecord } from '../Provider';
 import { cn } from '~/lib/utils';
 
-const SummaryClientContent = ({ recordDetails, mainEntity, token, image_placeholder, header_center_slot, is_show_header_tab = false, children }: any) => {
+const SummaryClientContent = ({ recordDetails, mainEntity, token, image_placeholder, header_center_slot, is_show_header_tab = false, actions, children }: any) => {
   const { isCollapseRecordSummary, onClickCollapseButton } =
     useContext(RecordWrapperContext);
 
@@ -85,6 +85,7 @@ const SummaryClientContent = ({ recordDetails, mainEntity, token, image_placehol
                 <IdentifierComponent
                   code={recordDetails?.data?.code!}
                   status={recordDetails?.data?.status!}
+                  actions={actions}
                   data-test-id={testIDFormatter('rcrd-sum-identifier')}
                 />
               </Card>

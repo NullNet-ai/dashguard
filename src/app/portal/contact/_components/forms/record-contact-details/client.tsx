@@ -128,13 +128,13 @@ export default function RecordContactDetails({
             maxDate: new Date(),
           },
         },
-        {
-          id: "address",
-          formType: "address-input",
-          name: "Address",
-          placeholder: "Address",
-          label: "Address",
-        },
+        // {
+        //   id: "address",
+        //   formType: "address-input",
+        //   name: "Address",
+        //   placeholder: "Address",
+        //   label: "Address",
+        // },
       ]}
     />
   );

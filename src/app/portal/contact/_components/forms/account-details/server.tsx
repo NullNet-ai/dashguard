@@ -21,6 +21,7 @@ const FormServerFetch = async () => {
   return (
     <div className="space-y-2">
       <AccountDetails
+        key={account?.email}
         defaultValues={{ ...account, contact_id: contact?.id }}
         selectOptions={{
           role_id: options?.user_role,

@@ -164,7 +164,7 @@ export const accountRouter = createTRPCRouter({
           token: ctx.token.value,
           query: {
             advance_filters: createAdvancedFilter({
-              contact_id: contactData?.data?.[0]?.contacts?.id,
+              contact_id: contactData?.data?.[0]?.id,
             }),
             pluck: ['id', 'email', 'role_id', 'contact_id', 'status'],
           },
@@ -179,7 +179,7 @@ export const accountRouter = createTRPCRouter({
 
       return {
         contact: {
-          ...contactData?.data?.[0]?.contacts,
+          ...contactData?.data?.[0],
         },
         account: accountData,
       };
@@ -304,10 +304,10 @@ export const accountRouter = createTRPCRouter({
         })
         .execute();
       const accountOrg = accounts.data[0] ?? {};
-
+      
       return {
-        ...accountOrg?.account_organizations,
-        role: accountOrg?.user_roles?.role,
+        ...accountOrg,
+        role: accountOrg?.user_roles?.[0]?.role,
       };
     }),
   fetchGridData: privateProcedure
@@ -350,10 +350,10 @@ export const accountRouter = createTRPCRouter({
                     (input.limit || 100),
               limit: input.limit || 1,
             },
-            multiple_sort: input.sorting?.length
-            // @ts-expect-error - No type yet
-              ? formatSorting(input.sorting)
-              : [],
+            // multiple_sort: input.sorting?.length
+            // // @ts-expect-error - No type yet
+            //   ? formatSorting(input.sorting)
+            //   : [],
             concatenate_fields: [
               ...addCommonGridConcatenates(input?.entity)
             ],

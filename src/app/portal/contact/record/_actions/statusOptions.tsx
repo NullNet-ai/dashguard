@@ -36,4 +36,9 @@ const statusOptions = [
   },
 ] as IMenuOptionConfig[];
 
+export const resetPasswordOption: IMenuOptionConfig = {
+  label: 'Reset Password',
+  onClick: () => window.dispatchEvent(new Event('contact:reset-password')),
+};
+
 export default statusOptions;

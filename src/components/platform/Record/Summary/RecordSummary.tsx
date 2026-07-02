@@ -7,6 +7,7 @@ const RecordSummary = async ({
   image_placeholder,
   header_center_slot,
   is_show_header_tab,
+  actions,
   children,
 }: any) => {
     const headerList = await headers();
@@ -27,6 +28,7 @@ const RecordSummary = async ({
         image_placeholder={textPlaceholder ?? image_placeholder}
         header_center_slot={header_center_slot}
         is_show_header_tab={is_show_header_tab}
+        actions={actions}
       >
         {children}
       </RecordClientWrapper>

@@ -6,7 +6,7 @@ import { useRecord } from '../Provider'
 
 import RecordSummaryContent from './SummaryContent'
 
-const RecordClientWrapper = ({ image_placeholder, header_center_slot, is_show_header_tab, children }: any) => {
+const RecordClientWrapper = ({ image_placeholder, header_center_slot, is_show_header_tab, actions, children}: any) => {
   const { state } = useRecord() || {}
 
   if (state?.config?.showRecordSummary ?? true) {
@@ -16,6 +16,7 @@ const RecordClientWrapper = ({ image_placeholder, header_center_slot, is_show_he
           image_placeholder={image_placeholder}
           header_center_slot={header_center_slot}
           is_show_header_tab={is_show_header_tab}
+          actions={actions}
         >
           {children}
         </RecordSummaryContent>

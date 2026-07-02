@@ -2,6 +2,7 @@ import { headers } from 'next/headers';
 
 import PlatformWizard from '~/components/platform/Wizard';
 import { stepValidator } from '~/components/platform/Wizard/Utils/stepValidation';
+import { TempPasswordDialogHost } from '~/components/platform/TempPasswordDialog';
 
 import stepLabels from '../_config/stepLabels';
 import stepsNavigation from '../_config/stepsNavigation';
@@ -37,6 +38,7 @@ const WizardLayout = async ({ children }: IWizardLayoutProps) => {
   const wizard_summary = WizardSummaryComponent();
   return (
     <div>
+      <TempPasswordDialogHost />
       <PlatformWizard
         config={{
           currentStep: Number(currentStep),

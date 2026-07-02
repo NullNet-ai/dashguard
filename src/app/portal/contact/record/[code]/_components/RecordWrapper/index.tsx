@@ -5,7 +5,9 @@ import RecordSummaryMobile from '~/components/platform/Record/Summary/RecordSumm
 import HeaderTabs from '~/components/platform/Record/Tabs/HeaderTabs'
 import { ResizablePanel, ResizablePanelGroup } from '~/components/ui/resizable'
 
-import statusOptions from '../../../_actions/statusOptions'
+import statusOptions, {
+  resetPasswordOption,
+} from '../../../_actions/statusOptions';
 import tabs from '../../../_config/tabs'
 
 import type { IProps } from './types'
@@ -25,7 +27,10 @@ const Wrapper = ({
       config={{
         entityCode: entity_code,
         entityName: entity_name!,
-        identifierOption: is_applicant ? statusOptions : undefined,
+        identifierOption: [
+          ...(is_applicant ? statusOptions : []),
+          resetPasswordOption,
+        ],
         // showRecordSummary:false,
         // showToolbar: false,
         enableTimeline,
