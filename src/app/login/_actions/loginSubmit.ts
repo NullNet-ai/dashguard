@@ -45,8 +45,10 @@ export default async function LoginSubmit({
   // get account data
   const accountDataResponse = await api.auth.getAccountData();
 
-  const { is_new_user, status, account_organization_status, account_id } =
+  const { status, account_organization_status, account_id } =
     accountDataResponse ?? {};
+  const is_new_user =
+    fetchedAccountOrganizations?.is_new_user ?? accountDataResponse?.is_new_user;
 
   if (
     (status !== 'Active' ||
