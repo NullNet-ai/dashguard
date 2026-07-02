@@ -4,5 +4,9 @@
     "device",
     "remote_access",
     "settings"
-  ]
+  ],
+  "roles": {
+    "admin": "*",
+    "developer": ["device", "remote_access"]
+  }
 }
