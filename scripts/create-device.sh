@@ -513,7 +513,7 @@ while [[ $# -gt 0 ]]; do
     --address-country=*)        ADDRESS_COUNTRY="${1#*=}" ;;
     --address-country-code=*)   ADDRESS_COUNTRY_CODE="${1#*=}" ;;
     --remote-access-url=*)      REMOTE_ACCESS_URL="${1#*=}" ;;
-    --wallguard-version=*)      WALLGUARD_VERSION="${1#*=}" ;;
+    --wallguard-version=*)      WALLGUARD_VERSION="${1#*=}"; WALLGUARD_VERSION_EXPLICIT=true ;;
     --platform=*)               PLATFORM="${1#*=}" ;;
     --poll-interval=*)          POLL_INTERVAL="${1#*=}" ;;
     --poll-timeout=*)           POLL_TIMEOUT="${1#*=}" ;;
@@ -628,6 +628,20 @@ if [[ -n "${STATE_FILE}" ]] && [[ -f "${STATE_FILE}" ]]; then
     load_state
     log_important "Incomplete run detected — auto-continuing from step ${STEP_COMPLETED} (pass --fresh to reinstall from scratch)."
   fi
+fi
+
+# A resumed state file may have cached a stale WALLGUARD_VERSION from a prior run.
+# Always re-fetch the latest version from the store unless the user passed
+# --wallguard-version explicitly.
+if [[ "${WALLGUARD_VERSION_EXPLICIT}" != "true" ]]; then
+  WALLGUARD_VERSION=""
+fi
+
+# A resumed state file may have cached a stale WALLGUARD_VERSION from a prior run.
+# Always re-fetch the latest version from the store unless the user passed
+# --wallguard-version explicitly.
+if [[ "${WALLGUARD_VERSION_EXPLICIT}" != "true" ]]; then
+  WALLGUARD_VERSION=""
 fi
 
 # ---------------------------------------------------------------------------
