@@ -131,6 +131,7 @@ export const accountRouter = createTRPCRouter({
       const contactData = await ctx.dnaClient
         .findAll({
           entity: 'contacts',
+          no_caching: true,
           token: ctx.token.value,
           query: {
             advance_filters: createAdvancedFilter({
@@ -161,6 +162,7 @@ export const accountRouter = createTRPCRouter({
       const accounts = await ctx.dnaClient
         .findAll({
           entity: 'account_organizations',
+          no_caching: true,
           token: ctx.token.value,
           query: {
             advance_filters: createAdvancedFilter({
@@ -174,7 +176,7 @@ export const accountRouter = createTRPCRouter({
         ...(accounts.data[0] ?? {}),
         email: accounts.data[0]?.email
           ? accounts.data[0]?.email
-          : contactData?.data?.[0]?.contact_emails?.email,
+          : contactData?.data?.[0]?.contact_emails?.[0]?.email,
       };
 
       return {
@@ -190,6 +192,7 @@ export const accountRouter = createTRPCRouter({
       const userRole = await ctx.dnaClient
         .findAll({
           entity: 'user_role',
+          no_caching: true,
           token: ctx.token.value,
           query: {
             pluck: ['id', 'role'],
