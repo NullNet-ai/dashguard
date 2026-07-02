@@ -101,7 +101,6 @@ export default function AccountDetails({
           label: 'Email',
           required: true,
           placeholder: 'Enter your email',
-          disabled: true,
         },
         {
           id: 'role_id',

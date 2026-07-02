@@ -46,6 +46,18 @@ const gridColumns = [
     },
   },
   {
+    header: 'Role',
+    accessorKey: 'roles',
+    data_type: 'array',
+    cell: ({ row }) => {
+      const roles = row?.original?.roles || [];
+      if (!Array.isArray(roles)) return null;
+      return roles.map((role: string, index: number) => {
+        return <StatusCell key={index} value={role} renderType="value" />;
+      });
+    },
+  },
+  {
     header: 'First Name',
     accessorKey: 'first_name',
   },

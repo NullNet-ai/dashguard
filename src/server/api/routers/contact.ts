@@ -343,7 +343,50 @@ export const contactRouter = createTRPCRouter({
       });
     }
 
-    const { total_count: totalCount = 1, data: items } = await query.execute();
+    const { total_count: totalCount = 1, data: rawItems } =
+      await query.execute();
+
+    const items = await Bluebird.map(rawItems, async (item: any) => {
+      const contactId = item?.id;
+      if (!contactId) return { ...item, roles: [] };
+      const acctOrgs = await ctx.dnaClient
+        .findAll({
+          entity: 'account_organizations',
+          token: ctx.token.value,
+          query: {
+            pluck_object: {
+              user_roles: ['role'],
+              account_organizations: ['id'],
+            },
+            advance_filters: createAdvancedFilter({ contact_id: contactId }),
+          },
+        })
+        .join({
+          type: 'left',
+          field_relation: {
+            to: {
+              entity: 'user_roles',
+              field: 'id',
+            },
+            from: {
+              entity: 'account_organizations',
+              field: 'role_id',
+            },
+          },
+        })
+        .execute();
+      const roles = [
+        ...new Set(
+          (acctOrgs.data ?? [])
+            .map((d: any) => {
+              console.log("🚀 ~ d:", JSON.stringify(d))
+              return d?.user_roles?.[0]?.role
+            })
+            .filter(Boolean),
+        ),
+      ];
+      return { ...item, roles };
+    });
 
     const totalPages = Math.ceil(totalCount / (input.limit || 100));
     if (input.grouping?.length) {
@@ -760,7 +803,7 @@ export const contactRouter = createTRPCRouter({
 
       // Suppose to create once only
       const insert = async (entity: string, data: any, pluck: string[]) => {
-      
+        
         const record = await ctx.dnaClient
           .create({
             entity,
