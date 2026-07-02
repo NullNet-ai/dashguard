@@ -14,6 +14,7 @@ const RecordSummary = async ({
     const pathname = headerList.get('x-pathname') || '';
     const [, , , , identifier] = pathname.split('/');
 
+  // @ts-expect-error - No type yet
   const { first_name, last_name } = await api.contact.fetchContactPhoneEmail({
     code: identifier!,
     pluck_fields: ['id', 'first_name', 'last_name'],
