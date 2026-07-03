@@ -1,7 +1,7 @@
 {
   "order": [
-    "user",
-    "device",
+    "users",
+    "devices",
     "remote_access",
     "settings"
   ],
