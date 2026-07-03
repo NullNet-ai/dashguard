@@ -373,6 +373,7 @@ const CustomCreateButton = ({ entity }: { entity: string }) => {
               </DialogFooter>
             </>
           ) : (
+            <>
             <div className="flex flex-col items-center justify-center gap-4 py-8">
               {success ? (
                 <>
@@ -380,9 +381,6 @@ const CustomCreateButton = ({ entity }: { entity: string }) => {
                   <p className="text-center font-semibold">
                     Device installed successfully!
                   </p>
-                  <Button onClick={handleGetInstallCommand} className="mt-2">
-                    Install Device Again
-                  </Button>
                 </>
               ) : (
                 <>
@@ -393,6 +391,14 @@ const CustomCreateButton = ({ entity }: { entity: string }) => {
                 </>
               )}
             </div>
+              {success && (
+                <DialogFooter className="pt-4">
+                  <Button onClick={handleGetInstallCommand}>
+                    Install Device Again
+                  </Button>
+                </DialogFooter>
+              )}
+            </>
           )}
         </DialogContent>
       </Dialog>
