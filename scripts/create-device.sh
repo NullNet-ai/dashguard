@@ -94,6 +94,7 @@ EMAIL=""
 PASSWORD=""
 ROOT_SECRET=""
 SCRIPT_TOKEN=""
+USER_TOKEN_INJECTED=""
 
 # Auto-detected from platform + public IP; override if needed.
 DEVICE_NAME=""
@@ -532,9 +533,14 @@ done
 STORE_URL="${STORE_URL:-https://store.appguard.ai}"
 REMOTE_ACCESS_URL="${REMOTE_ACCESS_URL:-wallguard-proxy.appguard.ai}"
 
-# Prompt for credentials if not supplied via flags or env vars
-if [[ -z "$EMAIL" ]];       then read -rp  "Org email: "    EMAIL;       fi
-if [[ -z "$PASSWORD" ]];    then read -rsp "Org password: " PASSWORD;    echo; fi
+# Prompt for credentials if not supplied via flags, env vars, or injected by portal
+if [[ -n "$USER_TOKEN_INJECTED" ]]; then
+  USER_TOKEN="$USER_TOKEN_INJECTED"
+  log "Using portal session token (device will be attributed to the logged-in user)"
+else
+  if [[ -z "$EMAIL" ]];       then read -rp  "Org email: "    EMAIL;       fi
+  if [[ -z "$PASSWORD" ]];    then read -rsp "Org password: " PASSWORD;    echo; fi
+fi
 if [[ -z "$ROOT_SECRET" ]]; then read -rsp "Root secret: "  ROOT_SECRET; echo; fi
 
 # ---------------------------------------------------------------------------
@@ -549,9 +555,11 @@ fi
 # 1. Required tools — fail before any network call
 check_exists_fatal curl jq
 
-# 2. Required credentials — fail if unset
-check_set EMAIL
-check_set PASSWORD
+# 2. Required credentials — fail if unset (unless USER_TOKEN_INJECTED is set)
+if [[ -z "$USER_TOKEN_INJECTED" ]]; then
+  check_set EMAIL
+  check_set PASSWORD
+fi
 check_set ROOT_SECRET
 
 # 3. Build curl options string
@@ -667,7 +675,11 @@ if [[ -z "$WALLGUARD_VERSION" ]]; then
   ver_resp=$(store_post "store/versions/filter?no_caching=true" '{"pluck":["latest_version"],"limit":1}')
   WALLGUARD_VERSION=$(echo "$ver_resp" | jq -r '.data[0].latest_version // ""')
   if [[ -z "$WALLGUARD_VERSION" ]]; then
-    log_important "ERROR: Could not fetch Wallguard version from API. Specify --wallguard-version=VER manually."
+    if [[ -n "$USER_TOKEN_INJECTED" ]]; then
+      log_important "ERROR: The portal user token attached to this install command has expired or is invalid. Please re-login to the portal and regenerate the install command."
+    else
+      log_important "ERROR: Could not fetch Wallguard version from API. Specify --wallguard-version=VER manually."
+    fi
     exit 1
   fi
 fi
