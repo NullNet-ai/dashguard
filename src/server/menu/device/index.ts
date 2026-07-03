@@ -2,7 +2,7 @@ import { getGridLink } from '~/components/platform/Grid/utils/grid-get-link';
 import { ISidebarMenu } from "~/components/platform/SideBar/type";
 
 const menu = {
-  title: "Device",
+  title: "Devices",
   url: getGridLink({
     mainEntity: "device",
   }),
