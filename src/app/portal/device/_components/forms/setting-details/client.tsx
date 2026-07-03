@@ -65,6 +65,7 @@ const SettingDetails = ({
             ),
           },
         },
+        // @ts-expect-error - No type yet
         ...(deviceCategory === 'Firewall'
           ? [
         {
@@ -74,21 +75,22 @@ const SettingDetails = ({
           label: '',
           placeholder: 'Enable Config Monitoring',
           switchConfig: {
-                  rightLabel: (
-                    <span className="flex flex-col">
-                      <span>Enable Config Monitoring</span>
-                      <span className="text-sm text-muted-foreground">
-                        Uploads parsed firewall config snapshots (filter/NAT
-                        rules, aliases, interfaces) when config changes.
-                      </span>
-                    </span>
-                  ),
+            rightLabel: (
+              <span className="flex flex-col">
+                <span>Enable Config Monitoring</span>
+                <span className="text-sm text-muted-foreground">
+                  Uploads parsed firewall config snapshots (filter/NAT
+                  rules, aliases, interfaces) when config changes.
+                </span>
+              </span>
+            ),
           },
         },
             ]
           : []),
         {
           id: 'is_telemetry_monitoring_enabled',
+          // @ts-expect-error - No type yet
           formType: 'switch',
           name: 'is_telemetry_monitoring_enabled',
           label: '',
