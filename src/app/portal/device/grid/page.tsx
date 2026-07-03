@@ -244,12 +244,16 @@ export default function Page() {
                   }, 5000);
 
                   ws.onopen = () => {
+                    // Shell isn't ready to receive input immediately on open, matching
+                    // the wait in terminal/client.tsx before injecting commands.
+                    setTimeout(() => {
                     ws.send('wallguard-cli leave\r');
                     setTimeout(() => {
                       clearTimeout(fallback);
                       ws.close();
                       resolve();
                     }, 2000);
+                    }, 1500);
                   };
                   ws.onerror = () => {
                     clearTimeout(fallback);
