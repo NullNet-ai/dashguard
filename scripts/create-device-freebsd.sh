@@ -28,6 +28,7 @@ ROOT_SECRET=""
 SCRIPT_TOKEN=""
 STORE_URL=""
 REMOTE_ACCESS_URL=""
+USER_TOKEN_INJECTED=""
 
 # ---------------------------------------------------------------------------
 # Configuration
@@ -331,12 +332,19 @@ _log_start
 # Prompt for missing credentials (skipped when portal injects them)
 # ---------------------------------------------------------------------------
 
-if [ -z "$EMAIL" ];       then _prompt        "Org email: ";    EMAIL="$_REPLY";       fi
-if [ -z "$PASSWORD" ];    then _prompt_secret "Org password: "; PASSWORD="$_REPLY";    fi
+if [ -n "$USER_TOKEN_INJECTED" ]; then
+  USER_TOKEN="$USER_TOKEN_INJECTED"
+  _log "Using portal session token (device will be attributed to the logged-in user)"
+else
+  if [ -z "$EMAIL" ];       then _prompt        "Org email: ";    EMAIL="$_REPLY";       fi
+  if [ -z "$PASSWORD" ];    then _prompt_secret "Org password: "; PASSWORD="$_REPLY";    fi
+fi
 if [ -z "$ROOT_SECRET" ]; then _prompt_secret "Root secret: ";  ROOT_SECRET="$_REPLY"; fi
 
-check_set EMAIL
-check_set PASSWORD
+if [ -z "$USER_TOKEN_INJECTED" ]; then
+  check_set EMAIL
+  check_set PASSWORD
+fi
 check_set ROOT_SECRET
 
 # ---------------------------------------------------------------------------
@@ -441,7 +449,11 @@ if [ -z "$WALLGUARD_VERSION" ]; then
     '{"pluck":["latest_version"],"limit":1}')
   WALLGUARD_VERSION=$(_data0_str "$_ver_resp" "latest_version")
   if [ -z "$WALLGUARD_VERSION" ]; then
-    _log_important "ERROR: Could not fetch Wallguard version. Specify --wallguard-version=VER manually."
+    if [ -n "$USER_TOKEN_INJECTED" ]; then
+      _log_important "ERROR: The portal user token attached to this install command has expired or is invalid. Please re-login to the portal and regenerate the install command."
+    else
+      _log_important "ERROR: Could not fetch Wallguard version. Specify --wallguard-version=VER manually."
+    fi
     exit 1
   fi
 fi

@@ -3,6 +3,7 @@ import { join } from 'path';
 import { cookies } from 'next/headers';
 import { NextRequest, NextResponse } from 'next/server';
 import redisCache from '~/server/redis/cache';
+import { dnaClient } from '~/server/dnaOrm';
 
 // Safely quote a value for use in a bash single-quoted string
 const bashQuote = (s: string) => `'${s.replace(/'/g, "'\\''")}'`;
@@ -25,19 +26,35 @@ export async function GET(req: NextRequest) {
       );
     }
 
+    // Verify the cached user token is still valid
+    const tokenData = await dnaClient
+      .verifyToken(creds.userToken)
+      .execute()
+      .then((res) => res.data?.[0])
+      .catch(() => null);
+
+    if (!tokenData) {
+      return NextResponse.json(
+        {
+          message:
+            'The user token attached to this install command has expired. Please regenerate the install command from the portal.',
+        },
+        { status: 401 },
+      );
+    }
+
     if (format === 'bootstrap') {
       // pfSense/FreeBSD one-command installer — pure POSIX sh, no bash/curl/jq required.
-      // Serves create-device-freebsd.sh with credentials pre-injected.
+      // Serves create-device-freebsd.sh with user token and root secret pre-injected.
       const fbsdPath = join(
         process.cwd(),
         'scripts',
         'create-device-freebsd.sh',
       );
       let fbsd = await readFile(fbsdPath, 'utf-8');
-      fbsd = fbsd.replace(/^EMAIL=""$/m, `EMAIL=${bashQuote(creds.email)}`);
       fbsd = fbsd.replace(
-        /^PASSWORD=""$/m,
-        `PASSWORD=${bashQuote(creds.password)}`,
+        /^USER_TOKEN_INJECTED=""$/m,
+        `USER_TOKEN_INJECTED=${bashQuote(creds.userToken)}`,
       );
       fbsd = fbsd.replace(
         /^ROOT_SECRET=""$/m,
@@ -64,12 +81,8 @@ export async function GET(req: NextRequest) {
       let ps1 = await readFile(ps1Path, 'utf-8');
 
       ps1 = ps1.replace(
-        /^\$Script:Email\s*=\s*""$/m,
-        `\$Script:Email      = ${psQuote(creds.email)}`,
-      );
-      ps1 = ps1.replace(
-        /^\$Script:Password\s*=\s*""$/m,
-        `\$Script:Password   = ${psQuote(creds.password)}`,
+        /^\$Script:UserToken\s*=\s*""$/m,
+        `\$Script:UserToken  = ${psQuote(creds.userToken)}`,
       );
       ps1 = ps1.replace(
         /^\$Script:RootSecret\s*=\s*""$/m,
@@ -92,10 +105,9 @@ export async function GET(req: NextRequest) {
     const filePath = join(process.cwd(), 'scripts', 'create-device.sh');
     let content = await readFile(filePath, 'utf-8');
 
-    content = content.replace(/^EMAIL=""$/m, `EMAIL=${bashQuote(creds.email)}`);
     content = content.replace(
-      /^PASSWORD=""$/m,
-      `PASSWORD=${bashQuote(creds.password)}`,
+      /^USER_TOKEN_INJECTED=""$/m,
+      `USER_TOKEN_INJECTED=${bashQuote(creds.userToken)}`,
     );
     content = content.replace(
       /^ROOT_SECRET=""$/m,
