@@ -1,6 +1,6 @@
 {
   "order": [
-    "user",
+    "users",
     "device",
     "remote_access",
     "settings"
