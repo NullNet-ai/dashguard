@@ -15,8 +15,12 @@ const FormSchema = z.object({
   is_config_monitoring_enabled: z.boolean().optional(),
   is_telemetry_monitoring_enabled: z.boolean().optional(),
   // is_remote_access_enabled: z.boolean().optional(),
-})
-const SettingDetails = ({ params, defaultValues }: IFormProps) => {
+});
+const SettingDetails = ({
+  params,
+  defaultValues,
+  deviceCategory,
+}: IFormProps & { deviceCategory?: string }) => {
   const updateSetting = api.device.updateDeviceSetting.useMutation()
 
   const handleSave = async ({
@@ -50,9 +54,19 @@ const SettingDetails = ({ params, defaultValues }: IFormProps) => {
           label: '',
           placeholder: 'Enable Traffic Monitoring',
           switchConfig: {
-            rightLabel: 'Enable Traffic Monitoring',
+            rightLabel: (
+              <span className="flex flex-col">
+                <span>Enable Traffic Monitoring</span>
+                <span className="text-sm text-muted-foreground">
+                  Per-flow connection summaries (src/dst IP & port, protocol,
+                  byte/packet counts) — not raw packets.
+                </span>
+              </span>
+            ),
           },
         },
+        ...(deviceCategory === 'Firewall'
+          ? [
         {
           id: 'is_config_monitoring_enabled',
           formType: 'switch',
@@ -60,9 +74,19 @@ const SettingDetails = ({ params, defaultValues }: IFormProps) => {
           label: '',
           placeholder: 'Enable Config Monitoring',
           switchConfig: {
-            rightLabel: 'Enable Config Monitoring',
+                  rightLabel: (
+                    <span className="flex flex-col">
+                      <span>Enable Config Monitoring</span>
+                      <span className="text-sm text-muted-foreground">
+                        Uploads parsed firewall config snapshots (filter/NAT
+                        rules, aliases, interfaces) when config changes.
+                      </span>
+                    </span>
+                  ),
           },
         },
+            ]
+          : []),
         {
           id: 'is_telemetry_monitoring_enabled',
           formType: 'switch',
@@ -70,7 +94,15 @@ const SettingDetails = ({ params, defaultValues }: IFormProps) => {
           label: '',
           placeholder: 'Enable Telemetry Monitoring',
           switchConfig: {
-            rightLabel: 'Enable Telemetry Monitoring',
+            rightLabel: (
+              <span className="flex flex-col">
+                <span>Enable Telemetry Monitoring</span>
+                <span className="text-sm text-muted-foreground">
+                  Streams host resource usage (CPU, memory, disk, disk I/O,
+                  temperatures) sampled every second.
+                </span>
+              </span>
+            ),
           },
         },
         // {

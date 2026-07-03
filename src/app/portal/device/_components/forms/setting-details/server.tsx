@@ -24,6 +24,7 @@ const WizardContainer = async () => {
           id: record_id!,
           shell_type: application! as "record" | "wizard",
         }}
+        deviceCategory={response?.data?.device_category}
       />
     </div>
   );
