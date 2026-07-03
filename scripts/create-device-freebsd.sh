@@ -451,7 +451,11 @@ _log "Wallguard version: $WALLGUARD_VERSION"
 # Step 1c -- Check if script_token is tied to an existing device
 # ---------------------------------------------------------------------------
 
-if [ -n "$SCRIPT_TOKEN" ] && [ "$STEP_COMPLETED" -lt 2 ]; then
+# Runs on every script-token invocation — even when a local state file resumed us
+# at a late step — so a device that was Deleted/Archived (or removed) since the last
+# run can't be blindly resumed. The Draft step-derivation is gated on STEP_COMPLETED
+# so a valid higher step from local state isn't clobbered.
+if [ -n "$SCRIPT_TOKEN" ]; then
   _log_header "=== Step 1c: Check existing device for this install token ==="
   _st_resp=$(_store_post "store/devices/filter" \
     "{\"pluck\":[\"id\",\"code\",\"status\",\"address_id\",\"device_category\",\"device_name\",\"device_type\"],\"advance_filters\":[{\"type\":\"criteria\",\"field\":\"script_token\",\"operator\":\"equal\",\"values\":[\"$SCRIPT_TOKEN\"]}],\"limit\":1}")
@@ -460,7 +464,14 @@ if [ -n "$SCRIPT_TOKEN" ] && [ "$STEP_COMPLETED" -lt 2 ]; then
   if [ "$_st_status" = "Active" ]; then
     _log_important "ERROR: A device is already Active for this install token. Aborting."
     exit 1
-  elif [ "$_st_status" = "Draft" ]; then
+  elif [ "$_st_status" = "Deleted" ] || [ "$_st_status" = "Archived" ] || [ -z "$_st_status" ]; then
+    _log_important "Device for this install token is ${_st_status:-no longer found} -- discarding stale state and creating a new device."
+    STEP_COMPLETED=0; DEVICE_ID=""; DEVICE_CODE=""; ADDRESS_ID=""; INSTALL_TOKEN=""
+    if [ -n "$STATE_FILE" ] && [ -f "$STATE_FILE" ]; then
+      rm -f "$STATE_FILE"
+      _log "Stale state file removed: $STATE_FILE"
+    fi
+  elif [ "$_st_status" = "Draft" ] && [ "$STEP_COMPLETED" -lt 2 ]; then
     DEVICE_ID=$(_data0_str "$_st_resp" "id")
     DEVICE_CODE=$(_data0_str "$_st_resp" "code")
     _assert_field "$DEVICE_ID"   "device id (resumed)"
