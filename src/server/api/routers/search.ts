@@ -470,6 +470,13 @@ export const searchRouter = createTRPCRouter({
               return v;
             }),
           };
+        } else if (e.field === 'protocol') {
+          updatedFilter = {
+            ...updatedFilter,
+            values: updatedFilter.values?.flatMap((v) =>
+              'ui'.includes(v.toLowerCase()) ? ['http', 'https'] : v,
+            ),
+          };
         }
         return updatedFilter;
       });
@@ -554,17 +561,41 @@ export const searchRouter = createTRPCRouter({
             ...e,
             label: 'Connection Types',
             display_value: Array.isArray(e.values)
-              ? e.values
-                  .map((v: unknown) =>
-                    typeof v === 'string' ? v.toUpperCase() : v,
-                  )
-                  .join(', ')
+                ? [
+                    ...new Set(
+                      e.values.map((v: unknown) => {
+                        if (typeof v !== 'string') return v;
+                        const lower = v.toLowerCase();
+                        if (lower === 'http' || lower === 'https') return 'UI';
+                        return v.toUpperCase();
+                      }),
+                    ),
+                  ].join(', ')
               : e.display_value,
           };
         }
         return updatedSuggestion;
       });
-      return { items: suggestions };
+
+      const mergedProtocol = new Map<string, any>();
+      const dedupedSuggestions: any[] = [];
+      for (const s of suggestions) {
+        if (s.field !== 'protocol') {
+          dedupedSuggestions.push(s);
+          continue;
+        }
+        const existing = mergedProtocol.get(s.display_value);
+        if (existing) {
+          existing.values = [...new Set([...existing.values, ...s.values])];
+          existing.count = (existing.count ?? 0) + (s.count ?? 0);
+        } else {
+          const copy = { ...s, values: [...s.values] };
+          mergedProtocol.set(s.display_value, copy);
+          dedupedSuggestions.push(copy);
+        }
+      }
+
+      return { items: dedupedSuggestions };
     }),
   aliasSearch: privateProcedure
     .input(
