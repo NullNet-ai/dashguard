@@ -47,6 +47,7 @@ export async function POST(req: NextRequest) {
   const freebsdUrl = `${base}&format=bootstrap`;
 
   return NextResponse.json({
+    token: installToken,
     url,
     windowsUrl,
     freebsdUrl,
