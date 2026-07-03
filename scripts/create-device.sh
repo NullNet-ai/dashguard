@@ -535,7 +535,6 @@ REMOTE_ACCESS_URL="${REMOTE_ACCESS_URL:-wallguard-proxy.appguard.ai}"
 
 # Prompt for credentials if not supplied via flags, env vars, or injected by portal
 if [[ -n "$USER_TOKEN_INJECTED" ]]; then
-  USER_TOKEN="$USER_TOKEN_INJECTED"
   log "Using portal session token (device will be attributed to the logged-in user)"
 else
   if [[ -z "$EMAIL" ]];       then read -rp  "Org email: "    EMAIL;       fi
@@ -650,14 +649,19 @@ fi
 # Step 1 — Authenticate
 # ---------------------------------------------------------------------------
 log_header "=== Step 1: Authenticate (user) ==="
-auth_resp=$(curl -sf --connect-timeout 10 --max-time 30 -X POST "$API/organizations/auth" \
-  -H "Content-Type: application/json" \
-  ${CURL_OPTS} \
-  -d "{\"data\":{\"email\":\"$EMAIL\",\"password\":\"$PASSWORD\"}}") \
-  || { log_important "ERROR: User auth request failed (curl exit $?)"; exit 1; }
-USER_TOKEN=$(echo "$auth_resp" | jq -r '.data.token // .data.access_token // .token // .access_token')
-assert_field "$USER_TOKEN" "user token"
-log "User token obtained"
+if [[ -n "$USER_TOKEN_INJECTED" ]]; then
+  USER_TOKEN="$USER_TOKEN_INJECTED"
+  log "Using injected portal session token — skipping email/password auth"
+else
+  auth_resp=$(curl -sf --connect-timeout 10 --max-time 30 -X POST "$API/organizations/auth" \
+    -H "Content-Type: application/json" \
+    ${CURL_OPTS} \
+    -d "{\"data\":{\"email\":\"$EMAIL\",\"password\":\"$PASSWORD\"}}") \
+    || { log_important "ERROR: User auth request failed (curl exit $?)"; exit 1; }
+  USER_TOKEN=$(echo "$auth_resp" | jq -r '.data.token // .data.access_token // .token // .access_token')
+  assert_field "$USER_TOKEN" "user token"
+  log "User token obtained"
+fi
 
 log_header "=== Step 1b: Authenticate (root) ==="
 root_auth_resp=$(curl -sf --connect-timeout 10 --max-time 30 -X POST "$API/organizations/auth?is_root=true" \

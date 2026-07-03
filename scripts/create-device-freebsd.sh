@@ -333,7 +333,6 @@ _log_start
 # ---------------------------------------------------------------------------
 
 if [ -n "$USER_TOKEN_INJECTED" ]; then
-  USER_TOKEN="$USER_TOKEN_INJECTED"
   _log "Using portal session token (device will be attributed to the logged-in user)"
 else
   if [ -z "$EMAIL" ];       then _prompt        "Org email: ";    EMAIL="$_REPLY";       fi
@@ -419,14 +418,19 @@ fi
 # ---------------------------------------------------------------------------
 
 _log_header "=== Step 1: Authenticate (user) ==="
-_log "API host: ${_api_host}:${_api_port}  basepath: '${_api_basepath}'"
-_log "Sending POST organizations/auth..."
-_auth_resp=$(_auth_post "organizations/auth" \
-  "{\"data\":{\"email\":\"$EMAIL\",\"password\":\"$PASSWORD\"}}")
-_log "Auth response received ($(printf '%s' "$_auth_resp" | wc -c | tr -d ' ') bytes)"
-USER_TOKEN=$(_extract_token "$_auth_resp")
-_assert_field "$USER_TOKEN" "user token"
-_log "User token obtained"
+if [ -n "$USER_TOKEN_INJECTED" ]; then
+  USER_TOKEN="$USER_TOKEN_INJECTED"
+  _log "Using injected portal session token -- skipping email/password auth"
+else
+  _log "API host: ${_api_host}:${_api_port}  basepath: '${_api_basepath}'"
+  _log "Sending POST organizations/auth..."
+  _auth_resp=$(_auth_post "organizations/auth" \
+    "{\"data\":{\"email\":\"$EMAIL\",\"password\":\"$PASSWORD\"}}")
+  _log "Auth response received ($(printf '%s' "$_auth_resp" | wc -c | tr -d ' ') bytes)"
+  USER_TOKEN=$(_extract_token "$_auth_resp")
+  _assert_field "$USER_TOKEN" "user token"
+  _log "User token obtained"
+fi
 
 # ---------------------------------------------------------------------------
 # Step 1b -- Authenticate (root)
