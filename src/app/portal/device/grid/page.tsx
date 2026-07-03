@@ -1,4 +1,4 @@
-'use client'
+'use client';
 
 import { usePathname, useSearchParams } from 'next/navigation';
 import { useCallback, useEffect, useMemo, useState } from 'react';
@@ -143,7 +143,9 @@ export default function Page() {
           <div className="flex flex-1 gap-2 py-4 font-bold">Archive Record</div>
           <div className="flex flex-1 flex-col gap-2">
             <div>
-              Are you sure you want to archive this record? Archiving will move the record to an inactive state, and it will no longer be available on the active list.
+              Are you sure you want to archive this record? Archiving will move
+              the record to an inactive state, and it will no longer be
+              available on the active list.
             </div>
             <div>
               <span className="font-bold">Note:</span> This device is currently
@@ -164,14 +166,14 @@ export default function Page() {
               onClick={async () => {
                 setIsArchiving(true);
                 try {
-                if (config?.archiveCustomAction) {
+                  if (config?.archiveCustomAction) {
                     await config.archiveCustomAction(row.original);
-                } else {
-                  handleArchive({ row, config });
-                }
+                  } else {
+                    handleArchive({ row, config });
+                  }
                 } finally {
                   setIsArchiving(false);
-                handleClose();
+                  handleClose();
                 }
               }}
               disabled={isLoading}
@@ -190,7 +192,7 @@ export default function Page() {
   return (
     <Grid
       {...gridProps}
-      gridChildClass='!h-[calc(100vh-12.6em)]'
+      gridChildClass="!h-[calc(100vh-12.6em)]"
       totalCount={totalCount || 0}
       data={items}
       isLoading={isLoading}
@@ -247,12 +249,15 @@ export default function Page() {
                     // Shell isn't ready to receive input immediately on open, matching
                     // the wait in terminal/client.tsx before injecting commands.
                     setTimeout(() => {
-                    ws.send('wallguard-cli leave\r');
-                    setTimeout(() => {
-                      clearTimeout(fallback);
-                      ws.close();
-                      resolve();
-                    }, 2000);
+                      ws.send('wallguard-cli leave\r');
+                      setTimeout(() => {
+                        ws.send('wallguard-cli stop\r');
+                        setTimeout(() => {
+                          clearTimeout(fallback);
+                          ws.close();
+                          resolve();
+                        }, 2000);
+                      }, 500);
                     }, 1500);
                   };
                   ws.onerror = () => {
@@ -327,9 +332,7 @@ export default function Page() {
             return;
           }
 
-          router.push(
-            `/portal/${edit?.entity}/record/${edit?.code}/dashboard`,
-          );
+          router.push(`/portal/${edit?.entity}/record/${edit?.code}/dashboard`);
         },
         onFetchRecords: handleFetchRecords,
       }}
