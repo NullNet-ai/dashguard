@@ -360,6 +360,40 @@ export const deviceRouter = createTRPCRouter({
         address: responseAddresses.data?.[0]
       }
     }),
+  fetchDeviceByScriptToken: privateProcedure
+    .input(
+      z.object({
+        script_token: z.string().min(1),
+      }),
+    )
+    .query(async ({ input, ctx }) => {
+      const { script_token } = input;
+
+      const response = await ctx.dnaClient
+        .findAll({
+          entity: 'devices',
+          no_caching: true,
+          token: ctx.token.value,
+          query: {
+            pluck: ['id', 'code', 'status', 'is_device_online'],
+            advance_filters: createAdvancedFilter({ script_token }),
+            order: {
+              limit: 1,
+              by_field: 'created_date',
+              by_direction: EOrderDirection.DESC,
+            },
+          },
+        })
+        .execute();
+
+      if (!response.success) {
+        throw new Error(
+          `Failed to fetch device: ${response.errors?.join(', ') ?? 'Unknown error'}`,
+        );
+      }
+
+      return response.data[0] ?? null;
+    }),
   updateDeviceCategory: privateProcedure
     .input(
       z.object({

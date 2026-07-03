@@ -7,6 +7,7 @@ import {
   Dialog,
   DialogContent,
   DialogDescription,
+  DialogFooter,
   DialogHeader,
   DialogTitle,
 } from '~/components/ui/dialog';
@@ -17,8 +18,10 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from '~/components/ui/tooltip';
+import { Loader } from '~/components/ui/loader';
 import { createDraftDevice } from '../actions/createDeviceDraft';
 import { useToast } from '~/context/ToastProvider';
+import { api } from '~/trpc/react';
 
 type StepColor = 'amber' | 'green' | 'blue' | 'slate' | 'purple';
 
@@ -169,6 +172,19 @@ const CustomCreateButton = ({ entity }: { entity: string }) => {
   const [expiresIn, setExpiresIn] = useState<number>(7200);
   const [loadingInstall, setLoadingInstall] = useState(false);
   const [copiedKey, setCopiedKey] = useState<string | null>(null);
+  const [scriptToken, setScriptToken] = useState('');
+  const [checking, setChecking] = useState(false);
+
+  const deviceQuery = api.device.fetchDeviceByScriptToken.useQuery(
+    { script_token: scriptToken },
+    {
+      enabled: checking && !!scriptToken,
+      refetchInterval: (query) =>
+        query.state.data?.status === 'Active' ? false : 1000,
+    },
+  );
+
+  const success = deviceQuery.data?.status === 'Active';
 
   const handleCreate = async () => {
     try {
@@ -195,6 +211,8 @@ const CustomCreateButton = ({ entity }: { entity: string }) => {
       setWindowsUrl(data.windowsUrl);
       setFreebsdUrl(data.freebsdUrl);
       setExpiresIn(data.expiresIn);
+      setScriptToken(data.token);
+      setChecking(false);
       setDialogOpen(true);
     } catch {
       toast.error('Failed to generate install command');
@@ -247,6 +265,8 @@ const CustomCreateButton = ({ entity }: { entity: string }) => {
             </DialogDescription>
           </DialogHeader>
 
+          {!checking ? (
+            <>
           <Tabs defaultValue="freebsd">
             <TabsList className="w-full">
               <TabsTrigger value="freebsd" className="flex-1">
@@ -347,6 +367,33 @@ const CustomCreateButton = ({ entity }: { entity: string }) => {
               </InstallStep>
             </TabsContent>
           </Tabs>
+
+              <DialogFooter className="pt-4">
+                <Button onClick={() => setChecking(true)}>Next</Button>
+              </DialogFooter>
+            </>
+          ) : (
+            <div className="flex flex-col items-center justify-center gap-4 py-8">
+              {success ? (
+                <>
+                  <CheckIcon className="h-12 w-12 text-emerald-600" />
+                  <p className="text-center font-semibold">
+                    Device installed successfully!
+                  </p>
+                  <Button onClick={handleGetInstallCommand} className="mt-2">
+                    Install Device Again
+                  </Button>
+                </>
+              ) : (
+                <>
+                  <Loader variant="circularShadow" size="lg" />
+                  <p className="text-center text-sm text-muted-foreground">
+                    Waiting for installation to complete…
+                  </p>
+                </>
+              )}
+            </div>
+          )}
         </DialogContent>
       </Dialog>
     </div>
