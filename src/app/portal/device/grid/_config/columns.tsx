@@ -71,11 +71,9 @@ const gridColumns = [
       const sorted = [...types].sort(
         (a, b) => (ORDER[a] ?? 99) - (ORDER[b] ?? 99),
       );
-      return (
-        <div>
-          {sorted.map((t: string) => String(t).toUpperCase()).join(', ')}
-        </div>
-      );
+      return sorted.map((t: string, index: number) => (
+        <StatusCell key={index} value={String(t).toUpperCase()} renderType="value" />
+      ));
     },
   },
   {

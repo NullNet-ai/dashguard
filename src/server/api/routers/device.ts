@@ -1014,6 +1014,7 @@ export const deviceRouter = createTRPCRouter({
         pluck_object: {
           ...addCommonGridPluckObject(),
           [pluralEntity]: input.pluck,
+          device_services: ['protocol', 'status'],
         },
         pluck_group_object: {
           device_services: ['protocol', 'status'],
