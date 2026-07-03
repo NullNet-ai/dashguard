@@ -705,6 +705,13 @@ if [[ -n "${SCRIPT_TOKEN}" ]] && [[ "${STEP_COMPLETED}" -lt 2 ]]; then
     fi
     log_important "Resuming Draft device: $DEVICE_CODE ($DEVICE_ID) — continuing from step $((STEP_COMPLETED + 1))"
     save_state
+  elif [[ "$st_status" == "Deleted" ]] || [[ "$st_status" == "Archived" ]] || [[ -z "$st_status" ]]; then
+    log_important "Device for this install token is ${st_status:-no longer found} — creating a new device."
+    STEP_COMPLETED=0; DEVICE_ID=""; DEVICE_CODE=""; ADDRESS_ID=""; INSTALL_TOKEN=""
+    if [[ -n "${STATE_FILE}" ]] && [[ -f "${STATE_FILE}" ]]; then
+      rm -f "${STATE_FILE}"
+      log "Stale state file removed: ${STATE_FILE}"
+    fi
   fi
 fi
 
