@@ -336,7 +336,12 @@ export default function Page() {
         },
         onFetchRecords: handleFetchRecords,
       }}
-      customCreateButton={<CustomCreateButton entity={main_entity!} />}
+      customCreateButton={
+        <CustomCreateButton
+          entity={main_entity!}
+          onFetchRecords={handleFetchRecords}
+        />
+      }
     />
   );
 }
