@@ -53,6 +53,65 @@ interface IDeviceAccountSetupResponse {
   status_code: number;
 }
 
+// Input wrapper: expand a "ui" protocol filter value into ['http', 'https']
+// so filtering/grouping by "ui" matches both underlying protocols.
+const mapProtocolFilterValuesToUi = (
+  filters: IAdvanceFilters[],
+): IAdvanceFilters[] =>
+  filters.map((filter) =>
+    filter.field === 'protocol'
+      ? {
+          ...filter,
+          values: (filter.values as string[])?.flatMap((v) =>
+            String(v).toLowerCase() === 'ui' ? ['http', 'https'] : v,
+          ),
+        }
+      : filter,
+  );
+
+// Output wrapper: combine the "http" and "https" group_by rows into a single
+// "ui" row (summing counts), representing http/https as one connection type.
+// Relabel unconditionally: even if only http or only https exists, it becomes "ui".
+const getRowProtocol = (row: any): string | undefined =>
+  row?.device_services_protocol ??
+  row?.device_services?.protocol ??
+  row?.entity_data?.device_services?.protocol;
+
+const mergeUiProtocolGroups = (rows: any[]): any[] => {
+  const uiRows = rows.filter((row) =>
+    ['http', 'https'].includes(getRowProtocol(row)!),
+  );
+  if (!uiRows.length) return rows;
+
+  const otherRows = rows.filter(
+    (row) => !['http', 'https'].includes(getRowProtocol(row)!),
+  );
+  const mergedCount = uiRows.reduce((sum, row) => sum + (row.count ?? 0), 0);
+
+  const base = uiRows[0];
+  const merged = {
+    ...base,
+    device_services_protocol: 'ui',
+    count: mergedCount,
+    total_group_count: Math.max(
+      0,
+      (base?.total_group_count ?? rows.length) - (uiRows.length - 1),
+    ),
+  };
+  // Relabel every shape the row may carry so the client reads 'ui' regardless
+  if (base?.device_services?.protocol) {
+    merged.device_services = { ...base.device_services, protocol: 'ui' };
+  }
+  if (base?.entity_data?.device_services?.protocol) {
+    merged.entity_data = {
+      ...base.entity_data,
+      device_services: { ...base.entity_data.device_services, protocol: 'ui' },
+    };
+  }
+
+  return [...otherRows, merged];
+};
+
 export const deviceRouter = createTRPCRouter({
   ...createDefineRoutes(entity),
   getAccountSetUpDetailsByDeviceCode: privateProcedure
@@ -1019,10 +1078,17 @@ export const deviceRouter = createTRPCRouter({
         pluck_group_object: {
           device_services: ['protocol', 'status'],
         },
-        advance_filters: [...(_advance_filters as IAdvanceFilters[])],
-        group_advance_filters: _group_advance_filters as IGroupAdvanceFilters<
-          string | number
-        >[],
+        advance_filters: mapProtocolFilterValuesToUi(
+          _advance_filters as IAdvanceFilters[],
+        ),
+        group_advance_filters: (
+          _group_advance_filters as IGroupAdvanceFilters<string | number>[]
+        )?.map((group) => ({
+          ...group,
+          filters: mapProtocolFilterValuesToUi(
+            group.filters as IAdvanceFilters[],
+          ) as typeof group.filters,
+        })),
         order: {
           starts_at:
             (input.current || 0) === 0
@@ -1074,7 +1140,14 @@ export const deviceRouter = createTRPCRouter({
     const totalPages = Math.ceil(totalCount / (limit || 100));
 
     if (input.grouping?.length) {
-      return { totalCount, items, currentPage: 0, totalPages };
+      // Saved tabs may carry stale field strings ('device_services_protocol',
+      // bare 'protocol'), so match loosely instead of exact-equality
+      const groupedItems = input.grouping.some((g) =>
+        String(g).endsWith('protocol'),
+      )
+        ? mergeUiProtocolGroups(items)
+        : items;
+      return { totalCount, items: groupedItems, currentPage: 0, totalPages };
     }
 
     const protocolToType = (p?: string) =>
