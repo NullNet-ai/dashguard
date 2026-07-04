@@ -70,6 +70,7 @@ export default function Page() {
     'device_category',
     'device_type',
     'device_uuid',
+    'device_version',
     'is_device_online',
   ];
 

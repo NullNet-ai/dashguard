@@ -98,6 +98,13 @@ const gridColumns = [
     },
   },
   {
+    header: 'Wallguard Version',
+    accessorKey: 'device_version',
+    search_config: {
+      operator: 'like',
+    },
+  },
+  {
     header: "Updated Date",
     accessorKey: "updated_date_time",
     data_type: "datetime",
