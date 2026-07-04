@@ -123,23 +123,13 @@ const InnerEnhanceTabItems: React.FC<DraggableTabsProps & { hasNewButton?: boole
         };
       }
 
-      const findTabs = initialTabs?.find((_tab) => _tab?.id === tab?.id);
-      if (
-        findTabs &&
-        tab?.name === 'new' &&
-        application !== 'grid' &&
-        code === findTabs?.name
-      ) {
-        return {
-          ...findTabs,
-          href: fullPathName,
-          current: true,
-        };
-      }
-
-      if (tab?.name === code && !findTabs) {
+      // Draft just got a real code (Create/Paste/Next/Continue Draft) — rename the
+      // placeholder 'new' tab in place instead of leaving it behind as a duplicate.
+      if (tab?.name === 'new' && application !== 'grid' && !existTab) {
         return {
           ...tab,
+          name: code!,
+          label: code,
           href: fullPathName,
           current: true,
         };
