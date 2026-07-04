@@ -1,6 +1,6 @@
 'use client';
 
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { CheckIcon, CopyIcon, PlusIcon, TerminalIcon } from 'lucide-react';
 import { Button } from '~/components/ui/button';
 import {
@@ -162,7 +162,13 @@ function formatTtl(seconds: number): string {
   return `${seconds} seconds`;
 }
 
-const CustomCreateButton = ({ entity }: { entity: string }) => {
+const CustomCreateButton = ({
+  entity,
+  onFetchRecords,
+}: {
+  entity: string;
+  onFetchRecords?: () => void;
+}) => {
   const toast = useToast();
 
   const [dialogOpen, setDialogOpen] = useState(false);
@@ -173,18 +179,29 @@ const CustomCreateButton = ({ entity }: { entity: string }) => {
   const [loadingInstall, setLoadingInstall] = useState(false);
   const [copiedKey, setCopiedKey] = useState<string | null>(null);
   const [scriptToken, setScriptToken] = useState('');
-  const [checking, setChecking] = useState(false);
 
   const deviceQuery = api.device.fetchDeviceByScriptToken.useQuery(
     { script_token: scriptToken },
     {
-      enabled: checking && !!scriptToken,
+      enabled: dialogOpen && !!scriptToken,
       refetchInterval: (query) =>
         query.state.data?.status === 'Active' ? false : 1000,
     },
   );
 
   const success = deviceQuery.data?.status === 'Active';
+
+  const hasRefreshedRef = useRef(false);
+
+  useEffect(() => {
+    if (success && !hasRefreshedRef.current) {
+      hasRefreshedRef.current = true;
+      onFetchRecords?.();
+    }
+    if (!success) {
+      hasRefreshedRef.current = false;
+    }
+  }, [success, onFetchRecords]);
 
   const handleCreate = async () => {
     try {
@@ -212,7 +229,6 @@ const CustomCreateButton = ({ entity }: { entity: string }) => {
       setFreebsdUrl(data.freebsdUrl);
       setExpiresIn(data.expiresIn);
       setScriptToken(data.token);
-      setChecking(false);
       setDialogOpen(true);
     } catch {
       toast.error('Failed to generate install command');
@@ -256,7 +272,7 @@ const CustomCreateButton = ({ entity }: { entity: string }) => {
       <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
         <DialogContent className="w-5/6 bg-white md:w-3/6">
           <DialogHeader>
-            <DialogTitle>Install Device (Experimental)</DialogTitle>
+            <DialogTitle>Install Device</DialogTitle>
             <DialogDescription>
               Automatically creates a Device Record, then installs and runs the
               Wallguard Agent on the target server. Run the command below on the
@@ -265,8 +281,6 @@ const CustomCreateButton = ({ entity }: { entity: string }) => {
             </DialogDescription>
           </DialogHeader>
 
-          {!checking ? (
-            <>
           <Tabs defaultValue="freebsd">
             <TabsList className="w-full">
               <TabsTrigger value="freebsd" className="flex-1">
@@ -368,37 +382,30 @@ const CustomCreateButton = ({ entity }: { entity: string }) => {
             </TabsContent>
           </Tabs>
 
-              <DialogFooter className="pt-4">
-                <Button onClick={() => setChecking(true)}>Next</Button>
-              </DialogFooter>
-            </>
-          ) : (
-            <>
-            <div className="flex flex-col items-center justify-center gap-4 py-8">
-              {success ? (
-                <>
-                  <CheckIcon className="h-12 w-12 text-emerald-600" />
-                  <p className="text-center font-semibold">
-                    Device installed successfully!
-                  </p>
-                </>
-              ) : (
-                <>
-                  <Loader variant="circularShadow" size="lg" />
-                  <p className="text-center text-sm text-muted-foreground">
-                    Waiting for installation to complete…
-                  </p>
-                </>
-              )}
-            </div>
-              {success && (
-                <DialogFooter className="pt-4">
-                  <Button onClick={handleGetInstallCommand}>
-                    Install Device Again
-                  </Button>
-                </DialogFooter>
-              )}
-            </>
+          <div className="flex flex-col items-center justify-center gap-3 py-4">
+            {success ? (
+              <>
+                <CheckIcon className="h-8 w-8 text-emerald-600" />
+                <p className="text-center font-semibold">
+                  Device installed successfully!
+                </p>
+              </>
+            ) : (
+              <>
+                <Loader variant="circularShadow" size="lg" />
+                <p className="text-center text-sm text-muted-foreground">
+                  Waiting for installation to complete…
+                </p>
+              </>
+            )}
+          </div>
+
+          {success && (
+            <DialogFooter className="pt-4">
+              <Button onClick={handleGetInstallCommand}>
+                Install Device Again
+              </Button>
+            </DialogFooter>
           )}
         </DialogContent>
       </Dialog>
