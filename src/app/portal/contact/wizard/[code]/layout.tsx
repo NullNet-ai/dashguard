@@ -49,7 +49,7 @@ const WizardLayout = async ({ children }: IWizardLayoutProps) => {
           stepLabels,
           callbackHandlers: wizardCallbacks,
           traverseSteps: traverseData?.traverse,
-          enableTimeline: true,
+          enableTimeline: false,
           metadata:{
             timeline_title: `Timeline Records (${identifier})`
           }
