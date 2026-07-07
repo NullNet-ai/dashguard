@@ -6,12 +6,29 @@ import { useEffect, useRef, useState } from 'react';
 import { useXTerm } from 'react-xtermjs'
 import { isHeartbeatWithinSeconds } from '~/app/portal/device/utils/getHeartbeat'
 import { api } from '~/trpc/react'
+// The gateway is a raw byte passthrough that reads WebSocket frames into a
+// fixed buffer, so one giant frame (e.g. pasting a 150KB CSV) overruns it and
+// the connection drops. Chunk outbound data to keep every frame small.
+// ponytail: splits by UTF-16 code unit — fine for shell/ASCII paste; a
+// surrogate pair straddling a boundary would corrupt that one char.
+const PASTE_CHUNK_SIZE = 1024;
+const sendToSocket = (sock: WebSocket, data: string) => {
+  if (sock.readyState !== WebSocket.OPEN) return;
+  if (data.length <= PASTE_CHUNK_SIZE) {
+    sock.send(data);
+    return;
+  }
+  for (let i = 0; i < data.length; i += PASTE_CHUNK_SIZE) {
+    sock.send(data.slice(i, i + PASTE_CHUNK_SIZE));
+  }
+};
 
 export default function WebTerminal() {
   const { instance, ref } = useXTerm()
   const fitAddonRef = useRef<FitAddon | null>(null);
   if (!fitAddonRef.current) fitAddonRef.current = new FitAddon();
   const socketRef = useRef<WebSocket | null>(null); // stable socket for resize handler
+  const dataDisposableRef = useRef<{ dispose: () => void } | null>(null); // terminal→socket sender
   const [socket, setSocket] = useState<WebSocket | null>(null) // Track WebSocket instance
   const [isInitializing, setIsInitializing] = useState(true);
   const [isReconnecting, setIsReconnecting] = useState(false)
@@ -174,7 +191,13 @@ export default function WebTerminal() {
         setIsInitializing(false);
       };
 
-      newSocket.onclose = () => {
+      newSocket.onclose = (event) => {
+        // code 1009 = message too big, 1006 = abnormal (no close frame).
+        console.error('@@@ WebSocket closed:', {
+          code: event.code,
+          reason: event.reason,
+          wasClean: event.wasClean,
+        });
         socketRef.current = null;
         instance?.write('\x1b[33mConnection closed\x1b[0m\r\n')
         setIsConnectionClosed(true) // Set connection status to closed dynamically
@@ -184,8 +207,15 @@ export default function WebTerminal() {
         // localStorage.removeItem('current_terminal_session')
       }
 
-      const addon = new AttachAddon(newSocket)
-      instance?.loadAddon(addon)
+      // bidirectional:false → AttachAddon only pipes server→terminal. We send
+      // terminal→server ourselves (chunked) so large pastes don't blow the
+      // gateway's frame buffer and drop the connection.
+      const addon = new AttachAddon(newSocket, { bidirectional: false });
+      instance?.loadAddon(addon);
+
+      dataDisposableRef.current?.dispose(); // avoid stacking senders across reconnects
+      dataDisposableRef.current =
+        instance?.onData((data) => sendToSocket(newSocket, data)) ?? null;
 
       setSocket(newSocket) // Update the WebSocket instance in state
     } catch (error: any) {
@@ -203,6 +233,7 @@ export default function WebTerminal() {
     return () => {
       // Close the WebSocket connection when the component unmounts
       socket?.close()
+      dataDisposableRef.current?.dispose();
     }
   }, [instance])
 
