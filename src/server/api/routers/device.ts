@@ -1064,6 +1064,70 @@ export const deviceRouter = createTRPCRouter({
 
     const rootOrm = await createRootOrm(ctx.dnaClient);
 
+    // Role-scoped grid: developers see only devices assigned to their own contact
+    // (via device_contacts junction). Role + contact_id derived server-side from
+    // the session token — never from the client — so a developer cannot view
+    // another contact's devices (no IDOR). Admins are unscoped.
+    let isDeveloper = false;
+    let developerContactId: string | null = null;
+    const accountOrgId = ctx.session.account?.account_organization_id;
+    if (accountOrgId) {
+      const roleResp = await rootOrm
+        .findAll({
+          entity: 'account_organizations',
+          query: {
+            advance_filters: [
+              {
+                type: 'criteria',
+                field: 'id',
+                operator: EOperator.EQUAL,
+                values: [accountOrgId],
+                entity: 'account_organizations',
+              },
+            ],
+            pluck_object: {
+              account_organizations: ['id', 'contact_id'],
+              user_roles: ['role'],
+            },
+          },
+        })
+        .join({
+          type: 'left',
+          field_relation: {
+            to: { entity: 'user_roles', field: 'id' },
+            from: { entity: 'account_organizations', field: 'role_id' },
+          },
+        })
+        .execute();
+
+      const row = (roleResp?.data?.[0] ?? {}) as Record<string, any>;
+      let user_roles = row.user_roles;
+      if (Array.isArray(user_roles)) user_roles = user_roles[0];
+      if ((user_roles?.role ?? '').toLowerCase() === 'developer') {
+        isDeveloper = true;
+        developerContactId = row.contact_id ?? null;
+      }
+    }
+
+    // Fail closed: a developer with no linked contact is scoped to a sentinel
+    // value that matches nothing, never the full list.
+    const scoped_advance_filters = [...(_advance_filters as any[])];
+    if (isDeveloper) {
+      if (scoped_advance_filters.length) {
+        scoped_advance_filters.push({
+          type: 'operator',
+          operator: EOperator.AND,
+        });
+      }
+      scoped_advance_filters.push({
+        type: 'criteria',
+        field: 'contact_id',
+        operator: EOperator.EQUAL,
+        values: [developerContactId ?? '__no_contact__'],
+        entity: 'device_contacts',
+      });
+    }
+
     const query = rootOrm.findAll({
       entity: baseEntity,
       no_caching: true,
@@ -1074,12 +1138,15 @@ export const deviceRouter = createTRPCRouter({
           ...addCommonGridPluckObject(),
           [pluralEntity]: input.pluck,
           device_services: ['protocol', 'status'],
+          ...(isDeveloper
+            ? { device_contacts: ['device_id', 'contact_id'] }
+            : {}),
         },
         pluck_group_object: {
           device_services: ['protocol', 'status'],
         },
         advance_filters: mapProtocolFilterValuesToUi(
-          _advance_filters as IAdvanceFilters[],
+          scoped_advance_filters as IAdvanceFilters[],
         ),
         group_advance_filters: (
           _group_advance_filters as IGroupAdvanceFilters<string | number>[]
@@ -1124,6 +1191,16 @@ export const deviceRouter = createTRPCRouter({
         from: { entity: baseEntity, field: 'id' },
       },
     });
+
+    if (isDeveloper) {
+      query.join({
+        type: 'left',
+        field_relation: {
+          to: { entity: 'device_contacts', field: 'device_id' },
+          from: { entity: baseEntity, field: 'id' },
+        },
+      });
+    }
 
     addCommonGridJoins(query, baseEntity);
 

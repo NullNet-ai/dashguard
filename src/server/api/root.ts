@@ -33,6 +33,7 @@ import { deviceHeartbeatsRouter } from './routers/device_heartbeat';
 import { deviceRuleRouter } from './routers/configuration_rule';
 import { deviceNatRuleRouter } from './routers/configuration_nat_rule';
 import { deviceAliasRouter } from './routers/configuration_alias';
+import { contactDeviceRouter } from './routers/contact_device';
 
 /**
  * This is the primary router for your server.
@@ -50,6 +51,7 @@ export const appRouter = createTRPCRouter({
   record: recordRouter,
   notification: notificationsRouter,
   contact: contactRouter,
+  contactDevice: contactDeviceRouter,
   validator: validatorRouter,
   degreeLevel: degreeLevelRouter,
   country: countryRouter,
