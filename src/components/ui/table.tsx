@@ -196,6 +196,15 @@ const TableCell = React.forwardRef<
               });
             return;
           }
+
+          const labelField = config?.recordLabelField;
+          if (labelField && row.original?.[labelField]) {
+            sessionStorage.setItem(
+              `tab-label:${edit.code}`,
+              row.original[labelField],
+            );
+          }
+
           router.push(
             `/portal/${edit?.entity}/record/${edit?.code}/${edit?.entity}`,
           );
