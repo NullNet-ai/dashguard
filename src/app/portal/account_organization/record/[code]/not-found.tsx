@@ -11,7 +11,7 @@ export default function NotFound() {
             alt=""
             className="h-8 w-auto"
             height={60}
-            src="/tailwindLogo.svg"
+            src="/appguard-logo.png"
             width={60}
           />
         </a>

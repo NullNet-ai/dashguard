@@ -15,7 +15,7 @@ export default async function NotFound() {
               width={60}
               height={60}
               alt=""
-              src="/tailwindLogo.svg"
+              src="/appguard-logo.png"
               className="h-8 w-auto"
             />
           </a>

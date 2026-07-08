@@ -40,9 +40,9 @@ export default async function SideBarMenu() {
         <div className="flex items-center justify-start py-1.5 text-sm lg:justify-center">
           <Image
             alt="Company Logo"
-            className="h-8 w-auto"
+            className="h-12 w-auto"
             height={50}
-            src="/tailwindLogo.svg"
+            src="/appguard-logo.png"
             width={50}
           />
           <Clock />

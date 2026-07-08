@@ -29,7 +29,7 @@ export function Logo() {
   return (
     <Image
       alt="Your Company"
-      src="/tailwindLogo.svg"
+      src="/appguard-logo.png"
       className="ml-4 mr-auto h-auto w-14 md:hidden"
       width={40}
       height={40}
