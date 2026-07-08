@@ -8,7 +8,7 @@ type Props = {
 const Layout = (props: Props) => {
   return (
     <Fragment>
-      <InnerTabs />
+      <InnerTabs recordLabelField="device_name" />
       {props.children}
     </Fragment>
   );
