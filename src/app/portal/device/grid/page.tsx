@@ -209,6 +209,7 @@ export default function Page() {
         // paginationType: 'default',
         enableRowSelection: false,
         enableAutoCreate: true,
+        recordLabelField: 'device_name',
         defaultShownColumns: ['created_date', 'updated_date'],
         hideColumnsOnMobile: TO_HIDE_COLUMNS_WHEN_MOBILE,
         archiveDialogCustomComponent: OnlineDeviceArchiveDialog,

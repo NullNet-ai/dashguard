@@ -76,7 +76,11 @@ const getSessionTabs = async () => {
 
 }
 
-const InnerTabs = async ({ variant = 'dropdown', hasNewButton = false }: InnerTabsProps) => {
+const InnerTabs = async ({
+  variant = 'dropdown',
+  hasNewButton = false,
+  recordLabelField,
+}: InnerTabsProps) => {
   try {
     const headerList = await headers();
     const pathname = headerList.get('x-pathname') || '';
@@ -89,7 +93,11 @@ const InnerTabs = async ({ variant = 'dropdown', hasNewButton = false }: InnerTa
             <div className="animate-slide absolute left-0 top-0 h-[3px] w-full bg-blue-500"></div>
           </div>
         ) : (
-          <InnerEnhanceTabItems  initialTabs={newTabs} hasNewButton={hasNewButton}/>
+          <InnerEnhanceTabItems
+            initialTabs={newTabs}
+            hasNewButton={hasNewButton}
+            recordLabelField={recordLabelField}
+          />
         )}
       </div>
     );

@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useRef, useEffect, useContext } from 'react';
-import { ChevronDown, Plus } from 'lucide-react';
+import { ChevronDown, Loader2, Plus } from 'lucide-react';
 import {
   Tooltip,
   TooltipContent,
@@ -30,6 +30,7 @@ import { testIDFormatter } from '~/utils/formatter';
 import CreateButtonTabs from './components/CreateButtonInTabs';
 import RecordDetails from '~/components/application-layout/Header/RecordDetails';
 import { Separator } from '~/components/ui/separator';
+import { api } from '~/trpc/react';
 
 interface Tab {
   id: string;
@@ -42,6 +43,7 @@ interface Tab {
 
 interface DraggableTabsProps {
   initialTabs?: ITabs[];
+  recordLabelField?: string;
 }
 
 export interface ITabs {
@@ -57,6 +59,7 @@ export interface ITabs {
   metadata?: {
     item_width: number;
   };
+  labelPending?: boolean;
   [key: string]: any;
 }
 
@@ -65,10 +68,9 @@ export interface IArgs {
   current?: boolean;
 }
 
-const InnerEnhanceTabItems: React.FC<DraggableTabsProps & { hasNewButton?: boolean }> = ({
-  initialTabs,
-  hasNewButton = false,
-}) => {
+const InnerEnhanceTabItems: React.FC<
+  DraggableTabsProps & { hasNewButton?: boolean }
+> = ({ initialTabs, hasNewButton = false, recordLabelField }) => {
   const [tabs, setTabs] = useState<ITabs[]>(initialTabs ?? []);
 
   const newPathname = usePathname();
@@ -81,6 +83,7 @@ const InnerEnhanceTabItems: React.FC<DraggableTabsProps & { hasNewButton?: boole
   const [isDragging, setIsDragging] = useState(false);
   const [draggedTab, setDraggedTab] = useState<ITabs | null>(null);
   const router = useRouter();
+  const utils = api.useUtils();
   const tabsContainerRef = useRef<HTMLDivElement>(null);
   const { width } = useWindowSize();
   const screenType = useScreenType();
@@ -107,9 +110,56 @@ const InnerEnhanceTabItems: React.FC<DraggableTabsProps & { hasNewButton?: boole
     localStorage.setItem('last_visited_url:' + entity, fullUrl);
   }, [newPathname, searchParams.toString(), initialTabs]);
 
+  // Resolve record name to tab label if configured for this entity.
+  // Uses each tab's own `name` (the record code) rather than the URL's
+  // `code`, so it also resolves other open tabs while viewing the grid.
+  useEffect(() => {
+    const labelField = recordLabelField;
+    if (!labelField || !entity) return;
+
+    const unresolved = tabs.filter((t) => t.name !== 'new' && t.labelPending);
+    if (unresolved.length === 0) return;
+
+    Promise.all(
+      unresolved.map((t) =>
+        utils.record.getByCode
+          .fetch({
+            main_entity: entity,
+            id: t.name,
+            pluck_fields: ['code', labelField],
+          })
+          .then((res) => ({ name: t.name, newLabel: res?.data?.[labelField] }))
+          .catch(() => ({ name: t.name, newLabel: null })),
+      ),
+    ).then((results) => {
+      const updated = tabs.map((t) => {
+        const match = results.find((r) => r.name === t.name);
+        if (!match) return t;
+        return {
+          ...t,
+          label: match.newLabel || t.label,
+          labelPending: false,
+        };
+      });
+      setTabs(updated);
+      updatecachedItems(updated);
+    });
+  }, [entity, tabs, utils]);
+
   useEffect(() => {
     const fullPathName = `${newPathname}${searchParams.toString() ? `?${searchParams.toString()}` : ''}`;
     const existTab = tabs?.find((tab) => tab.name === code);
+
+    // Check for sessionStorage label handoff (avoids code→name flicker on grid row click)
+    const sessionLabel = code
+      ? sessionStorage.getItem(`tab-label:${code}`)
+      : null;
+    if (sessionLabel && code) {
+      sessionStorage.removeItem(`tab-label:${code}`);
+    }
+
+    const labelField = recordLabelField;
+
     // if (!existTab) {
     const newMapped = tabs?.map((tab) => {
       if (
@@ -120,6 +170,13 @@ const InnerEnhanceTabItems: React.FC<DraggableTabsProps & { hasNewButton?: boole
           ...tab,
           href: fullPathName,
           current: true,
+          label: sessionLabel && tab?.name === code ? sessionLabel : tab.label,
+          labelPending:
+            tab?.name === code
+              ? sessionLabel
+                ? false
+                : tab.labelPending
+              : tab.labelPending,
         };
       }
 
@@ -129,7 +186,8 @@ const InnerEnhanceTabItems: React.FC<DraggableTabsProps & { hasNewButton?: boole
         return {
           ...tab,
           name: code!,
-          label: code,
+          label: sessionLabel || code,
+          labelPending: !!labelField && !sessionLabel,
           href: fullPathName,
           current: true,
         };
@@ -150,7 +208,8 @@ const InnerEnhanceTabItems: React.FC<DraggableTabsProps & { hasNewButton?: boole
         current: true,
         href: fullPathName,
         default: false,
-        label: code,
+        label: sessionLabel || code,
+        labelPending: !!labelField && !sessionLabel,
       });
     }
 
@@ -283,6 +342,7 @@ const InnerEnhanceTabItems: React.FC<DraggableTabsProps & { hasNewButton?: boole
     const dropdownButtonWidth = 30;
     const tabPadding = 0;
     const minTabWidth = 88;
+    const maxTabWidth = 160; // ponytail: matches truncate max-w-[160px]; tunable
 
     // Find the current/active tab
     const currentTab = tabs.find(
@@ -301,7 +361,10 @@ const InnerEnhanceTabItems: React.FC<DraggableTabsProps & { hasNewButton?: boole
     for (const tab of tabs) {
       const estimatedTabWidth = Math.max(
         minTabWidth,
-        (tab?.name?.length || 0) * 8 + tabPadding + 16,
+        Math.min(
+          ((tab?.label ?? tab?.name)?.length || 0) * 8 + tabPadding + 16,
+          maxTabWidth,
+        ),
       );
 
       if (currentWidth + estimatedTabWidth <= availableWidth) {
@@ -326,7 +389,12 @@ const InnerEnhanceTabItems: React.FC<DraggableTabsProps & { hasNewButton?: boole
       // Calculate current tab width
       const currentTabWidth = Math.max(
         minTabWidth,
-        (currentTab?.name?.length || 0) * 8 + tabPadding + 16,
+        Math.min(
+          ((currentTab?.label ?? currentTab?.name)?.length || 0) * 8 +
+            tabPadding +
+            16,
+          maxTabWidth,
+        ),
       );
 
       // Try to fit current tab at the end
@@ -340,7 +408,10 @@ const InnerEnhanceTabItems: React.FC<DraggableTabsProps & { hasNewButton?: boole
 
         const tabWidth = Math.max(
           minTabWidth,
-          (tab?.name?.length || 0) * 8 + tabPadding + 16,
+          Math.min(
+            ((tab?.label ?? tab?.name)?.length || 0) * 8 + tabPadding + 16,
+            maxTabWidth,
+          ),
         );
 
         if (recalculatedWidth + tabWidth + currentTabWidth <= availableWidth) {
@@ -499,10 +570,14 @@ const InnerEnhanceTabItems: React.FC<DraggableTabsProps & { hasNewButton?: boole
                   <Tooltip>
                     <TooltipTrigger asChild>
                       <>
-                        <span>
-                          {tab?.name === 'new'
-                            ? capitalize(tab?.name)
-                            : (tab.label ?? tab?.name)}
+                        <span className="flex max-w-[160px] items-center truncate">
+                          {tab.labelPending ? (
+                            <Loader2 className="h-3 w-3 animate-spin" />
+                          ) : tab?.name === 'new' ? (
+                            capitalize(tab?.name)
+                          ) : (
+                            (tab.label ?? tab?.name)
+                          )}
                         </span>
                         {!tab.default && (
                           <TabMenu
@@ -526,7 +601,13 @@ const InnerEnhanceTabItems: React.FC<DraggableTabsProps & { hasNewButton?: boole
                       /> */}
                     </TooltipTrigger>
                     <TooltipContent>
-                      <p>{formatGridTabName(tab?.name)}</p>
+                      <p>
+                        {tab.labelPending
+                          ? 'Loading...'
+                          : tab?.name === 'new'
+                            ? capitalize(tab?.name)
+                            : (tab.label ?? tab?.name)}
+                      </p>
                     </TooltipContent>
                   </Tooltip>
                 </div>

@@ -138,6 +138,7 @@ export interface IConfigGrid {
   // toggle for single and multi select
   enableMultiRowSelection?: boolean;
   enableRowClick?: boolean;
+  recordLabelField?: string;
   rowClickCustomAction?:
     | ((args: DefaultRowActions) => void)
     | IRowClickCustomConfig;
