@@ -45,7 +45,8 @@
     "**/*.js",
     ".next/types/**/*.ts",
     "cypress/e2e/portal/contacts/contact_applicant_confirmation.spec.cy",
-    ".next/dev/types/**/*.ts"
+    ".next/dev/types/**/*.ts",
+    ".next/dev/dev/types/**/*.ts"
   ],
   "exclude": [
     "node_modules"

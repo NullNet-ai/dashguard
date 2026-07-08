@@ -14,6 +14,8 @@ export interface IFetchDataParams {
   group_advance_filters?: ISearchItem[];
   sorting?: any[]
   grouping?: string[]
+  // ponytail: forwarded as-is to the router's query input, so resolver-specific filters (e.g. contact_id) pass through
+  [key: string]: any
 }
 
 interface IData {

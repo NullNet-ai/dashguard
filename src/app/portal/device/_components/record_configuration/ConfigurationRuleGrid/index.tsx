@@ -193,7 +193,6 @@ const ConfigurationRuleGrid = ({
 
 
   const { fetchData, data: grid_data } = useFetchGridData({...gridParams,
-    // @ts-expect-error - No type yet
     device_id: record?.data?.id}, {
     resolver: 'mainGrid',
     router: 'deviceRule',

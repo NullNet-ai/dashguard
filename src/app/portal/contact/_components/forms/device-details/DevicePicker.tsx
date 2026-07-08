@@ -96,6 +96,7 @@ export default function DevicePicker({
 
   const handleSave = useCallback(async () => {
     if (selectedRows.length === 0) {
+      // @ts-expect-error - No type yet
       toast.warning('Please select at least one device');
       return;
     }
@@ -144,6 +145,7 @@ export default function DevicePicker({
           enableAutoCreate: false,
           disableDefaultAction: true,
           hideCreateButton: true,
+          // @ts-expect-error - No type yet
           customBulkButtonConfig: { hidden: true },
           defaultShownColumns: ['device_name'],
           searchConfig: {
@@ -152,6 +154,7 @@ export default function DevicePicker({
             query_params: {
               entity: 'devices',
               pluck: _pluck,
+              // @ts-expect-error - No type yet
               contact_id,
             },
           },
