@@ -18,4 +18,7 @@ export default [
   "device_tunnels",
   "device_ssh_sessions",
   "device_tty_sessions",
+  "device_contact",
+  "device_contacts",
+  "devices",
 ];

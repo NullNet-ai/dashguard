@@ -35,6 +35,8 @@ function MainServer({
     useSidebar: false
   },
   withVerticalTabs = false,
+  onSelectRecords,
+  initialSelectedRecords,
 }: IPropsGrid) {
   const screenType = useScreenType();
   const isDesktop = screenType
@@ -60,6 +62,8 @@ function MainServer({
       hideCreateNewFilter={hideCreateNewFilter}
       defaultGrouping={defaultGrouping}
       current_tab_id={current_tab_id}
+      onSelectRecords={onSelectRecords}
+      initialSelectedRecords={initialSelectedRecords}
     >
       {isDesktop ? (
         <GridScrollView parentType={parentType} className={gridParentClass} sidebarTab={sidebarTab}>

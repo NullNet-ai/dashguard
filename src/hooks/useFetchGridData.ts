@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react';
 import { IGroupBy } from '~/components/platform/Grid/Category/type'
 
 import { ISearchItem, type IAdvanceFilter } from '~/components/platform/Grid/Search/types'
@@ -70,7 +70,14 @@ const useFetchGridData = (initialArgs: IFetchDataParams, query_options?: IQueryO
     }
   }, [data, isLoading])
 
+  const isFirstRun = useRef(true);
   useEffect(() => {
+    // ponytail: useQuery already fires the initial request; skip the first run
+    // so this effect only refetches on later fetchData() calls, not a duplicate on mount.
+    if (isFirstRun.current) {
+      isFirstRun.current = false;
+      return;
+    }
     refetch()
   }, [args, refetch])
 

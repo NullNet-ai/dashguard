@@ -23,6 +23,9 @@ import { ArchiveX, Loader2 } from 'lucide-react';
 export default function Page() {
   const router = useRouter();
   const toast = useToast();
+  const { data: sessionInfo } = api.record.getSessionInfo.useQuery();
+  const isDeveloper =
+    sessionInfo?.current_organization?.role?.toLowerCase() === 'developer';
   const _navigate = api.wizard.getCurrentStep.useMutation();
   const utils = api.useUtils();
   const createSessionMutation =
@@ -208,10 +211,12 @@ export default function Page() {
         },
         // paginationType: 'default',
         enableRowSelection: false,
-        enableAutoCreate: true,
+        enableAutoCreate: !isDeveloper,
+        hideCreateButton: isDeveloper,
         recordLabelField: 'device_name',
         defaultShownColumns: ['created_date', 'updated_date'],
         hideColumnsOnMobile: TO_HIDE_COLUMNS_WHEN_MOBILE,
+        archiveCustomComponent: isDeveloper ? () => <></> : undefined,
         archiveDialogCustomComponent: OnlineDeviceArchiveDialog,
         archiveCustomAction: async (record: Record<string, any>) => {
           try {
@@ -339,10 +344,12 @@ export default function Page() {
         onFetchRecords: handleFetchRecords,
       }}
       customCreateButton={
-        <CustomCreateButton
-          entity={main_entity!}
-          onFetchRecords={handleFetchRecords}
-        />
+        isDeveloper ? undefined : (
+          <CustomCreateButton
+            entity={main_entity!}
+            onFetchRecords={handleFetchRecords}
+          />
+        )
       }
     />
   );

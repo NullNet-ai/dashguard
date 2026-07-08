@@ -24,5 +24,10 @@ const tabs = [
     name: "Account",
     tabName: "account?categories=",
   },
+  {
+    id: 'devices',
+    name: 'Devices',
+    tabName: 'devices?categories=',
+  },
 ];
 export default tabs;

@@ -239,7 +239,7 @@ const ScrollContainer: React.FC<ScrollContainerProps> = ({
           }}
           ref={scrollableRef}
           onScroll={handleScroll}
-          className={`main-grid-scroll-container mx-2 !h-[calc(100vh-13em)] overflow-x-auto rounded-md border bg-card text-card-foreground ${gridChildClass}`}
+          className={`main-grid-scroll-container mx-2 overflow-x-auto rounded-md border bg-card text-card-foreground ${gridChildClass}`}
         >
           <style jsx>{`
             div::-webkit-scrollbar {

@@ -7,6 +7,6 @@
   ],
   "roles": {
     "admin": "*",
-    "developer": ["device", "remote_access"]
+    "developer": ["devices", "remote_access"]
   }
 }
