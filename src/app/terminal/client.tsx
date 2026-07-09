@@ -81,6 +81,11 @@ export default function WebTerminal() {
       { enabled: Boolean(deviceId), refetchInterval: 1000 },
     )
 
+  const { data: deviceSummary } = api.device.fetchRecordShellSummary.useQuery(
+    { id: deviceId },
+    { enabled: Boolean(deviceId) },
+  );
+
   const remoteAccessSessionQueryInput =
     terminalSessionType && terminalSessionToken
       ? {
@@ -266,7 +271,19 @@ export default function WebTerminal() {
       onResize.dispose();
     };
   }, [instance]);
-  
+
+  useEffect(() => {
+    const deviceName = deviceSummary?.data?.device_name;
+    if (!deviceName) return;
+    const previousTitle = document.title;
+    document.title = terminalSessionType
+      ? `${deviceName} (${terminalSessionType.toUpperCase()}) - Terminal`
+      : `${deviceName} - Terminal`;
+    return () => {
+      document.title = previousTitle;
+    };
+  }, [deviceSummary?.data?.device_name, terminalSessionType]);
+
   const lastHeartbeatTimestamp = lastHeartbeat?.data?.[0]?.bucket
   // const isDeviceOfflineOrMissing =
   //   Boolean(deviceId) &&
