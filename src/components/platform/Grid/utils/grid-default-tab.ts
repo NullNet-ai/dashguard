@@ -47,12 +47,11 @@ export const SetIdTab = ({
   const additional_tabs = GRIDTABS[mainEntity] || [];
 
   const modifyDefaultSorting =
-    defaultSorting?.map((sort) => {
-      return {
-        id: sort.id,
-        desc: sort.desc,
-      };
-    }) || [];
+    defaultSorting?.map((sort) => ({
+      id: sort.id,
+      desc: sort.desc,
+      ...(sort.sort_key ? { sort_key: sort.sort_key } : {}),
+    })) || [];
 
   const modifydefaultGridTabs =
     defaultGridTabs?.map((tab) => {
