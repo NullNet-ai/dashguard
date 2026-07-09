@@ -114,6 +114,8 @@ export default function ContactDevicesGrid({
 
   const handleFetchRecords = useCallback(
     (newArgs?: any) => {
+      console.log("🚀 ~ ContactDevicesGrid ~ newArgs:", newArgs)
+      console.log("🚀 ~ ContactDevicesGrid ~ gridParams:", gridParams)
       fetchData(newArgs ?? gridParams);
     },
     [fetchData, gridParams],
