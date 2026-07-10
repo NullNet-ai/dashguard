@@ -303,10 +303,22 @@ revert_agent() {
   log "Uninstalling Wallguard package..."
   case "$(uname -s 2>/dev/null)" in
     Linux)
-      log "Running: apt-get remove -y wallguard"
-      apt-get remove -y wallguard 2>&1 \
-        && log "apt-get remove: OK" \
-        || log "apt-get remove exited $? (may not have been installed)"
+      if check_exists apt-get; then
+        log "Running: apt-get remove -y wallguard"
+        apt-get remove -y wallguard 2>&1 \
+          && log "apt-get remove: OK" \
+          || log "apt-get remove exited $? (may not have been installed)"
+      elif check_exists dnf; then
+        log "Running: dnf remove -y wallguard"
+        dnf remove -y wallguard 2>&1 \
+          && log "dnf remove: OK" \
+          || log "dnf remove exited $? (may not have been installed)"
+      elif check_exists yum; then
+        log "Running: yum remove -y wallguard"
+        yum remove -y wallguard 2>&1 \
+          && log "yum remove: OK" \
+          || log "yum remove exited $? (may not have been installed)"
+      fi
       ;;
     FreeBSD)
       log "Running: pkg delete -y wallguard"
@@ -830,11 +842,35 @@ assert_running_as_root
 
 case "$PLATFORM" in
   linux)
-    DEB="wallguard_${WALLGUARD_VERSION}_amd64.deb"
-    DEB_URL="https://github.com/NullNet-ai/wallguard/releases/download/v${WALLGUARD_VERSION}/${DEB}"
-    download "${DEB_URL}" "${TEMP_DIR}/${DEB}"
-    log "Running: apt install -y ${TEMP_DIR}/${DEB}"
-    apt install -y "${TEMP_DIR}/${DEB}"
+    # Detect package manager and install accordingly
+    if check_exists apt-get; then
+      DEB="wallguard_${WALLGUARD_VERSION}_amd64.deb"
+      DEB_URL="https://github.com/NullNet-ai/wallguard/releases/download/v${WALLGUARD_VERSION}/${DEB}"
+      download "${DEB_URL}" "${TEMP_DIR}/${DEB}"
+      log "Running: apt install -y ${TEMP_DIR}/${DEB}"
+      apt install -y "${TEMP_DIR}/${DEB}"
+    elif check_exists dnf; then
+      RPM="wallguard-${WALLGUARD_VERSION}-1.x86_64.rpm"
+      RPM_URL="https://github.com/NullNet-ai/wallguard/releases/download/v${WALLGUARD_VERSION}/${RPM}"
+      download "${RPM_URL}" "${TEMP_DIR}/${RPM}"
+      log "Running: dnf install -y ${TEMP_DIR}/${RPM}"
+      dnf install -y "${TEMP_DIR}/${RPM}"
+    elif check_exists yum; then
+      RPM="wallguard-${WALLGUARD_VERSION}-1.x86_64.rpm"
+      RPM_URL="https://github.com/NullNet-ai/wallguard/releases/download/v${WALLGUARD_VERSION}/${RPM}"
+      download "${RPM_URL}" "${TEMP_DIR}/${RPM}"
+      log "Running: yum install -y ${TEMP_DIR}/${RPM}"
+      yum install -y "${TEMP_DIR}/${RPM}"
+    elif check_exists rpm; then
+      RPM="wallguard-${WALLGUARD_VERSION}-1.x86_64.rpm"
+      RPM_URL="https://github.com/NullNet-ai/wallguard/releases/download/v${WALLGUARD_VERSION}/${RPM}"
+      download "${RPM_URL}" "${TEMP_DIR}/${RPM}"
+      log "Running: rpm -Uvh ${TEMP_DIR}/${RPM}"
+      rpm -Uvh "${TEMP_DIR}/${RPM}"
+    else
+      log_important "ERROR: No supported package manager found (apt, dnf, yum, or rpm required)"
+      exit 1
+    fi
     log "Running: wallguard-cli start --control-channel-url=${REMOTE_ACCESS_URL}:50051 --platform=generic"
     wallguard-cli start --control-channel-url="${REMOTE_ACCESS_URL}:50051" --platform=generic
     sleep 1
