@@ -194,6 +194,51 @@ function getSteps(
     ];
   }
 
+  if (type === 'redhat') {
+    return [
+      {
+        title: 'Download the package',
+        color: 'amber',
+        jsx: <CodeRow variant="amber" value={downloadCommand} />,
+      },
+      {
+        title: 'Install the package',
+        color: 'blue',
+        jsx: (
+          <CodeRow
+            variant="blue"
+            value={`sudo dnf install ./wallguard-${versionStr}-1.x86_64.rpm`}
+          />
+        ),
+      },
+      {
+        title: 'Start the WallGuard Agent',
+        color: 'green',
+        jsx: (
+          <CodeRow
+            variant="green"
+            value={`sudo wallguard-cli start --control-channel-url=${controlChannelUrl} --platform=generic`}
+          />
+        ),
+      },
+      {
+        title: 'Verify the installation',
+        color: 'teal',
+        jsx: <CodeRow variant="teal" value="sudo wallguard-cli version" />,
+      },
+      {
+        title: 'Complete the setup',
+        color: 'purple',
+        jsx: (
+          <CodeRow
+            variant="purple"
+            value={`sudo wallguard-cli join ${joinCode}`}
+          />
+        ),
+      },
+    ];
+  }
+
   if (type === 'windows') {
     return [
       {
@@ -360,6 +405,12 @@ function getDeviceTypeText(deviceType: string): {
           'Follow these steps to install and set up the WallGuard agent on your Linux system.',
         shellHint: 'Run these commands in your Linux terminal',
       };
+    case 'redhat':
+      return {
+        subtitle:
+          'Follow these steps to install and set up the WallGuard agent on your RedHat/CentOS system.',
+        shellHint: 'Run these commands in your RedHat/CentOS terminal',
+      };
     case 'windows':
       return {
         subtitle:
@@ -437,9 +488,9 @@ const SetupDetails: React.FC<{ identifier: string; remoteAccessUrl?: string }> =
         clearTimeout(timeoutId);
       }
     };
-  // @ts-expect-error - No type yet
+    // @ts-expect-error - No type yet
   }, [device?.device_name, device?.device_type]);
-  
+
   useEffect(() => {
     // @ts-expect-error - No type yet
     if (!device?.device_name || !device?.device_type) {
@@ -476,6 +527,8 @@ const SetupDetails: React.FC<{ identifier: string; remoteAccessUrl?: string }> =
     packageName = `wallguard-${versionStr}.pkg`;
   } else if (deviceType.toLowerCase() === 'linux') {
     packageName = `wallguard_${versionStr}_amd64.deb`;
+  } else if (deviceType.toLowerCase() === 'redhat') {
+    packageName = `wallguard-${versionStr}-1.x86_64.rpm`;
   } else if (deviceType.toLowerCase() === 'windows') {
     packageName = `wallguard-${versionStr}-x86_64.msi`;
   } else {

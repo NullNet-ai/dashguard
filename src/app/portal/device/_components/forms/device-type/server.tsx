@@ -9,6 +9,7 @@ const optionsByCategory: Record<string, string[]> = {
   ],
   'Appguard Client': [
     'Linux',
+    'RedHat',
     'Windows',
     'Mac OS',
     // 'ExpressJS',
