@@ -21,4 +21,5 @@ export default [
   "device_contact",
   "device_contacts",
   "devices",
+  'system_resources',
 ];
