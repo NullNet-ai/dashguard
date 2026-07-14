@@ -5,6 +5,7 @@ import { toast } from 'sonner'
 import { Button } from '~/components/ui/button'
 import { api } from '~/trpc/react'
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '~/components/ui/tooltip'
+import { openRemoteAccessSession } from '~/app/portal/device_remote_access_session/_utils/startRemoteAccessSession';
 
 export const CustomRowActions = ({ row }: { row: any }) => {
   const { original } = row
@@ -15,29 +16,8 @@ export const CustomRowActions = ({ row }: { row: any }) => {
   const remote_access = ['ssh', 'tty', 'rd']
 
   const handleOpenSideDrawer = async () => {
-      if(remote_access?.includes(tunnel_type?.toLowerCase())) {
-        // @ts-expect-error - No type yet
-        const wsUrl = {
-          ssh: `wss://${remote_access_session}.${process.env.NEXT_PUBLIC_REMOTE_ACCESS_API_URL?.replace('https://', '')}/wallguard/gateway/ssh`,
-          tty: `wss://${remote_access_session}.${process.env.NEXT_PUBLIC_REMOTE_ACCESS_API_URL?.replace('https://', '')}/wallguard/gateway/tty`,
-          rd: `ws://${process.env.NEXT_PUBLIC_REMOTE_ACCESS_API_IP?.replace('https://', '')}/wallguard/gateway/rd?tunnel_id=${remote_access_session}`,
-        }[tunnel_type]
-        const sessionKey = `terminal_session_${Date.now()}_${Math.random().toString(36)
-          .substring(2, 9)}`
-        localStorage.setItem(sessionKey, wsUrl)
-
-        localStorage.setItem('current_terminal_session', sessionKey)
-        localStorage.setItem('device_id', device_id)
-        
-        if (tunnel_type === 'rd') {
-          window.open(`/rd`, '_blank')
-        } else {
-          window.open(`/terminal`, '_blank')
-        }
-      } else {
-        window.open(`https://${remote_access_session}.${process.env.NEXT_PUBLIC_REMOTE_ACCESS_URL?.replace('https://', '')}/`, '_blank')
-      }
-}
+    openRemoteAccessSession(remote_access_session, tunnel_type, device_id);
+  };
 
   const handleDisconnect = async () => {
     await disconnectRemoteAccess.mutateAsync({
