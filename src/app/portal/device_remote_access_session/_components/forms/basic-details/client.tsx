@@ -8,6 +8,7 @@ import { FormBuilder } from '~/components/platform/FormBuilder';
 import { type IHandleSubmit } from '~/components/platform/FormBuilder/types';
 import { useToast } from '~/context/ToastProvider';
 import { api } from '~/trpc/react';
+import { openRemoteAccessSession } from '../../../_utils/startRemoteAccessSession';
 
 import { type IFormProps } from '../types';
 
@@ -106,49 +107,11 @@ export default function RemoteAccessDetails(props: IFormProps) {
 
         toast.success('Remote Access submitted successfully');
 
-        const remote_access = ['ssh', 'tty', 'rd'];
-
-        if (remote_access?.includes(remote_access_type)) {
-          const wsUrl = {
-            ssh: `wss://${remote_access_session}.${process.env.NEXT_PUBLIC_REMOTE_ACCESS_API_URL?.replace('https://', '')}/wallguard/gateway/ssh`,
-            tty: `wss://${remote_access_session}.${process.env.NEXT_PUBLIC_REMOTE_ACCESS_API_URL?.replace('https://', '')}/wallguard/gateway/tty`,
-            rd: `ws://${process.env.NEXT_PUBLIC_REMOTE_ACCESS_API_IP?.replace('https://', '')}/wallguard/gateway/rd?tunnel_id=${remote_access_session}`,
-          }[remote_access_type];
-
-          const sessionKey = `terminal_session_${Date.now()}_${Math.random()
-            .toString(36)
-            .substring(2, 9)}`;
-
-          // @ts-expect-error - No type yet
-          localStorage.setItem(sessionKey, wsUrl);
-
-          localStorage.setItem('current_terminal_session', sessionKey);
-          localStorage.setItem(
-            'current_terminal_session_type',
-            remote_access_type,
-          );
-          localStorage.setItem(
-            'device_id',
-            deviceId || (deviceCode && devices?.[0]?.value) || device_id,
-          );
-
-          // Set a flag in localStorage to reload the previous tab
-          localStorage.setItem('reload_previous_tab', 'true');
-
-          if (remote_access_type === 'rd') {
-            window.open('/rd', '_blank');
-          } else {
-            window.open(`/terminal`, '_blank');
-          }
-        } else {
-          // Set a flag in localStorage to reload the previous tab
-          localStorage.setItem('reload_previous_tab', 'true');
-
-          window.open(
-            `https://${remote_access_session}.${process.env.NEXT_PUBLIC_REMOTE_ACCESS_URL?.replace('https://', '')}/`,
-            '_blank',
-          );
-        }
+        openRemoteAccessSession(
+          remote_access_session,
+          remote_access_type,
+          deviceId || (deviceCode && devices?.[0]?.value) || device_id,
+        );
       } else {
         toast.error('Failed to submit Remote Access: Invalid response');
       }
