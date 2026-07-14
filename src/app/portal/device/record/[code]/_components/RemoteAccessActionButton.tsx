@@ -92,6 +92,7 @@ const RemoteAccessActionButton = ({
       return;
     }
 
+    // @ts-expect-error - No type yet
     const deviceServiceId = filteredServices[0]?.value;
 
     try {

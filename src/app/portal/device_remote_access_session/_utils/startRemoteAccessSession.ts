@@ -16,6 +16,7 @@ export function openRemoteAccessSession(
       .toString(36)
       .substring(2, 9)}`;
 
+    // @ts-expect-error - No type yet
     localStorage.setItem(sessionKey, wsUrl);
     localStorage.setItem('current_terminal_session', sessionKey);
     localStorage.setItem('current_terminal_session_type', remote_access_type);
