@@ -5,7 +5,7 @@ import { Loader } from '~/components/ui/loader';
 import { api } from '~/trpc/server';
 import OfflineWarning from './offlineWarning';
 import SidebarTab from '~/components/platform/SidebarTab';
-import { Clock, Map, TrendingUp } from 'lucide-react';
+import { Clock, Cpu, Map, TrendingUp } from 'lucide-react';
 
 // Lazy load components
 const Timeline = lazy(
@@ -27,13 +27,16 @@ const TrafficGraph = lazy(
   () => import('../../_components/dashboard/traffic-graph/server'),
 );
 
+const SystemTab = lazy(
+  () => import('../../_components/dashboard/system/server'),
+);
 
 export default async function DashboardTabs() {
   const headerList = await headers();
   const pathname = headerList.get('x-pathname') || '';
   const [, , main_entity, , identifier] = pathname.split('/');
   // Should Refetch Every ??
-  
+
   const fetched_device = identifier
     ? await api.record.getByCode({
         id: identifier!,
@@ -116,7 +119,29 @@ export default async function DashboardTabs() {
           < TrafficMaps />
         </Suspense>
       ),
-    }
+    },
+    {
+      id: 'system',
+      label: 'System',
+      icon: <Cpu size={16} />,
+      content: (
+        <Suspense
+          fallback={
+            <div className="flex h-[500px] w-full items-center justify-center">
+              <div className="flex items-center justify-center">
+                <Loader
+                  className="h-8 w-8 bg-primary text-primary"
+                  label=""
+                  variant="spinner"
+                />
+              </div>
+            </div>
+          }
+        >
+          <SystemTab />
+        </Suspense>
+      ),
+    },
   ];
 
   return (
