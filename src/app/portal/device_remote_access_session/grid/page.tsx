@@ -9,7 +9,6 @@ import { api } from '~/trpc/server';
 import { defaultSorting } from './_config/sorting';
 import { getGridCacheData } from '~/components/platform/Grid/utils/grid-get-cache-data';
 import { gridDataResolver } from '~/components/platform/Grid/utils/gridDataResolver';
-import { CustomNewButton } from './_components/CustomNewButton';
 import uiGridColumns from './_config/columns';
 import { CustomRowActions } from './_components/CustomRowActions';
 
@@ -140,7 +139,7 @@ export default async function Page() {
               },
             },
           }}
-          customCreateButton={<CustomNewButton />}
+          customCreateButton={<div></div>}
           data={mainGrid.items}
           defaultSorting={defaultSorting}
           totalCount={mainGrid.totalCount || 0}
