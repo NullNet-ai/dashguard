@@ -7,8 +7,6 @@ export const ROOT_ENTITIES = [
   'device_configurations',
   'device_filter_rules',
   'device_nat_rules',
-  'device_group_settings',
-  'device_groups',
   'device_heartbeats',
   'device_instances',
   'device_interface_addresses',

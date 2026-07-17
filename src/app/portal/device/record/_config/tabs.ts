@@ -14,5 +14,10 @@ const tabs = [
     name: "Configuration",
     tabName: "configuration?categories=",
   },
+  {
+    id: 'device_group',
+    name: 'Device Group',
+    tabName: 'device_group',
+  },
 ];
 export default tabs;

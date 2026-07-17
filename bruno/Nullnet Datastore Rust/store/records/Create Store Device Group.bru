@@ -1,0 +1,31 @@
+meta {
+  name: Create Store Device Group
+  type: http
+  seq: 5
+}
+
+post {
+  url: {{baseUrl}}/api/store/device_group_settings
+  body: json
+  auth: inherit
+}
+
+params:query {
+  ~pluck: id
+}
+
+body:json {
+  {
+    "name": "dg1"
+    
+  }
+}
+
+vars:pre-request {
+  baseUrl: https://store.appguard.ai
+}
+
+settings {
+  encodeUrl: true
+  timeout: 0
+}
