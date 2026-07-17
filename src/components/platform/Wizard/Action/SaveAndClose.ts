@@ -1,23 +1,24 @@
-"use server";
-import { headers } from "next/headers";
-import { redirect } from "next/navigation";
-import { api } from "~/trpc/server";
+'use server';
+import { headers } from 'next/headers';
+import { redirect } from 'next/navigation';
+import { api } from '~/trpc/server';
 
 export async function SaveAndClose({
   entity,
   identifier,
-  currentContext
+  currentContext,
+  ormEntity,
 }: {
   entity: string;
   identifier: string;
   currentContext: string;
+  ormEntity?: string;
 }) {
-
   const headerList = await headers();
-  const pathname = headerList.get("x-pathname") || "";
+  const pathname = headerList.get('x-pathname') || '';
 
   await api.wizard.activator({
-    entity,
+    entity: ormEntity || entity,
     identifier,
   });
 
@@ -26,8 +27,7 @@ export async function SaveAndClose({
   await api.tab.closeCurrentInnerClassTab({
     href: updatedPath,
     current_context: currentContext,
-  })
-
+  });
 
   redirect(`/portal/${entity}/grid`);
 }

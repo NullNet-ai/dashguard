@@ -1,19 +1,18 @@
-"use client";
+'use client';
 
-import { EllipsisVertical } from "lucide-react";
+import { EllipsisVertical } from 'lucide-react';
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
-} from "~/components/ui/dropdown-menu";
+} from '~/components/ui/dropdown-menu';
 
-import { MinusCircleIcon } from "@heroicons/react/24/outline";
-import { Fragment, SetStateAction } from "react";
-import { Card, CardContent, CardHeader, CardTitle } from "~/components/ui/card";
-import { Separator } from "~/components/ui/separator";
-import { TDisplayType } from "../../../types";
-import { capitalize } from 'lodash';
+import { MinusCircleIcon } from '@heroicons/react/24/outline';
+import { Fragment, SetStateAction } from 'react';
+import { Card, CardContent, CardHeader, CardTitle } from '~/components/ui/card';
+import { Separator } from '~/components/ui/separator';
+import { TDisplayType } from '../../../types';
 import { testIDFormatter } from '~/utils/formatter';
 
 export default function SelectedView({
@@ -21,13 +20,13 @@ export default function SelectedView({
   handleRemovedSelectedRecords,
   handleUpdateDisplayType,
   renderComponentSelected,
-  entity
+  entity,
 }: {
   renderComponentSelected?: (record: any) => React.JSX.Element;
   handleRemovedSelectedRecords: (records: any[]) => void;
   handleUpdateDisplayType: (type: SetStateAction<TDisplayType>) => void;
   records: any;
-  entity?: string
+  entity?: string;
 }) {
   return (
     <Fragment>
@@ -35,10 +34,17 @@ export default function SelectedView({
         <Fragment key={record.id}>
           <Card className="border-none shadow-none">
             <CardHeader
-              className={"flex flex-row items-center justify-between"}
+              className={'flex flex-row items-center justify-between'}
             >
-              <CardTitle className="text-sm" data-test-id={testIDFormatter( `${entity}-wzrd-${entity}-id`, )}><span className='text-primary'>{entity ? `${capitalize(entity ?? '')} ID:` : '' }</span> {record.code}</CardTitle>
-              
+              <CardTitle
+                className="text-sm"
+                data-test-id={testIDFormatter(`${entity}-wzrd-${entity}-id`)}
+              >
+                <span className="text-primary">
+                  {entity ? `${entity} ID:` : ''}
+                </span>{' '}
+                {record.code}
+              </CardTitle>
             </CardHeader>
             <CardContent>
               {renderComponentSelected ? (

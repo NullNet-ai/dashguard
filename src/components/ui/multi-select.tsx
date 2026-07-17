@@ -248,16 +248,16 @@ const MultipleSelector = React.forwardRef<
     // Convert string array to Option array if useStringValues is true
     const convertToOptions = React.useCallback(
       (stringArray: string[], keyAlias?: Record<string, any>): Option[] => {
-        if (!keyAlias) {
-          return stringArray.map((str) => ({ value: str, label: str }));
-        }
-        const new_options = stringArray.map((str) => ({
+        const optionsPool = arrayOptions ?? arrayDefaultOptions;
+        return stringArray.map((str) => ({
           value: str,
-          label: keyAlias[str] || str,
+          label:
+            keyAlias?.[str] ??
+            optionsPool?.find((o) => o.value === str)?.label ??
+            str,
         }));
-        return new_options;
       },
-      [keyAlias],
+      [arrayOptions, arrayDefaultOptions],
     );
 
     // Convert Option array to string array if useStringValues is true

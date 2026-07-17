@@ -7,12 +7,20 @@ import { api } from '~/trpc/react';
 import SummaryClientContent from './SummaryClientContent';
 import { useEventEmitter } from '~/context/EventEmitterProvider';
 
-const RecordSummaryContent = ({ children, image_placeholder, header_center_slot, is_show_header_tab, actions }: any) => {
+const RecordSummaryContent = ({
+  children,
+  image_placeholder,
+  header_center_slot,
+  is_show_header_tab,
+  actions,
+  main_entity: propMainEntity,
+}: any) => {
   const eventEmitter = useEventEmitter();
   const pathname = usePathname();
   const token = (getCookie('token') as string) || '';
 
   const [, , mainEntity, , identifier] = pathname.split('/');
+  const mainEntity_resolved = propMainEntity || mainEntity;
 
   if (!identifier || !mainEntity || !token) {
     throw new Error('Invalid URL parameters');
@@ -38,7 +46,7 @@ const RecordSummaryContent = ({ children, image_placeholder, header_center_slot,
         'updated_by',
         'image_url',
       ],
-      main_entity: mainEntity!,
+      main_entity: mainEntity_resolved!,
     },
     {
       enabled: !!identifier && !!mainEntity,

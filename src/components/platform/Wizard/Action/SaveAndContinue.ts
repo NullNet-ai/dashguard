@@ -9,17 +9,19 @@ export async function SaveAndContinue({
   identifier,
   currentContext,
   defaultRecordTab,
+  ormEntity,
 }: {
   entity: string;
   identifier: string;
   currentContext: string;
   defaultRecordTab?: string;
+  ormEntity?: string;
 }) {
   const headerList = await headers();
   const pathname = headerList.get('x-pathname') || '';
 
   await api.wizard.activator({
-    entity,
+    entity: ormEntity || entity,
     identifier,
   });
 
@@ -32,8 +34,7 @@ export async function SaveAndContinue({
 
   // Return the URL instead of redirecting
 
-    redirect(
-      `/portal/${entity}/record/${identifier}/${defaultRecordTab ?? entity}`,
-    );
-  
+  redirect(
+    `/portal/${entity}/record/${identifier}/${defaultRecordTab ?? entity}`,
+  );
 }

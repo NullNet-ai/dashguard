@@ -6,7 +6,7 @@ import SummaryRecordTab from './Header/SummaryTab';
 import SystemDates from './Header/SystemDate';
 import { RecordWrapperContext } from '../providers/RecordWrapperProvider';
 import { useContext } from 'react';
-import {  ChevronRightIcon } from 'lucide-react';
+import { ChevronRightIcon } from 'lucide-react';
 import { Button } from '@headlessui/react';
 import { testIDFormatter } from '~/utils/formatter';
 import { CardComponent as Card } from '~/components/ui/card/index';
@@ -15,21 +15,23 @@ import { Badge } from '~/components/ui/badge';
 import { RecordContext, useRecord } from '../Provider';
 import { cn } from '~/lib/utils';
 
-const SummaryClientContent = ({ recordDetails, mainEntity, token, image_placeholder, header_center_slot, is_show_header_tab = false, actions, children }: any) => {
+const SummaryClientContent = ({
+  recordDetails,
+  mainEntity,
+  token,
+  image_placeholder,
+  header_center_slot,
+  is_show_header_tab = false,
+  actions,
+  children,
+}: any) => {
   const { isCollapseRecordSummary, onClickCollapseButton } =
     useContext(RecordWrapperContext);
 
-  const {state: recordState} = useRecord() ?? {};
+  const { state: recordState } = useRecord() ?? {};
 
   const { state } = useContext(RecordContext);
   const entityName = state?.entityName;
-
-  const ellipsis = (str: string, length: number) => {
-    const sanitizedStr = str?.replace(/["']/g, "");
-    return sanitizedStr?.length > length
-      ? sanitizedStr.substring(0, length) + "..."
-      : sanitizedStr;
-  };
 
   const status = recordDetails?.data?.status!;
 
@@ -38,32 +40,32 @@ const SummaryClientContent = ({ recordDetails, mainEntity, token, image_placehol
   const collapseBtn = (
     <Button
       className={cn(
-        "absolute flex -right-2 bottom-0 size-6 items-center justify-center rounded-full bg-background shadow w-fit p-1 border",
-        !isCollapseRecordSummary ?  "top-0 my-auto" : "top-[10px] my-0"
+        'absolute -right-2 bottom-0 flex size-6 w-fit items-center justify-center rounded-full border bg-background p-1 shadow',
+        !isCollapseRecordSummary ? 'top-0 my-auto' : 'top-[10px] my-0',
       )}
       onClick={handleClickCollapseButton}
       data-test-id={testIDFormatter('rcrd-sum-collapse-button')}
     >
       <ChevronRightIcon
         className={cn(
-          "transition-transform duration-200 size-4",
-          !isCollapseRecordSummary ? "rotate-180" : "rotate-0",
+          'size-4 transition-transform duration-200',
+          !isCollapseRecordSummary ? 'rotate-180' : 'rotate-0',
         )}
         data-test-id={testIDFormatter('rcrd-sum-collapse-icon')}
       />
     </Button>
-  )
+  );
 
   return (
     <div data-test-id={testIDFormatter('rcrd-sum-container')}>
       {isCollapseRecordSummary ? (
-        <div className="relative group">
+        <div className="group relative">
           <Card>
-            <div 
+            <div
               className="flex h-[calc(100dvh-100px)] flex-col items-center pt-2"
               data-test-id={testIDFormatter('rcrd-sum-collapsed')}
             >
-              <span 
+              <span
                 className="vertical-text mt-1 rotate-180 py-2 text-md font-semibold text-black [writing-mode:vertical-lr]"
                 data-test-id={testIDFormatter('rcrd-sum-collapsed-label')}
               >
@@ -71,16 +73,17 @@ const SummaryClientContent = ({ recordDetails, mainEntity, token, image_placehol
               </span>
             </div>
           </Card>
-          <div className="hidden group-hover:block">
-            {collapseBtn}
-          </div>
+          <div className="hidden group-hover:block">{collapseBtn}</div>
         </div>
       ) : (
-        <div className={cn(`flex flex-col `,
-          `${recordState?.config?.showToolbar === false ? '' : 'gap-2'}`
-        )}>
-          {is_show_header_tab && 
-            <div className="relative group">
+        <div
+          className={cn(
+            `flex flex-col`,
+            `${recordState?.config?.showToolbar === false ? '' : 'gap-2'}`,
+          )}
+        >
+          {is_show_header_tab && (
+            <div className="group relative">
               <Card>
                 <IdentifierComponent
                   code={recordDetails?.data?.code!}
@@ -89,23 +92,24 @@ const SummaryClientContent = ({ recordDetails, mainEntity, token, image_placehol
                   data-test-id={testIDFormatter('rcrd-sum-identifier')}
                 />
               </Card>
-              <div className="hidden group-hover:block">
-                {collapseBtn}
-              </div>
+              <div className="hidden group-hover:block">{collapseBtn}</div>
             </div>
-          }
+          )}
           <Card>
-            <div className='flex flex-col gap-2 p-3'>
+            <div className="flex flex-col gap-2 p-3">
               <div className="flex items-center justify-between text-sm">
                 <div className="flex items-center gap-x-1">
-                  <span data-test-id={entityName + "-rcrd-code"} className='font-medium text-md me-2'>
-                    {ellipsis(JSON.stringify(recordDetails?.data?.code!), 8)}
+                  <span
+                    data-test-id={entityName + '-rcrd-code'}
+                    className="me-2 text-md font-medium"
+                  >
+                    {recordDetails?.data?.code}
                   </span>
                 </div>
                 {header_center_slot}
                 <Badge
-                  variant={status === "Archived" ? "secondary" : "success"}
-                  data-test-id={entityName + "-rcrd-status"}
+                  variant={status === 'Archived' ? 'secondary' : 'success'}
+                  data-test-id={entityName + '-rcrd-status'}
                 >
                   {capitalize(status)}
                 </Badge>

@@ -7,10 +7,12 @@ export const stepValidator = async ({
   identifier,
   currentStep,
   mainEntity,
+  ormEntity,
 }: {
   identifier: string;
   currentStep: string;
   mainEntity: string;
+  ormEntity?: string;
 }) => {
   if (!identifier || !currentStep || !mainEntity) {
     return notFound();
@@ -22,7 +24,7 @@ export const stepValidator = async ({
 
   if (identifier !== 'new') {
     const record_details = await api.record.getByCode({
-      main_entity: mainEntity!,
+      main_entity: ormEntity || mainEntity!,
       id: identifier!,
       pluck_fields: ['id', 'code', 'status'],
     });
