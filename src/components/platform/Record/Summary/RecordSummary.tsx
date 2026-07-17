@@ -9,10 +9,11 @@ const RecordSummary = async ({
   is_show_header_tab,
   actions,
   children,
+  main_entity,
 }: any) => {
-    const headerList = await headers();
-    const pathname = headerList.get('x-pathname') || '';
-    const [, , , , identifier] = pathname.split('/');
+  const headerList = await headers();
+  const pathname = headerList.get('x-pathname') || '';
+  const [, , , , identifier] = pathname.split('/');
 
   // @ts-expect-error - No type yet
   const { first_name, last_name } = await api.contact.fetchContactPhoneEmail({
@@ -30,6 +31,7 @@ const RecordSummary = async ({
         header_center_slot={header_center_slot}
         is_show_header_tab={is_show_header_tab}
         actions={actions}
+        main_entity={main_entity}
       >
         {children}
       </RecordClientWrapper>

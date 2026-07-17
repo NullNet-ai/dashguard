@@ -26,6 +26,7 @@ export interface IConfigWizard {
   stepValidation?: Record<string, IConfigValidationWizard[]>;
   customNavigation?: Record<string, boolean>;
   defaultRecordTab?: string;
+  ormEntity?: string;
   customNextNavigationAction?: Record<
     string,
     (args: {
@@ -121,7 +122,7 @@ export interface IState extends IConfigWizard {
   callbackHandlers?: ICallbackHandler;
   title?: string;
   enableTimeline?: boolean;
-  metadata?: any
+  metadata?: any;
 }
 
 export interface IAction {

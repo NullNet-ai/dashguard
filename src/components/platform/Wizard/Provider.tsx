@@ -178,14 +178,14 @@ export default function WizardProvider({
       };
       const steps = currentStep + 1;
       if (config?.customNextNavigationAction?.[numberToWords(currentStep)]) {
-        await config?.customNextNavigationAction?.[numberToWords(currentStep)]?.(
-          {
-            entity: mainEntity!,
-            identifier: identifier!,
-            next,
-            setNextLoading,
-          },
-        );
+        await config?.customNextNavigationAction?.[
+          numberToWords(currentStep)
+        ]?.({
+          entity: mainEntity!,
+          identifier: identifier!,
+          next,
+          setNextLoading,
+        });
         return;
       }
       next();
@@ -262,6 +262,7 @@ export default function WizardProvider({
         entity: mainEntity!,
         identifier: config?.entityIdentifier,
         currentContext: currentContext,
+        ormEntity: config?.ormEntity,
       };
       const next = async (toastMessage?: string) => {
         if (toastMessage) {
@@ -297,6 +298,7 @@ export default function WizardProvider({
         identifier: config?.entityIdentifier,
         currentContext: currentContext,
         is_from_grid: false,
+        ormEntity: config?.ormEntity,
       };
       const next = async (toastMessage?: string) => {
         if (config?.enableAutoCreate === false) {
@@ -334,6 +336,7 @@ export default function WizardProvider({
         entity: mainEntity!,
         identifier: config?.entityIdentifier,
         currentContext: currentContext,
+        ormEntity: config?.ormEntity,
       };
       const next = async (toastMessage?: string) => {
         if (toastMessage) {
@@ -440,7 +443,7 @@ export default function WizardProvider({
     title: config?.title,
     customNavigation: config?.customNavigation,
     enableTimeline: config?.enableTimeline,
-    metadata: config?.metadata
+    metadata: config?.metadata,
   } as IState;
 
   const actions = {

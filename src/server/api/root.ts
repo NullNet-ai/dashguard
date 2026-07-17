@@ -34,6 +34,7 @@ import { deviceRuleRouter } from './routers/configuration_rule';
 import { deviceNatRuleRouter } from './routers/configuration_nat_rule';
 import { deviceAliasRouter } from './routers/configuration_alias';
 import { contactDeviceRouter } from './routers/contact_device';
+import { deviceGroupRouter } from './routers/device_group';
 import { systemResourcesRouter } from './routers/system_resources';
 
 /**
@@ -78,6 +79,7 @@ export const appRouter = createTRPCRouter({
   deviceRule: deviceRuleRouter,
   deviceNatRule: deviceNatRuleRouter,
   deviceAlias: deviceAliasRouter,
+  deviceGroup: deviceGroupRouter,
   systemResource: systemResourcesRouter,
 });
 

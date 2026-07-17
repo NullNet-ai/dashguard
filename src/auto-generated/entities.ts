@@ -22,4 +22,8 @@ export default [
   "device_contacts",
   "devices",
   'system_resources',
+  'device_group_setting',
+  'device_group_settings',
+  'device_group',
+  'device_groups',
 ];
