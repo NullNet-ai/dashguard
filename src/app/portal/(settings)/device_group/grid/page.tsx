@@ -48,7 +48,7 @@ export default async function DeviceGroupGridPage() {
       data={items}
       totalCount={totalCount || 0}
       config={{
-        entity: 'device_group',
+        entity: 'device_group_settings',
         title: 'Device Groups',
         columns: gridColumns,
         columnsOrder: gridCacheData?.columns,
