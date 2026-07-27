@@ -219,25 +219,26 @@ export const contactDeviceRouter = createTRPCRouter({
       return { success: true };
     }),
 
-  assignedGroups: privateProcedure
+  currentGroups: privateProcedure
     .input(z.object({ contact_id: z.string() }))
     .query(async ({ input, ctx }) => {
       const { contact_id } = input;
 
-      const { token: queryToken, as_root } = await getEntityCredentials(
-        'contact_device_groups',
+      const { token, as_root } = await getEntityCredentials(
+        'device_contacts',
         ctx.dnaClient,
         ctx.token.value,
       );
 
       const query = ctx.dnaClient.findAll({
-        entity: 'contact_device_groups',
-        token: queryToken,
+        entity: 'device_contacts',
+        token,
         as_root,
         query: {
-          pluck: ['id', 'device_group_setting_id'],
+          pluck: ['id', 'device_id'],
           pluck_object: {
-            device_group_settings: ['id', 'name', 'status'],
+            device_groups: ['id', 'device_id', 'device_group_setting_id'],
+            device_group_settings: ['id', 'name'],
           },
           advance_filters: [
             {
@@ -245,128 +246,251 @@ export const contactDeviceRouter = createTRPCRouter({
               field: 'contact_id',
               operator: EOperator.EQUAL,
               values: [contact_id],
-              entity: 'contact_device_groups',
-            },
-            { type: 'operator', operator: EOperator.AND },
-            {
-              type: 'criteria',
-              field: 'status',
-              operator: EOperator.EQUAL,
-              values: ['Active'],
-              entity: 'contact_device_groups',
+              entity: 'device_contacts',
             },
           ],
+          order: { limit: 1000 },
         },
       });
 
       query.join({
         type: 'left',
         field_relation: {
-          from: {
-            entity: 'contact_device_groups',
-            field: 'device_group_setting_id',
-          },
+          from: { entity: 'device_contacts', field: 'device_id' },
+          to: { entity: 'device_groups', field: 'device_id' },
+        },
+      })
+      .nestedJoin({
+        type: 'left',
+        field_relation: {
+          from: { entity: 'device_groups', field: 'device_group_setting_id' },
           to: { entity: 'device_group_settings', field: 'id' },
         },
       });
 
       const { data: items } = await query.execute();
+      
+      const dedupedGroups = new Map<string, string>();
+      items?.forEach((item: any) => {
+        // Look at root level (nestedJoin typically merges here)
+        const rootSettings = Array.isArray(item?.device_group_settings)
+          ? item.device_group_settings
+          : item?.device_group_settings
+            ? [item.device_group_settings]
+            : [];
+            
+        rootSettings.forEach((setting: any) => {
+          if (setting?.id && setting?.name) {
+            dedupedGroups.set(setting.id, setting.name);
+          }
+        });
 
-      return (
-        items?.map((item: any) => ({
-          id: item.id,
-          contact_device_group_id: item.id,
-          group_id: item.device_group_setting_id,
-          group_name: item?.device_group_settings?.[0]?.name,
-        })) || []
-      );
+        // Look at nested level (fallback)
+        item?.device_groups?.forEach((dg: any) => {
+          const setting = Array.isArray(dg?.device_group_settings) ? dg?.device_group_settings?.[0] : dg?.device_group_settings;
+          if (setting?.id && setting?.name) {
+            dedupedGroups.set(setting.id, setting.name);
+          }
+        });
+      });
+
+      return Array.from(dedupedGroups.entries()).map(([value, label]) => ({
+        value,
+        label,
+      }));
     }),
 
-  assignableGroups: privateProcedure
-    .input(z.object({ contact_id: z.string() }))
-    .query(async ({ input, ctx }) => {
-      const { contact_id } = input;
+  setDeviceGroups: privateProcedure
+    .input(
+      z.object({
+        contact_id: z.string().min(1),
+        group_ids: z.array(z.string()),
+      }),
+    )
+    .mutation(async ({ input, ctx }) => {
+      const meta_header = await get_meta_header();
+      const { contact_id, group_ids } = input;
 
-      const { token: queryToken, as_root } = await getEntityCredentials(
-        'contact_device_groups',
-        ctx.dnaClient,
-        ctx.token.value,
-      );
-
-      // Find already-assigned group_ids for this contact
-      const assigned = await ctx.dnaClient
-        .findAll({
-          entity: 'contact_device_groups',
-          token: queryToken,
-          as_root,
-          query: {
-            pluck: ['device_group_setting_id'],
-            order: { limit: 1000 },
-            advance_filters: [
-              {
-                type: 'criteria',
-                field: 'contact_id',
-                operator: EOperator.EQUAL,
-                values: [contact_id],
-                entity: 'contact_device_groups',
-              },
-            ],
-          },
-        })
-        .execute();
-
-      const assignedGroupIds =
-        assigned.data?.map((row: any) => row.device_group_setting_id) ?? [];
-
-      // Query all groups, excluding assigned ones
-      const advance_filters: any[] = [
-        {
-          type: 'criteria',
-          field: 'status',
-          operator: EOperator.EQUAL,
-          values: [EStatus.ACTIVE],
-          entity: 'device_group_settings',
-        },
-      ];
-
-      if (assignedGroupIds.length > 0) {
-        advance_filters.push(
-          { type: 'operator', operator: EOperator.AND },
-          {
-            type: 'criteria',
-            field: 'id',
-            operator: EOperator.NOT_EQUAL,
-            values: assignedGroupIds,
-            entity: 'device_group_settings',
-          },
-        );
-      }
-
-      const { token: groupToken, as_root: groupAsRoot } =
-        await getEntityCredentials(
-          'device_group_settings',
-          ctx.dnaClient,
-          ctx.token.value,
-        );
-
-      const query = ctx.dnaClient.findAll({
-        entity: 'device_group_settings',
-        token: groupToken,
-        as_root: groupAsRoot,
+      const currentGroupsQuery = ctx.dnaClient.findAll({
+        entity: 'device_contacts',
+        token: ctx.token.value,
         query: {
-          pluck: ['id', 'name', 'code'],
-          track_total_records: true,
-          advance_filters,
-          order: {
-            limit: 500,
-            by_field: 'name',
-            by_direction: EOrderDirection.ASC,
+          pluck: ['id', 'device_id'],
+          pluck_object: {
+            device_groups: ['id', 'device_id', 'device_group_setting_id'],
           },
+          advance_filters: [
+            {
+              type: 'criteria',
+              field: 'contact_id',
+              operator: EOperator.EQUAL,
+              values: [contact_id],
+              entity: 'device_contacts',
+            },
+          ],
+          order: { limit: 1000 },
         },
       });
 
-      const { data: items } = await query.execute();
-      return items || [];
+      currentGroupsQuery.join({
+        type: 'left',
+        field_relation: {
+          from: { entity: 'device_contacts', field: 'device_id' },
+          to: { entity: 'device_groups', field: 'device_id' },
+        },
+      });
+
+      const { data: items } = await currentGroupsQuery.execute();
+      const currentDeviceContacts = items || [];
+      const previousSelection = new Set<string>();
+      
+      currentDeviceContacts.forEach((item: any) => {
+        item?.device_groups?.forEach((dg: any) => {
+          if (dg.device_group_setting_id) {
+            previousSelection.add(dg.device_group_setting_id);
+          }
+        });
+      });
+
+      const added = group_ids.filter((id) => !previousSelection.has(id));
+      const removed = Array.from(previousSelection).filter((id) => !group_ids.includes(id));
+
+      const existingAssignedSet = new Set(currentDeviceContacts.map((c: any) => c.device_id));
+      
+      const createPromises: Promise<any>[] = [];
+      for (const id of added) {
+        const query = ctx.dnaClient.findAll({
+          entity: 'device_groups',
+          token: ctx.token.value,
+          query: {
+            pluck: ['device_id'],
+            order: { limit: 10000 },
+            advance_filters: [
+              {
+                type: 'criteria',
+                field: 'device_group_setting_id',
+                operator: EOperator.EQUAL,
+                values: [id],
+                entity: 'device_groups',
+              },
+              { type: 'operator', operator: EOperator.AND },
+              {
+                type: 'criteria',
+                field: 'status',
+                operator: EOperator.EQUAL,
+                values: [EStatus.ACTIVE],
+                entity: 'device_groups',
+              },
+            ],
+          },
+        });
+        const { data: devices } = await query.execute();
+        (devices || []).forEach((row: any) => {
+          if (!existingAssignedSet.has(row.device_id)) {
+            existingAssignedSet.add(row.device_id);
+            createPromises.push(
+              ctx.dnaClient
+                .create({
+                  entity: 'device_contacts',
+                  token: ctx.token.value,
+                  ...meta_header,
+                  mutation: {
+                    pluck: ['id'],
+                    params: {
+                      contact_id,
+                      device_id: row.device_id,
+                      status: EStatus.ACTIVE,
+                    },
+                  },
+                })
+                .execute()
+            );
+          }
+        });
+      }
+
+      const deletePromises: Promise<any>[] = [];
+      for (const id of removed) {
+        const query = ctx.dnaClient.findAll({
+          entity: 'device_groups',
+          token: ctx.token.value,
+          query: {
+            pluck: ['device_id'],
+            order: { limit: 10000 },
+            advance_filters: [
+              {
+                type: 'criteria',
+                field: 'device_group_setting_id',
+                operator: EOperator.EQUAL,
+                values: [id],
+                entity: 'device_groups',
+              },
+              { type: 'operator', operator: EOperator.AND },
+              {
+                type: 'criteria',
+                field: 'status',
+                operator: EOperator.EQUAL,
+                values: [EStatus.ACTIVE],
+                entity: 'device_groups',
+              },
+            ],
+          },
+        });
+        const { data: devices } = await query.execute();
+        
+        for (const row of (devices || [])) {
+          if (group_ids.length > 0) {
+            const checkQuery = ctx.dnaClient.findAll({
+              entity: 'device_groups',
+              token: ctx.token.value,
+              query: {
+                pluck: ['id'],
+                advance_filters: [
+                  {
+                    type: 'criteria',
+                    field: 'device_id',
+                    operator: EOperator.EQUAL,
+                    values: [row.device_id],
+                    entity: 'device_groups',
+                  },
+                  { type: 'operator', operator: EOperator.AND },
+                  {
+                    type: 'criteria',
+                    field: 'device_group_setting_id',
+                    operator: EOperator.EQUAL,
+                    values: group_ids,
+                    entity: 'device_groups',
+                  },
+                ],
+              }
+            });
+            const { data: checkData } = await checkQuery.execute();
+            if (checkData && checkData.length > 0) {
+              continue; 
+            }
+          }
+          
+          const deviceContact = currentDeviceContacts.find((c: any) => c.device_id === row.device_id);
+          if (deviceContact) {
+            deletePromises.push(
+              ctx.dnaClient
+                .delete(deviceContact.id, {
+                  entity: 'device_contacts',
+                  token: ctx.token.value,
+                })
+                .execute()
+            );
+            existingAssignedSet.delete(row.device_id);
+            const index = currentDeviceContacts.findIndex((c: any) => c.id === deviceContact.id);
+            if (index > -1) {
+              currentDeviceContacts.splice(index, 1);
+            }
+          }
+        }
+      }
+
+      await Promise.all([...createPromises, ...deletePromises]);
+      return { success: true };
     }),
 
   assignGroups: privateProcedure
@@ -386,7 +510,6 @@ export const contactDeviceRouter = createTRPCRouter({
           token: ctx.token.value,
           query: {
             pluck: ['device_id'],
-            order: { limit: 10000 },
             advance_filters: [
               {
                 type: 'criteria',
@@ -412,7 +535,6 @@ export const contactDeviceRouter = createTRPCRouter({
           token: ctx.token.value,
           query: {
             pluck: ['device_id'],
-            order: { limit: 10000 },
             advance_filters: [
               {
                 type: 'criteria',
