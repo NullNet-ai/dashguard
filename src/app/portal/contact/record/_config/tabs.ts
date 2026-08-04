@@ -29,5 +29,10 @@ const tabs = [
     name: 'Devices',
     tabName: 'devices?categories=',
   },
+  {
+    id: 'device_groups',
+    name: 'Device Groups',
+    tabName: 'device_groups?categories=',
+  },
 ];
 export default tabs;

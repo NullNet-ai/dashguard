@@ -4,4 +4,4 @@ export { default as Organizations } from "./organization-details/server";
 export { default as AccountDetails } from "./account-details/server";
 export { default as TimelineDetails } from "./timeline-details/server";
 export { default as DeviceDetails } from './device-details/server';
-export { default as ConfirmationDetails } from './confirmation-details/server';
+export { default as DeviceGroupDetails } from './device-group-details/server';

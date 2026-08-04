@@ -12,6 +12,10 @@ import {
 import DevicePicker from './DevicePicker';
 import DeviceGroupPicker from './DeviceGroupPicker';
 
+// ponytail: quick-assign picker choice (By Device / By Device Group) disabled per product request;
+// flip to true to restore the popover, logic below is untouched
+const ENABLE_ASSIGN_PICKER_CHOICE = false;
+
 interface AssignDeviceDrawerButtonProps {
   contact_id: string;
   onFetchRecords: () => void;
@@ -58,6 +62,14 @@ export default function AssignDeviceDrawerButton({
     actions.openSideDrawer(config as any);
     setPopoverOpen(false);
   };
+
+  if (!ENABLE_ASSIGN_PICKER_CHOICE) {
+    return (
+      <Button onClick={() => openDrawer('device')}>
+        Assign <PlusIcon className="ml-2 h-4 w-4" />
+      </Button>
+    );
+  }
 
   return (
     <Popover open={popoverOpen} onOpenChange={setPopoverOpen}>
