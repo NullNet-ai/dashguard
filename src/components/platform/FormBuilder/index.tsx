@@ -45,17 +45,19 @@ export const FormBuilder = (props: IPropsForms) => {
     myParent,
     fieldConfig,
     customConfig,
-    properties = {
-      isEditable: true,
-      hasActions: true,
-      allowCopyPaste: true,
-      allowRemoveSelection: true,
-      allowUpdateRecord: true,
-      selectOnly: false,
-    },
+    properties: rawProperties,
     formSaveButtonTitle,
     formSaveIcon,
   } = props;
+  const properties = {
+    isEditable: true,
+    hasActions: true,
+    allowCopyPaste: true,
+    allowRemoveSelection: true,
+    allowUpdateRecord: true,
+    selectOnly: false,
+    ...rawProperties,
+  };
   const { isEditable = true } = properties ?? {};
   const { actions } = useWizard();
   const router = useRouter();
@@ -208,6 +210,8 @@ export const FormBuilder = (props: IPropsForms) => {
 
   useEffect(() => {
     if (!filterGridConfig) {
+      if (!isUndefined(props.properties?.isEditable)) return;
+
       if (!formHostInitialView) {
         setTimeout(() => {
           const defaultLock = myParent === 'record' ? true : false;
@@ -230,7 +234,7 @@ export const FormBuilder = (props: IPropsForms) => {
         return;
       }
     }
-  }, [form.control, formHostInitialView, myParent]);
+  }, [form.control, formHostInitialView, myParent, props.properties?.isEditable]);
 
   //* HANDLERS
 
@@ -559,9 +563,9 @@ export const FormBuilder = (props: IPropsForms) => {
     }
   };
   useEffect(() => {
-    if (isUndefined(properties?.isEditable)) return;
-    form?.control._disableForm(!properties?.isEditable);
-  }, [properties?.isEditable]);
+    if (isUndefined(props.properties?.isEditable)) return;
+    form?.control._disableForm(!props.properties?.isEditable);
+  }, [props.properties?.isEditable]);
 
   //* RENDER
   return (
