@@ -1,5 +1,5 @@
 import RecordContactDetails from "../../../../../_components/forms/record-contact-details/server";
-import { ConfirmationDetails } from "../../../../../_components/forms";
+import ConfirmationDetails from "../../../../../_components/forms/confirmation-details/server";
 
 const FormContainer = async () => (
   <div className="space-y-2">
