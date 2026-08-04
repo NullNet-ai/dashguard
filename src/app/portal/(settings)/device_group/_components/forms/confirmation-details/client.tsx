@@ -2,6 +2,7 @@
 
 import { z } from "zod";
 import { FormBuilder } from "~/components/platform/FormBuilder";
+import { api } from "~/trpc/react";
 
 import { type IHandleSubmit } from "~/components/platform/FormBuilder/types";
 import { type IFormProps } from "../types";
@@ -14,18 +15,17 @@ export default function ConfirmationDetails({
   params,
   defaultValues,
 }: IFormProps) {
-  // const updateContact = api.contact.updateContactWithTags.useMutation();
+  const updateDeviceGroup = api.deviceGroup.updateDeviceGroupWithTags.useMutation();
 
   const handleSave = async ({
     data,
   }: IHandleSubmit<z.infer<typeof FormSchema>>) => {
     try {
-      // const tags = data?.tags?.map((tag) => tag.value);
-      // await updateContact.mutateAsync({
-      //   id: params.id,
-      //   ...data,
-      //   tags,
-      // });
+      const tags = data?.tags?.map((tag) => tag.value);
+      await updateDeviceGroup.mutateAsync({
+        id: params.id,
+        tags,
+      });
     } catch (error) {
       throw error;
     }
@@ -36,6 +36,7 @@ export default function ConfirmationDetails({
       formSchema={FormSchema}
       myParent={params.shell_type}
       formProps={params}
+      properties={{ isEditable: !defaultValues?.tags?.length }}
       handleSubmit={handleSave}
       formLabel="Tags"
       formKey="Tags"
@@ -45,6 +46,7 @@ export default function ConfirmationDetails({
           formType: "multi-select",
           name: "tags",
           label: "Tags",
+          multiSelectEnableCreate: true,
         },
       ]}
     />

@@ -18,6 +18,32 @@ const entity = 'device_group_settings';
 
 export const deviceGroupRouter = createTRPCRouter({
   ...createDefineRoutes(entity),
+  updateDeviceGroupWithTags: privateProcedure
+    .input(z.object({ id: z.string(), tags: z.array(z.string()).optional() }))
+    .mutation(async ({ input, ctx }) => {
+      const meta_header = await get_meta_header();
+      const { tags } = input;
+
+      const { token, as_root } = await getEntityCredentials(
+        entity,
+        ctx.dnaClient,
+        ctx.token.value,
+      );
+
+      return ctx.dnaClient
+        .update(input.id, {
+          entity,
+          token,
+          as_root,
+          ...meta_header,
+          mutation: {
+            params: {
+              tags,
+            },
+          },
+        })
+        .execute();
+    }),
 
   mainGrid: privateProcedure.input(ZodItems).query(async ({ input, ctx }) => {
     const {

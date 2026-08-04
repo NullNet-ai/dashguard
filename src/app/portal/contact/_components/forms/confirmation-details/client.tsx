@@ -15,18 +15,18 @@ export default function ConfirmationDetails({
   params,
   defaultValues,
 }: IFormProps) {
-  // const updateContact = api.contact.updateContactWithTags.useMutation();
+  const updateContact = api.contact.updateContactWithTags.useMutation();
 
   const handleSave = async ({
     data,
   }: IHandleSubmit<z.infer<typeof FormSchema>>) => {
     try {
-      // const tags = data?.tags?.map((tag) => tag.value);
-      // await updateContact.mutateAsync({
-      //   id: params.id,
-      //   ...data,
-      //   tags,
-      // });
+      const tags = data?.tags?.map((tag) => tag.value);
+      await updateContact.mutateAsync({
+        id: params.id,
+        ...data,
+        tags,
+      });
     } catch (error) {
       throw error;
     }
@@ -37,6 +37,7 @@ export default function ConfirmationDetails({
       formSchema={FormSchema}
       myParent={params.shell_type}
       formProps={params}
+      properties={{ isEditable: !defaultValues?.tags?.length }}
       handleSubmit={handleSave}
       formLabel="Tags"
       formKey="Tags"
@@ -46,6 +47,7 @@ export default function ConfirmationDetails({
           formType: "multi-select",
           name: "tags",
           label: "Tags",
+          multiSelectEnableCreate: true,
         },
       ]}
     />

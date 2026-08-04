@@ -661,6 +661,25 @@ export const contactRouter = createTRPCRouter({
         })
         .execute();
     }),
+  updateContactWithTags: privateProcedure
+    .input(z.object({ id: z.string(), tags: z.array(z.string()).optional() }))
+    .mutation(async ({ input, ctx }) => {
+      const meta_header = await get_meta_header();
+      const { tags } = input;
+
+      return ctx.dnaClient
+        .update(input.id, {
+          entity: ENTITY,
+          token: ctx.token.value,
+          ...meta_header,
+          mutation: {
+            params: {
+              tags,
+            },
+          },
+        })
+        .execute();
+    }),
   saveContactPhoneEmail: privateProcedure
     .input(ContactPhoneEmailSchema)
     .mutation(async ({ input, ctx }) => {

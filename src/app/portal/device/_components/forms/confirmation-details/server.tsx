@@ -9,9 +9,8 @@ const FormServerFetch = async () => {
   const pathname = headerList.get("x-pathname") || "";
   const [, , main_entity, application, identifier] = pathname.split("/");
 
-  const response = await api.record.getByCode({
-    main_entity: main_entity!,
-    id: identifier!,
+  const response = await api.device.getByCode({
+    code: identifier!,
     pluck_fields: ["id", "tags"],
   });
 
@@ -23,7 +22,15 @@ const FormServerFetch = async () => {
 
   return (
     <div className="space-y-2">
-      <ConfirmationSummary />
+      {application === "wizard" && <ConfirmationSummary />}
+      <ConfirmationDetails
+        defaultValues={default_values}
+        params={{
+          id: contact_id!,
+          shell_type: application! as "record" | "wizard",
+          entity: main_entity,
+        }}
+      />
     </div>
   );
 };

@@ -114,6 +114,23 @@ const mergeUiProtocolGroups = (rows: any[]): any[] => {
 
 export const deviceRouter = createTRPCRouter({
   ...createDefineRoutes(entity),
+  updateDeviceWithTags: privateProcedure
+    .input(z.object({ id: z.string(), tags: z.array(z.string()).optional() }))
+    .mutation(async ({ input, ctx }) => {
+      const { tags } = input;
+
+      return ctx.dnaClient
+        .update(input.id, {
+          entity: 'devices',
+          token: ctx.token.value,
+          mutation: {
+            params: {
+              tags,
+            },
+          },
+        })
+        .execute();
+    }),
   getAccountSetUpDetailsByDeviceCode: privateProcedure
     .input(
       z.object({
