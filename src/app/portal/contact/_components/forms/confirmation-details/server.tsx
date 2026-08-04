@@ -2,7 +2,7 @@ import { api } from "~/trpc/server";
 import { headers } from "next/headers";
 import ConfirmationDetails from "./client";
 import { transformDataToOptions } from "./actions/utils";
-import { ConfirmationSummary } from '~/components/platform/ConfirmationForm';
+import ConfirmationSummary from "./custom/ConfirmationSummary";
 
 const FormServerFetch = async () => {
   const headerList = await headers();
@@ -23,7 +23,7 @@ const FormServerFetch = async () => {
 
   return (
     <div className="space-y-2">
-      <ConfirmationSummary />
+      {application === "wizard" && <ConfirmationSummary />}
       <ConfirmationDetails
         defaultValues={default_values}
         params={{

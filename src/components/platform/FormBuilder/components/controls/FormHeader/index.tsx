@@ -33,7 +33,7 @@ const FormHeader = (props: IFormHeaderProps) => {
     formProps,
     properties,
   } = props;
-  const { isEditable = true, hasActions = true } = properties ?? {};
+  const { hasActions = true } = properties ?? {};
   const { enableUnlockFormFilter = true } = features ?? {};
 
   return (
@@ -82,20 +82,16 @@ const FormHeader = (props: IFormHeaderProps) => {
 
         {properties?.hasActions ? (
           <Fragment>
-            {isEditable && (
-              <Fragment>
-                {form.formState.disabled &&
-                  !filterGridConfig &&
-                  (buttonConfig?.hideLockButton ? null : (
-                    <UnlockButton
-                      dataTestID={testIDFormatter(
-                        `${formProps?.entity ?? 'no_entity'}-wizard-${formKey}-unlock-button`,
-                      )}
-                      handleLock={handleLock}
-                    />
-                  ))}
-              </Fragment>
-            )}
+            {form.formState.disabled &&
+              !filterGridConfig &&
+              (buttonConfig?.hideLockButton ? null : (
+                <UnlockButton
+                  dataTestID={testIDFormatter(
+                    `${formProps?.entity ?? 'no_entity'}-wizard-${formKey}-unlock-button`,
+                  )}
+                  handleLock={handleLock}
+                />
+              ))}
           </Fragment>
         ) : null}
         {buttonHeaderRender}
