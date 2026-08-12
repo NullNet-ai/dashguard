@@ -23,7 +23,7 @@ export default function MyTableHead() {
     <TableRow
       className="backdrop-blur-lg"
       key={headerGroup.id + 'group' + index}
-      data-test-id={testIDFormatter(`${state.config.entity}-grd-tbl-thead-row`)}
+      data-test-id={testIDFormatter(`${state.config.entity}-grid-table-head-row`)}
     >
       {headerGroup.headers.map((header, index) => {
         const columnSortKey = (header?.column?.columnDef as any)?.sortKey;
@@ -44,7 +44,7 @@ export default function MyTableHead() {
           <TableHead
             key={header.id + index}
             data-test-id={testIDFormatter(
-              `${state.config.entity}-grd-tbl-thead-row-${header.column.id}`,
+              `${state.config.entity}-grid-table-head-row-${header.column.id}`,
             )}
             className={cn(
               'group relative font-medium text-muted-foreground',
@@ -72,17 +72,29 @@ export default function MyTableHead() {
               <div className="flex flex-row items-center gap-1 whitespace-nowrap text-default">
                 {cellValue}
                 {sortingState && !sortingState.desc && (
-                  <ArrowUpIcon className="h-4 w-4" />
+                  <ArrowUpIcon
+                    className="h-4 w-4"
+                    data-test-id={testIDFormatter(
+                      `${state.config.entity}-grid-table-head-row-${header.column.id}-sort-asc`,
+                    )}
+                  />
                 )}
                 {sortingState && sortingState.desc && (
-                  <ArrowDownIcon className="h-4 w-4" />
+                  <ArrowDownIcon
+                    className="h-4 w-4"
+                    data-test-id={testIDFormatter(
+                      `${state.config.entity}-grid-table-head-row-${header.column.id}-sort-desc`,
+                    )}
+                  />
                 )}
                 {!!defaultFilter?.length && (
                   <FilterIcon className="h-3 w-3 text-primary" />
                 )}
                 {/* <div className="flex flex-wrap gap-2"> */}
-                {header.id === 'grouping' && <HeaderGroupWrapper items={grouping} state={state}/> }
-                  
+                {header.id === 'grouping' && (
+                  <HeaderGroupWrapper items={grouping} state={state} />
+                )}
+
                 {/* </div> */}
               </div>
               <HeaderMenu header={header} defaultFilter={defaultFilter} />

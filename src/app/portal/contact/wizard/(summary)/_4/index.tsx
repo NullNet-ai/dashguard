@@ -31,7 +31,7 @@ const Summary = ({ form_key }: { form_key: string }) => {
   }
   return (
     <div>
-      <p>
+      <p className="text-[#334155]">
         <span className='text-slate-400'> Department: </span>
         &nbsp;{" "}
         {organizations?.length

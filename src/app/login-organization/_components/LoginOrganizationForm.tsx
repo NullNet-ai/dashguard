@@ -35,7 +35,8 @@ const LoginOrganizationForm = ({ defaultValues, selectOptions }: any) => {
       if (response && !response.valid && response.errorMessage) {
         setErrorMessage(response.errorMessage);
       }
-    } catch (error) {
+    } catch (error: any) {
+      if (error.message === 'NEXT_REDIRECT') return;
       if (error instanceof Error) {
         setError(error.message);
       } else {
@@ -94,7 +95,7 @@ const LoginOrganizationForm = ({ defaultValues, selectOptions }: any) => {
             </Button>
             <Button
               className="flex h-auto w-full items-center justify-center gap-3 rounded py-1.5 text-md font-semibold shadow-sm"
-              data-test-id="login-submit-btn"
+              data-test-id="login-submit-button"
               loading={isSubmitting}
               type="submit"
               variant={'default'}

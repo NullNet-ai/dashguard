@@ -33,7 +33,7 @@ const Summary = ({ form_key }: { form_key: string }) => {
 
   return (
     <div>
-      <p className="mb-[8px] no-underline">
+      <p className="mb-[8px] no-underline text-[#334155]">
         <span className='text-slate-400'> Category: </span>
         &nbsp;{" "}
         {filtered_categories?.length ? filtered_categories.join(", ") : "None"}

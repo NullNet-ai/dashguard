@@ -5,7 +5,9 @@ import RecordSummaryMobile from '~/components/platform/Record/Summary/RecordSumm
 import HeaderTabs from '~/components/platform/Record/Tabs/HeaderTabs'
 import { ResizablePanel, ResizablePanelGroup } from '~/components/ui/resizable'
 
-import statusOptions from '../../../_actions/statusOptions'
+import statusOptions, {
+  resetPasswordOption,
+} from '../../../_actions/statusOptions';
 import tabs from '../../../_config/tabs'
 
 import type { IProps } from './types'
@@ -17,28 +19,37 @@ const Wrapper = ({
   entity_code,
   entity_name,
   is_applicant,
+  enableTimeline,
+  metadata,
 }: IProps) => {
   return (
     <RecordProvider
       config={{
         entityCode: entity_code,
         entityName: entity_name!,
-        identifierOption: is_applicant ? statusOptions : undefined,
+        identifierOption: [
+          ...(is_applicant ? statusOptions : []),
+          resetPasswordOption,
+        ],
+        // showRecordSummary:false,
+        // showToolbar: false,
+        enableTimeline,
+        metadata,
       }}
     >
       <RecordWrapperProvider>
-        <section className="up mt-0 min-h-[calc(100vh-110px)] lg:mt-[0rem]">
-          <ResizablePanelGroup direction="horizontal" className="flex">
+        <section className="up mt-0 h-[calc(100vh-85px)] lg:mt-[0rem]">
+          <ResizablePanelGroup direction="horizontal" className="flex gap-2 p-2">
             <RecordContainer>
               {record_summary}
             </RecordContainer>
             <ResizablePanel
               defaultSize={95}
               minSize={25}
-              className="min-h-60 flex-grow-[6] bg-transparent"
+              className="flex flex-col gap-2 min-h-60 flex-grow-[6] bg-transparent"
             >
               <HeaderTabs tabs={tabs} />
-              <MainContent className="p-4" application="record">
+              <MainContent application="record">
                 {record}
               </MainContent>
             </ResizablePanel>

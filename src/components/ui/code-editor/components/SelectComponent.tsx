@@ -20,7 +20,7 @@ export default function SelectComponent({ options, value, onValueChange, placeho
 	return (
 		<Select onValueChange={onValueChange} value={value}>
 			<SelectTrigger className={cn(
-				'h-9 text-sm gap-1 sm:text-[14px]',
+				'h-9 text-sm gap-1 sm:text-md',
 				className,
 				themeClass
 			)}>

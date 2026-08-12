@@ -7,8 +7,9 @@ import { useToast } from '~/context/ToastProvider';
 import { type IFormProps } from '../types';
 import { api } from "~/trpc/react";
 
+
 const FormSchema = z.object({
-  device_category: z.string(),
+  device_category: z.string().min(1, 'Device Category is required'),
 });
 
 export default function DeviceCategory({ params, defaultValues }: IFormProps) {
@@ -52,26 +53,28 @@ export default function DeviceCategory({ params, defaultValues }: IFormProps) {
           fieldClassName: '',
           radioOrientation: 'vertical',
           fieldStyle: {},
+          required: true,
         },
       ]}
       checkboxOptions={{}}
       radioOptions={{
         device_category: [
           {
-            label: 'AppGuard Client',
-            value: 'AppGuard Client',
+            label: 'Appguard Client',
+            value: 'Appguard Client',
           },
           {
             label: 'Firewall',
             value: 'Firewall',
           },
-          {
-            label: 'Load Balancer',
-            value: 'Load Balancer',
-          },
+          // {
+          //   label: 'Load Balancer',
+          //   value: 'Load Balancer',
+          // },
         ],
       }}
-      selectOptions={{}}
+      selectOptions={{
+      }}
       multiSelectOptions={{}}
     />
   );

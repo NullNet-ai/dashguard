@@ -1,68 +1,90 @@
-import { cookies, headers } from 'next/headers'
-import React from 'react'
-import { api } from '~/trpc/server'
-import SummaryClientContent from './SummaryClientContent'
+'use client';
 
-const RecordSummaryContent = async () => {
-  try {
-    const headerList = await headers()
-    const username = (await cookies()).get('username')?.value || ''
-    const pathname = headerList.get('x-pathname') || ''
-    const mainEntity = headerList.get('x-main-entity') || '';
-    const [, , , , identifier] = pathname.split('/')
+import React, { useEffect } from 'react';
+import { usePathname } from 'next/navigation';
+import { getCookie } from 'cookies-next';
+import { api } from '~/trpc/react';
+import SummaryClientContent from './SummaryClientContent';
+import { useEventEmitter } from '~/context/EventEmitterProvider';
 
-    if (!identifier || !mainEntity) {
-      throw new Error('Invalid URL parameters')
-    }
+const RecordSummaryContent = ({
+  children,
+  image_placeholder,
+  header_center_slot,
+  is_show_header_tab,
+  actions,
+  main_entity: propMainEntity,
+}: any) => {
+  const eventEmitter = useEventEmitter();
+  const pathname = usePathname();
+  const token = (getCookie('token') as string) || '';
 
-    const [recordDetails, token] = await Promise.all([
-      api.record.getByCodeWithJoin({
-        id: identifier,
-        pluck_fields: [
-          'id',
-          'code',
-          'status',
-          'created_date',
-          'created_time',
-          'updated_date',
-          'updated_time',
-          'categories',
-          'updated_by',
-          'image_url',
-        ],
-        main_entity: mainEntity,
-      }),
-      api.auth.getToken({
-        username: username,
-      })
-    ]).catch((error) => {
-      throw new Error(`Failed to fetch data: ${error.message}`)
-    })
+  const [, , mainEntity, , identifier] = pathname.split('/');
+  const mainEntity_resolved = propMainEntity || mainEntity;
 
-    if (recordDetails?.status_code === 500) {
-      throw recordDetails.message
-    }
-
-    if (!recordDetails || !token) {
-      throw new Error('Failed to fetch required data')
-    }
-
-    return (
-      <SummaryClientContent 
-        recordDetails={recordDetails} 
-        mainEntity={mainEntity} 
-        token={token}
-      />
-    )
-  } catch (error) {
-    return (
-      <div className="flex h-full w-full items-center justify-center">
-        <div className="rounded-lg bg-red-50 p-4 text-sm text-red-500">
-          {error instanceof Error ? error.message : 'An unexpected error occurred'}
-        </div>
-      </div>
-    )
+  if (!identifier || !mainEntity || !token) {
+    throw new Error('Invalid URL parameters');
   }
-}
+  // Query for record details
+  const {
+    data: recordDetails,
+    isLoading: recordLoading,
+    error: recordError,
+    refetch: recordRefetch,
+  } = api.record.getByCodeWithJoin.useQuery(
+    {
+      id: identifier!,
+      pluck_fields: [
+        'id',
+        'code',
+        'status',
+        'created_date',
+        'created_time',
+        'updated_date',
+        'updated_time',
+        'categories',
+        'updated_by',
+        'image_url',
+      ],
+      main_entity: mainEntity_resolved!,
+    },
+    {
+      enabled: !!identifier && !!mainEntity,
+      retry: 1,
+    },
+  );
 
-export default RecordSummaryContent
+  useEffect(() => {
+    eventEmitter.on('record:summary_content', () => {
+      recordRefetch();
+    });
+    return () => {
+      eventEmitter.off('record:summary_content', recordRefetch);
+    };
+  }, []);
+
+  // Handle loading state
+  // if (recordLoading) {
+  //   return (
+  //     <div className="flex h-full w-full items-center justify-center">
+  //       <div className="text-sm text-gray-500">Loading...</div>
+  //     </div>
+  //   );
+  // }
+
+  return (
+    <SummaryClientContent
+      recordDetails={recordDetails}
+      mainEntity={mainEntity}
+      token={token}
+      image_placeholder={image_placeholder}
+      header_center_slot={header_center_slot}
+      is_show_header_tab={is_show_header_tab}
+      actions={actions}
+    >
+      {children}
+    </SummaryClientContent>
+  );
+};
+
+export default RecordSummaryContent;

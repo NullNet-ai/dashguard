@@ -216,7 +216,7 @@ SortableOverlay.displayName = "SortableOverlay";
 
 interface SortableItemContextProps {
   attributes: React.HTMLAttributes<HTMLElement>;
-  listeners: DraggableSyntheticListeners | undefined;
+  listeners: DraggableSyntheticListeners;
   isDragging?: boolean;
 }
 

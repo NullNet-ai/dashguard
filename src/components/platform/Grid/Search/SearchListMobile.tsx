@@ -84,21 +84,30 @@ const SearchListMobile = ({gridType, parentType} : any) => {
     return itemsRef.current[lastIndex - 1]?.offsetLeft + itemsRef.current[lastIndex - 1]?.offsetWidth + 5
   }, [data, defaultSearchItems, itemsRef.current])
 
+
+  const ellipsisText = (text: string, num: number) => {
+    if (text.length > num) {
+      return text.substring(0, num) + '...'
+    }
+    return text
+  }
+
   return (
     <div
-      className="mobile-container-ref flex  flex-col  gap-2 md:flex-row overflow-hidden relative"
+      className="mobile-container-ref flex  flex-row justify-between  gap-2 md:flex-row overflow-hidden relative"
       ref={conref}
-      style={{ width: isMobile ? gridType==='card-list' || parentType === 'grid_expansion' ? '100%' :  width - (screenSize === 'md' ? 100 : 16) : 'auto' }}
+      style={{ width: isMobile ? gridType==='card-list' || parentType === 'grid_expansion' || parentType==='grid' ? '100%' :  width - (screenSize === 'md' ? 100 : 16) : 'auto' }}
     >
       <div className="flex flex-row items-center">
-        <span
+        {defaultSearchItems.length ? <span
           className={cn(
-            `whitespace-nowrap text-xs text-black`, `${selectedSearchItems.length ? '' : 'mt-[12px]'}`,
+            `whitespace-nowrap text-xs text-black`, `${selectedSearchItems.length ? '' : ''}`,
           )}
         >
           Search By:
           {' '}
-        </span>
+        </span> : null}
+        
         {defaultSearchItems.length
           ? (
               <div className="flex flex-nowrap py-1 ">
@@ -115,9 +124,10 @@ const SearchListMobile = ({gridType, parentType} : any) => {
                       }}
                       variant="secondary"
                     >
-                      {item.type === 'criteria'
+                      {ellipsisText(item.type === 'criteria'
                         ? `${item?.label || formatAndCapitalize(item?.field ?? '')} is "${item?.display_value ? item?.display_value : item?.values?.[0]}"`
-                        : item?.operator}
+                        : item?.operator, 15)}
+                      {}
                       {item.type === 'criteria' && !item.default && (
                         <Button
                           className="h-auto w-auto text-nowrap p-0 text-default/40 hover:bg-transparent focus:outline-none"
@@ -216,7 +226,7 @@ const SearchListMobile = ({gridType, parentType} : any) => {
                         : ''
                     }`
                   )}
-                  name="resetSortButton"
+                  name="resetSearchButton"
                   style={{
                     left: lastHiddenIndexLeftPos
                       ? lastHiddenIndexLeftPos + 63
@@ -227,7 +237,7 @@ const SearchListMobile = ({gridType, parentType} : any) => {
                     actions?.handleClearSearchItems()
                   }}
                 >
-                  Clear All
+                  Clear
                 </Button>
               </div>
             )

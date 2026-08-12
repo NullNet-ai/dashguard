@@ -22,19 +22,19 @@ import { testIDFormatter } from '~/utils/formatter';
 const TabMenu = ({
   current,
   href,
-  tabs,
+  tab,
   name,
   entity,
   tabsAction,
 }: {
   current: boolean;
   href: string;
-  tabs: any;
+  tab: any;
   name: string;
   entity: string;
   tabsAction?: {
     handleCloseTab?: (args: IArgs) => void;
-    handleCloseOtherTabs: ({ pathname, current, tabs }: IArgs) => void;
+    handleCloseOtherTabs: ({ current, tab }: IArgs) => void;
     handleCloseAllTabs: () => void;
   };
 }) => {
@@ -44,8 +44,9 @@ const TabMenu = ({
     <DropdownMenu data-test-id={testIDFormatter(`${entity}-tab-menu`)}>
       <DropdownMenuTrigger asChild>
         <div
-          className="opacity-1 flex cursor-pointer items-center gap-2 py-1.5 pr-[2px] text-left text-sm group-hover:opacity-100 lg:opacity-0"
+          className="opacity-1 flex cursor-pointer items-center gap-2 py-1.5 pr-[4px] text-left text-sm group-hover:opacity-100 lg:opacity-0"
           data-test-id={testIDFormatter(`${entity}-tab-menu-trigger`)}
+          onClick={(e) => e.stopPropagation()}
         >
           <EllipsisVertical
             className="h-3.5 w-3.5 cursor-pointer font-semibold text-default/60"
@@ -57,15 +58,19 @@ const TabMenu = ({
       <DropdownMenuContent
         align="start"
         data-test-id={testIDFormatter(`${entity}-tab-menu-content`)}
+        className='z-[100]'
       >
         <DropdownMenuItem
           className="relative flex cursor-pointer gap-2"
+          onClick={e => {
+            e.stopPropagation()
+          }}
           onSelect={async (event) => {
             event.preventDefault();
+            event.stopPropagation()
             tabsAction?.handleCloseTab?.({
-              pathname: href,
-              current,
-              tabs,
+              tab,
+              current: current,
             });
           }}
           data-test-id={testIDFormatter(`${entity}-tab-menu-close-tab`)}
@@ -74,13 +79,14 @@ const TabMenu = ({
           <span>Close Tab</span>
         </DropdownMenuItem>
         <DropdownMenuItem
+          onClick={e => {
+            e.stopPropagation()
+          }}
           className="flex cursor-pointer gap-2"
           onSelect={async (event) => {
-            event.preventDefault();
             tabsAction?.handleCloseOtherTabs({
-              pathname: href,
               current,
-              tabs,
+              tab,
             });
           }}
           data-test-id={testIDFormatter(`${entity}-tab-menu-close-other-tabs`)}
@@ -90,6 +96,9 @@ const TabMenu = ({
         </DropdownMenuItem>
         <DropdownMenuItem
           className="flex cursor-pointer gap-2"
+          onClick={e => {
+            e.stopPropagation()
+          }}
           onSelect={async (event) => {
             event.preventDefault();
             tabsAction?.handleCloseAllTabs();
@@ -99,16 +108,13 @@ const TabMenu = ({
           <FileX className="h-4 w-4 text-default/60" aria-hidden="true" />
           <span>Close All Tabs</span>
         </DropdownMenuItem>
-        <DropdownMenuSeparator
-          data-test-id={testIDFormatter(`${entity}-tab-menu-separator`)}
-        />
-        <DropdownMenuItem
+        {/* <DropdownMenuItem
           className="flex gap-2"
           data-test-id={testIDFormatter(`${entity}-tab-menu-add-favorites`)}
         >
           <StarIcon className="h-4 w-4" />
           <span>Add to Favorites</span>
-        </DropdownMenuItem>
+        </DropdownMenuItem> */}
       </DropdownMenuContent>
     </DropdownMenu>
   );

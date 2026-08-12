@@ -7,10 +7,10 @@ import { type ISearchableField } from '../types'
 const findTextInValue = (value: unknown, searchText: string, operator: string) => {
   // if (['contains', 'like', 'equal'].includes(operator)) {
     if (typeof value === 'string') {
-      return value.toLowerCase() == searchText.toLowerCase() ? value : null
+      return value.toLowerCase().includes(searchText.toLowerCase()) ? value : null
     }
     else if (Array.isArray(value) && value.every(v => typeof v === 'string')) {
-      return value.find(v => v.toLowerCase() == searchText.toLowerCase()) || null
+      return value.find(v => v.toLowerCase().includes(searchText.toLowerCase())) || null
     }
   // }
   return value === searchText ? value : null

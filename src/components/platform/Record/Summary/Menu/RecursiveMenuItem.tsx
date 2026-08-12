@@ -1,15 +1,13 @@
 'use client';
+import { Loader2 } from 'lucide-react';
+import { Fragment, useState } from 'react';
 import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuTrigger,
+  DropdownMenu
 } from '~/components/ui/dropdown-menu';
-import { IMenuOptionConfig } from '../../types';
-import { Fragment, useContext, useState } from 'react';
-import MenuItem from './MenuItem';
+import { useSideDrawer } from '~/components/platform/SideDrawer';
 import { formatFormTestID } from '~/lib/utils';
-import { ChevronRight } from 'lucide-react';
-import { RecordMenuOptionContext } from '~/components/RecordMenuOptionProvider/RecordMenuOptionsProvider';
+import { IMenuOptionConfig } from '../../types';
+import MenuItem from './MenuItem';
 
 interface IRecursiveMenuItemProps {
   recordId: string;
@@ -24,6 +22,7 @@ export default function RecursiveMenuItem({
   entityName,
   isMobile = false,
 }: IRecursiveMenuItemProps) {
+  const { actions: sideDrawerActions } = useSideDrawer()
   const [menuItemLoadingState, setMenuItemLoadingState] = useState<
     Record<string, boolean>
   >({});
@@ -39,54 +38,36 @@ export default function RecursiveMenuItem({
     <Fragment key={recordId}>
       {(option.children && option.children.length > 0 && (
         <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <div className="flex items-center gap-2 text-left text-sm">
-              <MenuItem
-                onClick={option.onClick.bind(
-                  null,
-                  recordId,
-                  entityName,
-                  handleLoadingStateChange,
-                )}
-                data-test-id={
-                  entityName +
-                  '-rcrd-ddn-menu-' +
-                  formatFormTestID(option.label ?? '')
-                }
-                disabled={option.disabled ?? false}
-              >
-                <ChevronRight className="size-5 text-default/40" />{' '}
-                {option.label}
-              </MenuItem>
-            </div>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent
-            align="start"
-            side={isMobile ? 'left' : 'right'}
-            className="z-[1000]"
-          >
+            <div className="flex flex-col items-center text-center text-sm w-full">
             <RecursiveMenuItem
               recordId={recordId}
               entityName={entityName}
               menuOptionConfig={option.children}
             />
-          </DropdownMenuContent>
+            </div>
         </DropdownMenu>
       )) || (
-        <div className="flex items-center gap-2 text-left text-sm">
+        <div className="flex items-center gap-2 text-sm w-full">
           <MenuItem
+            className='cursor-pointer focus:bg-primary focus:text-white'
             onClick={option.onClick.bind(
               null,
               recordId,
               entityName,
               handleLoadingStateChange,
+              sideDrawerActions,
             )}
             data-test-id={
               entityName + '-rcrd-menu-' + formatFormTestID(option.label ?? '')
             }
-            disabled={option.disabled ?? false}
+            disabled={(option.disabled ?? false) || menuItemLoadingState[option.label ?? '']}
           >
-            {option.label}
+            <div className="flex items-center gap-2">
+              {option.label}
+               {menuItemLoadingState[option.label ?? ''] && (
+                <Loader2 className="h-4 w-4 animate-spin" />
+              )}
+            </div>
           </MenuItem>
         </div>
       )}

@@ -20,27 +20,27 @@ const Wrapper = ({
       config={{
         entityCode: entity_code,
         entityName: entity_name!,
-        // identifierOption: statusOptions,
+        // identifierOption: [],
       }}
     >
-      <section className="mt-[3rem] min-h-[calc(100vh-110px)] md:mt-[1rem] lg:mt-[0rem]">
-        <ResizablePanelGroup direction="horizontal" className="flex">
-            <RecordWrapperProvider>
-            <RecordContainer>
-              {record_summary}
-            </RecordContainer>
-            </RecordWrapperProvider>
-          <ResizablePanel
-            defaultSize={95}
-            minSize={25}
-            className="min-h-60 flex-grow-[6] bg-transparent"
-          >
-            <HeaderTabs tabs={tabs} />
-            <MainContent className="p-4">{record}</MainContent>
-          </ResizablePanel>
-        </ResizablePanelGroup>
-      </section>
-      <RecordSummaryMobile>{record_summary}</RecordSummaryMobile>
+      <RecordWrapperProvider>
+        <section className='mt-0 h-[calc(100vh-85px)]'>
+          <ResizablePanelGroup direction="horizontal" className="flex gap-2 p-2">
+              <RecordContainer>
+                {record_summary}
+              </RecordContainer>
+            <ResizablePanel
+              defaultSize={95}
+              minSize={25}
+              className="flex flex-col gap-2 min-h-60 flex-grow-[6] bg-transparent"
+            >
+              <HeaderTabs tabs={tabs} />
+              <MainContent>{record}</MainContent>
+            </ResizablePanel>
+          </ResizablePanelGroup>
+        </section>
+        <RecordSummaryMobile>{record_summary}</RecordSummaryMobile>
+      </RecordWrapperProvider>
     </RecordProvider>
   );
 };

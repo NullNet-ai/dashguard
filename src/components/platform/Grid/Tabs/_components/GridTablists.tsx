@@ -399,7 +399,7 @@ const GridTabLists = ({ tabs }: { tabs: any[] }) => {
         </Sortable>
         {!!copyTab?.length && !copyTab.some((item) => item.hidden) && (
           <Fragment>
-            {!state?.hideCreateNewFilter && <CreateNewFilter />}
+            {!state?.hideCreateNewFilter && <CreateNewFilter initialTab={tabs?.[0] ?? {}} />}
           </Fragment>
         )}
       </div>
@@ -410,7 +410,7 @@ const GridTabLists = ({ tabs }: { tabs: any[] }) => {
             isWindowLoaded && (
               <div>
                 <Fragment>
-                  {!state?.hideCreateNewFilter && <CreateNewFilter />}
+                  {!state?.hideCreateNewFilter && <CreateNewFilter initialTab={tabs?.[0] ?? {}} />}
                 </Fragment>
               </div>
             )}

@@ -18,6 +18,7 @@ import {
   ComboSelect,
   type ComboSelectOption,
 } from '~/components/ui/combo-select';
+import { testIDFormatter } from '~/utils/formatter';
 
 import { createRecord } from '../../Actions/CreateRecord';
 import { type IField, type ISelectOptions } from '../../types';
@@ -45,6 +46,7 @@ export default function FormSelect({
   form.watch(fieldConfig?.name);
   const toast = useToast();
   const { error } = useFormField();
+  const fieldNameTestId = testIDFormatter(fieldConfig.name);
 
   const [query, setQuery] = useState('');
   // Initialize options with useMemo to avoid unnecessary re-renders
@@ -187,7 +189,7 @@ export default function FormSelect({
       <button
         value={query}
         className="block w-full cursor-pointer truncate bg-primary px-3 py-2 text-start text-md font-bold text-secondary-foreground text-white hover:bg-primary hover:text-primary-foreground"
-        data-test-id={`${formKey}-opt-create-new-${fieldConfig.name}`}
+        data-test-id={`${formKey}-option-create-new-${fieldNameTestId}`}
         onClick={() => {
           createNewRecord();
         }}
@@ -202,7 +204,7 @@ export default function FormSelect({
     (fieldConfig?.selectEnableCreate && !query) ? (
       <span
         className="ms-3 block truncate text-md group-data-[selected]:font-semibold"
-        data-test-id={`${formKey}-opt-not-found-${fieldConfig.name}`}
+        data-test-id={`${formKey}-option-not-found-${fieldNameTestId}`}
       >
         {fieldConfig?.label
           ? `No ${fieldConfig?.label} found.`
@@ -215,7 +217,7 @@ export default function FormSelect({
       <div>
         <FormLabel
           required={fieldConfig?.required}
-          data-test-id={`${formKey}-lbl-${fieldConfig.name}`}
+          data-test-id={`${formKey}-label-${fieldNameTestId}`}
         >
           {fieldConfig?.label}
         </FormLabel>
@@ -223,7 +225,7 @@ export default function FormSelect({
           <>
             {pillOptions.map((option, index) => (
               <Badge
-                data-test-id={`${formKey}-opt-${option}-${fieldConfig.name}`}
+                data-test-id={`${formKey}-option-${testIDFormatter(String(option))}-${fieldNameTestId}`}
                 key={index}
                 className="mx-2 border border-success bg-success/10 text-success"
               >
@@ -257,7 +259,7 @@ export default function FormSelect({
         renderCreateOption={renderCreateOption}
         renderEmptyState={renderEmptyState}
         onQueryChange={setQuery}
-        testId={formatFormTestID(`${formKey}-select-${fieldConfig.name}`)}
+        testId={testIDFormatter(`${formKey}-select-${fieldConfig.name}`)}
         infiniteScroll={
           fieldConfig.selectConfig?.infiniteScroll
             ? {
@@ -285,8 +287,7 @@ export default function FormSelect({
       />
 
       <FormMessage
-        className="text-md"
-        data-test-id={`${formKey}-err-msg-${fieldConfig.name}`}
+        data-test-id={`${formKey}-error-message-${fieldNameTestId}`}
       />
     </FormItem>
   );

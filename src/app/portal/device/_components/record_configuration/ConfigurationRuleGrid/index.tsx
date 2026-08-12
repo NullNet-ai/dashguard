@@ -7,37 +7,27 @@ import {
   getGridCacheData,
 } from '~/components/platform/Grid/utils/grid-get-cache-data';
 import { gridDataResolver } from '~/components/platform/Grid/utils/gridDataResolver';
-import { CardHeader } from '~/components/ui/card';
-import { Label } from '~/components/ui/label';
+import { Card, CardHeader, CardTitle } from '~/components/ui/card';
 import useFetchGridData from '~/hooks/useFetchGridData';
 import gridColumns from './_config/columns';
 import { defaultSorting } from './_config/sorting';
 import { api } from '~/trpc/react';
+import { ulid } from 'ulid';
+import { useSidebarTab } from '~/components/platform/SidebarTab/Provider';
+import type { IConfigurationRuleGridProps, TGridDataResult } from './types';
 
 const ConfigurationRuleGrid = ({
   code,
-}: {
-  code: string;
-}) => {
+}: IConfigurationRuleGridProps) => {
   console.log("%c Line:21 🥪 code", "color:#e41a6a", code);
   const pathname = usePathname();
-  const searchTest = useSearchParams();
-
-  const grid_config = useMemo(() => ({
-    gridKey: 'configuration_rule_grid',
-    entity: 'devices',
-    application: 'record',
-    identifier: code,
-    pathname:
-      `${pathname}` +
-      `${searchTest?.toString() ? `?${searchTest?.toString()}` : ''}`,
-    defaultSorting: defaultSorting,
-  }), [pathname, searchTest, code]);
+  const searchParams = useSearchParams();
+  const { isCollapsed } = useSidebarTab();
 
   const {
     data: record = { data: { id: null } },
     refetch,
-    error,
+    isSuccess: isRecordLoaded,
   } = api.record.getByCode.useQuery({
     id: code,
     pluck_fields: ['id'],
@@ -48,40 +38,127 @@ const ConfigurationRuleGrid = ({
     refetch()
   }, [refetch])
 
+  const deviceId = record?.data?.id as string | null
+
+  const { data: deviceInterfaces = [], isSuccess: isInterfacesLoaded } = api.deviceRule.getInterfaces.useQuery(
+    { device_id: deviceId! },
+    { enabled: !!deviceId },
+  )
+
+  // Wait until record is loaded and, if there's a deviceId, until its interfaces are loaded too.
+  // This ensures the first (cache-writing) call to initializeGridTabs has the full defaultGridTabs.
+  const isCacheReady = isRecordLoaded && (!deviceId || isInterfacesLoaded)
+
+  const gridConfig = useMemo(() => {
+    const floatingTab = {
+      name: 'Floating',
+      current: true,
+      href: `${pathname}?filter_id=`,
+      default: true,
+      default_filter: [],
+      group_advance_filters: [],
+      advance_filters: [
+        {
+          type: 'criteria',
+          field: 'floating',
+          entity: 'device_filter_rules',
+          operator: 'equal',
+          values: ['true'],
+          id: ulid(),
+          label: 'Floating',
+          default: true,
+        },
+      ],
+      hidden: false,
+      order: 0,
+    }
+
+    const interfaceTabs = deviceInterfaces.map((networkInterface, index) => ({
+      name: networkInterface.toUpperCase(),
+      current: false,
+      href: `${pathname}?filter_id=`,
+      default: true,
+      default_filter: [],
+      group_advance_filters: [],
+      advance_filters: [
+        {
+          type: 'criteria',
+          field: 'interface',
+          entity: 'device_filter_rules',
+          operator: 'equal',
+          values: [networkInterface],
+          id: ulid(),
+          label: 'Interface',
+          default: true,
+        },
+        {
+          operator: 'and',
+          type: 'operator',
+          default: true,
+        },
+        {
+          type: 'criteria',
+          field: 'floating',
+          entity: 'device_filter_rules',
+          operator: 'equal',
+          values: ['false'],
+          id: ulid(),
+          label: 'Floating',
+          default: true,
+        },
+      ],
+      hidden: false,
+      order: index + 1,
+    }))
+
+    return {
+      gridKey: 'configuration_rule_grid',
+      entity: 'devices',
+      application: 'record',
+      identifier: code,
+      pathname:
+        `${pathname}` +
+        `${searchParams?.toString() ? `?${searchParams?.toString()}` : ''}`,
+      defaultSorting: defaultSorting,
+      hideDefaultAllTab: true,
+      defaultGridTabs: [floatingTab, ...interfaceTabs],
+    }
+  }, [pathname, searchParams, code, deviceInterfaces])
+  console.log("🚀 ~ ConfigurationRuleGrid ~ gridConfig:", gridConfig)
+
   const [gridCachedData, setGridCachedData] = useState<IGridCacheDataResponse>(
     {} as IGridCacheDataResponse,
   );
 
   const getGridCachedData = useCallback(async () => {
-    const gridCachedData = await getGridCacheData({
-      ...grid_config,
+    const cachedData = await getGridCacheData({
+      ...gridConfig,
     });
-    setGridCachedData(gridCachedData);
-  }, [grid_config]);
+    setGridCachedData(cachedData);
+  }, [gridConfig]);
 
-  const searchParamsString = searchTest?.toString();
+  const searchParamsString = searchParams?.toString();
   useEffect(() => {
-    if (!code) return;
+    if (!code || !isCacheReady) return;
     getGridCachedData();
-  }, [searchParamsString, code, getGridCachedData]);
+  }, [searchParamsString, code, getGridCachedData, isCacheReady]);
 
   const { sorts, pagination, filters, groups, columns, grid_tabs } =
-    (gridCachedData || {}) as IGridCacheDataResponse;
+  (gridCachedData || {}) as IGridCacheDataResponse;
 
   const _pluck = [
     'id',
     'device_configuration_id',
     'device_rule_status',
     'status',
-    'type',
     'policy',
     'protocol',
-    'source_port',
-    'source_addr',
+    'source_port_value',
+    'source_ip_value',
     'source_type',
     'source_inversed',
-    'destination_port',
-    'destination_addr',
+    'destination_port_value',
+    'destination_ip_value',
     'destination_type',
     'destination_inversed',
     'description',
@@ -91,12 +168,14 @@ const ConfigurationRuleGrid = ({
     'updated_date',
     'disabled',
     'interface',
-    'order'
+    'order',
+    'ipprotocol'
   ]
 
   const { gridParams, gridProps } = gridDataResolver({
-    entity: 'device_rules',
+    entity: 'device_filter_rules',
     pluck: _pluck,
+    // @ts-expect-error - No type yet
     gridCacheData: {
       grid_tabs,
       sorts,
@@ -113,20 +192,35 @@ const ConfigurationRuleGrid = ({
   
 
 
-  const { fetchData, data: grid_data } = useFetchGridData({...gridParams, device_id: record?.data?.id}, {
+  const { fetchData, data: grid_data } = useFetchGridData({...gridParams,
+    device_id: record?.data?.id}, {
     resolver: 'mainGrid',
     router: 'deviceRule',
   });
   
-  const { items = [], totalCount = 0 } = (grid_data || {}) as any;
+  const { items = [], totalCount = 0 } = (grid_data ?? {}) as Partial<TGridDataResult>;
+
+  useEffect(() => {
+    if (record?.data?.id && !!grid_tabs?.[0]) {
+      // @ts-expect-error - No type yet
+      fetchData({ device_id: record?.data?.id, advance_filters: grid_tabs?.[0]?.advance_filters || [] })
+    }
+  }, [record?.data?.id, !!grid_tabs?.[0]])
 
   return (
-    <>
+    <Card className="overflow-hidden">
       <CardHeader className="flex w-full flex-1 items-center justify-between bg-slate-100">
-        <Label className="font-bold">Rules</Label>
+        <CardTitle className="text-md text-foreground">
+          Rules
+        </CardTitle>
       </CardHeader>
       <Grid
         {...gridProps}
+        gridChildClass='!h-[calc(100vh-19.1em)]'
+        sidebarTab={{
+          closed: isCollapsed ?? false,
+          useSidebar: true
+        }}
         gridKey="configuration_rule_grid"
         totalCount={totalCount || 0}
         parentType="record"
@@ -136,7 +230,7 @@ const ConfigurationRuleGrid = ({
             gridStartPosition: 348,
             summaryWidth: 320,
           },
-          entity: 'device_rules',
+          entity: 'device_filter_rules',
           title: 'Rules',
           columns: gridColumns,
           columnsOrder: columns,
@@ -144,6 +238,7 @@ const ConfigurationRuleGrid = ({
           disableDefaultAction: true,
           hideCreateButton: true,
           enableRowSelection: false,
+          enableRowClick: false,
           // rowClickCustomAction: ({ row }) => {
           //   const { original } = row || {};
           //   const { code: page_code } = original?.page || {};
@@ -155,10 +250,12 @@ const ConfigurationRuleGrid = ({
             router: 'deviceRule',
             resolver: 'mainGrid',
             query_params: {
-              entity: 'device_rules',
+              entity: 'device_filter_rules',
               pluck: _pluck,
               group_advance_filters: filters?.groupAdvanceFilters,
               sorting: gridCachedData?.sorts?.sorting,
+              // @ts-expect-error - No type yet
+              device_id: record?.data?.id,
             },
           },
           customTabDefaults: {
@@ -167,7 +264,7 @@ const ConfigurationRuleGrid = ({
           },
         }}
       />
-    </>
+    </Card>
   );
 };
 

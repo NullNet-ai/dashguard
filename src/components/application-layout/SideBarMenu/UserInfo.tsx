@@ -51,10 +51,10 @@ const SideUserInfo = ({
 
   return (
     <DropdownMenu>
-      <DropdownMenuTrigger className="grid place-items-center px-2 hover:ring-0 active:ring-0">
+      <DropdownMenuTrigger asChild>
         <div
           className={cn(
-            `flex cursor-pointer items-center gap-2 px-1 py-1.5 text-left text-sm`,
+            `flex cursor-pointer items-center gap-2 px-2 py-1.5 text-left text-sm hover:ring-0 active:ring-0`,
             `${(open || openMobile) && mobile ? 'w-full' : ''} `,
           )}
         >
@@ -65,16 +65,17 @@ const SideUserInfo = ({
             />
             <AvatarFallback className="rounded-lg">{initials}</AvatarFallback>
           </Avatar>
-          <div
-            className={cn(
-              `grid flex-1 text-left text-sm leading-tight`,
-              `${(open && !mobile) || (openMobile && mobile) || (open && !openMobile && !mobile) ? '' : 'hidden'}`,
-            )}
-          >
-            <span className="truncate font-semibold">{user_name}</span>
-            <span className="truncate text-xs">{email}</span>
-            <span className="truncate text-xs">{organization}</span>
-          </div>
+          {((open && mobile) || openMobile || (open && !openMobile)) && (
+            <div
+              className={cn(
+                `grid flex-1 text-left text-sm leading-tight`,
+              )}
+            >
+              <span className="truncate font-semibold">{user_name}</span>
+              <span className="truncate text-xs">{email}</span>
+              <span className="truncate text-xs">{organization}</span>
+            </div>
+          )}
         </div>
       </DropdownMenuTrigger>
       {!!other_organizations?.length && (

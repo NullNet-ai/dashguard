@@ -11,11 +11,10 @@ import {
 } from '@headlessui/react';
 import { MagnifyingGlassIcon } from '@heroicons/react/20/solid';
 import { Clock, SearchIcon, X } from 'lucide-react';
-import { useContext, useMemo, useState } from 'react';
+import { useContext, useEffect, useMemo, useState } from 'react';
 
 import { Button } from '~/components/ui/button';
 import { useDebounce } from '~/components/ui/multi-select';
-
 
 import { SearchGraphContext } from './Provider';
 import SearchResult from './SearchResult';
@@ -24,15 +23,19 @@ import { transformSearchData } from './utils/transformSearchData';
 import { cn, formatAndCapitalize } from '~/lib/utils';
 import { Badge } from '~/components/ui/badge';
 import { Separator } from '~/components/ui/separator';
-import { usePathname } from 'next/navigation'
-import { testIDFormatter } from '~/utils/formatter'
+import { usePathname } from 'next/navigation';
+import { testIDFormatter } from '~/utils/formatter';
 import { GridContext } from '~/components/platform/Grid/Provider';
+import { useEventEmitter } from '~/context/EventEmitterProvider';
 
 export default function SearchDialog() {
+  const eventEmitter = useEventEmitter();
   const { state, actions } = useContext(SearchGraphContext);
   const [openDialog, setOpenDialog] = useState(false);
-  const path =  usePathname()
-  const [, , path1, path2] = path.split('/')
+  const [loading, setLoading] = useState(false);
+
+  const path = usePathname();
+  const [, , path1, path2] = path.split('/');
 
   const { searchItems = [] } = state ?? {};
 
@@ -48,17 +51,20 @@ export default function SearchDialog() {
     (item: any) => !item?.default,
   );
   const defaultSearchItems = selectedSearchItems
-  ?.map((item: any) => ({ ...item, hidden: false }))
-  .filter((itm: any) => itm.type !== 'operator')
-  .filter((item: any, index: number, self: any) =>
-    index === self.findIndex((t: any) =>
-      t.entity === item.entity &&
-      t.field === item.field &&
-      JSON.stringify(t.values) === JSON.stringify(item.values)
-    )
-  );
+    ?.map((item: any) => ({ ...item, hidden: false }))
+    .filter((itm: any) => itm.type !== 'operator')
+    .filter(
+      (item: any, index: number, self: any) =>
+        index ===
+        self.findIndex(
+          (t: any) =>
+            t.entity === item.entity &&
+            t.field === item.field &&
+            JSON.stringify(t.values) === JSON.stringify(item.values),
+        ),
+    );
 
-  const {rawItems: items} = state ?? {}
+  const { rawItems: items } = state ?? {};
 
   const {
     searchableFields = [],
@@ -70,10 +76,10 @@ export default function SearchDialog() {
   const { handleSearchQuery } = actions ?? {};
 
   const debouncedSearchInput = useDebounce(query, 500);
-  
- useMemo(() => {
-    if(!debouncedSearchInput)return
-   return handleSearchQuery!(
+
+  useMemo(() => {
+    if (!debouncedSearchInput) return;
+    return handleSearchQuery!(
       {
         entity: 'connections',
         current: 0,
@@ -89,13 +95,25 @@ export default function SearchDialog() {
           'updated_time',
         ],
         advance_filters: advanceFilterItems as IAdvanceFilters[],
-      }, {
+      },
+      {
         refetchOnWindowFocus: false,
         gcTime: 0,
         enabled: !!debouncedSearchInput,
-      })
+      },
+    );
+  }, [debouncedSearchInput]);
 
-  },[debouncedSearchInput])
+  useEffect(() => {
+    const setLoadingState = (data: boolean) => {
+      setLoading(data);
+    };
+    eventEmitter.on('timeline_loading', setLoadingState);
+    return () => {
+      eventEmitter.off('timeline_loading', setLoadingState);
+    };
+  }, [eventEmitter]);
+
   const handleOpenDialog = () => {
     setOpenDialog(true);
   };
@@ -107,11 +125,14 @@ export default function SearchDialog() {
   return (
     <>
       <Button
-        className={cn('flex gap-x-1 focus:outline-none focus-visible:outline-none focus-visible:ring-0')}
+        className={cn(
+          'flex gap-x-1 focus:outline-none focus-visible:outline-none focus-visible:ring-0',
+        )}
         size="md"
         variant="softPrimary"
         onClick={() => handleOpenDialog()}
         data-test-id={`${testIDFormatter(`${path1}-${path2}-srch-btn`)}`}
+        disabled={loading}
       >
         <SearchIcon className="size-4" />
         <span className="mr-1">Search</span>
@@ -170,11 +191,13 @@ export default function SearchDialog() {
                     <h2 className="mb-2 mt-1 px-3 text-xs font-semibold text-gray-500">
                       <SearchResult
                         results={
-                          (transformSearchData(
-                            items,
-                            debouncedSearchInput,
-                            searchableFields,
-                          ) as ISearchItemResult[]) || null
+                          state?.isLoading
+                            ? null
+                            : (transformSearchData(
+                                items,
+                                debouncedSearchInput,
+                                searchableFields,
+                              ) as ISearchItemResult[]) || null
                         }
                         closeDialog={handleCloseDialog}
                       />

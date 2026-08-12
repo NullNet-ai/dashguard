@@ -58,6 +58,9 @@ import FormBadge from '../../../FormType/FormBadge'
 import FormAdaptiveBadge from '../../../FormType/FormAdaptiveBadge'
 import FormMessageInputBox from '../../../FormType/FormMessageInputBox'
 import FormColorPicker from '../../../FormType/FormColorPicker'
+import FormCreditCard from '../../../FormType/FormCreditCard'
+import { SavedCard } from '~/components/ui/credit-card/_components/save-cards'
+import FormOtpInput from '../../../FormType/FormOtpInput'
 
 export default function RenderFormType(
   fieldConfig: IField,
@@ -75,8 +78,10 @@ export default function RenderFormType(
     checkboxOptions?: Record<string, ICheckboxOptions[]>
     currencyInputOptions?: Record<string, Option[]>
     multiSelectOnSearch?: Record<string, (search: string) => Promise<Option[]>>
+    savedCardOptions?: SavedCard[]
   },
 ): ReactElement {
+
   switch (fieldConfig?.formType) {
     case 'code-editor':
       return (
@@ -373,6 +378,16 @@ export default function RenderFormType(
     case 'custom-field':
       return (
         <FormCustom fieldConfig={fieldConfig} form={form} formKey={formKey} formRenderProps={formRenderProps} selectOptions={subConfig?.selectOptions} />
+      )
+    case 'credit-card':
+      return (
+        <FormCreditCard fieldConfig={fieldConfig} form={form} formKey={formKey} formRenderProps={formRenderProps} savedCardOptions={subConfig?.savedCardOptions} onSetPrimary={fieldConfig.onSetPrimary} 
+        onDeleteCard={fieldConfig.onDeleteCard}
+        />
+      )
+    case 'otp-input':
+      return (
+        <FormOtpInput fieldConfig={fieldConfig} form={form} formKey={formKey} formRenderProps={formRenderProps} />
       )
     default:
       return <Input />

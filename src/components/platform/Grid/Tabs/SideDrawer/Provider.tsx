@@ -1,7 +1,8 @@
 'use client';
 
-import { createContext, useContext, useState } from 'react';
+import { createContext, useContext, useEffect, useState } from 'react';
 import {
+  getTabData,
   saveGridFilter,
   transformFilterGroups,
   updateGridFilter,
@@ -12,6 +13,7 @@ import { AppRouterKeys } from '../../types';
 import { ISearchParams } from '../../Search/types';
 import { api } from '~/trpc/react';
 import { IAction } from '~/components/platform/Grid/types';
+import { formatSortingFields } from '../../utils/formatSortingFields';
 
 interface ManageFilterContextType {
   state: {
@@ -21,7 +23,9 @@ interface ManageFilterContextType {
     createFilterLoading: boolean;
     searchConfig: any;
     customTabDefaults: Record<string, any>;
+    filterType?: 'timeline' | 'default';
     errorMessages: string[]; // Changed from string to string array
+    isTimeline?: boolean;
   };
   actions: {
     handleUpdateFilter: (data: any) => void;
@@ -112,7 +116,7 @@ const prepareFilterDetails = async (
           desc: true,
         },
       ];
-
+  const resolvedSorting = formatSortingFields(sorting, columns as any);
   const rawFilterGroup = JSON.parse(
     JSON.stringify(filterDetails?.filter_groups || []),
   );
@@ -125,16 +129,20 @@ const prepareFilterDetails = async (
       customDefaultFilter: customTabDefaults?.defaultAdvanceFilter,
     });
 
+  const defaultAdvanceFilter = resolveDefaultFilter?.length
+    ? resolveDefaultFilter
+    : filterDetails?.default_filter;
+
   return {
     ...filterDetails,
-    default_filter: resolveDefaultFilter,
-    sorts: sorting,
-    default_sorts: sorting,
+    // default_filter: defaultAdvanceFilter,
+    sorts: resolvedSorting,
+    // default_sorts: resolvedSorting,
     filter_groups: rawFilterGroup,
     group_advance_filters: resolveGroupFilter,
     entity: searchConfig?.entity,
     groups: filterDetails?.groups?.length ? filterDetails.groups : [],
-    advance_filters: resolveDefaultFilter,
+    advance_filters: defaultAdvanceFilter,
   };
 };
 
@@ -148,9 +156,12 @@ export function ManageFilterProvider({
   onFetchRecords,
   gridActions,
   tabActions,
+  filterType = 'default',
+  isTimeline = false,
 }: {
   children: React.ReactNode;
   tab: any;
+  filterType?: 'timeline' | 'default';
   columns: Record<string, any>[];
   searchConfig?: {
     router?: AppRouterKeys;
@@ -163,7 +174,9 @@ export function ManageFilterProvider({
   onFetchRecords?: (args: any) => void;
   gridActions?: IAction;
   tabActions?: any;
+  isTimeline?: boolean;
 }) {
+
   const { actions } = useSideDrawer();
   const router = useRouter();
   const utils = api.useUtils();
@@ -227,9 +240,9 @@ export function ManageFilterProvider({
 
       await handleUpdateTab(modifyFilterDetails);
       if (onFetchRecords) {
-        gridActions?.handleUpdateGrouping(
-          modifyFilterDetails?.groups?.map((item: any) => item.value),
-        );
+        // gridActions?.handleUpdateGrouping(
+        //   modifyFilterDetails?.groups?.map((item: any) => item.value),
+        // );
         onFetchRecords({
           grouping: modifyFilterDetails?.groups?.map((item: any) => item.field),
           advance_filters: modifyFilterDetails.default_filter,
@@ -291,17 +304,33 @@ export function ManageFilterProvider({
     }
   };
 
+  const fetchTabData = async () => {
+    const tabData = await getTabData(tab?.id, gridKey);
+    setFilterDetails({
+     ...filterDetails,
+     ...tabData,
+    })
+  }
+
+  useEffect(() => {
+    if (tab?.id) {
+      fetchTabData()
+    }
+  }, [])
+
   return (
     <ManageFilterContext.Provider
       value={{
         state: {
           tab_props: tab,
           filterDetails,
-          columns,
+          columns: filterDetails?.columns || columns,
           createFilterLoading,
           searchConfig,
           customTabDefaults,
           errorMessages, // Changed to array
+          filterType,
+          isTimeline,
         },
         actions: {
           handleUpdateFilter,

@@ -12,7 +12,8 @@ import { createAdvancedFilter } from '~/server/utils/transformAdvanceFilter'
 import ZodItems from '~/server/zodSchema/grid/items'
 
 import { createDefineRoutes } from '../baseCrud'
-const entity = 'device_aliases'
+import { createRootOrm } from '~/server/lib/root-orm';
+const entity = 'aliases'
 export const deviceAliasRouter = createTRPCRouter({
   ...createDefineRoutes(entity),
   mainGrid: privateProcedure
@@ -28,13 +29,16 @@ export const deviceAliasRouter = createTRPCRouter({
         pluck,
         device_id,
         sorting,
+        // @ts-expect-error - No type yet
         is_case_sensitive_sorting = "false"
       } = input
 
       const _sorting = sorting?.filter(({id}: {id: string}) => !['created_by', 'updated_by'].includes(id))
-      const device_configuration = await ctx.dnaClient.findAll({
+      
+      const rootOrm = await createRootOrm(ctx.dnaClient);
+      
+      const device_configuration = await rootOrm.findAll({
         entity: 'device_configurations',
-        token: ctx.token.value,
         query: {
           pluck: ['id', 'created_date', 'timestamp'],
           advance_filters: [
@@ -50,6 +54,7 @@ export const deviceAliasRouter = createTRPCRouter({
             limit: 1,
             by_field: 'timestamp',
             by_direction: EOrderDirection.DESC,
+            is_case_sensitive_sorting: true,
           },
           // multiple_sort: [
           //   {
@@ -67,18 +72,45 @@ export const deviceAliasRouter = createTRPCRouter({
 
       const device_conf_id = device_configuration?.data?.[0]?.id as string
 
-      const device_aliases = await ctx.dnaClient
+      const device_aliases = await rootOrm
         .findAll({
-          entity: 'device_aliases',
-          token: ctx.token.value,
+          entity: 'aliases',
           query: {
             track_total_records: true,
             pluck,
-            pluck_object:{
-              device_aliases: pluck
+            pluck_group_object: {
+              ip_aliases: ['ip'],
+              port_aliases: ['upper_port'],
+            },
+            pluck_object: {
+              aliases: pluck,
+              ip_aliases: ['ip'],
+              port_aliases: ['upper_port'],
             },
             advance_filters: _advance_filters?.length
-              ? _advance_filters as IAdvanceFilters[]
+              ? [
+                ..._advance_filters.map(e => {
+                  if (!e.entity) {
+                    return {
+                      ...e,
+                      entity: 'aliases',
+                    }
+                  }
+                  return e
+                }),
+                {
+                  operator: 'and',
+                  type: 'operator',
+                  default: true,
+                },
+                {
+                  type: 'criteria',
+                  field: 'device_configuration_id',
+                  entity: 'aliases',
+                  operator: EOperator.EQUAL,
+                  values: [device_conf_id],
+                },
+              ] as IAdvanceFilters[]
               : createAdvancedFilter({
                 device_configuration_id: device_conf_id,
                 status: 'Active',
@@ -90,13 +122,39 @@ export const deviceAliasRouter = createTRPCRouter({
                   : (input.current || 1) * (input.limit || 100)
                     - (input.limit || 100),
               limit: input.limit || 1,
-              by_field: 'code',
-              by_direction: EOrderDirection.DESC,
+              // @ts-expect-error - No type yet
+              by_field: _sorting?.[0]?.name,
+              by_direction: _sorting?.[0]?.desc ? EOrderDirection.DESC : EOrderDirection.ASC,
             },
-            // @ts-expect-error - multiple_sort is not defined in the type
-            multiple_sort: _sorting?.length
-            ? formatSorting(_sorting, 'device_aliases', is_case_sensitive_sorting)
-            : [],
+            // multiple_sort: _sorting?.length
+            // ? formatSorting(_sorting, 'aliases', is_case_sensitive_sorting)
+            // : [],
+          },
+        })
+        .join({
+          type: 'left',
+          field_relation: {
+            to: {
+              entity: 'ip_aliases',
+              field: 'alias_id',
+            },
+            from: {
+              entity,
+              field: 'id',
+            },
+          },
+        })
+        .join({
+          type: 'left',
+          field_relation: {
+            to: {
+              entity: 'port_aliases',
+              field: 'alias_id',
+            },
+            from: {
+              entity,
+              field: 'id',
+            },
           },
         })
         .execute()
@@ -106,7 +164,7 @@ export const deviceAliasRouter = createTRPCRouter({
 
       const formatted_items = items?.map((item: Record<string, any>) => {
         const {
-          [pluralize(input?.entity)]: entity_data,
+          [input?.entity]: entity_data,
           ...rest
         } = item
 

@@ -6,6 +6,8 @@ import { api } from '~/trpc/server';
 
 import TabItems from './TabItems';
 import type { IPropsTabList } from './type';
+import { loadGetInitialProps } from 'next/dist/shared/lib/utils';
+import NewTabItems from './NewTabItems';
 
 const getSessionTabs = async (): Promise<{
   pathname: string
@@ -17,8 +19,6 @@ const getSessionTabs = async (): Promise<{
   const stateTabs = (await api.tab.getMainTabs()) as IPropsTabList[];
   const currentContext = `/${portal}/${mainEntity}`;
 
-
-
   let newTabs = stateTabs.map((tab) => {
     return {
       ...tab,
@@ -27,16 +27,14 @@ const getSessionTabs = async (): Promise<{
     };
   });
   
-
-
   if (newTabs.length === 0) {
     newTabs = [
       {
-        name: mainEntity!,
-        href: pathname,
+        name: 'dashboard',
+        href: '/portal/dashboard',
         current: true,
         is_current: true,
-      },
+      }
     ];
   }
 
@@ -73,6 +71,7 @@ export default async function TabList({ className }: { className?: string }) {
   }
 
   return (
-    <TabItems items={withIDTabs} />
+    // <TabItems initialTabs={withIDTabs} />
+    <NewTabItems initialTabs={withIDTabs} />
   );
 }

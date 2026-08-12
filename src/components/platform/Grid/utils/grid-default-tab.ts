@@ -1,7 +1,7 @@
 import pluralize from 'pluralize';
 import { ulid } from 'ulid';
 import GRIDTABS from '~/server/default-grid-tab';
-
+import { ISearchItem } from '../Search/types';
 
 export const tabName: Record<string, string> = {
   user_role: 'role',
@@ -25,69 +25,94 @@ export const SetIdTab = ({
   defaultGridTabs,
   defaultSorting,
   additionalFilters,
+  defaultGrouping,
+  gridEntity,
+  defaultAdvanceFilter,
+  defaultAllTabName,
+  hideDefaultAllTab = false,
 }: {
   mainEntity: string;
   href?: string;
   defaultGridTabs?: any[];
   defaultSorting?: any[];
   additionalFilters?: any[];
+  defaultGrouping?: any[];
+  gridEntity?: string;
+  defaultAdvanceFilter?: ISearchItem[];
+  defaultAllTabName?: string;
+  hideDefaultAllTab?: boolean;
 }) => {
-
   const modified_entity = tabName[mainEntity] || mainEntity;
 
   const additional_tabs = GRIDTABS[mainEntity] || [];
 
-  const modifyDefaultSorting = defaultSorting?.map((sort) => {
-    return {
+  const modifyDefaultSorting =
+    defaultSorting?.map((sort) => ({
       id: sort.id,
-      desc : sort.desc,
-    };
-  }) || [];
+      desc: sort.desc,
+      ...(sort.sort_key ? { sort_key: sort.sort_key } : {}),
+    })) || [];
 
-  const modifydefaultGridTabs = defaultGridTabs?.map((tab) => {
-    return {
-      ...tab,
-      sorts: tab?.sorts?.length ? tab.sorts : modifyDefaultSorting,
-    };
-  }) || [];
+  const modifydefaultGridTabs =
+    defaultGridTabs?.map((tab) => {
+      return {
+        ...tab,
+        sorts: tab?.sorts?.length ? tab.sorts : modifyDefaultSorting,
+      };
+    }) || [];
+
+  const gridTabs = [...additional_tabs, ...modifydefaultGridTabs];
+
   const tabs = [
-    {
-      name: `All ${pluralize(modified_entity)}`,
-      current: true,
-      href: href ? href : `/portal/${mainEntity}/grid?filter_id=`,
-      default: true,
-      sorts : modifyDefaultSorting,
-      default_filter: [
-        {
-          operator: 'equal',
-          type: 'criteria',
-          field: 'status',
-          id: ulid(),
-          label: 'Status',
-          values: ['Active', 'Draft'],
-          default: true,
-        },
-        ...(additionalFilters?.length? [
+    ...(!hideDefaultAllTab
+      ? [
           {
-            operator: 'and',
-            type: 'operator',
+            name: defaultAllTabName ?? `All ${pluralize(modified_entity)}`,
+            current: true,
+            href: href ? href : `/portal/${mainEntity}/grid?filter_id=`,
             default: true,
+            sorts: modifyDefaultSorting,
+            groups: defaultGrouping,
+            default_filter: defaultAdvanceFilter?.length
+              ? defaultAdvanceFilter
+              : [
+                  {
+                    operator: 'equal',
+                    type: 'criteria',
+                    field: 'status',
+                    id: ulid(),
+                    label: 'Status',
+                    values: ['Active', 'Draft'],
+                    default: true,
+                    ...(gridEntity
+                      ? {
+                          entity: gridEntity,
+                        }
+                      : {}),
+                  },
+                  ...(additionalFilters?.length
+                    ? [
+                        {
+                          operator: 'and',
+                          type: 'operator',
+                          default: true,
+                        },
+                        ...additionalFilters,
+                      ]
+                    : []),
+                ],
           },
-          ...additionalFilters,
-        ] : [])
-
-      ],
-    },
-    ...additional_tabs,
-    ...modifydefaultGridTabs,
+        ]
+      : []),
+    ...gridTabs,
   ];
 
-  const modifiedTabs =  tabs.map((tab) => {
+  const modifiedTabs = tabs.map((tab) => {
     const _id = tab.id || ulid();
-    
+
     // Fix the URL construction to prevent duplicate filter_id
     let finalHref = tab.href;
-    
+
     // If the URL already contains ?filter_id= (with or without a value)
     if (finalHref.includes('?filter_id=')) {
       // Check if it already has a value

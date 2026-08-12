@@ -1,6 +1,7 @@
 stages:
   - build
   - update_portainer-qa
+  - build_appguard-v2
 
 master_build:
   stage: build
@@ -8,27 +9,26 @@ master_build:
     REGISTRY_ADDRESS: 'registry.dnamicro.com'
     REGISTRY_USERNAME: 'dna'
     REGISTRY_PASSWORD: 'aBGioazrbkrFvG5XSdgB'
-    PROJECT_IMAGE_PREFIX: 'platform'
+    PROJECT_IMAGE_PREFIX: 'portal-template'
   script:
     - echo 'Image build successfully'    
   only:
     - 'development'
 
-
 update_stack:
   stage: update_portainer-qa
   variables:
     ENDPOINT_ID: 2
-    STACK_ID: 83
+    STACK_ID: 306
     PORTAINER_USERNAME: 'ci'
     PORTAINER_PASSWORD: 'fZmcpMHDpp63yKiszHL3'
     PORTAINER_HOST: https://portainer.dnaqa.net
-    PORTAINER_YML_FILE: platform-template.yml
+    PORTAINER_YML_FILE: nullnet-portal-template.yml
     FILE_PATH: /var/apps/portainer
     REGISTRY_ADDRESS: 'registry.dnamicro.com'
     REGISTRY_USERNAME: 'dna'
     REGISTRY_PASSWORD: 'aBGioazrbkrFvG5XSdgB'
-    PROJECT_IMAGE_PREFIX: 'platform'
+    PROJECT_IMAGE_PREFIX: 'portal-template'
   script:
     - 'docker login $REGISTRY_ADDRESS -u $REGISTRY_USERNAME -p $REGISTRY_PASSWORD'
     - "docker build -t $REGISTRY_ADDRESS/$PROJECT_IMAGE_PREFIX-$CI_PROJECT_NAME:$CI_COMMIT_REF_NAME-$CI_PIPELINE_ID -f dockerfile \
@@ -46,4 +46,21 @@ update_stack:
     - echo 'updating portal'
     - PORTAINER_HOST=$PORTAINER_HOST portainer stack:update  $ENDPOINT_ID  $STACK_ID  $FILE_PATH/$PORTAINER_YML_FILE
   only:
-    - 'qa'
+    - 'portal-template-qa'
+
+build_appguard_v2:
+  stage: build_appguard-v2
+  variables:
+    REGISTRY_ADDRESS: 'registry.dnamicro.com'
+    REGISTRY_USERNAME: 'dna'
+    REGISTRY_PASSWORD: 'aBGioazrbkrFvG5XSdgB'
+    PROJECT_IMAGE_PREFIX: 'portal-template'
+  script:
+    - 'docker login $REGISTRY_ADDRESS -u $REGISTRY_USERNAME -p $REGISTRY_PASSWORD'
+    - "docker build -t $REGISTRY_ADDRESS/$PROJECT_IMAGE_PREFIX-$CI_PROJECT_NAME:$CI_COMMIT_REF_NAME-$CI_PIPELINE_ID -f dockerfile \
+      --build-arg PROJECT=$CI_PROJECT_NAME ."
+    - 'docker tag $REGISTRY_ADDRESS/$PROJECT_IMAGE_PREFIX-$CI_PROJECT_NAME:$CI_COMMIT_REF_NAME-$CI_PIPELINE_ID $REGISTRY_ADDRESS/$PROJECT_IMAGE_PREFIX-$CI_PROJECT_NAME:$CI_COMMIT_REF_NAME'
+    - 'docker push $REGISTRY_ADDRESS/$PROJECT_IMAGE_PREFIX-$CI_PROJECT_NAME:$CI_COMMIT_REF_NAME-$CI_PIPELINE_ID'
+    - 'docker push $REGISTRY_ADDRESS/$PROJECT_IMAGE_PREFIX-$CI_PROJECT_NAME:$CI_COMMIT_REF_NAME'
+  only:
+    - 'appguard-v2'

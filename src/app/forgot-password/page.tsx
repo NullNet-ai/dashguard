@@ -12,7 +12,7 @@ const SetupPassword = () => {
               alt="Tailwind CSS Logo"
               className="mb-4"
               height={35}
-              src="/tailwindLogo.svg"
+              src="/appguard-logo.png"
               width={58}
             />
             <h2 className="mt-8 text-center text-2xl font-bold tracking-tight text-foreground lg:text-left">

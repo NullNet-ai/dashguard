@@ -1,33 +1,36 @@
-import { useMemo, useRef } from 'react';
+import { useMemo } from 'react';
 import { Area, AreaChart, CartesianGrid, ResponsiveContainer, XAxis, YAxis } from 'recharts';
 
 import { ChartLegend, ChartLegendContent, ChartTooltip, ChartTooltipContent } from '~/components/ui/chart';
 import { formatNumber, modifyAxis } from './LineChart';
-import { graphColors, sortInterface } from './graph-color';
+import { getInterfaceColor, sortInterface } from './graph-color';
+import { formatBytes } from '../../pie-chart/function/formatBytes'
 
 const AreaChartComponent = ({ filteredData, interfaces }: any) => {
+  const formatTooltipValue = (value: unknown, item: any) => {
+    const { payload, dataKey } = item;
+    const packet = payload[`${dataKey}_packet`];
+    const originalValue = payload[`${dataKey}_original`] ?? value;
+    const numericValue =
+      typeof originalValue === 'number' ? originalValue : Number(originalValue);
+    return `${Number.isFinite(numericValue) ? formatBytes(numericValue) : String(originalValue ?? '')} (${packet} Packet${packet > 1 ? 's' : ''})`;
+  };
   const sorted = sortInterface(interfaces);
-
-  // Store the previous yAxisMax value
-  const previousYAxisMaxRef = useRef<number | null>(null);
-
-  // Dynamically calculate the Y-axis domain
-  const { yAxisMax: calculatedYAxisMax, yAxisMin } = useMemo(() => modifyAxis(filteredData), [filteredData]);
-
-  // Update the Y-axis max only if the new value is greater than the previous value
-  const yAxisMax = useMemo(() => {
-    if (previousYAxisMaxRef.current === null || calculatedYAxisMax > previousYAxisMaxRef.current) {
-      previousYAxisMaxRef.current = calculatedYAxisMax;
-    }
-    return previousYAxisMaxRef.current;
-  }, [calculatedYAxisMax]);
+  const { yAxisMax, yAxisMin } = modifyAxis(filteredData);
 
   const number_of_ticks = useMemo(() => {
     return yAxisMax >= 100000 ? 10 : 5;
   }, [yAxisMax]);
 
+  const yDomain = useMemo(() => {
+    if (yAxisMax == null || yAxisMin == null) return ['auto', 'auto'];
+    if (yAxisMax === 0 && yAxisMin === 0) return [0, 1];
+    return [yAxisMin, yAxisMax];
+  }, [yAxisMin, yAxisMax]);
+
   const yticks = useMemo(() => {
-    if (!yAxisMax || !yAxisMin) return [];
+    if (yAxisMax == null || yAxisMin == null) return [];
+    if (yAxisMax === 0 && yAxisMin === 0) return [0];
     const ticks = [yAxisMin]; // Start from yAxisMin
     for (let i = 1; i < number_of_ticks; i++) {
       ticks.push(Math.round(yAxisMin + i * ((yAxisMax - yAxisMin) / (number_of_ticks - 1))));
@@ -38,14 +41,27 @@ const AreaChartComponent = ({ filteredData, interfaces }: any) => {
   return (
     <ResponsiveContainer width="100%" height={300}>
       <AreaChart
-        data={filteredData}
+        data={filteredData.map((e: Record<string, any>) => {
+          const [, firstTick] = yticks;
+          if (!firstTick) return e;
+          const transformed: Record<string, any> = { ...e };
+          sorted?.forEach((item: any) => {
+            const key = item.value;
+            const original = e[key];
+            transformed[`${key}_original`] = original;
+            if (original !== 0 && original < firstTick) {
+              transformed[key] = firstTick * 0.2 - original * 0.2;
+            }
+          });
+          return transformed;
+        })}
         height={300}
         width={1870}
         margin={{ top: 20, right: 30, bottom: 20, left: 30 }} // Increased margin to prevent cutting
       >
         <defs>
           {sorted?.map((item: any) => {
-            const color = graphColors[item?.value] || '#16a34a';
+            const color = getInterfaceColor(item?.value, item?.value1);
             return (
               <linearGradient key={item.value} id={item?.value} x1="0" x2="0" y1="0" y2="1">
                 <stop offset="5%" stopColor={color} stopOpacity={0.8} />
@@ -77,7 +93,7 @@ const AreaChartComponent = ({ filteredData, interfaces }: any) => {
         <YAxis
           allowDataOverflow={true}
           axisLine={false}
-          domain={[yAxisMin || 'auto', yAxisMax || 'auto']} // Dynamically adjust the domain
+          domain={yDomain}
           tickCount={number_of_ticks}
           tickFormatter={(value) => formatNumber(value)} // Format all values dynamically
           tickLine={false}
@@ -93,14 +109,25 @@ const AreaChartComponent = ({ filteredData, interfaces }: any) => {
           content={
             <ChartTooltipContent
               indicator="dot"
-              labelFormatter={(value) => {
-                if (value.includes(':')) {
-                  return value; // Display time directly if it includes ':'
-                }
-                return new Date(value).toLocaleDateString('en-US', {
-                  month: 'short',
-                  day: 'numeric',
-                });
+              valueFormatter={formatTooltipValue}
+              labelFormatter={(value, payload) => {
+                const total = payload?.reduce((sum, entry) => {
+                  const num = typeof entry.value === 'number' ? entry.value : Number(entry.value)
+                  return sum + (Number.isFinite(num) ? num : 0)
+                }, 0) ?? 0
+
+                const highest = payload?.reduce<{ num: number; key: string } | null>((max, entry) => {
+                  const num = typeof entry.value === 'number' ? entry.value : Number(entry.value)
+                  if (!Number.isFinite(num)) return max
+                  return !max || num > max.num ? { num, key: String(entry.dataKey) } : max
+                }, null)
+
+                const label = value.includes(':')
+                  ? value
+                  : new Date(value).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
+
+                const highestStr = highest ? ` | Top: ${highest.key} (${formatBytes(highest.num)})` : ''
+                return `${label} — Total: ${formatBytes(total)}${highestStr}`
               }}
             />
           }
@@ -117,7 +144,7 @@ const AreaChartComponent = ({ filteredData, interfaces }: any) => {
             <Area
               key={item.value}
               dataKey={item?.value}
-              stroke={graphColors[item?.value] ? graphColors[item?.value] : '#16a34a'}
+              stroke={getInterfaceColor(item?.value, item?.value1)}
               fill={`url(#${item?.value})`}
               type="monotone" // Use "monotone" to ensure smooth curves
               isAnimationActive={false}

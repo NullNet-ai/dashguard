@@ -57,6 +57,10 @@ export const selectRecord = async (rows: any[]) => {
     href: pathname,
     current_context: currentContext,
   });
+  // await api.tab.updateNewInnerTabs({
+  //   code: rows?.[0]?.code,
+  //   current_context: currentContext,
+  // });
   redirect(`/portal/${mainEntity}/wizard/${rows?.[0]?.code}/1`);
 };
 

@@ -1,7 +1,7 @@
 'use client'
 
 import moment from 'moment-timezone'
-import React, { useEffect, useMemo } from 'react'
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { z } from 'zod'
 
@@ -10,17 +10,22 @@ import {
   getLastTimeStamp,
 } from '~/app/portal/device/utils/timeRange'
 import FormModule from '~/components/platform/FormBuilder/components/ui/FormModule/FormModule'
-import { Card } from '~/components/ui/card'
+import { Card, CardContent, CardHeader, CardTitle } from '~/components/ui/card'
 import { ChartContainer } from '~/components/ui/chart'
 import { Form } from '~/components/ui/form'
 import { api } from '~/trpc/react'
 import FormClientFetch from '../pie-chart/client-fetch'
 import { type IFormProps } from '../types'
+import { Popover, PopoverTrigger, PopoverContent } from '~/components/ui/popover'
+import { Command, CommandGroup, CommandItem, CommandList } from '~/components/ui/command'
+import { Checkbox } from '~/components/ui/checkbox'
+import { ChevronDown, Check } from 'lucide-react'
 
 import { renderChart } from './function/renderChart'
 import { useSocketConnection } from '../custom-hooks/useSocketConnection';
 import { updateNetworkBuckets } from './function/updateNetworkBucket';
 import { Alert, AlertContent, AlertTitle } from "~/components/ui/alert";
+import ChartCustomContainer from './components/ChartCustomContainer'
 
 
 const timezone = Intl.DateTimeFormat().resolvedOptions().timeZone
@@ -31,6 +36,8 @@ const InteractiveGraph = ({
   multiSelectOptions,
 }: IFormProps) => {
 
+
+  const [prefsReady, setPrefsReady] = useState(false)
   const [interfaces, setInterfaces] = React.useState<IDropdown[]>([])
   const [packetsIP, setPacketsIP] = React.useState<any[]>([])
   const [filteredData, setFilteredData] = React.useState<any[]>([])
@@ -40,12 +47,17 @@ const InteractiveGraph = ({
   const {socket} = useSocketConnection({channel_name, token})
   const getAccount = api.organizationAccount.getAccountID.useMutation();
   const getChartData = api.packet.getBandwithInterfacePerSecond.useMutation();
-  
+  const savePreferences = api.cachedFilter.saveGraphInterfacePreferences.useMutation();
+  const getPreferences = api.cachedFilter.getGraphInterfacePreferences.useMutation();
+  const isFirstRenderRef = useRef(true)
+
+  const wanLanFilter = multiSelectOptions?.filter(e => e.label.toLowerCase().includes('wan') || e.label.toLowerCase().includes('lan'))
+
   const form = useForm({
     defaultValues: {
       graph_type: 'area',
-      interfaces: multiSelectOptions,
-      pie_chart_interfaces: multiSelectOptions,
+      interfaces: [] as typeof wanLanFilter,
+      pie_chart_interfaces: [] as typeof wanLanFilter,
     },
   })
   
@@ -69,21 +81,61 @@ const InteractiveGraph = ({
     )
   }, [interfaces])
 
-  const fetchBandWidth = async () => {
+  const taskQueueRef = useRef<Array<() => Promise<void>>>([])
+  const isQueueWorkerRunningRef = useRef(false)
+  const isUnmountedRef = useRef(false)
+  const startQueueServiceRef = useRef<(() => void) | null>(null)
+
+  const fetchBandWidth = useCallback(async () => {
+    console.debug('[pooling] fetchBandWidth')
     const res = await getChartData.mutateAsync({
       bucket_size: '1s',
       timezone,
       device_id: defaultValues?.id,
-      time_range: getLastTimeStamp({count: 2, unit: 'minute', _now: new Date()}) as string[],
+      time_range: getLastTimeStamp({count: 1, unit: 'minute', _now: new Date(Date.now() - 10_000), add_remaining_time: true }) as string[],
       interface_names: interfaces?.map((item: any) => item?.value),
     })
+    console.log("🚀 ~ InteractiveGraph ~ res:", res)
     
     
     setPacketsIP((prev) => {
       const updatedData = [...prev, ...res].slice(-100) // Keep only last 100 records
       return updatedData
     })
-  }
+  }, [defaultValues?.id, getChartData, interfaces])
+
+  const startQueueService = useCallback(() => {
+    if (isQueueWorkerRunningRef.current) return
+    isQueueWorkerRunningRef.current = true
+
+    void (async () => {
+      try {
+        while (!isUnmountedRef.current) {
+          const next = taskQueueRef.current.shift()
+          if (!next) break
+          try {
+            await next()
+          } catch (err) {
+            console.error('[multi-graph] queue task failed', err)
+          }
+        }
+      } finally {
+        isQueueWorkerRunningRef.current = false
+        if (!isUnmountedRef.current && taskQueueRef.current.length > 0) {
+          startQueueServiceRef.current?.()
+        }
+      }
+    })()
+  }, [])
+
+  useEffect(() => {
+    startQueueServiceRef.current = startQueueService
+  }, [startQueueService])
+
+  const enqueueTask = useCallback((task: () => Promise<void>) => {
+    taskQueueRef.current.push(task)
+    startQueueServiceRef.current?.()
+  }, [])
 
     useEffect(() => {
       if (!packetsIP) return
@@ -110,14 +162,19 @@ const InteractiveGraph = ({
       _getAccount()
       // Eviction: Keep only the last 100 records
       return () => {
+        isUnmountedRef.current = true
+        taskQueueRef.current = []
         setPacketsIP([])
         setFilteredData([])
       }
     }, [])
 
     useEffect(() => {
+      console.debug('[socket] event - connection_multi_graph listener isnt created yet')
       if (!socket || !defaultValues?.id || !orgID) return
+      console.debug('[socket] event - connection_multi_graph listener created')
       socket.on( `connection_multi_graph-${defaultValues?.id}-${orgID}`, (data: Record<string,any>) => {
+        console.debug(`[socket] event connection_multi_graph-${defaultValues?.id}-${orgID} - data`, data)
         const updated_filtered_data =  updateNetworkBuckets(filteredData, data)
         setFilteredData(updated_filtered_data)
       })
@@ -127,15 +184,24 @@ const InteractiveGraph = ({
       };
     },[socket, filteredData, orgID, defaultValues?.id])
     
-
   useEffect(() => {
-    fetchBandWidth()
+    if (!interfaces?.length) return
 
-  }, [interfaces, defaultValues?.id, defaultValues?.device_status])
+    isUnmountedRef.current = false
+    taskQueueRef.current = []
 
-  useEffect(() => {
-      fetchBandWidth()
-  }, [])
+    const enqueueFetchBandwidth = () => {
+      enqueueTask(() => fetchBandWidth())
+    }
+
+    enqueueFetchBandwidth()
+    const interval = window.setInterval(enqueueFetchBandwidth, 2000)
+
+    return () => {
+      window.clearInterval(interval)
+      taskQueueRef.current = []
+    }
+  }, [enqueueTask, fetchBandWidth, interfaces, defaultValues?.id, defaultValues?.is_device_online])
 
   // packet_multi_graph-
 
@@ -144,180 +210,377 @@ const InteractiveGraph = ({
     setInterfaces(interfacesData as any)
   }, [form.watch('interfaces')])
 
+  useEffect(() => {
+    if (!defaultValues?.id) return
+    void (async () => {
+      const prefs = await getPreferences.mutateAsync({ device_id: defaultValues.id })
+      isFirstRenderRef.current = true // prevent save from firing on this programmatic reset
+      form.reset({
+        graph_type: form.getValues('graph_type'),
+        interfaces: prefs?.interfaces ?? wanLanFilter,
+        pie_chart_interfaces: prefs?.pie_chart_interfaces ?? wanLanFilter,
+      })
+      setPrefsReady(true)
+    })()
+  }, [])
+
+  useEffect(() => {
+    if (!prefsReady) return
+    if (isFirstRenderRef.current) {
+      isFirstRenderRef.current = false
+      return
+    }
+    if (!defaultValues?.id) return
+    const currentInterfaces = (form.getValues('interfaces') ?? []) as { value: string; label: string }[]
+    const currentPieChartInterfaces = (form.getValues('pie_chart_interfaces') ?? []) as { value: string; label: string }[]
+    savePreferences.mutate({
+      device_id: defaultValues.id,
+      interfaces: currentInterfaces,
+      pie_chart_interfaces: currentPieChartInterfaces,
+    })
+  }, [form.watch('interfaces'), form.watch('pie_chart_interfaces')])
+
+  if (!prefsReady) return null
+
   return (
-    <div className="mt-4 flex flex-col gap-2">
+    <div className="flex flex-col gap-3">
       {/* Display offline message if the device is offline */}
-      { defaultValues?.device_status.toLowerCase() === 'offline' && (
+      { !defaultValues?.is_device_online && (
         <Alert variant="warning" dismissible>
           {/* <AlertTitle>Device is offline.</AlertTitle> */}
           <AlertContent>
-            The device is Offline. Data transmission is unavailable.
+            The device is Offline. Data transmission unavailable.
           </AlertContent>
         </Alert>
       )}
   
       {/* Always display the graphs */}
-      <div className="flex flex-row gap-4 px-4">
-        <div className="w-[30%]">
-          <Card className="px-4 min-h-[432px]">
-            <div className="text-base py-2 pt-4">
-              <h3>Bandwidth per second</h3>
-            </div>
-            <Form {...form}>
-              <div className="grid !grid-cols-4 gap-4 pt-2">
-                <FormModule
-                  fields={[
-                    {
-                      id: 'pie_chart_interfaces',
-                      formType: 'multi-select',
-                      name: 'pie_chart_interfaces',
-                      label: 'Interfaces',
-                      description: 'Field Description',
-                      placeholder: '',
-                      fieldClassName: 'relative z-[100]',
-                      fieldStyle: {
-                        gridColumn: '1 / span 4',
-                        gridRow: '1 / span 1',
+      <div className="grid gap-2 px-0 grid-cols-1 xl:grid-cols-5">
+        <div className="col-span-2">
+          <Card className="h-[26em] xl:h-[30em] 2xl:h-[29em] overflow-hidden">
+            <CardHeader className={"flex flex-row items-center justify-between bg-slate-100"}>
+              <CardTitle className="text-md text-foreground">
+                Bandwidth per second
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="px-4">
+              <Form {...form}>
+                <div className="grid !grid-cols-4 gap-4 pt-2.5">
+                  <FormModule
+                    fields={[
+                      {
+                        id: 'pie_chart_interfaces',
+                        formType: 'custom-field',
+                        name: 'pie_chart_interfaces',
+                        label: 'Interfaces',
+                        description: 'Field Description',
+                        placeholder: '',
+                        fieldClassName: 'relative z-[100]',
+                        fieldStyle: {
+                          gridColumn: '1 / span 4',
+                          gridRow: '1 / span 1',
+                        },
+                        render: ({ form }) => {
+                          const selected = form?.watch('pie_chart_interfaces') || []
+                          const summary =
+                            Array.isArray(selected) && selected.length > 0
+                              ? selected.map((o: { label: string }) => o.label).join(', ')
+                              : 'Select interfaces'
+                          const toggleOption = (opt: any) => {
+                            const value = String(opt?.value ?? '')
+                            const label = String(opt?.label ?? '')
+                            const exists = selected.some((s: { value: string }) => s.value === value)
+                            const next = exists
+                              ? selected.filter((s: { value: string }) => s.value !== value)
+                              : [...selected, { value, label }]
+                            form.setValue('pie_chart_interfaces', next, { shouldDirty: true, shouldTouch: true })
+                          }
+                          const triggerRef = React.useRef<HTMLButtonElement>(null)
+                          const [contentWidth, setContentWidth] = React.useState<number>(0)
+                          React.useEffect(() => {
+                            const update = () => setContentWidth(triggerRef.current?.offsetWidth ?? 0)
+                            update()
+                            window.addEventListener('resize', update)
+                            return () => window.removeEventListener('resize', update)
+                          }, [])
+                          return (
+                            <div className='space-y-2'>
+                              <span className='text-sm leading-6 font-medium text-slate-700'>Interfaces</span>
+                              <Popover>
+                                <PopoverTrigger asChild>
+                                  <button
+                                    type="button"
+                                    className="flex h-[36px] w-full items-center justify-between rounded-md border border-input bg-background px-3 text-sm"
+                                    ref={triggerRef}
+                                  >
+                                    <span className="truncate text-slate-700">{summary}</span>
+                                    <ChevronDown className="size-4 text-muted-foreground" />
+                                  </button>
+                                </PopoverTrigger>
+                                <PopoverContent className="p-0 w-full" style={{ width: contentWidth || undefined }}>
+                                  {/* <div className="px-3 py-2 text-sm font-medium">Interfaces</div> */}
+                                  <Command className="w-full rounded-none">
+                                    <CommandList>
+                                      <CommandGroup>
+                                        {(multiSelectOptions ?? []).map((opt: any) => {
+                                          const isSelected = selected.some((s: { value: string }) => s.value === String(opt?.value ?? ''))
+                                          return (
+                                            <CommandItem
+                                              key={opt.value}
+                                              // onSelect={() => toggleOption(opt)}
+                                              className="!text-md hover:bg-slate-100 active:bg-slate-200 data-[selected=true]:!bg-slate-100 data-[selected=true]:!text-foreground !rounded-none"
+                                            >
+                                              <div className="flex w-full items-center justify-between">
+                                                <div className="flex items-center gap-3">
+                                                  <Checkbox
+                                                    checked={isSelected}
+                                                    onCheckedChange={() => toggleOption(opt)}
+                                                    className="h-4 w-4"
+                                                  />
+                                                  <span className="text-sm">{opt.label}</span>
+                                                </div>
+                                                {isSelected ? (
+                                                  <Check className="size-4 text-success" />
+                                                ) : (
+                                                  <span className="size-4 opacity-0" />
+                                                )}
+                                              </div>
+                                            </CommandItem>
+                                          )
+                                        })}
+                                      </CommandGroup>
+                                    </CommandList>
+                                  </Command>
+                                </PopoverContent>
+                              </Popover>
+                            </div>
+                          )
+                        },
                       },
-                    },
-                    {
-                      id: 'pie_chart',
-                      formType: 'custom-field',
-                      name: 'pie_chart',
-                      label: 'Pie Chart',
-                      description: 'Field Description',
-                      placeholder: 'Enter value...',
-                      fieldClassName: '',
-                      fieldStyle: {
-                        gridColumn: '1 / span 4',
-                        gridRow: '2 / span 1',
+                      {
+                        id: 'pie_chart',
+                        formType: 'custom-field',
+                        name: 'pie_chart',
+                        label: 'Pie Chart',
+                        description: 'Field Description',
+                        placeholder: 'Enter value...',
+                        fieldClassName: '',
+                        fieldStyle: {
+                          gridColumn: '1 / span 4',
+                          gridRow: '2 / span 1',
+                        },
+                        render: () => {
+                          return (
+                            <ChartCustomContainer>
+                              <div className="flex items-center justify-center mt-10 pie-container-form">
+                                <FormClientFetch interfaces={_pie_chart_interfaces} />
+                              </div>
+                            </ChartCustomContainer>
+                            
+                          );
+                        },
                       },
-                      render: () => {
-                        return (
-                          <div className="flex items-center justify-center mt-10">
-                            <FormClientFetch interfaces={_pie_chart_interfaces} />
-                          </div>
-                        );
+                    ]}
+                    form={form as any}
+                    formKey="PieChart"
+                    formSchema={z.object({})}
+                    myParent="record"
+                    subConfig={{
+                      multiSelectOptions: {
+                        pie_chart_interfaces: (multiSelectOptions ?? [] as any),
                       },
-                    },
-                  ]}
-                  form={form as any}
-                  formKey="PieChart"
-                  formSchema={z.object({})}
-                  myParent="record"
-                  subConfig={{
-                    multiSelectOptions: {
-                      pie_chart_interfaces: (multiSelectOptions ?? [] as any),
-                    },
-                  }}
-                />
-              </div>
-            </Form>
+                    }}
+                  />
+                </div>
+              </Form>
+            </CardContent>
           </Card>
         </div>
-        <div className="w-[70%]">
-          <Card className="px-4">
-            <div className="text-base py-2 pt-4">
-              {/* <h3>Chart Label</h3> */}
-            </div>
-            <Form {...form}>
-              <div className="grid !grid-cols-4 gap-4 pt-2">
-                <FormModule
-                  fields={[
-                    {
-                      id: 'field_1741046129256',
-                      formType: 'space',
-                      name: 'field_1741046129256',
-                      label: 'New Field 1',
-                      description: 'Field Description',
-                      placeholder: 'Enter value...',
-                      fieldClassName: '',
-                      fieldStyle: {
-                        gridColumn: '1 / span 1',
-                        gridRow: '1 / span 1',
+        <div className="col-span-2 xl:col-span-3">
+          <Card className="h-[30em] xl:h-[30em] 2xl:h-[29em] overflow-hidden">
+            <CardHeader className={"flex flex-row items-center justify-between bg-slate-100"}>
+              <CardTitle className="text-md text-foreground">
+                Live Graph
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="px-4">
+              <Form {...form}>
+                <div className="grid grid-cols-3 gap-4 pt-2.5">
+                  <FormModule
+                    fields={[
+                      // {
+                      //   id: 'field_1741046129256',
+                      //   formType: 'space',
+                      //   name: 'field_1741046129256',
+                      //   label: 'New Field 1',
+                      //   description: 'Field Description',
+                      //   placeholder: 'Enter value...',
+                      //   fieldClassName: '',
+                      //   fieldStyle: {
+                      //     gridColumn: '4 / span 1',
+                      //     gridRow: '1 / span 1',
+                      //   },
+                      // },
+                      {
+                        id: 'interfaces',
+                        formType: 'custom-field',
+                        name: 'interfaces',
+                        label: 'Interfaces',
+                        description: 'Field Description',
+                        placeholder: '',
+                        fieldClassName: '',
+                        fieldStyle: {
+                          gridColumn: '1 / span 2',
+                          gridRow: '1 / span 1',
+                        },
+                        render: ({ form }) => {
+                          const selected = form?.watch('interfaces') || []
+                          const summary =
+                            Array.isArray(selected) && selected.length > 0
+                              ? selected.map((o: { label: string }) => o.label).join(', ')
+                              : 'Select interfaces'
+                          const toggleOption = (opt: any) => {
+                            const value = String(opt?.value ?? '')
+                            const label = String(opt?.label ?? '')
+                            const exists = selected.some((s: { value: string }) => s.value === value)
+                            const next = exists
+                              ? selected.filter((s: { value: string }) => s.value !== value)
+                              : [...selected, { value, label }]
+                            form.setValue('interfaces', next, { shouldDirty: true, shouldTouch: true })
+                          }
+                          const triggerRef = React.useRef<HTMLButtonElement>(null)
+                          const [contentWidth, setContentWidth] = React.useState<number>(0)
+                          React.useEffect(() => {
+                            const update = () => setContentWidth(triggerRef.current?.offsetWidth ?? 0)
+                            update()
+                            window.addEventListener('resize', update)
+                            return () => window.removeEventListener('resize', update)
+                          }, [])
+                          return (
+                            <div className="space-y-2">
+                              <span className="text-sm leading-6 font-medium text-slate-700">Interfaces</span>
+                              <Popover>
+                                <PopoverTrigger asChild>
+                                  <button
+                                    type="button"
+                                    className="flex h-[36px] w-full items-center justify-between rounded-md border border-input bg-background px-3 text-sm"
+                                    ref={triggerRef}
+                                  >
+                                    <span className="truncate text-slate-700">{summary}</span>
+                                    <ChevronDown className="size-4 text-muted-foreground" />
+                                  </button>
+                                </PopoverTrigger>
+                                <PopoverContent className="p-0 w-full" style={{ width: contentWidth || undefined }}>
+                                  {/* <div className="px-3 py-2 text-sm font-medium">Interfaces</div> */}
+                                  <Command className="w-full rounded-none">
+                                    <CommandList>
+                                      <CommandGroup>
+                                        {(multiSelectOptions ?? []).map((opt: any) => {
+                                          const isSelected = selected.some((s: { value: string }) => s.value === String(opt?.value ?? ''))
+                                          return (
+                                            <CommandItem
+                                              key={opt.value}
+                                              className="!text-md hover:bg-slate-100 active:bg-slate-200 data-[selected=true]:!bg-slate-100 data-[selected=true]:!text-foreground !rounded-none"
+                                            >
+                                              <div className="flex w-full items-center justify-between">
+                                                <div className="flex items-center gap-3">
+                                                  <Checkbox
+                                                    checked={isSelected}
+                                                    onCheckedChange={() => toggleOption(opt)}
+                                                    className="h-4 w-4"
+                                                  />
+                                                  <span className="text-sm">{opt.label}</span>
+                                                </div>
+                                                {isSelected ? (
+                                                  <Check className="size-4 text-success" />
+                                                ) : (
+                                                  <span className="size-4 opacity-0" />
+                                                )}
+                                              </div>
+                                            </CommandItem>
+                                          )
+                                        })}
+                                      </CommandGroup>
+                                    </CommandList>
+                                  </Command>
+                                </PopoverContent>
+                              </Popover>
+                            </div>
+                          )
+                        },
                       },
-                    },
-                    {
-                      id: 'interfaces',
-                      formType: 'multi-select',
-                      name: 'interfaces',
-                      label: 'Interfaces',
-                      description: 'Field Description',
-                      placeholder: '',
-                      fieldClassName: '',
-                      fieldStyle: {
-                        gridColumn: '2 / span 2',
-                        gridRow: '1 / span 1',
+                      {
+                        id: 'graph_type',
+                        formType: 'select',
+                        name: 'graph_type',
+                        label: 'Graph Type',
+                        description: 'Field Description',
+                        placeholder: '',
+                        fieldClassName: '',
+                        fieldStyle: {
+                          gridColumn: '3 / span 4',
+                          gridRow: '1 / span 1',
+                        },
                       },
-                    },
-                    {
-                      id: 'graph_type',
-                      formType: 'select',
-                      name: 'graph_type',
-                      label: 'Graph Type',
-                      description: 'Field Description',
-                      placeholder: '',
-                      fieldClassName: '',
-                      fieldStyle: {},
-                    },
-                    {
-                      id: 'field_1741046122848',
-                      formType: 'custom-field',
-                      name: 'field_1741046122848',
-                      label: 'New Field 5',
-                      description: 'Field Description',
-                      placeholder: 'Enter value...',
-                      fieldClassName: '',
-                      fieldStyle: {
-                        gridColumn: '1 / span 4',
-                        gridRow: '2 / span 1',
+                      {
+                        id: 'field_1741046122848',
+                        formType: 'custom-field',
+                        name: 'field_1741046122848',
+                        label: 'New Field 5',
+                        description: 'Field Description',
+                        placeholder: 'Enter value...',
+                        fieldClassName: '',
+                        fieldStyle: {
+                          gridColumn: '1 / span 6',
+                          gridRow: '2 / span 1',
+                        },
+                        render: ({ form }) => {
+                          const interfacesData = form?.watch('interfaces') || [];
+                          const graphType = form?.watch('graph_type');
+                          return (
+                            <div className="max-h-[340px]">
+                              <ChartContainer
+                                className="h-full w-full py-4"
+                                config={chartConfig || {visitors: {
+                                  label: 'Visitors',
+                                },
+                                bandwidth: {
+                                  label: 'Bandwidth',
+                                  color: 'hsl(var(--chart-2))',
+                                }} as any}
+                              >
+                                {renderChart({
+                                  filteredData,
+                                  graphType,
+                                  interfaces: interfacesData,
+                                  // interfaces: [],
+                                })}
+                              </ChartContainer>
+                            </div>
+                          );
+                        },
                       },
-                      render: ({ form }) => {
-                        const interfacesData = form?.watch('interfaces') || [];
-                        const graphType = form?.watch('graph_type');
-                        return (
-                          <div className="max-h-[340px]">
-                            <ChartContainer
-                              className="h-full w-full py-4"
-                              config={chartConfig || {visitors: {
-                                label: 'Visitors',
-                              },
-                              bandwidth: {
-                                label: 'Bandwidth',
-                                color: 'hsl(var(--chart-2))',
-                              }} as any}
-                            >
-                              {renderChart({
-                                filteredData,
-                                graphType,
-                                interfaces: interfacesData,
-                                // interfaces: [],
-                              })}
-                            </ChartContainer>
-                          </div>
-                        );
+                    ]}
+                    form={form as any}
+                    formKey="AreaChart"
+                    formSchema={z.object({})}
+                    myParent="record"
+                    subConfig={{
+                      multiSelectOptions: {
+                        interfaces: (multiSelectOptions ?? [] as any),
                       },
-                    },
-                  ]}
-                  form={form as any}
-                  formKey="AreaChart"
-                  formSchema={z.object({})}
-                  myParent="record"
-                  subConfig={{
-                    multiSelectOptions: {
-                      interfaces: (multiSelectOptions ?? [] as any),
-                    },
-                    selectOptions: {
-                      graph_type: [
-                        { label: 'Area Chart', value: 'area' },
-                        { label: 'Bar Chart', value: 'bar' },
-                        { label: 'Line Chart', value: 'line' },
-                      ],
-                    },
-                  }}
-                />
-              </div>
-            </Form>
+                      selectOptions: {
+                        graph_type: [
+                          { label: 'Area Chart', value: 'area' },
+                          { label: 'Bar Chart', value: 'bar' },
+                          { label: 'Line Chart', value: 'line' },
+                        ],
+                      },
+                    }}
+                  />
+                </div>
+              </Form>
+            </CardContent>
           </Card>
         </div>
       </div>

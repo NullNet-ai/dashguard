@@ -8,6 +8,8 @@ import { testIDFormatter } from "~/utils/formatter";
 export default function CardViewButton() {
   const { state, actions } = React.useContext(GridContext);
   const active = state?.viewMode === "card";
+  const disabled = !!state?.grouping?.length
+
   return (
     <Button
     variant={active ? 'default' : 'outline'}
@@ -15,6 +17,7 @@ export default function CardViewButton() {
       className="rounded-l-none hidden lg:block"
       onClick={() => actions?.handleSwitchViewMode("card")}
       data-test-id={testIDFormatter(`${state?.config.entity}-grd-card-view-btn`)}
+      disabled={disabled}
     >
       <LogsIcon className="h-4 w-4" />
     </Button>

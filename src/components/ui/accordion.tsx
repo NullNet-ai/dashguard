@@ -62,6 +62,8 @@ const AccordionTrigger = React.forwardRef<
     iconClassName?: string;
     iconState?: IconStateProps;
     transitionDuration?: "fast" | "normal" | "slow";
+    isCustomHeader?: boolean;
+    customIcon?: (arg: any) => any
   }
 >(({ 
   className, 
@@ -72,6 +74,8 @@ const AccordionTrigger = React.forwardRef<
   iconState,
   transitionDuration = "normal",
   children, 
+  isCustomHeader,
+  customIcon,
   ...props 
 }, ref) => {
   // Define transition durations
@@ -105,15 +109,27 @@ const AccordionTrigger = React.forwardRef<
     ...props,
     onClick: handleClick,
   };
+
   
   const renderIcon = () => {
+
+    if(customIcon) {
+      return customIcon({
+        isOpen,
+        iconState,
+        iconType,
+        iconClassName,
+        transitionDuration,
+      })
+    }
+
     if (hideTriggerIcon) return null;
     
     // If custom open/close icons are provided
     if (iconState?.openIcon && iconState?.closeIcon) {
       // Use our local state to determine which icon to show
       const currentIcon = isOpen ? iconState.openIcon : iconState.closeIcon;
-      return React.cloneElement(currentIcon, {
+      return React.cloneElement(currentIcon as any, {
         className: cn(
           "h-4 w-4 shrink-0", 
           `transition-all ${transitionDurations[transitionDuration]} ease-in-out`,
@@ -126,7 +142,7 @@ const AccordionTrigger = React.forwardRef<
     let IconComponent: React.ReactNode;
     
     if (React.isValidElement(iconType)) {
-      IconComponent = React.cloneElement(iconType, {
+      IconComponent = React.cloneElement(iconType as any, {
         className: cn(
           "h-4 w-4 shrink-0", 
           `transition-transform ${transitionDurations[transitionDuration]}`,
@@ -170,6 +186,27 @@ const AccordionTrigger = React.forwardRef<
     
     return IconComponent;
   };
+
+
+  if(isCustomHeader) {
+    return (
+      <AccordionPrimitive.Header className="flex">
+        <AccordionPrimitive.Trigger
+        ref={ref}
+        className={cn(
+          "flex flex-1 items-center font-medium py-4",
+          `transition-all ${transitionDurations[transitionDuration]} ease-in-out`,
+        )}
+        {...triggerProps}
+        data-state={isOpen ? "open" : "closed"}
+      >
+        {renderIcon()}
+        {children}
+      </AccordionPrimitive.Trigger>
+      </AccordionPrimitive.Header>
+    )
+  }
+
   
   return (
     <AccordionPrimitive.Header className="flex">

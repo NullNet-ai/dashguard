@@ -7,13 +7,21 @@ import type { IProps } from "./types";
 import RecordProvider from "~/components/platform/Record/Provider";
 import statusOptions from "../../../_actions/statusOptions";
 import tabs from "../../../_config/tabs";
+import RecordContainer from './_component/RecordContainer';
+import RemoteAccessActionButton from "../RemoteAccessActionButton";
 
 const Wrapper = ({
   record,
   record_summary,
   entity_code,
   entity_name,
+  device_category,
 }: IProps) => {
+  const filteredTabs =
+    device_category === 'Appguard Client'
+      ? tabs.filter((t) => t.id !== 'configuration')
+      : tabs;
+
   return (
     <RecordProvider
       config={{
@@ -22,22 +30,33 @@ const Wrapper = ({
         identifierOption: statusOptions,
       }}
     >
-      <section className="mt-[3rem] min-h-[calc(100vh-110px)] md:mt-[1rem] lg:mt-[0rem]">
-        <ResizablePanelGroup direction="horizontal" className="flex">
-          <div className="hidden h-full min-h-[calc(100vh-105px)] w-full border-r border-slate-100 md:block md:w-[240px] lg:w-[300px]">
-            <RecordWrapperProvider>{record_summary}</RecordWrapperProvider>
-          </div>
-          <ResizablePanel
-            defaultSize={95}
-            minSize={25}
-            className="min-h-60 flex-grow-[6] bg-transparent"
-          >
-            <HeaderTabs tabs={tabs} />
-            <MainContent className="p-4">{record}</MainContent>
-          </ResizablePanel>
-        </ResizablePanelGroup>
-      </section>
-      <RecordSummaryMobile>{record_summary}</RecordSummaryMobile>
+      <RecordWrapperProvider>
+        <section className='mt-0 h-[calc(100vh-42px)]'>
+          <ResizablePanelGroup direction="horizontal" className="flex gap-2 p-2">
+            <RecordContainer>{record_summary}</RecordContainer>
+            <ResizablePanel
+              defaultSize={95}
+              minSize={25}
+              className="flex flex-col gap-2 min-h-60 flex-grow-[6] bg-transparent"
+            >
+              <HeaderTabs tabs={filteredTabs} tab_items_left_slot={
+                <RemoteAccessActionButton
+                  identifier={entity_code}
+                  main_entity={entity_name!}
+                />
+              } />
+              <MainContent
+                style={{ 
+                  height: 'calc(100vh - 110px)' 
+                }}
+              >
+                {record}
+              </MainContent>
+            </ResizablePanel>
+          </ResizablePanelGroup>
+        </section>
+        <RecordSummaryMobile>{record_summary}</RecordSummaryMobile>
+      </RecordWrapperProvider>
     </RecordProvider>
   );
 };

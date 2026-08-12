@@ -7,11 +7,13 @@ import {
   getGridCacheData,
 } from '~/components/platform/Grid/utils/grid-get-cache-data';
 import { gridDataResolver } from '~/components/platform/Grid/utils/gridDataResolver';
-import { CardHeader } from '~/components/ui/card';
+import { Card, CardHeader, CardTitle } from '~/components/ui/card';
 import { Label } from '~/components/ui/label';
 import useFetchGridData from '~/hooks/useFetchGridData';
 import { defaultSorting } from './_config/sorting';
 import gridColumns from './_config/columns';
+import { api } from '~/trpc/react';
+import { useSidebarTab } from '~/components/platform/SidebarTab/Provider';
 
 const ConfigurationAliasGrid = ({
   code,
@@ -20,6 +22,7 @@ const ConfigurationAliasGrid = ({
 }) => {
   const pathname = usePathname();
   const searchTest = useSearchParams();
+  const { isCollapsed } = useSidebarTab();
 
   const grid_config = {
     gridKey: 'configuration_alias_grid',
@@ -30,7 +33,18 @@ const ConfigurationAliasGrid = ({
       `${pathname}` +
       `${searchTest?.toString() ? `?${searchTest?.toString()}` : ''}`,
     defaultSorting: defaultSorting,
+    defaultAllTabName: 'All Aliases',
   };
+
+  const {
+      data: record = { data: { id: null } },
+      refetch,
+      error,
+    } = api.record.getByCode.useQuery({
+      id: code,
+      pluck_fields: ['id'],
+      main_entity: 'devices',
+    });
 
   const [gridCachedData, setGridCachedData] = useState<IGridCacheDataResponse>(
     {} as IGridCacheDataResponse,
@@ -54,32 +68,37 @@ const ConfigurationAliasGrid = ({
   const _pluck = [
     'id',
     'device_configuration_id',
-    'device_rule_status',
+    // 'device_rule_status',
     'status',
-    'type',
-    'policy',
-    'protocol',
-    'source_port',
-    'source_addr',
-    'source_type',
-    'source_inversed',
-    'destination_port',
-    'destination_addr',
-    'destination_type',
-    'destination_inversed',
-    'description',
+    // 'type',
+    // 'policy',
+    // 'protocol',
+    // 'source_port',
+    // 'source_addr',
+    // 'source_type',
+    // 'source_inversed',
+    // 'destination_port',
+    // 'destination_addr',
+    // 'destination_type',
+    // 'destination_inversed',
+    // 'description',
     'created_by',
     'updated_by',
     'created_date',
     'updated_date',
-    'disabled',
-    'interface',
-    'order'
+    // 'disabled',
+    // 'interface',
+    // 'order',
+    // New columns
+    'type',
+    'name',
+    'description'
   ]
 
   const { gridParams, gridProps } = gridDataResolver({
-    entity: 'device_aliases',
+    entity: 'aliases',
     pluck: _pluck,
+    // @ts-expect-error - gridCacheData is not assignable to type IGridCacheDataResponse
     gridCacheData: {
       grid_tabs,
       sorts,
@@ -94,19 +113,35 @@ const ConfigurationAliasGrid = ({
     },
   });
 
-  const { fetchData, data: grid_data } = useFetchGridData(gridParams, {
+  const { fetchData, data: grid_data } = useFetchGridData({
+    ...gridParams,
+    device_id: record?.data?.id
+  }, {
     resolver: 'mainGrid',
-    router: 'deviceRule',
+    router: 'deviceAlias',
   });
   const { items = [], totalCount = 0 } = (grid_data || {}) as any;
+    useEffect(() => {
+      if (record?.data?.id) {
+        // @ts-expect-error - No type yet
+        fetchData({ device_id: record?.data?.id })
+      }
+    }, [record?.data?.id])
 
   return (
-    <>
+    <Card className="overflow-hidden">
       <CardHeader className="flex w-full flex-1 items-center justify-between bg-slate-100">
-        <Label className="font-bold">Aliases</Label>
+        <CardTitle className="text-md text-foreground">
+          Aliases
+        </CardTitle>
       </CardHeader>
       <Grid
         {...gridProps}
+        gridChildClass='!h-[calc(100vh-19.1em)]'
+        sidebarTab={{
+          closed: isCollapsed ?? false,
+          useSidebar: true
+        }}
         gridKey="configuration_alias_grid"
         totalCount={totalCount || 0}
         parentType="record"
@@ -116,7 +151,7 @@ const ConfigurationAliasGrid = ({
             gridStartPosition: 348,
             summaryWidth: 320,
           },
-          entity: 'device_aliases',
+          entity: 'aliases',
           title: 'Aliases',
           columns: gridColumns,
           columnsOrder: columns,
@@ -132,14 +167,20 @@ const ConfigurationAliasGrid = ({
           // customRowAction: CustomRowActions,
           onFetchRecords: fetchData,
           searchConfig: {
-            router: 'deviceRule',
+            router: 'deviceAlias',
             resolver: 'mainGrid',
             query_params: {
-              entity: 'device_aliases',
+              entity: 'aliases',
               pluck: _pluck,
               group_advance_filters: filters?.groupAdvanceFilters,
               sorting: gridCachedData?.sorts?.sorting,
+              // @ts-expect-error - No type yet
+              device_id: record?.data?.id
             },
+          },
+          searchSuggestionConfig: {
+            router: 'search',
+            resolver: 'aliasSearch',
           },
           customTabDefaults: {
             defaultSorting,
@@ -147,7 +188,7 @@ const ConfigurationAliasGrid = ({
           },
         }}
       />
-    </>
+    </Card>
   );
 };
 

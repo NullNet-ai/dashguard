@@ -2,15 +2,19 @@
 
 import { CheckCircle, XCircle } from 'lucide-react';
 
-type AuthorizationCellProps = {
+interface AuthorizationCellProps {
   authorized: boolean;
-};
+}
 
 export default function AuthorizationCell({
   authorized,
 }: AuthorizationCellProps) {
   return (
-    <span className="flex items-center gap-2 text-sm font-medium">
+    <span
+      data-test-id="device-auth-cell"
+      data-authorized={authorized ? 'true' : 'false'}
+      className="flex items-center gap-2 text-sm font-medium"
+    >
       {authorized ? (
         <>
           <CheckCircle className="h-4 w-4 text-green-600" />

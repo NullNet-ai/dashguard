@@ -1,18 +1,20 @@
-import { type SortingState } from '@tanstack/react-table'
+import { type SortingState } from '@tanstack/react-table';
 
-import { type ISearchItem } from '../Search/types'
+import { type ISearchItem } from '../Search/types';
 
-import { type IGridCacheDataResponse } from './grid-get-cache-data'
-import { resolveGridParams } from './grid-params-resolver'
+import { type IGridCacheDataResponse } from './grid-get-cache-data';
+import { resolveGridParams } from './grid-params-resolver';
+import { IGroupBy } from '../Category/type';
 
 interface IGridDataResolver {
-  entity: string
-  gridCacheData: IGridCacheDataResponse
+  entity: string;
+  gridCacheData: IGridCacheDataResponse;
   defaults: {
-    defaultAdvanceFilter?: ISearchItem[]
-    defaultSorting?: SortingState
-  }
-  pluck?: string[]
+    defaultAdvanceFilter?: ISearchItem[];
+    defaultSorting?: SortingState;
+    defaultGrouping?: IGroupBy[];
+  };
+  pluck?: string[];
 }
 
 export const gridDataResolver = ({
@@ -21,12 +23,16 @@ export const gridDataResolver = ({
   entity,
   pluck,
 }: IGridDataResolver) => {
-  const { grid_tabs, sorts, filters, groups, pagination } = gridCacheData ?? {}
-  const { defaultSorting, defaultAdvanceFilter: _defaultAdvanceFilter } = defaults ?? {}
+  const { grid_tabs, sorts, filters, groups, pagination, current_tab_id } = gridCacheData ?? {};
+  const {
+    defaultSorting,
+    defaultAdvanceFilter: _defaultAdvanceFilter,
+    defaultGrouping,
+  } = defaults ?? {};
 
   const defaultAdvanceFilter = _defaultAdvanceFilter?.length
     ? _defaultAdvanceFilter
-    : filters?.defaultFilters
+    : filters?.defaultFilters;
 
   const gridParams = resolveGridParams({
     ...gridCacheData,
@@ -34,18 +40,19 @@ export const gridDataResolver = ({
     defaultAdvanceFilter,
     entity,
     pluck,
-  })
+  });
 
   const gridAdvanceFilter = filters?.groupAdvanceFilters?.length
     ? filters.groupAdvanceFilters
     : filters?.reportFilters?.length
       ? filters.reportFilters
-      : defaultAdvanceFilter
+      : defaultAdvanceFilter;
 
   const gridDefaultAdvanceFilter = filters?.groupAdvanceFilters?.length
-  ? filters.groupAdvanceFilters
-  : gridAdvanceFilter
+    ? filters.groupAdvanceFilters
+    : gridAdvanceFilter;
   const gridProps = {
+    current_tab_id,
     grid_tabs,
     defaultSorting: sorts?.defaultSorting.length
       ? sorts?.defaultSorting
@@ -54,7 +61,8 @@ export const gridDataResolver = ({
     advanceFilter: gridAdvanceFilter,
     sorting: sorts?.sorting || [],
     grouping: groups || [],
-    pagination
-  }
-  return { gridParams, gridProps }
-}
+    defaultGrouping,
+    pagination,
+  };
+  return { gridParams, gridProps };
+};

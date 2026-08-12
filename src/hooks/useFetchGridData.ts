@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react';
 import { IGroupBy } from '~/components/platform/Grid/Category/type'
 
 import { ISearchItem, type IAdvanceFilter } from '~/components/platform/Grid/Search/types'
@@ -14,7 +14,8 @@ export interface IFetchDataParams {
   group_advance_filters?: ISearchItem[];
   sorting?: any[]
   grouping?: string[]
-  device_id?:string
+  // ponytail: forwarded as-is to the router's query input, so resolver-specific filters (e.g. contact_id) pass through
+  [key: string]: any
 }
 
 interface IData {
@@ -56,8 +57,6 @@ const useFetchGridData = (initialArgs: IFetchDataParams, query_options?: IQueryO
   const [currentData, setCurrentData] = useState<IData>()
   const { router = 'grid', resolver = 'items' } = query_options ?? {}
   // @ts-expect-error - TS doesn't know that `api` is a global variable that is defined in the `trpc` package
-
-  
   const { data, isLoading, error, refetch } = api?.[router]?.[resolver].useQuery({
     current: 0,
     limit: 100,
@@ -66,7 +65,6 @@ const useFetchGridData = (initialArgs: IFetchDataParams, query_options?: IQueryO
     advance_filters: advanceFilterResolver(args.advance_filters ?? []),
     ...args,
   }, queryConditions)
-  
 
   useEffect(() => {
     if (!isLoading) {
@@ -74,7 +72,14 @@ const useFetchGridData = (initialArgs: IFetchDataParams, query_options?: IQueryO
     }
   }, [data, isLoading])
 
+  const isFirstRun = useRef(true);
   useEffect(() => {
+    // ponytail: useQuery already fires the initial request; skip the first run
+    // so this effect only refetches on later fetchData() calls, not a duplicate on mount.
+    if (isFirstRun.current) {
+      isFirstRun.current = false;
+      return;
+    }
     refetch()
   }, [args, refetch])
 

@@ -27,6 +27,7 @@ const Layout = async ({ children }: { children: React.ReactNode }) => {
       'created_time',
       'updated_date',
       'updated_time',
+      'image_url'
     ],
   })
   if (record_details?.errors?.length) {
@@ -45,8 +46,16 @@ const Layout = async ({ children }: { children: React.ReactNode }) => {
 
   const is_applicant = categories?.includes('Applicant')
 
+  const timeline =  {
+    enableTimeline: true,
+    metadata:{
+      timeline_title: `Timeline Records (${identifier})`
+    }
+  }
+
   return (
     <RecordWrapper
+      {...timeline}
       entity_code={identifier!}
       entity_name={main_entity!}
       is_applicant={is_applicant}
@@ -59,5 +68,7 @@ const Layout = async ({ children }: { children: React.ReactNode }) => {
     />
   )
 }
+
+export const dynamic = 'force-dynamic'
 
 export default Layout

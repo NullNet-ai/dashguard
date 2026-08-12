@@ -23,15 +23,19 @@ import { gridFilterRouter } from './routers/grid_filter';
 import { communicationTemplateRouter } from './routers/communication_template';
 import { deviceRouter } from './routers/device';
 import { locationRouter } from './routers/location';
-import { deviceGroupSettingsRouter } from './routers/device_group_settings';
-import { deviceHeartbeatsRouter } from './routers/device_heartbeat';
-import { deviceRuleRouter } from './routers/configuration_rule';
-import { deviceAliasRouter } from './routers/configuration_alias';
+import { searchRouter } from './routers/search';
+import { timelineRouter } from './routers/timeline';
 import { deviceConfigurationRouter } from './routers/device_configuration';
-import { deviceRemoteAccessSessionRouter } from './routers/device_remote_access_session';
 import { packetRouter } from './routers/packet';
 import { cachedFilterRouter } from './routers/cache_filter';
-import { searchRouter } from './routers/search';
+import { deviceRemoteAccessSessionRouter } from './routers/device_remote_access_session';
+import { deviceHeartbeatsRouter } from './routers/device_heartbeat';
+import { deviceRuleRouter } from './routers/configuration_rule';
+import { deviceNatRuleRouter } from './routers/configuration_nat_rule';
+import { deviceAliasRouter } from './routers/configuration_alias';
+import { contactDeviceRouter } from './routers/contact_device';
+import { deviceGroupRouter } from './routers/device_group';
+import { systemResourcesRouter } from './routers/system_resources';
 
 /**
  * This is the primary router for your server.
@@ -49,6 +53,7 @@ export const appRouter = createTRPCRouter({
   record: recordRouter,
   notification: notificationsRouter,
   contact: contactRouter,
+  contactDevice: contactDeviceRouter,
   validator: validatorRouter,
   degreeLevel: degreeLevelRouter,
   country: countryRouter,
@@ -63,15 +68,19 @@ export const appRouter = createTRPCRouter({
   communicationTemplate: communicationTemplateRouter,
   device: deviceRouter,
   location: locationRouter,
-  deviceGroupSetting: deviceGroupSettingsRouter,
-  deviceHeartbeat: deviceHeartbeatsRouter,
-  deviceRule: deviceRuleRouter,
-  deviceAlias: deviceAliasRouter,
+  search: searchRouter,
+  timeline: timelineRouter,
+  // Project Routers
   deviceConfiguration: deviceConfigurationRouter,
-  deviceRemoteAccessSession: deviceRemoteAccessSessionRouter,
   packet: packetRouter,
   cachedFilter: cachedFilterRouter,
-  search: searchRouter,
+  deviceRemoteAccessSession: deviceRemoteAccessSessionRouter,
+  deviceHeartbeat: deviceHeartbeatsRouter,
+  deviceRule: deviceRuleRouter,
+  deviceNatRule: deviceNatRuleRouter,
+  deviceAlias: deviceAliasRouter,
+  deviceGroup: deviceGroupRouter,
+  systemResource: systemResourcesRouter,
 });
 
 // export type definition of API

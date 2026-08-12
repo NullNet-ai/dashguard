@@ -4,8 +4,7 @@ export const FilterCriteriaSchema = z.object({
   field: z.string(),
   operator: z.string(),
   label: z.string(),
-  values: z.union([z.string(), z.array(z.string()), z.undefined()]),
-  type: z.literal('criteria'),
+  values: z.union([z.string(), z.array(z.string()), z.number(), z.array(z.number()), z.undefined()]),  type: z.literal('criteria'),
   default: z.boolean(),
 });
 

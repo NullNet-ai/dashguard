@@ -8,12 +8,16 @@ export default function SubmitForm({
   form,
   saveForm,
   formSchema,
+  formSaveButtonTitle,
+  formSaveIcon,
   ...props
 }: {
   saveForm(data: z.infer<typeof formSchema>): Promise<void>;
   isLoading: boolean;
   form: any;
   formSchema: z.ZodObject<any, any> | z.ZodEffects<z.ZodObject<any, any>>;
+  formSaveButtonTitle?: string;
+  formSaveIcon?: React.ReactNode;
 }) {
   return (
     // <Button
@@ -40,8 +44,8 @@ export default function SubmitForm({
       className="gap-1 items-center text-sm"
       {...props}
       >
-      <SaveIcon className="h-4 w-4" />
-      Save
+      {formSaveIcon ?? <SaveIcon className="h-4 w-4" />}
+      {formSaveButtonTitle ?? 'Save'}
     </Button>
 
     

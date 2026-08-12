@@ -65,15 +65,46 @@ const time_resolution_options: { [key: string]: string[] } = {
   '7d': ['12h', '1d'],
 }
 
-export const FilterGroup = ({ form, groupIndex, onRemoveFilter, onUpdateJunctionOperator }: {
+const TIME_RANGE_TO_RESOLUTION: Record<string, string> = {
+  '24h': '24m',
+  '12h': '12m',
+  '6h': '6m',
+  '3h': '3m',
+  '1h': '1m',
+  '30m': '30s',
+}
+
+export const FilterGroup = ({ form, groupIndex, filter_type, onRemoveFilter, onUpdateJunctionOperator }: {
   onRemoveFilter: (index: number) => void, form: any, filter_type: string, groupIndex: number
   onUpdateJunctionOperator: (index: number, operator: string) => void; }) => {
   const { state } = useManageFilter()
   const { columns, errors } = state ?? {}
-  const [resolutionOptions, setResolutionOptions] = useState<any>([])
-
-
+  const [resolutionOptions, setResolutionOptions] = useState<{ label: string; value: string }[]>([])
   const fields = form.getValues().filterGroups
+
+  const timeRangeFilterIndex = fields?.[groupIndex]?.filters?.findIndex(
+    (f: { field: string }) => f.field === 'Time Range'
+  ) ?? -1
+  const timeRangeValue: string | undefined = timeRangeFilterIndex !== -1
+    ? form.watch(`filterGroups.${groupIndex}.filters.${timeRangeFilterIndex}.Time Range`)
+    : undefined
+
+  useEffect(() => {
+    if (!timeRangeValue) return
+    const autoResolution = TIME_RANGE_TO_RESOLUTION[timeRangeValue]
+    if (!autoResolution) return
+    const currentFields = form.getValues().filterGroups
+    const resolutionFilterIndex = currentFields?.[groupIndex]?.filters?.findIndex(
+      (f: { field: string }) => f.field === 'Resolution'
+    ) ?? -1
+    if (resolutionFilterIndex !== -1) {
+      form.setValue(
+        `filterGroups.${groupIndex}.filters.${resolutionFilterIndex}.Resolution`,
+        autoResolution
+      )
+    }
+  }, [timeRangeValue, groupIndex, form])
+  const isMapFilterGroupLocked = filter_type === 'map_filter' && groupIndex === 0
 
   // useEffect(() => {
   //   const fetchResolutionType = async () => {
@@ -115,9 +146,12 @@ export const FilterGroup = ({ form, groupIndex, onRemoveFilter, onUpdateJunction
   const hasManyFilters = criteriaFilters?.length > 1
 
   return (
-    <div className="space-y-4 rounded-lg bg-gray-50 p-4 mt-[8px]">
+    <div className="space-y-4 rounded-lg bg-gray-50 pl-3 pb-3 pr-2 pt-2">
       <Form {...form}>
-        <div className="space-y-4">
+        <fieldset
+          aria-disabled={isMapFilterGroupLocked}
+          className={` ${isMapFilterGroupLocked ? 'pointer-events-none opacity-50' : ''}`}
+        >
           {fields?.[groupIndex]?.filters?.map((field: any, index: number) => {
             const criteriaIndex
           = fields?.[groupIndex]?.filters?.slice(0, index + 1).filter((f: Record<string, any>) => f.type === 'criteria')
@@ -135,11 +169,11 @@ export const FilterGroup = ({ form, groupIndex, onRemoveFilter, onUpdateJunction
 
             return (
               <div
-                className="grid grid-cols-[1fr_1fr_2fr_auto] items-start gap-2"
                 key={field.id}
+                className={`grid grid-cols-[1fr_1fr_2fr_auto] items-end gap-1 ${index > 0 ? 'grid-cols-[auto_1fr_1fr_2fr_auto]' : 'grid-cols-[1fr_1fr_2fr_auto]'}`}
               >
-                {(((groupIndex == 1 && index == 0)) || (index > 0 && (!default_filter_last_operation))) && field.type === 'operator' && (
-                  <div className="col-span-4 mt-[7px]">
+
+                {index > 0 && fields?.[groupIndex]?.filters?.[index - 1].type === 'operator' && (
                     <Select
                       disabled = { true }
                       value = {
@@ -149,7 +183,7 @@ export const FilterGroup = ({ form, groupIndex, onRemoveFilter, onUpdateJunction
                       }
                       onValueChange = { (operator) => onUpdateJunctionOperator(index - 1, operator)}
                     >
-                      <SelectTrigger className="w-[100px] border-gray-200 bg-white">
+                      <SelectTrigger className="h-9 border-gray-200 bg-white">
                         <SelectValue placeholder="AND" />
                       </SelectTrigger>
                       <SelectContent className="z-[9999]">
@@ -157,7 +191,6 @@ export const FilterGroup = ({ form, groupIndex, onRemoveFilter, onUpdateJunction
                         <SelectItem value="or">OR</SelectItem>
                       </SelectContent>
                     </Select>
-                  </div>
                 )}
 
                 {required_fields?.includes(field?.field)
@@ -182,21 +215,11 @@ export const FilterGroup = ({ form, groupIndex, onRemoveFilter, onUpdateJunction
                       },
                       {
                         id: `${prefix}.${field.field}`,
-                        formType: field?.field === 'Resolution' ? 'combobox' : 'select',
+                        formType: field?.field === 'Resolution' ? 'input' : 'select',
                         name: `${prefix}.${field.field}`,
                         placeholder: 'Select a value',
                         selectSearchable: true,
-                        // @ts-expect-error - isAlphabetical is not a valid prop for input
-                        isAlphabetical: false,
-                        ...(field?.field === 'Resolution' ? {
-                          comboboxConfig: {
-                            selectOptions: [
-                              { label: 'Seconds', value: 's' },
-                              { label: 'Minutes', value: 'm' },
-                              { label: 'Hours', value: 'h' },
-                            ]
-                          }
-                        } : {})
+                        readonly: field?.field === 'Resolution',
                       },
                     ]}
                     form={form}
@@ -216,10 +239,30 @@ export const FilterGroup = ({ form, groupIndex, onRemoveFilter, onUpdateJunction
                           { label: 'Hours', value: 'h' },
                         ],
                         [`${prefix}.Time Range`]: [
-                          // { label: '30 Days', value: '30d' },
-                          { label: '12h', value: '12h' },
-                          { label: '1d', value: '1d' },
-                          // { label: '7d', value: '7d' },
+                          {
+                            label: '24h',
+                            value: '24h'
+                          },
+                          {
+                            label: '12h',
+                            value: '12h'
+                          },
+                          {
+                            label: '6h',
+                            value: '6h'
+                          },
+                          {
+                            label: '3h',
+                            value: '3h'
+                          },
+                          {
+                            label: '1h',
+                            value: '1h'
+                          },
+                          {
+                            label: '30m',
+                            value: '30m'
+                          },
                         ],
                         // [`${prefix}.Resolution`]:  resolution_options,
                         [`${prefix}.Resolution`]: resolutionOptions,
@@ -253,7 +296,7 @@ export const FilterGroup = ({ form, groupIndex, onRemoveFilter, onUpdateJunction
                         },
                         {
                           id: `${prefix}.values`,
-                          formType: 'multi-select',
+                          formType: 'input',
                           name: `${prefix}.values`,
                           placeholder: 'Enter the value',
                           multiSelectEnableCreate: true,
@@ -276,7 +319,7 @@ export const FilterGroup = ({ form, groupIndex, onRemoveFilter, onUpdateJunction
                       }}
                     />
 
-                    {hasManyFilters && (
+                    {hasManyFilters && !isMapFilterGroupLocked && (
                       <Button
                         variant = "ghost"
                         onClick = { () => onRemoveFilter(criteriaIndex) }
@@ -289,7 +332,7 @@ export const FilterGroup = ({ form, groupIndex, onRemoveFilter, onUpdateJunction
               </div>
             )
           })}
-        </div>
+        </fieldset>
       </Form>
     </div>
   )

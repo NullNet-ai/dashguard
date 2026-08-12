@@ -1,0 +1,15 @@
+meta {
+  name: Delete Sample By Id
+  type: http
+  seq: 8
+}
+
+delete {
+  url: {{baseUrl}}/api/store/samples/{{sampleId}}
+  body: none
+  auth: inherit
+}
+
+settings {
+  encodeUrl: true
+}

@@ -38,6 +38,7 @@ const Confirmation = (_: IFormProps) => {
     const interval = setInterval(async () => {
       const { data } = await fetchDeviceInfo.refetch();
       
+      // @ts-expect-error - No type yet
       const { is_device_online = false } = data || {};
 
       if (is_device_online) {

@@ -1,0 +1,129 @@
+meta {
+  name: Filter Store Aliases
+  type: http
+  seq: 3
+}
+
+post {
+  url: {{baseUrl}}/api/store/aliases/filter
+  body: json
+  auth: inherit
+}
+
+body:json {
+  {
+    "pluck": [
+      "id",
+      "device_configuration_id",
+      "status",
+      "created_by",
+      "updated_by",
+      "created_date",
+      "updated_date",
+      "type",
+      "name",
+      "description"
+    ],
+    "pluck_object": {
+      "aliases": [
+        "id",
+        "device_configuration_id",
+        "status",
+        "created_by",
+        "updated_by",
+        "created_date",
+        "updated_date",
+        "type",
+        "name",
+        "description"
+      ],
+      "ip_aliases": [
+        "ip"
+      ],
+      "port_aliases": [
+        "upper_port"
+      ]
+    },
+    "pluck_group_object": {
+      "ip_aliases": [
+        "ip"
+      ],
+      "port_aliases": [
+        "upper_port"
+      ]
+    },
+    "advance_filters": [
+      {
+        "type": "criteria",
+        "field": "device_configuration_id",
+        "operator": "equal",
+        "values": [
+          "01KTTEX00045ADYD6HN9N93QXP"
+        ]
+      },
+      {
+        "type": "operator",
+        "operator": "and"
+      },
+      {
+        "type": "criteria",
+        "field": "status",
+        "operator": "equal",
+        "values": [
+          "Active"
+        ]
+      }
+    ],
+    "offset": 0,
+    "limit": 100,
+    "joins": [
+      {
+        "type": "left",
+        "field_relation": {
+          "to": {
+            "entity": "ip_aliases",
+            "field": "alias_id"
+          },
+          "from": {
+            "entity": "aliases",
+            "field": "id"
+          }
+        },
+        "nested": false
+      },
+      {
+        "type": "left",
+        "field_relation": {
+          "to": {
+            "entity": "port_aliases",
+            "field": "alias_id"
+          },
+          "from": {
+            "entity": "aliases",
+            "field": "id"
+          }
+        },
+        "nested": false
+      }
+    ],
+    "order_direction": "asc",
+    "order_by": "name",
+    "is_case_sensitive_sorting": false,
+    "multiple_sort": [],
+    "date_format": "mm/dd/YYYY",
+    "concatenate_fields": [],
+    "group_advance_filters": [],
+    "distinct_by": "",
+    "time_format": "HH24:MI"
+  }
+}
+
+vars:pre-request {
+  baseUrl: https://store.appguard.ai
+  defaultEntity: versions
+}
+
+settings {
+  encodeUrl: true
+  timeout: 0
+}

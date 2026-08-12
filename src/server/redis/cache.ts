@@ -30,12 +30,17 @@ const cacheData = async (key: string, data: any, ttl = 900000) => {
 const getCachedData = async (key: string) => {
   if (redisClient) {
     const res = await redisClient.get(key);
-    return JSON.parse(res || "0");
+    if (!res) return null;
+    try {
+      return JSON.parse(res);
+    } catch {
+      return null;
+    }
   } else {
     // Retrieve from memory if Redis is not connected
     const cacheEntry = inMemoryCache[key];
     if (cacheEntry && cacheEntry.expiry > Date.now()) {
-      return JSON.stringify(cacheEntry.data); // Return cached data
+      return cacheEntry.data;
     }
     return null; // Cache miss
   }
@@ -52,12 +57,17 @@ const deleteCachedData = async (key: string) => {
 const  getHashValue = async (hash_key: string, field: string): Promise<string | null> => {
   if (redisClient) {
     const res = await redisClient.hget(hash_key, field);
-    return JSON.parse(res || "0");
+    if (!res) return null;
+    try {
+      return JSON.parse(res);
+    } catch {
+      return null;
+    }
   } else {
     // Retrieve from memory if Redis is not connected
     const cacheEntry = inMemoryCache[hash_key];
     if (cacheEntry && cacheEntry.expiry > Date.now()) {
-      return JSON.stringify(cacheEntry.data); // Return cached data
+      return cacheEntry.data;
     }
     return null; // Cache miss
   }

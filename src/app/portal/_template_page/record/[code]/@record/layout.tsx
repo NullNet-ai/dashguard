@@ -1,10 +1,14 @@
 "use client";
 import React from "react";
 import { useSearchParams } from "next/navigation";
-import type { ILayoutProps } from "./types";
+// import type { ILayoutProps } from "./types";
 import ComingSoon from "../../_components/coming_soon";
 import RecordImplementationGuide from "../../../_components/record_guideline";
-const Layout = (props: ILayoutProps) => {
+const Layout = (
+  // props: ILayoutProps
+  // @ts-ignore
+  props
+) => {
   const searchParams = useSearchParams();
   const slot = searchParams.get("current_tab") ?? "dashboard";
   if (!slot)

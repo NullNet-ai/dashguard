@@ -42,5 +42,4 @@ export const organizationAccountsRouter = createTRPCRouter({
     const {organization_id} = ctx.session.account || {}
     return { account_id: '', organization_id , token: ctx.token.value };
   })
-
 })

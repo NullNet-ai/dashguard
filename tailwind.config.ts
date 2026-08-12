@@ -54,6 +54,7 @@ export default {
   			},
   			primary: {
   				DEFAULT: 'hsl(var(--primary))',
+  				highlight: 'hsl(var(--primary-highlight))',
   				foreground: 'hsl(var(--primary-foreground))'
   			},
   			danger: {
@@ -110,7 +111,8 @@ export default {
   				accent: 'hsl(var(--sidebar-accent))',
   				'accent-foreground': 'hsl(var(--sidebar-accent-foreground))',
   				border: 'hsl(var(--sidebar-border))',
-  				ring: 'hsl(var(--sidebar-ring))'
+  				ring: 'hsl(var(--sidebar-ring))',
+					white: 'hsl(var(--sidebar-white))',
   			}
   		},
   		keyframes: {

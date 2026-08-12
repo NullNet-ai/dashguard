@@ -7,8 +7,11 @@ import { cn } from "~/lib/utils";
 import { remToPx } from "~/utils/fetcher";
 import { PINNED_STATE_KEY as sideDrawerIsPinned, useSideDrawer } from '~/components/platform/SideDrawer/SideDrawerProvider'; 
 import { GridContext } from '../Provider';
+import { usePathname } from 'next/navigation';
 
-export const GridScrollView = ({ children, className, parentType }: any) => {
+export const GridScrollView = ({ children, className, parentType, sidebarTab }: any) => {
+  const path =  usePathname()
+  const [, , , path2] = path.split('/')
   const { open } = useSidebar();
   const { width } = useWindowSize();
   const newWidth = width <= 0 ? 1920 : width;
@@ -19,10 +22,11 @@ export const GridScrollView = ({ children, className, parentType }: any) => {
   const { dimentionOptions } = gridState?.config || {};
 
   const finalwidth = parentType === 'record' ? _width - (dimentionOptions?.summaryWidth || 350) : _width
+  const sidebarTransition = path2 !== 'grid' ? sidebarTab.useSidebar ? `transition-[max-width] duration-200 ease-in-out ${sidebarTab.closed ? 'max-w-[calc(100vw-41em)]' : 'max-w-[calc(100vw-49em)]'}` : 'w-[calc(100vw-36.5em)]' : '';
 
   return (
     <div
-      className={cn("grid-scroll-view", className, `${sideDrawerIsPinned ? 'flex-1' : ''} `)}
+      className={cn("grid-scroll-view", className, sidebarTransition, `${sideDrawerIsPinned ? 'flex-1' : ''} `)}
       style={{ width: sideDrawerIsPinned && (drawerState?.isOpen) ? '100%' : finalwidth + 15 }}
     >
       {children}

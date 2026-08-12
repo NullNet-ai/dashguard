@@ -1,25 +1,27 @@
-"use server";
-import { headers } from "next/headers";
-import { redirect } from "next/navigation";
-import { api } from "~/trpc/server";
+'use server';
+import { headers } from 'next/headers';
+import { redirect } from 'next/navigation';
+import { api } from '~/trpc/server';
 
 export async function SaveAndNew({
   entity,
   identifier,
   currentContext,
+  ormEntity,
 }: {
   entity: string;
   identifier: string;
   currentContext: string;
+  ormEntity?: string;
 }) {
   const headerList = await headers();
-  const pathname = headerList.get("x-pathname") || "";
+  const pathname = headerList.get('x-pathname') || '';
 
   await api.wizard.activator({
-    entity,
+    entity: ormEntity || entity,
     identifier,
   });
-  const updated_path = pathname.replace(/\/\d+$/, "/1");
+  const updated_path = pathname.replace(/\/\d+$/, '/1');
 
   await api.tab.closeCurrentInnerClassTab({
     href: updated_path,
@@ -27,7 +29,7 @@ export async function SaveAndNew({
   });
 
   const response = await api.wizard.createEntity({
-    entity,
+    entity: ormEntity || entity,
   });
   // redirect(`/portal/${entity}/wizard/${response?.data?.[0]?.id}`);
   redirect(`/portal/${entity}/wizard/${response?.data?.[0]?.code}`);

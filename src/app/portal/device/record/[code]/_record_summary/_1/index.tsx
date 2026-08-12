@@ -1,24 +1,12 @@
 'use client'
 
-import { Separator } from '~/components/ui/separator'
-import StatusCell from '~/components/ui/status-cell'
 import { api } from '~/trpc/react'
+import { useMemo } from 'react'
 
 import useRefetchRecord from '../hooks/useFetchMainRecord'
 import RecordDeviceLastHeartbeat from '../record_custom_query/RecordDeviceLastHeartbeat'
 import RecordDeviceStatus from '../record_custom_query/RecordDeviceStatus'
-
-const fields = {
-  'Type': 'type',
-  'Status': 'status',
-  'Last Heartbeat': 'last_heartbeat',
-  'Instance': 'instance_name',
-  'Host Name': 'hostname',
-  'Version': 'version',
-  'Grouping': 'grouping',
-  'Interfaces': 'interfaces',
-  'Category': 'categories',
-}
+import SummaryDetails from '~/components/platform/Record/Summary/SummaryDetails'
 
 const RecordShellSummary = ({
   form_key,
@@ -37,105 +25,136 @@ const RecordShellSummary = ({
   })
 
   const { data } = record ?? {}
+  const {
+    data: heartbeatRecord = { data: [{ bucket: '', count: 0 }] },
+  } = api.deviceHeartbeat.getLastHeartbeat.useQuery(
+    {
+      device_id: data?.id ?? '',
+      timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
+    },
+    {
+      enabled: Boolean(data?.id),
+      refetchInterval: 1000,
+      staleTime: 0,
+      structuralSharing: false,
+    },
+  )
 
   useRefetchRecord({
     refetch,
     form_key,
   })
-  const _data = {
-    ...data,
-    type: data?.model,
-    grouping: data?.grouping_name,
-    version: data?.device_version,
-  }
+
+  const deviceData = useMemo(() => {
+    if (!data) return {}
+    
+    const interfacesArr = Array.isArray(data?.interfaces) ? data.interfaces : []
+    const lastHeartbeatBucket = heartbeatRecord?.data?.[0]?.bucket || ''
+    const namedInterfaces = interfacesArr.reduce((acc: Record<string, string>, curr: any) => {
+      const name = typeof curr?.name === 'string' ? curr.name.toLowerCase() : ''
+      if (name) acc[name] = curr?.address ?? 'None'
+      return acc
+    }, {})
+
+    return {
+      ...data,
+      type: data?.model,
+      grouping: data?.grouping_name,
+      version: data?.device_version,
+      interfaces: interfacesArr,
+      device_category: data?.device_category || 'None',
+      last_heartbeat_bucket: lastHeartbeatBucket,
+      ...namedInterfaces,
+    }
+  }, [data, heartbeatRecord])
+
+  const isAppguardClient = data?.device_category === 'Appguard Client';
 
   if (error) {
     console.error("Error fetching record summary", error)
   }
 
   return (
-    <div>
-      <div>
-        {Object.entries(fields).map(([key, value], index) => {
-          if (key !== 'Category') return null // Only process the 'Category' field
-
-          const dataValue = (data as { [key: string]: any })?.[value as string]
-          return (
-            <div className='pt-2' key={index}>
-              <div className='px-5'>
-                <div className='p-1 text-sm'>
-                  <div>
-                    <span className='text-slate-400'>
-                      {key}
-                      {":"}
-                      {' '}
-                    </span>
-                    {' '}
-                    {/* Display the key 'Category' */}
-                    {dataValue?.length
-                      ? dataValue.map((item: string) => {
-                          return <StatusCell key={item} value={item} />
-                        })
-                      : 'None'}
-                  </div>
-                </div>
-              </div>
-            </div>
-          )
-        })}
-      </div>
-      <Separator />
-      <div>
-        {Object.entries(fields).map(([key, value], index) => {
-          if (key === 'Category') return null // Skip the 'Category' field as it is already processed
-
-          return (
-            <div className="pt-2" key={index}>
-              <div className="px-5">
-                <div className="p-1 text-sm">
-                  <div>
-                    <span className="text-slate-400">
-                      {key}
-                      {":"}
-                      {' '}
-                    </span>
-                    <span>
-                      {key === 'Status'
-                        ? (<RecordDeviceStatus device_id={ data?.id } />
-                          )
-                        : key === 'Last Heartbeat'
-                          ? (<RecordDeviceLastHeartbeat device_id={data?.id} />)
-                          : key === 'Interfaces' ? (
-                            <div className="pl-4" key={key}>
-                              {Array.isArray(_data[value]) && _data[value].length > 0 ? (
-                                _data[value].map((interfaceObj: { name: string; address: string }, index: number) => (
-                                  <div key={index}>
-                                    <span className="text-slate-400">
-                                      {interfaceObj.name.toUpperCase()}
-                                      {':'}
-                                      {' '}
-                                    </span>
-                                    <span>
-                                      {interfaceObj.address || 'None'}
-                                    </span>
-                                  </div>
-                                ))
-                              ) : 'None'}
-                            </div>
-                          ) 
-                            : (
-                                (_data as { [key: string]: any })?.[value as string]
-                                || 'None'
-                              )}
-                    </span>
-                  </div>
-                </div>
-              </div>
-            </div>
-          )
-        })}
-      </div>
-    </div>
+    <SummaryDetails
+      data={deviceData}
+      config={[
+        {
+          header_title: "Device Details",
+          items: [
+            {
+              key: "Name",
+              value: "device_name",
+              truncated: () => ({ string_limit: 35, path: ['value'] })
+            },
+            {
+              key: "Type",
+              value: "device_type",
+              truncated: () => ({ string_limit: 35, path: ['value'] })
+            },
+            {
+              key: "Status",
+              value: "status",
+              customValue: (data: any) => (
+                <RecordDeviceStatus
+                  lastHeartbeatBucket={data?.last_heartbeat_bucket}
+                />
+              )
+            },
+            {
+              key: "Last Heartbeat",
+              value: "last_heartbeat",
+              customValue: (data: any) => (
+                <RecordDeviceLastHeartbeat
+                  lastHeartbeatBucket={data?.last_heartbeat_bucket}
+                />
+              ),
+            },
+            ...(!isAppguardClient
+              ? [
+                  {
+                    key: "Host Name",
+                    value: "hostname",
+                    truncated: () => ({ string_limit: 35, path: ['value'] })
+                  },
+                ]
+              : []),
+            {
+              key: "Wallguard Version",
+              value: "version",
+              truncated: () => ({ string_limit: 35, path: ['value'] })
+            },
+          ]
+        },
+        ...(!isAppguardClient
+          ? [
+              {
+                header_title: 'Interfaces',
+                scrollable: true,
+                defaultVisibleCount: 3,
+                items: [...deviceData.interfaces]
+                  .sort((a: any, b: any) => {
+                    const order = ['wan', 'lan'];
+                    const ai = order.indexOf(a?.name?.toLowerCase());
+                    const bi = order.indexOf(b?.name?.toLowerCase());
+                    if (ai !== -1 && bi !== -1) return ai - bi;
+                    if (ai !== -1) return -1;
+                    if (bi !== -1) return 1;
+                    return (a?.name ?? '').localeCompare(
+                      b?.name ?? '',
+                      undefined,
+                      { numeric: true },
+                    );
+                  })
+                  .map((e) => ({
+                    key: e?.name?.toUpperCase(),
+                    value: e?.address,
+                    truncated: () => ({ string_limit: 35, path: ['value'] }),
+                  }))
+              },
+            ]
+          : [])
+      ]}
+    />
   )
 }
 

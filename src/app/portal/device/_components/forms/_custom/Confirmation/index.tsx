@@ -26,34 +26,27 @@ export default function CustomConfirmationDetails() {
   ];
 
   return (
-    <div className="flex min-h-[calc(100vh-400px)] flex-col">
-      <div className="w-full text-md lg:max-w-[80%]">
-        <p>Wait for your device to connect.</p>
-
-        <div className="flex flex-col gap-y-2 p-4">
-          {instructions.map((instruction, index) => (
-            <>
-              <p key={index} className="flex gap-x-2">
-                <instruction.icon className="size-5 text-success" />
-
-                <span style={{ backgroundColor: 'transparent' }}>
-                  {instruction.message}
-                </span>
-              </p>
-            </>
-          ))}
+     <div className="flex min-h-[calc(100vh-400px)] flex-col">
+        <div className='flex-1 h-full items-center justify-center flex flex-col '>
+          <div className="flex flex-col items-center gap-4 ">
+          {/* Spinner */}
+          <div className="relative w-16 h-16">
+            <div className="absolute inset-0 border-4 border-gray-200 rounded-full"></div>
+            <div className="absolute inset-0 border-4 border-transparent border-t-primary rounded-full animate-spin"></div>
+          </div>
+          
+          {/* Connecting text with animated dots */}
+          <div className="flex flex-col items-center gap-2 max-w-[470px] text-center">
+            <span className='text-slate-700 text-2xl font-medium'>Waiting for WallGuard Agent Connection</span>
+            <span className='text-slate-700 text-xl'>The portal is waiting for the WallGuard agent to establish a secure connection.</span>
+            {/* <span className="flex gap-1">
+              <span className="animate-bounce" style={{ animationDelay: '0ms' }}>.</span>
+              <span className="animate-bounce" style={{ animationDelay: '150ms' }}>.</span>
+              <span className="animate-bounce" style={{ animationDelay: '300ms' }}>.</span>
+            </span> */}
+          </div>
+        </div>
         </div>
       </div>
-
-      <div className="flex flex-1 flex-col items-center justify-center">
-        <Loader
-          size={'md'}
-          variant={'circularShadow'}
-          className="border-t-primary"
-          label=""
-        />
-        <p className="mt-2">Waiting for connection ...</p>
-      </div>
-    </div>
   );
 }

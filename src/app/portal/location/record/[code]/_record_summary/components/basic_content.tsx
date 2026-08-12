@@ -1,8 +1,10 @@
 'use client';
 import { api } from '~/trpc/react';
+import { Separator } from '~/components/ui/separator';
 import ContentLoading from './loader';
 import { Alert, AlertContent, AlertTitle } from '~/components/ui/alert';
 import useRefetchRecord from '../hooks/useFetchMainRecord';
+import { CardComponent as Card } from '~/components/ui/card/index';
 
 const fields = {
   ID: 'code',
@@ -48,21 +50,25 @@ export default function BasicRecordContent({
   }
 
   return (
-    <div>
-      {Object.entries(fields).map(([key, value], index) => (
-        <div className="pt-2" key={index}>
-          <div className="px-5">
-            <div className="p-1 text-sm">
-              <div>
-                <span className="text-slate-400">{key}: </span>
-                <span>
-                  {(record?.data as { [key: string]: any })?.[value] || 'None'}
-                </span>
-              </div>
-            </div>
-          </div>
+    <Card className="p-3">
+      <div className="flex flex-col gap-y-2">
+        <div>
+          <span className="text-md font-medium text-foreground">
+            Location Details
+          </span>
         </div>
-      ))}
-    </div>
+        <Separator />
+        <div className="flex flex-col gap-1">
+          {Object.entries(fields).map(([key, value], index) => (
+            <div className="flex justify-between gap-2 text-sm" key={index}>
+              <span className="text-slate-400 whitespace-nowrap">{key} </span>
+              <span className='break-all text-slate-700'>
+                {(record?.data as { [key: string]: any })?.[value] || 'None'}
+              </span>
+            </div>
+          ))}
+        </div>
+      </div>
+    </Card>
   );
 }

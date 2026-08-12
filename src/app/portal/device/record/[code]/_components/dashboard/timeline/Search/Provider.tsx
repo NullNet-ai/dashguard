@@ -1,16 +1,16 @@
-'use client'
+'use client';
 import React, {
   type PropsWithChildren,
   useEffect,
   useMemo,
   useState,
-} from 'react'
-import { ulid } from 'ulid'
+} from 'react';
+import { ulid } from 'ulid';
 
-import { getLastTimeStamp } from '~/app/portal/device/utils/timeRange'
-import { api } from '~/trpc/react'
-import { UpdateSearchFilter } from './Actions/UpdateSearchFilter'
-import { searchableFields, searchConfig, timeDuration } from './configs'
+import { getLastTimeStamp } from '~/app/portal/device/utils/timeRange';
+import { api } from '~/trpc/react';
+import { UpdateSearchFilter } from './Actions/UpdateSearchFilter';
+import { searchableFields, searchConfig, timeDuration } from './configs';
 import {
   type IAction,
   type ICreateContext,
@@ -18,53 +18,59 @@ import {
   type ISearchItemResult,
   type ISearchParams,
   type IState,
-} from './types'
-import { removeSearchItems } from './utils/removeSearchItems'
+} from './types';
+import { removeSearchItems } from './utils/removeSearchItems';
 import { useEventEmitter } from '~/context/EventEmitterProvider';
 
-export const SearchGraphContext = React.createContext<ICreateContext>({
-})
+export const SearchGraphContext = React.createContext<ICreateContext>({});
 
 interface IParams {
-  id: string
-  router: string
-  resolver: string
+  id: string;
+  router: string;
+  resolver: string;
 }
 
 interface IProps extends PropsWithChildren {
-  test?: any,
-  params: IParams,
-  filter_type: string
+  test?: any;
+  params: IParams;
+  filter_type: string;
 }
 
-export default function GraphSearchProvider({ children, params, filter_type }: IProps) {
-  const {id: device_id, router = 'packet', resolver = 'filterConnections'} = params || {}
-  
-  const { defaultEntity } = searchConfig ?? {}
+export default function GraphSearchProvider({
+  children,
+  params,
+  filter_type,
+}: IProps) {
+  const {
+    id: device_id,
+    router = 'packet',
+    resolver = 'filterConnections',
+  } = params || {};
 
-  const [_query, setQuery] = useState<string>('')
-  
-  const [searchItems, setSearchItems] = useState<ISearchItem[]>(
-    [],
-  )
-  const [rawItems, setRawItems] = useState<ISearchItem[]>( )
-  const [open, setOpen] = useState(false)
-  const [search_params, setSearchParams] = useState({})
-  const [filterId, setFilterID] = useState('01JNQ9WPA2JWNTC27YCTCYC1FE')
-  const [time, setTime] = useState<Record<string, any> | null>(null)
+  const { defaultEntity } = searchConfig ?? {};
 
+  const [_query, setQuery] = useState<string>('');
+
+  const [searchItems, setSearchItems] = useState<ISearchItem[]>([]);
+  const [rawItems, setRawItems] = useState<ISearchItem[]>();
+  const [isLoading, setIsLoading] = useState(false);
+  const [open, setOpen] = useState(false);
+  const [search_params, setSearchParams] = useState({});
+  const [filterId, setFilterID] = useState('01JNQ9WPA2JWNTC27YCTCYC1FE');
+  const [time, setTime] = useState<Record<string, any> | null>(null);
 
   // const [searchItems, setItems] = useState()
 
-  
-  const { refetch: refetchTimeUnitandResolution } = api.cachedFilter.fetchCachedFilterTimeUnitandResolution.useQuery(
-    {
-      type: filter_type,
-      filter_id: filterId,
-    }, {
-      enabled: false,
-    }
-  )
+  const { refetch: refetchTimeUnitandResolution } =
+    api.cachedFilter.fetchCachedFilterTimeUnitandResolution.useQuery(
+      {
+        type: filter_type,
+        filter_id: filterId,
+      },
+      {
+        enabled: false,
+      },
+    );
 
   const advanceFilterItems = useMemo(() => {
     const advanceFilter = searchItems.map(
@@ -75,7 +81,7 @@ export default function GraphSearchProvider({ children, params, filter_type }: I
         field,
         values,
       }),
-    ) as ISearchItem[]
+    ) as ISearchItem[];
 
     return searchableFields.reduce(
       (acc: any, { accessorKey: _, ...item }: any, index: any) => {
@@ -87,94 +93,103 @@ export default function GraphSearchProvider({ children, params, filter_type }: I
             entity: defaultEntity,
             ...item,
           },
-          ...(index !== 0
-            ? [{ type: 'operator', operator: 'or' }]
-            : []),
+          ...(index !== 0 ? [{ type: 'operator', operator: 'or' }] : []),
           ...acc,
-        ]
-      }, [
+        ];
+      },
+      [
         ...(advanceFilter?.length
           ? [{ type: 'operator', operator: 'and' }]
           : []),
         ...advanceFilter,
       ],
-    )
-  }, [_query])
+    );
+  }, [_query]);
 
   const handleQuery = (data: React.SetStateAction<string>) => {
-    setQuery(data)
-  }
+    setQuery(data);
+  };
 
   const handleOpen = (open: boolean) => {
-    setOpen(open)
-  }
+    setOpen(open);
+  };
 
   // const {time_count,time_unit = 'minute' } = timeDuration
 
-  const {
-    time_count = null,
-    time_unit = null,
-  } = time || {}
-  
+  const { time_count = null, time_unit = null } = time || {};
 
-  // @ts-expect-error - Types error
-  const { data, refetch } = api?.[router as 'packet']?.[resolver as 'filterConnections'].useQuery({ ...search_params, time_range:  getLastTimeStamp({count: time_count, unit: time_unit as 'minute',_now: new Date()}), device_id, _query }, {
-    refetchOnWindowFocus: false,
-    gcTime: 0,
-    enabled: false,
-  });
+  const { data, refetch } = api?.[router as 'packet']?.[
+    resolver as 'filterPackets'
+  ].useQuery(
+    {
+      ...search_params,
+      // @ts-ignorepect-error - time_range is not defined in the type
+      time_range: getLastTimeStamp({
+        count: time_count,
+        unit: time_unit as 'minute',
+        _now: new Date(),
+      }),
+      device_id,
+      _query,
+    },
+    {
+      refetchOnWindowFocus: false,
+      gcTime: 0,
+      enabled: false,
+    },
+  );
 
-  const handleSearchQuery = async(
-    search_params: ISearchParams,
-  ) => {
-    setSearchParams(
-      search_params
-    )
-   
-    return data
+  const handleSearchQuery = async (search_params: ISearchParams) => {
+    setSearchParams(search_params);
   };
 
-
   useEffect(() => {
-    if (!filterId) return
+    if (!filterId) return;
 
     const fetchTimeUnitandResolution = async () => {
-      const {
-        data: time_unit_resolution,
-      } = await refetchTimeUnitandResolution()
+      // const {
+      //   data: time_unit_resolution,
+      // } = await refetchTimeUnitandResolution()
 
-      const { time, resolution = '1h' } = time_unit_resolution || {}
-      const { time_count = 12, time_unit = 'hour' } = time || {}
-      
+      // const { time, resolution = '1h' } = time_unit_resolution || {}
+      // const { time_count = 12, time_unit = 'hour' } = time || {}
+
       setTime({
-        time_count,
-        time_unit: time_unit as 'hour',
-        resolution: resolution as '1h',
-      })
-    }
-    fetchTimeUnitandResolution()
-  }, [filterId])
-
+        time_count: 12, // time_count,
+        time_unit: 'hour', // time_unit as 'hour',
+        resolution: '1h', // resolution as '1h',
+      });
+    };
+    fetchTimeUnitandResolution();
+  }, [filterId]);
 
   useEffect(() => {
-    const refetchSearchOption =async () => {
-      const {data}: any = await refetch()
-      if(data?._query == _query){
-        setRawItems(data?.items)
+    const refetchSearchOption = async () => {
+      setRawItems([]);
+
+      if (!_query) return;
+
+      setIsLoading(true);
+      try {
+        const { data }: any = await refetch();
+        if (data?._query == _query) {
+          setRawItems(data?.items);
+        }
+      } finally {
+        setIsLoading(false);
       }
-    }
-    refetchSearchOption()
-  },[search_params])
-  
+    };
+    refetchSearchOption();
+  }, [search_params]);
 
   const handleAddSearchItem = async (filterItem: ISearchItemResult) => {
     // eslint-disable-next-line no-unused-vars
-    const { count: _, ...rest } = filterItem ?? {}
+    const { count: _, ...rest } = filterItem ?? {};
     const advanceFilter = searchItems.map(({ entity, ...rest }) => ({
       entity: entity || defaultEntity,
       ...rest,
-    })) as ISearchItem[]
-    setQuery('')
+    })) as ISearchItem[];
+    setQuery('');
     const updateSearchItems = [
       ...advanceFilter,
       ...(advanceFilter.length
@@ -183,66 +198,74 @@ export default function GraphSearchProvider({ children, params, filter_type }: I
       {
         ...rest,
         id: ulid(),
-        values:
-          [rest?.values?.[0]],
+        values: [rest?.values?.[0]],
         display_value: rest?.values?.[0],
         operator: rest?.operator === 'like' ? 'equal' : rest?.operator,
       },
-    ] as ISearchItem[]
-    setSearchItems(updateSearchItems)
+    ] as ISearchItem[];
+    setSearchItems(updateSearchItems);
+    eventEmitter.emit('timeline_search_loading', true);
 
-    
     await UpdateSearchFilter({
       filters: updateSearchItems,
       filterItemId: filterItem.id,
       filter_type,
-    })
-  }
+    });
+
+    eventEmitter.emit('timeline_search_committed', updateSearchItems);
+  };
 
   const handleRemoveSearchItem = async (filterItem: ISearchItem) => {
-    setQuery('')
-    const updatedSearchItems = removeSearchItems(searchItems, filterItem)
-    setSearchItems(updatedSearchItems)
+    setQuery('');
+    const updatedSearchItems = removeSearchItems(searchItems, filterItem);
+    setSearchItems(updatedSearchItems);
+    eventEmitter.emit('timeline_search_loading', true);
 
     await UpdateSearchFilter({
       filters: updatedSearchItems,
       filterItemId: filterItem.id,
       filter_type,
-    })
-  }
+    });
+
+    eventEmitter.emit('timeline_search_committed', updatedSearchItems);
+  };
 
   const handleClearSearchItems = async () => {
-    setQuery('')
-  }
+    setQuery('');
+    setSearchItems([]);
+    eventEmitter.emit('timeline_search_loading', true);
 
-  const {
-    data: cached_search_items = [],
-  } = api.cachedFilter.fetchCachedFilter.useQuery({
-    type: filter_type,
-  })
+    await UpdateSearchFilter({
+      filters: [],
+      filter_type,
+    });
 
-  
+    eventEmitter.emit('timeline_search_committed', [])
+  };
+
+  const { data: cached_search_items = [] } =
+    api.cachedFilter.fetchCachedFilter.useQuery({
+      type: filter_type,
+    });
+
   useEffect(() => {
-    setSearchItems(cached_search_items || [])
-  }, [cached_search_items?.length])
+    setSearchItems(cached_search_items || []);
+  }, [cached_search_items?.length]);
 
-
-  const eventEmitter = useEventEmitter()
+  const eventEmitter = useEventEmitter();
 
   useEffect(() => {
     const setFID = (data: any) => {
-      if (typeof data !== 'string') return
-      setFilterID(data)
-    }
-
+      if (typeof data !== 'string') return;
+      setFilterID(data);
+    };
     // eventEmitter.on(`${filter_type}_id`, setFID)
-    eventEmitter.on(`timeline_filter_id`, setFID)
+    eventEmitter.on(`timeline_filter_id`, setFID);
 
     return () => {
-      eventEmitter.off(`timeline_filter_id`, setFID)
-    }
-
-  }, [eventEmitter])
+      eventEmitter.off(`timeline_filter_id`, setFID);
+    };
+  }, [eventEmitter]);
 
   const state_context = {
     open,
@@ -253,7 +276,8 @@ export default function GraphSearchProvider({ children, params, filter_type }: I
       searchableFields,
     },
     rawItems,
-  } as IState
+    isLoading,
+  } as IState;
   const actions = {
     handleQuery,
     handleOpen,
@@ -261,8 +285,8 @@ export default function GraphSearchProvider({ children, params, filter_type }: I
     handleAddSearchItem,
     handleRemoveSearchItem,
     handleClearSearchItems,
-    setSearchParams
-  } as unknown as IAction
+    setSearchParams,
+  } as unknown as IAction;
 
   return (
     <SearchGraphContext.Provider
@@ -273,5 +297,5 @@ export default function GraphSearchProvider({ children, params, filter_type }: I
     >
       {children}
     </SearchGraphContext.Provider>
-  )
+  );
 }

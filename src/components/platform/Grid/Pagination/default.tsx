@@ -27,16 +27,22 @@ import { testIDFormatter } from '~/utils/formatter';
 import { UpdateReportPagination } from '../Action/UpdateReportPagination';
 import { GridContext } from '../Provider';
 import { IPagination } from '../types';
+import { usePathname } from 'next/navigation';
 export default function PaginationDefault({
   width: customWidth,
+  isGroupType,
 }: {
   width?: string | number;
+  isGroupType?: boolean;
 }) {
   const { state } = useContext(GridContext);
+  const isGroup = isGroupType ?? false;
   const { open } = useSidebar();
   const [pagination, setPagination] = useState<IPagination | undefined>(
     state?.pagination,
   );
+  const path = usePathname();
+  const [, , entity] = path.split('/');
 
   const { currentPage, totalPages, rows, totalRows } = useMemo(() => {
     const { current_page = 1, limit_per_page = 100 } = pagination ?? {};
@@ -62,8 +68,8 @@ export default function PaginationDefault({
         current: 1,
         limit: Number(value),
       });
-      return;
     }
+    if (isGroupType) return;
     UpdateReportPagination({
       pagination: {
         current_page: 1,
@@ -83,8 +89,8 @@ export default function PaginationDefault({
         current: Number(page),
         limit: Number(rows),
       });
-      return;
     }
+    if (isGroupType) return;
     UpdateReportPagination({
       pagination: {
         current_page: Number(page),
@@ -95,9 +101,9 @@ export default function PaginationDefault({
   };
 
   useEffect(() => {
+    if (state?.config?.onFetchRecords) return;
     setPagination(state?.pagination);
   }, [state?.pagination]);
-
 
   const generatePaginationText = (
     limit: number,
@@ -116,8 +122,9 @@ export default function PaginationDefault({
   return (
     <div
       className={cn(
-        'border-grid-header bg-grid-footer fixed bottom-14 flex w-full items-center justify-between bg-background px-4 py-2 transition-all duration-300 ease-in-out sm:px-4 sm:py-0 lg:static lg:w-full',
+        'border-grid-header bg-grid-footer  bottom-14 flex w-full items-center justify-between bg-background px-4 py-2 transition-all duration-300 ease-in-out sm:px-4 sm:py-0 lg:static lg:w-full',
         width,
+        isGroup ? 'md:fixed' : 'fixed',
       )}
       style={{
         width: customWidth ? customWidth : undefined,
@@ -146,13 +153,15 @@ export default function PaginationDefault({
 
       <div className="hidden flex-col gap-x-2 sm:flex sm:flex-1 sm:items-center sm:justify-between lg:flex-row">
         <div className="flex w-full flex-1 items-center justify-between">
-          <p className="text-sm text-muted-foreground">
+          <p className="text-sm text-muted-foreground" data-test-id={`${entity}-grd-shwing-${currentPage}-to-${rows}-of-${totalRows}-rslts`}>
             <span className="font-medium">
               {generatePaginationText(rows, currentPage, totalRows)}
             </span>
           </p>
           <div className="flex items-center justify-center gap-4">
-            <Label className="whitespace-nowrap">Rows per page</Label>
+            <Label className="whitespace-nowrap" data-test-id={`${entity}-grd-pgntn-row-per-page-label`}>
+              Rows per page
+            </Label>
             <Select
               defaultValue={`${rows}` || '10'}
               onValueChange={handlePerPageValueChange}

@@ -1,5 +1,5 @@
 import { redirect } from "next/navigation";
 
 export default function Page() {
-  return redirect("/portal/dashboard");
+  return redirect("/portal/device/grid");
 }

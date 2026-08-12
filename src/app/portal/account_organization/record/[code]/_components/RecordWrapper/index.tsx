@@ -59,20 +59,20 @@ const Wrapper = async ({
           entityName: entity_name!,
         }}
       >
-        <section className='mt-[3rem] min-h-[calc(100vh-110px)] md:mt-[1rem] lg:mt-[0rem]'>
-          <ResizablePanelGroup className='flex' direction='horizontal'>
+        <section className='mt-0 h-[calc(100vh-85px)]'>
+          <ResizablePanelGroup direction="horizontal" className="flex gap-2 p-2">
            <RecordWrapperProvider>
                 <RecordContainer>
                   {record_summary}
                 </RecordContainer>
               </RecordWrapperProvider>
             <ResizablePanel
-              className='min-h-60 flex-grow-[6] bg-transparent'
+              className='flex flex-col gap-2 min-h-60 flex-grow-[6] bg-transparent'
               defaultSize={95}
               minSize={25}
             >
               <HeaderTabs tabs={tabs} />
-              <MainContent className='p-4'>{record}</MainContent>
+              <MainContent>{record}</MainContent>
             </ResizablePanel>
           </ResizablePanelGroup>
         </section>

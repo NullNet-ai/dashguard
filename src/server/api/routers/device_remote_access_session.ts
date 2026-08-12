@@ -1,15 +1,16 @@
-import { EDateFormats, EOrderDirection, type IAdvanceFilters } from '@dna-platform/common-orm'
+import { EDateFormats, EOperator, EOrderDirection, type IAdvanceFilters } from '@dna-platform/common-orm'
+import { uniqBy } from 'lodash'
 import { z } from 'zod'
 
-import { createRemoteAccess } from '~/app/api/device_remote_access_session/create_remote_access'
+import { createRemoteAccessSession, createRemoteAccessTunnel } from '~/app/api/device_remote_access_session/create_remote_access'
 import { disconnectRemoteAccess } from '~/app/api/device_remote_access_session/disconnect_remote_access'
 import { createTRPCRouter, privateProcedure } from '~/server/api/trpc'
 import { formatSorting } from '~/server/utils/formatSorting'
 import { formatString } from '~/server/utils/formatString'
-import { pluralize } from '~/server/utils/pluralize'
 import { addCommonGridJoins, addCommonGridPluckObject } from '~/server/utils/queryBuilder'
 import { createAdvancedFilter } from '~/server/utils/transformAdvanceFilter'
 import ZodItems from '~/server/zodSchema/grid/items'
+import { createRootOrm } from '~/server/lib/root-orm';
 
 const entity = 'device_remote_access_sessions'
 const remote_type = ['console', 'shell']
@@ -21,18 +22,19 @@ export const deviceRemoteAccessSessionRouter = createTRPCRouter({
         id: z.string().optional(),
         code: z.string().optional(),
         limit: z.number().optional(),
-        device_id: z.string().optional()
+        device_id: z.string().optional(),
+        device_code: z.string().optional()
       }),
     )
     .query(async ({ input, ctx }) => {
-      const { limit, device_id } = input
+      const { limit, device_id, device_code } = input
       const res = await ctx.dnaClient
         .findAll({
           entity: 'devices',
           token: ctx.token.value,
           query: {
-            pluck: ['id', 'instance_name', 'device_status'],
-            advance_filters: createAdvancedFilter( !!device_id ? { id: device_id } : { status: 'Active' , device_status: 'Online'}),
+            pluck: ['id', 'device_name', 'is_device_online'],
+            advance_filters: createAdvancedFilter( !!device_id ? { id: device_id } : !!device_code ? { code: device_code } : { status: 'Active' , is_device_online: true}),
             order: {
               limit: limit || 10,
               by_field: 'created_date',
@@ -44,37 +46,319 @@ export const deviceRemoteAccessSessionRouter = createTRPCRouter({
       
       const res_data = res?.data?.map((item: Record<string, any>) => {
         return {
-          label: item.instance_name,
+          label: item.device_name,
           value: item.id,
-          device_status: item.device_status
+          is_device_online: item.is_device_online
         }
       })
       
       return res_data
     }
     ),
+  fetchDeviceTunnels: privateProcedure
+    .input(
+      z.object({
+        device_id: z.string(),
+        device_code: z.string().optional(),
+        limit: z.number().optional(),
+        tunnel_types: z.array(z.string()).optional(),
+        status: z.string().optional(),
+      }),
+    )
+    .query(async ({ input, ctx }) => {
+      const { limit, device_id, device_code, tunnel_types, status = 'Active' } = input
+
+      let realDeviceId = device_id
+      if (device_code) {
+        const device = await ctx.dnaClient
+          .findAll({
+            entity: 'devices',
+            token: ctx.token.value,
+            query: {
+              pluck: ['id'],
+              advance_filters: createAdvancedFilter({ code: device_code }),
+            },
+          })
+          .execute()
+        realDeviceId = device?.data?.[0]?.id || ''
+      }
+
+      const rootOrm = await createRootOrm(ctx.dnaClient);
+      
+      const res = await rootOrm
+        .findAll({
+          entity: 'device_tunnels',
+          query: {
+            pluck: ['id', 'service_id', 'tunnel_type', 'status', 'device_id'],
+            advance_filters: createAdvancedFilter({
+              device_id: realDeviceId,
+              ...(status ? { status } : {}),
+            }),
+            order: {
+              limit: limit || 200,
+              by_field: 'created_date',
+              by_direction: EOrderDirection.DESC,
+            },
+          },
+        })
+        .execute()
+
+      const tunnels = Array.isArray(res?.data) ? res.data : []
+      if (!Array.isArray(tunnel_types) || tunnel_types.length === 0) return tunnels
+
+      return tunnels.filter((t: Record<string, any>) => tunnel_types.includes(t?.tunnel_type))
+    }),
+  fetchDeviceRemoteAccess: privateProcedure
+    .input(
+      z.object({
+        device_id: z.string(),
+        device_code: z.string().optional(),
+        limit: z.number().optional(),
+      }),
+    )
+    .query(async ({ input, ctx }) => {
+      const { limit, device_id, device_code } = input
+      let realDeviceId = device_id
+      if (device_code) {
+        const device = await ctx.dnaClient
+          .findAll({
+            entity: 'devices',
+            token: ctx.token.value,
+            query: {
+              pluck: ['id'],
+              advance_filters: createAdvancedFilter({ code: device_code }),
+            },
+          })
+          .execute()
+        realDeviceId = device?.data?.[0]?.id || ''
+      }
+
+      const rootOrm = await createRootOrm(ctx.dnaClient);
+
+      const res = await rootOrm
+        .findAll({
+          entity: 'device_remote_access_sessions',
+          query: {
+            pluck: ['id', 'code', 'remote_access_session', 'remote_access_type'],
+            advance_filters: createAdvancedFilter({ device_id: realDeviceId }),
+            order: {
+              limit: limit || 10,
+              by_field: 'created_date',
+              by_direction: EOrderDirection.DESC,
+            },
+          },
+        })
+        .execute()
+      
+      const res_data = res?.data?.map((item: Record<string, any>) => {
+        return {
+          label: `${item.code} - ${item.remote_access_type}`,
+          value: item.id,
+          device_id: realDeviceId,
+          remote_access_session: item.remote_access_session,
+          remote_access_type: item.remote_access_type
+        }
+      })
+      
+      return res_data
+    }
+    ),
+  fetchDeviceServices: privateProcedure
+    .input(
+      z.object({
+        device_id: z.string(),
+        device_code: z.string().optional(),
+        limit: z.number().optional(),
+      }),
+    )
+    .query(async ({ input, ctx }) => {
+      const { limit, device_id, device_code } = input
+      let realDeviceId = device_id
+      if (device_code) {
+        const device = await ctx.dnaClient
+          .findAll({
+            entity: 'devices',
+            no_caching: true,
+            token: ctx.token.value,
+            query: {
+              pluck: ['id'],
+              advance_filters: createAdvancedFilter({ code: device_code }),
+            },
+          })
+          .execute()
+        realDeviceId = device?.data?.[0]?.id || ''
+      }
+
+      const rootOrm = await createRootOrm(ctx.dnaClient);
+
+      const res = await rootOrm
+        .findAll({
+          entity: 'device_services',
+          query: {
+            pluck: ['id', 'address', 'port', 'protocol', 'program'],
+            advance_filters: createAdvancedFilter({ device_id: realDeviceId, status: 'Active' }),
+            order: {
+              limit: limit || 10,
+              by_field: 'created_date',
+              by_direction: EOrderDirection.DESC,
+            },
+          },
+        })
+        .execute()
+      
+      const res_data = res?.data?.map((item: Record<string, any>) => {
+        return {
+          label: `${item.protocol}://${item.address}:${item.port}`,
+          value: item.id,
+          item
+        }
+      })
+      
+      return uniqBy(res_data, 'label')
+    }
+    ),
+  getRemoteAccessSessionStatus: privateProcedure
+    .input(
+      z.object({
+        remote_access_type: z.enum(['ssh', 'tty']),
+        remote_access_session: z.string(),
+      }),
+    )
+    .query(async ({ input, ctx }) => {
+      const baseEntity =
+        input.remote_access_type === 'ssh'
+          ? 'device_ssh_sessions'
+          : 'device_tty_sessions'
+
+      const res = await ctx.dnaClient
+        .findAll({
+          entity: baseEntity,
+          token: ctx.token.value,
+          query: {
+            pluck: ['id', 'session_status'],
+            advance_filters: createAdvancedFilter({ id: input.remote_access_session }),
+            order: {
+              limit: 1,
+              by_field: 'created_date',
+              by_direction: EOrderDirection.DESC,
+            },
+          },
+        })
+        .execute()
+
+      return {
+        success: true,
+        session_status: res?.data?.[0]?.session_status ?? null,
+      }
+    }),
   mainGrid: privateProcedure
   // Define input using zod for validation
-    .input(ZodItems)
+    .input(ZodItems.merge(z.object({ device_code: z.string().optional() })))
     .query(async ({ input, ctx }) => {
       const {
         limit = 50,
         current = 1,
-        advance_filters: _advance_filters = [],
         pluck = [],
         sorting = [],
-        is_case_sensitive_sorting = 'false',
+        // @ts-expect-error - No type yet
+        is_case_sensitive_sorting = 'true',
+        device_code,
       } = input
+      const baseEntity = 'device_tunnels'
+      let { advance_filters: _advance_filters = [] } = input
 
-      const pluck_object = {
-        ...addCommonGridPluckObject(),
-        devices: ['instance_name', 'id'],
-        [pluralize(input?.entity)]: pluck,
+      console.log('$$$ [device_remote_access_session] - mainGrid - _advance_filters 1st', _advance_filters)
+      
+      if (device_code) {
+        const deviceRes = await ctx.dnaClient
+          .findAll({
+            entity: 'devices',
+            token: ctx.token.value,
+            query: {
+              pluck: ['id'],
+              advance_filters: createAdvancedFilter({ code: device_code }),
+              order: {
+                limit: 1,
+                by_field: 'created_date',
+                by_direction: EOrderDirection.DESC,
+              },
+            },
+          })
+          .execute()
+
+        const deviceId = deviceRes?.data?.[0]?.id as string | undefined
+        if (!deviceId) {
+          return {
+            totalCount: 0,
+            items: [],
+            currentPage: current,
+            totalPages: 1,
+          }
+        }
+
+        let replacedDeviceIdFilter = false
+        _advance_filters = (_advance_filters as IAdvanceFilters[]).map((filter) => {
+          if (filter?.type === 'criteria' && filter?.field === 'device_id') {
+            replacedDeviceIdFilter = true
+            return {
+              ...filter,
+              values: [deviceId],
+            }
+          }
+          return filter
+        })
+
+        if (!replacedDeviceIdFilter) {
+          const hasExistingFilters = (_advance_filters as IAdvanceFilters[]).length > 0
+          _advance_filters = [
+            ...(_advance_filters as IAdvanceFilters[]),
+            ...(hasExistingFilters
+              ? [{ type: 'operator', operator: EOperator.AND } as IAdvanceFilters]
+              : []),
+              {
+                type: 'criteria',
+                operator: 'equal',
+                field: 'device_id',
+                entity: baseEntity,
+                values: [deviceId],
+              }
+          ]
+        }
       }
 
-      const query = ctx.dnaClient.findAll({
-        entity: input?.entity,
-        token: ctx.token.value,
+      const pluck_object: Record<string, any> = {
+        ...addCommonGridPluckObject(),
+        devices: ['device_name', 'id'],
+        device_services: ['address', 'port'],
+        [baseEntity]: pluck,
+      }
+
+      console.log('$$$ [device_remote_access_session] - mainGrid - _advance_filters', _advance_filters)
+
+      const isCaseSensitiveSorting = is_case_sensitive_sorting === 'true'
+      const singleSort = sorting?.length === 1 ? sorting[0] : undefined
+      const singleSortKey = (singleSort as any)?.sort_key ?? (singleSort as any)?.id
+      const resolvedOrderByField =
+        sorting?.length === 1
+          ? singleSort?.type === 'boolean'
+            ? singleSortKey
+            : typeof singleSortKey === 'string' && singleSortKey.includes('.')
+              ? singleSortKey
+              : singleSortKey || 'code'
+          : 'code'
+
+      const resolvedOrderByDirection =
+        sorting?.length === 1
+          ? singleSort?.desc
+            ? EOrderDirection.DESC
+            : EOrderDirection.ASC
+          : EOrderDirection.DESC
+
+      const rootOrm = await createRootOrm(ctx.dnaClient);
+
+      const query = rootOrm.findAll({
+        entity: baseEntity,
+        no_caching: true,
         query: {
           track_total_records: true,
           pluck: input.pluck,
@@ -88,15 +372,18 @@ export const deviceRemoteAccessSessionRouter = createTRPCRouter({
                 : (input.current || 1) * (input.limit || 100)
                   - (input.limit || 100),
             limit: input.limit || 1,
-            by_field: 'code',
-            by_direction: EOrderDirection.DESC,
+            by_field: resolvedOrderByField,
+            by_direction: resolvedOrderByDirection,
+            is_case_sensitive_sorting: isCaseSensitiveSorting,
           },
-          //@ts-expect-error - multiple sort
-            multiple_sort:
-            sorting?.length
-              ? formatSorting(sorting, entity, is_case_sensitive_sorting)
+          multiple_sort:
+            sorting?.length && sorting?.length > 1
+              ? formatSorting(
+                  sorting as any,
+                  baseEntity,
+                  isCaseSensitiveSorting ? 'true' : '',
+                )
               : [],
-            date_format: 'YYYY/mm/dd' as EDateFormats,
             concatenate_fields: [
             {
               fields: ['first_name', 'last_name'],
@@ -111,6 +398,24 @@ export const deviceRemoteAccessSessionRouter = createTRPCRouter({
               separator: ' ',
               entity: 'contacts',
               aliased_entity: 'updated_by',
+            },
+            {
+              fields: ['created_date', 'created_time'],
+              field_name: 'created_date_time',
+              separator: ' ',
+              entity: baseEntity,
+            },
+            {
+              fields: ['updated_date', 'updated_time'],
+              field_name: 'updated_date_time',
+              separator: ' ',
+              entity: baseEntity,
+            },
+            {
+              fields: ['last_access_date', 'last_access_time'],
+              field_name: 'last_access_date_time',
+              separator: ' ',
+              entity: baseEntity,
             },
             ],
               
@@ -127,33 +432,87 @@ export const deviceRemoteAccessSessionRouter = createTRPCRouter({
                 field: 'id',
               },
               from: {
-                entity,
+                entity: baseEntity,
                 field: 'device_id',
               },
             },
           })
+          .join({
+            type: 'left',
+            field_relation: {
+              to: {
+                entity: 'device_services',
+                field: 'id',
+              },
+              from: {
+                entity: baseEntity,
+                field: 'service_id',
+              },
+            },
+          });
       }
 
-      addCommonGridJoins(query, 'device_remote_access_sessions')
-      const { total_count: totalCount = 1, data: items }
-      = await query.execute()
+      addCommonGridJoins(query, baseEntity);
+
+      if (input.grouping?.length) {
+        query.groupBy({
+          query: {
+            fields: input.grouping,
+            has_count: true,
+          },
+        });
+      }
+
+      const { total_count: totalCount = 1, data: items } =
+      await query.execute()
+      
+      // Calculate total number of pages
+      const totalPages = Math.ceil(totalCount / limit);
+
+      if (input.grouping?.length) {
+        return {
+          totalCount,
+          items: items,
+          currentPage: 0,
+          totalPages,
+        };
+      }
+
+      console.log('$ [deviceRemoteAccessSessionRouter] items', items);
 
       const formatted_items = items?.map((item: Record<string, any>) => {
-        const {
-          [pluralize(input?.entity)]: entity_data,
+        let {
+          [baseEntity]: entity_data,
           created_by,
           devices,
+          device_services,
           updated_by,
           ...rest
         } = item
 
+        if (!entity_data)
+          entity_data = rest
+
+        if (Array.isArray(device_services))
+          device_services = device_services[0]
+
+        if (Array.isArray(devices))
+          devices = devices[0]
+
+        const resolvedTunnelType = entity_data?.tunnel_type
+
         return {
           ...entity_data,
           ...rest,
-          device_remote_access_type: entity_data?.remote_access_type?.toLowerCase() === 'shell' ? 'Console' : 'Web Interface',
+          tunnel_type: `${resolvedTunnelType ?? entity_data?.tunnel_type}`,
+          remote_access_session: entity_data?.id,
+          device_remote_access_type: entity_data?.remote_access_type,
+          tunnel_status: entity_data?.tunnel_status,
           // remote_access_category: formatString(remote_access_type),
           // type: formatString(remote_access_type),
-          device_name: formatString(devices?.instance_name),
+          address: device_services?.address,
+          port: device_services?.port,
+          device_name: devices?.device_name,
           created_by: !!created_by?.first_name || !!created_by?.last_name
             ? `${created_by?.first_name} ${created_by?.last_name}`
             : null,
@@ -163,8 +522,6 @@ export const deviceRemoteAccessSessionRouter = createTRPCRouter({
         }
       })
 
-      // Calculate total number of pages
-      const totalPages = Math.ceil(totalCount / limit)
       return {
         totalCount,
         items: formatted_items,
@@ -174,59 +531,80 @@ export const deviceRemoteAccessSessionRouter = createTRPCRouter({
     }),
 
   createUpdateDeviceRemoteAccessSessions: privateProcedure
-    .input(z.object({ id: z.string().optional(), device_id: z.string(), remote_access_type: z.string(), category: z.string() }))
+    .input(z.object({ id: z.string().optional(), device_id: z.string(), remote_access_type: z.string(), category: z.string(), device_service_id: z.string().optional() }))
     .mutation(async ({ input, ctx }) => {
       const token = ctx.token.value
-      const { device_id, remote_access_type } = input
-      const ra_type = remote_type.includes(remote_access_type.toLowerCase()) ? 'Shell' : 'UI'
-        const res = await ctx.dnaClient.findAll({
-          entity,
-          token: ctx.token.value,
+      const { device_id, remote_access_type, device_service_id } = input
+
+      const rootOrm = await createRootOrm(ctx.dnaClient);
+      
+      const response = await rootOrm
+        .findAll({
+          entity: 'device_instances',
           query: {
-            pluck: ['id', 'status', 'remote_access_session'],
-            advance_filters: createAdvancedFilter({ device_id, remote_access_status: 'active', remote_access_type: ra_type }),
+            pluck: ['id'],
+            advance_filters: createAdvancedFilter({ device_id, status: 'Active' }),
             order: {
               limit: 1,
               by_field: 'created_date',
               by_direction: EOrderDirection.DESC,
             },
-          },
-        })
-        .execute()
-        
-        
-        
-        if (!res?.data?.length) {
-          await createRemoteAccess({ device_id, ra_type, token })
-          
-          return await ctx.dnaClient.findAll({
-            entity,
-            token: ctx.token.value,
-            query: {
-              pluck: ['id', 'status', 'remote_access_session'],
-              advance_filters: createAdvancedFilter({ device_id, remote_access_status: 'active' }),
-              order: {
-                limit: 1,
+            multiple_sort: [
+              {
                 by_field: 'created_date',
                 by_direction: EOrderDirection.DESC,
               },
-            },
-          })
-          .execute()
-        }
+              {
+                by_field: 'created_time',
+                by_direction: EOrderDirection.DESC,
+              },
+            ],
+          },
+        })
+        .execute();
 
-        return res
+      const instanceId = response?.data?.[0]?.id; 
+
+      const ra_type = remote_access_type
+        
+      let tunnel_id
+      let session_token
+
+      // @ts-expect-error - No type yet
+      const createRemoteAccessTunnelResponse = await createRemoteAccessTunnel({ device_id, ra_type, token, instanceId , device_service_id })
+      const {
+        data: {
+          tunnel_id: newTunnelId
+        }
+      } = createRemoteAccessTunnelResponse
+      tunnel_id = newTunnelId
+
+      session_token = tunnel_id
+
+      return {
+        success: true,
+        data: [
+          {
+            remote_access_session: session_token
+          }
+        ]
+      }
     }),
   disconnectDeviceRemoteAccess: privateProcedure
-    .input(z.object({ id: z.string(), device_id: z.string(), remote_access_type: z.string() }))
+    .input(z.object({ remote_access_session: z.string(), tunnel_type: z.string() }))
     .mutation(async ({ input, ctx }) => {
-      const {  device_id, remote_access_type } = input
-      
-      const ra_type = remote_type.includes(remote_access_type.toLowerCase()) ? 'Shell' : 'UI'
+      const { remote_access_session, tunnel_type } = input
+ 
+      const response = await disconnectRemoteAccess({
+        remote_access_session,
+        token: ctx.token.value,
+        tunnel_type,
+      })
 
-
-      await disconnectRemoteAccess({ device_id, ra_type, token: ctx.token.value })
-        
+      return {
+        success: true,
+        data: response ?? null,
+      }
     }
     ),
 

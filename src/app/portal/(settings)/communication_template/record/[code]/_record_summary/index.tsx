@@ -3,6 +3,7 @@ import RecordSummary from '~/components/platform/Record/Summary/RecordSummary';
 import BasicRecordContent from './components/basic_content';
 import { headers } from 'next/headers';
 import NotFound from '~/app/not-found';
+import RecordContactBadge from '../_components/RecordContactBadge';
 export default async function Page() {
   const headerList = await headers();
   const pathname = headerList.get('x-pathname') || '';
@@ -13,13 +14,19 @@ export default async function Page() {
   }
 
   return (
-    <Fragment>
-      <RecordSummary />
+    <div className='flex flex-col gap-2 md:pr-0'>
+    <RecordSummary>
+      <RecordContactBadge 
+        form_key={main_entity}
+        identifier={identifier}
+        main_entity={main_entity}
+       />
+    </RecordSummary>
       <BasicRecordContent
         form_key={main_entity}
         identifier={identifier}
         main_entity={main_entity}
       />
-    </Fragment>
+    </div>
   );
 }

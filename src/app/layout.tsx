@@ -17,7 +17,7 @@ import { Loader } from '~/components/ui/loader'
 import { SocketProvider } from '~/context/SocketProvider';
 
 export const metadata: Metadata = {
-  title: 'Platform',
+  title: 'Appguard.ai',
   description: 'All in one platform for recruitment',
 };
 

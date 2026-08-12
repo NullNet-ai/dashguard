@@ -1,6 +1,7 @@
 import { api } from "~/trpc/server";
 import { headers } from "next/headers";
 import RecordContactDetails from "./client";
+import { CardComponent as Card } from '~/components/ui/card/index';
 
 const FormServerFetch = async () => {
   const headerList = await headers();
@@ -51,7 +52,7 @@ const FormServerFetch = async () => {
 
   const default_values = response;
   return (
-    <div className="space-y-2">
+    <Card className="space-y-2 !rounded-t-[2px] !rounded-b-[8px] ![overflow:unset]">
       <RecordContactDetails
         defaultValues={{ ...default_values, details }}
         params={{
@@ -59,7 +60,7 @@ const FormServerFetch = async () => {
           shell_type: application! as "record" | "wizard",
         }}
       />
-    </div>
+   </Card>
   );
 };
 

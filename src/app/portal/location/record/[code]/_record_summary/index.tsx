@@ -13,13 +13,13 @@ export default async function Page() {
   }
 
   return (
-    <Fragment>
+    <div className='flex flex-col gap-2 md:pr-0'>
       <RecordSummary />
       <BasicRecordContent
         form_key={main_entity}
         identifier={identifier}
         main_entity={main_entity}
       />
-    </Fragment>
+    </div>
   );
 }

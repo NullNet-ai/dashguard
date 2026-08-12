@@ -86,7 +86,7 @@ export default function MyVerticalStepper() {
   const isSummOpen = state?.isSummaryOpen;
 
   return (
-    <div className="scrollbar-hide h-[calc(100vh-10rem)] overflow-y-auto">
+    <div className={cn("scrollbar-hide overflow-y-auto", { "h-[calc(100vh-147.8px)]": isSummOpen, "h-[calc(100vh-231px)]": !isSummOpen })}>
       <Accordion
         // onValueChange={(value) => {
         // }}
@@ -101,7 +101,7 @@ export default function MyVerticalStepper() {
           className={cn(
             "relative hidden after:bg-gray-200 after:hover:bg-gray-300 sm:block sm:p-[12px]",
             { "text-center sm:p-0": !isSummOpen },
-            `${isSummOpen ? "w-full" : "w-[30px]"}`,
+            `${isSummOpen ? "w-full" : "w-[25px]"}`,
           )}
         >
           <ol role="list" className="overflow-hidden">
@@ -236,7 +236,7 @@ export default function MyVerticalStepper() {
                                   className='p-0 gap-2'
                                   iconPosition='right'
                                 >
-                                  <span className="text-sm font-bold sm:block">
+                                  <span className="text-sm font-bold text-slate-800 sm:block">
                                     {label
                                       ? label
                                       : "Description of Step " + stepIndex}
@@ -247,7 +247,7 @@ export default function MyVerticalStepper() {
                                     data-test-id={testIDFormatter(
                                       `${entityName}-wzrdsum-stepper-accordion-itm-${stepIndex}-content-${label}`
                                     )}
-                                    className="text-sm font-medium sm:block mt-[8px]"
+                                    className="text-sm sm:block mt-[8px]"
                                   >
                                     {component}
                                   </div>
@@ -284,7 +284,7 @@ export default function MyVerticalStepper() {
                         </span>
                         <span className="ml-[10px] flex min-w-0 flex-col pt-2.5">
                           {/* This will be hidden on mobile screens */}
-                          <span className="text-sm text-gray-500 sm:block">
+                          <span className="text-sm text-slate-400 sm:block">
                             {summaryTitle
                               ? summaryTitle
                               : "Description of Step " + stepIndex}

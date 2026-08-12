@@ -34,7 +34,8 @@ export default function CategoryDetails({ params, defaultValues }: IFormProps) {
         categories: data.categories ?? "",
       });
       toast.success("Category Details submitted successfully.");
-    } catch (error) {
+    } catch (error: any) {
+      if (error.message === 'NEXT_REDIRECT') return
       toast.error("Failed to submit Category Details.");
     }
   };

@@ -19,6 +19,8 @@ const GridTabMenu = ({ filter_id, tab }: IProps) => {
   const [sortData, setSortData] = useState<any>(null)
   const pathname = usePathname()
   const main_entity = pathname.split('/')[2]
+  const [isMenuOpen, setIsMenuOpen] = useState(false)
+  const [loadedId, setLoadedId] = useState<string | null>(null)
 
   useEffect(() => {
     const fetchData = async () => {
@@ -40,15 +42,19 @@ const GridTabMenu = ({ filter_id, tab }: IProps) => {
       const sortsRes = await fetch(`/api/grid/sorts?filter_id=${filter_id}`)
       const sortsData = await sortsRes.json()
       setSortData(sortsData)
+
+      setLoadedId(filter_id)
     };
 
-    void fetchData()
-  }, [filter_id])
+    if (isMenuOpen && filter_id && loadedId !== filter_id) {
+      void fetchData()
+    }
+  }, [isMenuOpen, filter_id, loadedId])
 
   if (tab?.name === `All ${main_entity?.toLowerCase()}`) return null
 
   return (
-    <DropdownMenu>
+    <DropdownMenu onOpenChange={setIsMenuOpen}>
       <DropdownMenuTrigger asChild>
         <div className="flex items-center gap-2 px-1 py-1.5 text-left text-sm">
           <EllipsisVertical

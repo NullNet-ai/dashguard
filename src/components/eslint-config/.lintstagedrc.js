@@ -4,7 +4,7 @@
 import path from 'path';
 
 const buildEslintCommand = (filenames) =>
-  `npx next lint --config ./src/components/eslint-config/.eslintrc-normal.cjs --fix --file ${filenames
+  `npx next lint --config ./src/components/eslint-config/.eslintrc-normal.cjs --file ${filenames
     .map((f) => path.relative(process.cwd(), f))
     .join(' --file ')}`;
 

@@ -12,10 +12,14 @@ import { ZodError } from 'zod';
 import { dnaClient } from '../dnaOrm';
 import redisClient from '~/server/redis/cache';
 
-import { cookies } from 'next/headers';
-import { type TokenData } from './types';
+import { cookies, headers } from 'next/headers';
+import { TokenData } from './types';
 import { ulid } from 'ulid';
 import { colors } from '../utils/choychoy';
+import { setMetaHeader } from '~/utils/request-header';
+import moment from 'moment';
+
+const includedEntities = ['contact', 'organization']
 
 /**
  * 1. CONTEXT
@@ -135,27 +139,24 @@ const timingMiddleware = t.middleware(async ({ next, path }) => {
  */
 export const publicProcedure = t.procedure.use(timingMiddleware);
 
-// const enforceUserIsAuthed = t.middleware(async ({ ctx, next }) => {
-//   const cookiesStore = cookies();
-//   const token = cookiesStore.get('token');
+const enforceUserIsAuthed = t.middleware(async ({ ctx, next }) => {
+  const cookiesStore = await cookies();
+  const token = cookiesStore.get('token');
 
-//   if (!token) {
-//     throw new TRPCError({
-//       code: 'UNAUTHORIZED',
-//     });
-//   }
+  if (!token) {
+    throw new TRPCError({
+      code: 'UNAUTHORIZED',
+    });
+  }
 
-//   return next({
-//     ctx: {
-//       ...ctx,
-//       token,
-//     },
-//   });
-// });
+  return next({
+    ctx: {
+      ...ctx,
+      token,
+    },
+  });
+});
 const verificationMiddleware = t.middleware(async ({ ctx, next, path }) => {
-  // const token = {
-  //   value: ctx.token!,
-  // };
   const cookiesStore = await cookies();
   const token = cookiesStore.get('token');
 
@@ -189,6 +190,7 @@ const verificationMiddleware = t.middleware(async ({ ctx, next, path }) => {
       legend(timing),
       'path: ' + path,
     );
+
     return next({
       ctx: {
         ...ctx,
@@ -218,6 +220,7 @@ const verificationMiddleware = t.middleware(async ({ ctx, next, path }) => {
     });
   }
   cachedSessionClient.cacheData(token.value, session, 50000);
+
   return next({
     ctx: {
       ...ctx,
@@ -227,21 +230,23 @@ const verificationMiddleware = t.middleware(async ({ ctx, next, path }) => {
   });
 });
 
-// const tokenIdMiddleware = t.middleware(async ({ ctx, next }) => {
-//   const storeCookies = cookies();
-//   const username = storeCookies.get('username')?.value;
 
-//   const token = await ctx.redisClient.getCachedData(
-//     `account_token:${username}`,
-//   );
+const tokenIdMiddleware = t.middleware(async ({ ctx, next }) => {
+  const storeCookies = await cookies();
+  const username = storeCookies.get('username')?.value;
 
-//   return next({
-//     ctx: {
-//       ...ctx,
-//       token,
-//     },
-//   });
-// });
+  const token = await ctx.redisClient.getCachedData(
+    `account_token:${username}`,
+  );
+
+  return next({
+    ctx: {
+      ...ctx,
+      token,
+    },
+  });
+});
+
 
 /**
  * Private (authenticated) procedure
@@ -251,4 +256,14 @@ const verificationMiddleware = t.middleware(async ({ ctx, next, path }) => {
  */
 export const privateProcedure = t.procedure
   .use(timingMiddleware)
-  .use(verificationMiddleware);
+  .use(verificationMiddleware)
+
+
+/**
+ * Contact mutation procedure with automatic meta header setting
+ * 
+ * This procedure automatically calls setMetaHeader for contact entity mutations
+ */
+
+
+// .use(setTimelineMetadataMiddleware);

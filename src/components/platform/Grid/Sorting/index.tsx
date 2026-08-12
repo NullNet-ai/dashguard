@@ -21,6 +21,7 @@ const Sorting = ({ className }: { className?: string }) => {
   const itemsRef = useRef<any[]>([]);
   const { state, actions } = useContext(GridContext);
   const entity = state?.config?.entity;
+  const removeResetSorting = state?.config?.removeResetSorting;
   const [data, setData] = useState<any[]>([]);
   const [open, setOpen] = useState(false);
   const ismobile = useIsMobile()
@@ -97,10 +98,11 @@ const Sorting = ({ className }: { className?: string }) => {
 
   if (!sortingFields?.length) return null;
 
+
   return (
     <div
       className={cn(
-        `sort-ref flex w-full flex-1 items-center overflow-hidden`,
+        `sort-ref flex w-full flex-1 items-center overflow-hidden relative`,
         className,
       )}
       ref={conref}
@@ -214,23 +216,27 @@ const Sorting = ({ className }: { className?: string }) => {
           </DropdownMenu>
         </div>
       ) : null}
-      <Button
-        className={cn(
-          `h-[30px] text-default/60 underline hover:no-underline`,
-          `${data?.length && data.some((item) => item.hidden) ? 'absolute mt-[2px]' : ''}`,
-        )}
-        name="resetSortButton"
-        style={{
-          left: lastHiddenIndexLeftPos ? lastHiddenIndexLeftPos + 63 : 0,
-        }}
-        variant="link"
-        onClick={() => {
-          actions?.handleResetSorting();
-        }}
-      >
-        {/* <Trash2 className="size-4 block lg:hidden"/> */}
-        <span>Reset <span className='sm:inline hidden'>Sort</span></span>
-      </Button>
+      {
+        !removeResetSorting && (
+          <Button
+            className={cn(
+              `h-[30px] text-default/60 underline hover:no-underline`,
+              `${data?.length && data.some((item) => item.hidden) ? 'absolute mt-[2px]' : ''}`,
+            )}
+            name="resetSortButton"
+            style={{
+              left: lastHiddenIndexLeftPos ? lastHiddenIndexLeftPos + 63 : 0,
+            }}
+            variant="link"
+            onClick={() => {
+              actions?.handleResetSorting();
+            }}
+          >
+            {/* <Trash2 className="size-4 block lg:hidden"/> */}
+            <span>Reset <span className='sm:inline hidden'>Sort</span></span>
+          </Button>
+        )
+      }
     </div>
   );
 };

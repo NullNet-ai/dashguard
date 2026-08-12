@@ -14,8 +14,13 @@ const FormServerFetch = async () => {
   return (
     <div className="space-y-2">
       <DeviceCategory
-        defaultValues={fetched_device ?? {}}
+        // @ts-expect-error - No type yet
+        defaultValues={{
+          ...fetched_device,
+          address_country: fetched_device?.address?.country || '',
+        } ?? {}}
         params={{
+          // @ts-expect-error - No type yet
           id: fetched_device?.id as string,
           shell_type: application! as 'record' | 'wizard',
           entity: main_entity,

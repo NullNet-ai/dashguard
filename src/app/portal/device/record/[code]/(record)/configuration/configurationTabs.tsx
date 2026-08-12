@@ -1,11 +1,17 @@
+import { AtSign, ListOrdered, Network } from 'lucide-react';
 import { headers } from 'next/headers';
 import { Suspense, lazy } from 'react';
+import SidebarTab from '~/components/platform/SidebarTab';
 import StateTab from '~/components/platform/StateTab';
 import { Loader } from '~/components/ui/loader';
 
 // Lazy load components
 const ConfigurationRule = lazy(
   () => import('../../../../_components/record_configuration/ConfigurationRuleGrid'),
+);
+
+const ConfigurationNatRule = lazy(
+  () => import('../../../../_components/record_configuration/ConfigurationNatRuleGrid'),
 );
 const ConfigurationAlias = lazy(
   () => import('../../../../_components/record_configuration/ConfigurationAliasGrid'),
@@ -27,6 +33,7 @@ export default async function DashboardTabs() {
     {
       id: 'configuration_rules',
       label: 'Rules',
+      icon: <ListOrdered size={16} />,
       content: (
         <Suspense
           fallback={
@@ -46,8 +53,31 @@ export default async function DashboardTabs() {
       ),
     },
     {
+      id: 'configuration_nat_rules',
+      label: 'NAT',
+      icon: <Network size={16} />,
+      content: (
+        <Suspense
+          fallback={
+            <div className="flex h-[500px] w-full items-center justify-center">
+              <div className="flex items-center justify-center">
+                <Loader
+                  className="h-8 w-8 bg-primary text-primary"
+                  label=""
+                  variant="spinner"
+                />
+              </div>
+            </div>
+          }
+        >
+          <ConfigurationNatRule code={identifier || ""}/>
+        </Suspense>
+      ),
+    },
+    {
       id: 'configuration_aliases',
       label: 'Aliases',
+      icon: <AtSign size={16} />,
       content: (
         <Suspense
           fallback={
@@ -66,40 +96,37 @@ export default async function DashboardTabs() {
         </Suspense>
       ),
     },
-    {
-      id: 'configuration_raw_data',
-      label: 'Raw Data',
-      content: (
-        <Suspense
-          fallback={
-            <div className="flex h-[500px] w-full items-center justify-center">
-              <div className="flex items-center justify-center">
-                <Loader
-                  className="h-8 w-8 bg-primary text-primary"
-                  label=""
-                  variant="spinner"
-                />
-              </div>
-            </div>
-          }
-        >
-          < ConfigurationRawData />
-        </Suspense>
-      ),
-    }
+    // {
+    //   id: 'configuration_raw_data',
+    //   label: 'Raw Data',
+    //   content: (
+    //     <Suspense
+    //       fallback={
+    //         <div className="flex h-[500px] w-full items-center justify-center">
+    //           <div className="flex items-center justify-center">
+    //             <Loader
+    //               className="h-8 w-8 bg-primary text-primary"
+    //               label=""
+    //               variant="spinner"
+    //             />
+    //           </div>
+    //         </div>
+    //       }
+    //     >
+    //       < ConfigurationRawData />
+    //     </Suspense>
+    //   ),
+    // }
   ];
 
   return (
     <div className="space-y-2">
-      <div className="ml-[-13px]">
-        <StateTab
+        <SidebarTab
           defaultValue="configuration_rules"
-          // orientation="horizontal"
-          rotateText={true}
+          isStickyContainer
+          stickyClassName="top-[50px]"
           persistKey={`configuration_rule-${identifier}`}
           tabs={tabs}
-          variant="underline"
-          size='sm'
         />
          {/* <StateTab
           defaultValue="filter"
@@ -108,7 +135,6 @@ export default async function DashboardTabs() {
           
           size="sm"
         /> */}
-      </div>
     </div>
   );
 }

@@ -47,6 +47,7 @@ export default function LoginForm(props: any) {
     } catch (error: any) {
       console.error('Error Details:', error.message);
       setIsSubmitting(false);
+      if (error.message === 'NEXT_REDIRECT') return;
       try {
         const parsedError = JSON.parse(error.message);
         setError(parsedError?.[0]?.message);
@@ -85,7 +86,7 @@ export default function LoginForm(props: any) {
                     type: 'text',
                   }}
                   form={form}
-                  formKey="Login"
+                  formKey="login"
                   formRenderProps={formProps}
                 />
               );
@@ -102,10 +103,10 @@ export default function LoginForm(props: any) {
                     name: 'password',
                     label: 'Password',
                     required: true,
-                    placeholder: 'Enter at least 5 characters',
+                    placeholder: 'Enter your password',
                   }}
                   form={form}
-                  formKey="Login"
+                  formKey="login"
                   formRenderProps={formProps}
                 />
               );
@@ -117,7 +118,7 @@ export default function LoginForm(props: any) {
               <Checkbox
                 id="rememberMe"
                 name="rememberMe"
-                data-test-id="login-rmmbr-me-chkbx"
+                data-test-id="login-remember-me-checkbox"
               />
               <label
                 className="ml-2 block text-md font-semibold text-foreground"
@@ -130,7 +131,7 @@ export default function LoginForm(props: any) {
               <a
                 className="font-semibold text-primary"
                 href="forgot-password"
-                data-test-id="login-frgt-pswrd-link"
+                data-test-id="login-forgot-password-link"
               >
                 Forgot Password?
               </a>
@@ -140,7 +141,7 @@ export default function LoginForm(props: any) {
             className={
               'justify-center\\\\ !mt-8 flex h-auto w-full items-center rounded py-1.5 text-md font-semibold text-white shadow-sm'
             }
-            data-test-id="login-submit-btn"
+            data-test-id="login-submit-button"
             loading={isSubmitting}
             type="submit"
           >

@@ -9,6 +9,8 @@ import {
 } from '~/server/api/trpc'
 
 import { createDefineRoutes } from '../baseCrud'
+import { createAdvancedFilter } from '~/server/utils/transformAdvanceFilter'
+import { createRootOrm } from '~/server/lib/root-orm';
 const entity = 'device_configurations'
 export const deviceConfigurationRouter = createTRPCRouter({
   ...createDefineRoutes(entity),
@@ -20,10 +22,12 @@ export const deviceConfigurationRouter = createTRPCRouter({
     )
 
     .query(async ({ input, ctx }) => {
-      const res = await ctx.dnaClient
+
+      const rootOrm = await createRootOrm(ctx.dnaClient);
+
+      const res = await rootOrm
         .findAll({
           entity,
-          token: ctx.token.value,
           query: {
             pluck_object: {
               device_configurations: [
@@ -62,6 +66,7 @@ export const deviceConfigurationRouter = createTRPCRouter({
               limit: 1,
               by_field: 'timestamp',
               by_direction: EOrderDirection.DESC,
+              is_case_sensitive_sorting: true,
             },
           },
         })
@@ -94,10 +99,12 @@ export const deviceConfigurationRouter = createTRPCRouter({
     )
     .query(async ({ input, ctx }) => {
       const { code } = input
-      const res = await ctx.dnaClient
+
+      const rootOrm = await createRootOrm(ctx.dnaClient);
+
+      const res = await rootOrm
         .findAll({
           entity: 'devices',
-          token: ctx.token.value,
           query: {
             pluck: ['id', 'code', 'updated_date', 'updated_time', 'updated_by', 'created_date', 'created_time', 'created_by'],
             pluck_object: {
@@ -116,7 +123,6 @@ export const deviceConfigurationRouter = createTRPCRouter({
                 code,
               ],
             }],
-            // @ts-expect-error - order is not defined
             order: {
               by_field: 'created_date',
               by_direction: EOrderDirection.DESC,
@@ -213,10 +219,12 @@ export const deviceConfigurationRouter = createTRPCRouter({
     }),
   )
   .query(async ({ input, ctx }) => {
-    const res = await ctx.dnaClient
+
+    const rootOrm = await createRootOrm(ctx.dnaClient);
+    
+    const res = await rootOrm
       .findAll({
         entity,
-        token: ctx.token.value,
         query: {
 
           pluck_object: {
@@ -227,13 +235,14 @@ export const deviceConfigurationRouter = createTRPCRouter({
             devices: [
               'id', 'code',
             ],
-            device_interfaces:[
-              'name',
-              "device",
-              "id"
-            ]
+            // device_interfaces:[
+            //   'name',
+            //   "device",
+            //   "id"
+            // ]
           },
-          advance_filters: [{
+          advance_filters: [
+            {
             type: 'criteria',
             field: 'code',
             entity: 'devices',
@@ -242,23 +251,25 @@ export const deviceConfigurationRouter = createTRPCRouter({
               input.code,
             ],
           },
-          {
-            type: 'operator',
-            operator: EOperator.AND,
-          },
-          {
-            type: 'criteria',
-            field: 'status',
-            entity: 'device_configurations',
-            operator: EOperator.EQUAL,
-            values: [
-              'Active',
-            ],
-          }],
+          // {
+          //   type: 'operator',
+          //   operator: EOperator.AND,
+          // },
+          // {
+          //   type: 'criteria',
+          //   field: 'status',
+          //   entity: 'device_configurations',
+          //   operator: EOperator.EQUAL,
+          //   values: [
+          //     'Active',
+          //   ],
+          // }
+        ],
           order: {
             limit: 1,
             by_field: 'timestamp',
             by_direction: EOrderDirection.DESC,
+            is_case_sensitive_sorting: true,
           }
         },
       })
@@ -276,31 +287,62 @@ export const deviceConfigurationRouter = createTRPCRouter({
           },
         },
       })
-      .join({
-        type: 'left',
-        field_relation: {
-          to: {
-            entity: 'device_interfaces',
-            field: 'device_configuration_id',
-          },
-          from: {
-            entity,
-            field: 'id',
-          },
-        },
-      })
+      // .join({
+      //   type: 'left',
+      //   field_relation: {
+      //     to: {
+      //       entity: 'device_interfaces',
+      //       field: 'device_configuration_id',
+      //     },
+      //     from: {
+      //       entity,
+      //       field: 'id',
+      //     },
+      //   },
+      // })
       .execute()
-
       
-      const data = res?.data?.[0]?.device_interfaces
-      const drpdwn_optn = data?.map((item: {
+      if (!res) {
+        return []
+      }
+
+      const deviceInterfaces = await rootOrm
+        .findAll({
+          entity: 'device_interfaces',
+          query: {
+            advance_filters: createAdvancedFilter({ device_configuration_id: res.data[0]?.id }),
+            pluck: [
+              'name',
+              "device",
+              "id",
+              "description",
+            ],
+            order: {
+              limit: 20,
+              by_field: 'created_date',
+              by_direction: EOrderDirection.DESC,
+            },
+          },
+        })
+        .execute();
+        
+
+      const data = deviceInterfaces.data // res?.data?.[0]?.device_interfaces
+
+      if (!data) {
+        return []
+      }
+
+      const drpdwn_optn = data.map((item: {
         name: string
         device: string
+        description: string
       }) => {
-        const { device , name} = item
+        const { device , name, description} = item
         return {
-          label: `${name.toUpperCase()} (${device})`,
-          value: device
+          label: `${(description ?? name).toUpperCase()} (${device})`,
+          value: device,
+          value1: name,
         }
       })
       

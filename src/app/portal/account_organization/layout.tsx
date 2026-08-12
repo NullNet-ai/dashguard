@@ -15,4 +15,6 @@ const Layout = (props: Props) => {
   )
 }
 
+export const dynamic = 'force-dynamic'
+
 export default Layout

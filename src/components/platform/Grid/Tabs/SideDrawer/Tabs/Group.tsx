@@ -23,6 +23,7 @@ interface GroupItem {
   label: string;
   value: string;
   desc: boolean | undefined;
+  is_case_sensitive_sorting?: boolean | undefined;
 }
 
 export default function GroupContent() {
@@ -35,7 +36,16 @@ export default function GroupContent() {
     defaultValues: {
       groups: state?.filterDetails?.groups?.length
         ? state?.filterDetails?.groups
-        : [{ id: '1', field: '', label: '', value: '', desc: undefined }],
+        : [
+            {
+              id: '1',
+              field: '',
+              label: '',
+              value: '',
+              desc: undefined,
+              is_case_sensitive_sorting: false,
+            },
+          ],
     },
   });
 
@@ -51,15 +61,19 @@ export default function GroupContent() {
       label: '',
       value: '',
       desc: undefined,
+      is_case_sensitive_sorting: false,
     };
     append(newGroup);
     handleUpdateFilter({
-      groups: [...fields, newGroup].map(({ field, label, value, desc }) => ({
-        field,
-        label,
-        value,
-        desc,
-      })),
+      groups: [...fields, newGroup].map(
+        ({ field, label, value, desc, is_case_sensitive_sorting = false }) => ({
+          field,
+          label,
+          value,
+          desc,
+          is_case_sensitive_sorting,
+        }),
+      ),
     });
   };
 
@@ -74,6 +88,7 @@ export default function GroupContent() {
       field: `${entity}.${field}`,
       label,
       value,
+      ...(columnConfig?.sort_config ?? {}),
     };
     update(index, {
       ...fields[index]!,
@@ -81,16 +96,7 @@ export default function GroupContent() {
     });
 
     handleUpdateFilter({
-      groups: fields.map((item, i) =>
-        i === index
-          ? { ...groupItem }
-          : {
-              field: item.field,
-              label: item.label,
-              value: item.value,
-              desc: item.desc,
-            },
-      ),
+      groups: fields.map((item, i) => (i === index ? { ...groupItem } : item)),
     });
   };
 
@@ -102,14 +108,7 @@ export default function GroupContent() {
 
     handleUpdateFilter({
       groups: fields.map((item, i) =>
-        i === index
-          ? { ...item, desc: value === 'desc' }
-          : {
-              field: item.field,
-              label: item.label,
-              value: item.value,
-              desc: item.desc,
-            },
+        i === index ? { ...item, desc: value === 'desc' } : item,
       ),
     });
   };
@@ -121,11 +120,12 @@ export default function GroupContent() {
     updatedGroups.splice(overIndex, 0, movedItem!);
 
     handleUpdateFilter({
-      groups: updatedGroups.map(({ field, label, value, desc }) => ({
+      groups: updatedGroups.map(({ field, label, value, desc, is_case_sensitive_sorting = false }) => ({
         field,
         label,
         value,
         desc,
+        is_case_sensitive_sorting
       })),
     });
   };
@@ -134,17 +134,18 @@ export default function GroupContent() {
     const updatedGroups = fields.filter((_, i) => i !== index);
     remove(index);
     handleUpdateFilter({
-      groups: updatedGroups.map(({ field, label, value, desc }) => ({
+      groups: updatedGroups.map(({ field, label, value, desc, is_case_sensitive_sorting = false }) => ({
         field,
         label,
         value,
         desc,
+        is_case_sensitive_sorting
       })),
     });
   };
 
   return (
-    <div className="mt-5 space-y-4 rounded-lg bg-gray-50 p-4">
+    <div className="mt-5 space-y-4 rounded-lg border border-gray-100 bg-gray-50 p-4">
       <div className="grid gap-3">
         <Sortable
           value={fields}

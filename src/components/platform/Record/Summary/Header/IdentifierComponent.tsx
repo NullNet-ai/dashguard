@@ -1,34 +1,31 @@
 "use client";
 
 import { ChevronLeftIcon } from "lucide-react";
-import { useContext, useMemo } from "react";
-import { Badge } from "~/components/ui/badge";
-import { StatusPoint } from "~/components/ui/StatusPoint";
-import useScreenType from "~/hooks/use-screen-type";
-import { RecordContext } from "../../Provider";
+import { ReactNode, useContext, useMemo, useState } from "react";
+import { RecordContext, useRecord } from "../../Provider";
 import { RecordWrapperContext } from "../../providers/RecordWrapperProvider";
 import DefaultSummaryMenuOptions from "../Menu/DefaultSummaryMenuOptions";
-import capitalize from 'lodash/capitalize';
 import { Button } from '@headlessui/react';
+import { cn } from '~/lib/utils';
+import { useRef, useEffect } from "react";
 
-const ellipsis = (str: string, length: number) => {
-  const sanitizedStr = str?.replace(/["']/g, "");
-  return sanitizedStr?.length > length
-    ? sanitizedStr.substring(0, length) + "..."
-    : sanitizedStr;
-};
+interface IProps {
+  code: string;
+  status: string;
+  actions?: ReactNode[];
+}
 
 export default function IdentifierComponent({
   code,
   status,
-}: {
-  code: string;
-  status: string;
-}) {
+  actions
+}: IProps ) {
   const { state } = useContext(RecordContext);
   const { isCollapseRecordSummary, onClickCollapseButton } =
     useContext(RecordWrapperContext);
-  const size = useScreenType();
+
+  const [clickedButtonIndex, setClickedButtonIndex] = useState<number | null>(null);
+  const {state: recordState} = useRecord() ?? {};
 
   const memoizedRecordData = useMemo(() => ({
     status: status,
@@ -39,44 +36,64 @@ export default function IdentifierComponent({
 
   const handleClickCollapseButton = () => onClickCollapseButton?.();
 
-  const entityName = state?.entityName;
+  // add actions here
+  const actionsBtns = [
+    <DefaultSummaryMenuOptions
+      status={status}
+      key={state?.recordId}
+      menuOptionConfig={state?.identifierOption}
+      memoizedRecordData={memoizedRecordData}
+    />,
+    ...(actions ?? [])
+  ]
+
+  const actionsContainerRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    function handleClickOutside(event: MouseEvent) {
+      if (
+        actionsContainerRef.current &&
+        !actionsContainerRef.current.contains(event.target as Node)
+      ) {
+        setClickedButtonIndex(null);
+      }
+    }
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, []);
+
+  if(recordState?.config?.showToolbar === false) {
+    return null;
+  }
 
   return (
-    <div className="flex flex-row items-center justify-between p-2 px-4 text-sm">
-      <div className="flex flex-row items-center gap-x-1">
-        <StatusPoint variant={status === "Archived" ? "secondary" : "success"} />
-        <span data-test-id={entityName + "-rcrd-code"} className='font-semibold me-2'>
-          {ellipsis(JSON.stringify(code), 8)}
-        </span>
-        <Badge 
-          variant={status === "Archived" ? "secondary" : "success"}
-          data-test-id={entityName + "-rcrd-status"}
-        >
-          {capitalize(status)}
-        </Badge>
-      </div>
-      <div className="flex flex-row items-center gap-x-1">
-
-        <Button 
-          className='hidden md:flex bg-primary/10 rounded-full size-5 items-center justify-center'
-            onClick={handleClickCollapseButton}
-        >
-        <ChevronLeftIcon
-          className={`hidden h-4 w-4 text-primary md:block cursor-pointer transition-transform
-            }`}
-        
-        />
-        </Button>
-        {/* <ChevronDownIcon
-          className={`h-4 w-4 text-slate-500 md:hidden cursor-pointer transition-transform ${isCollapseRecordSummary ? "rotate-180" : ""
-            }`}
-          onClick={handleClickCollapseButton}
-        /> */}
-        <DefaultSummaryMenuOptions
-          key={state?.recordId}
-          menuOptionConfig={state?.identifierOption}
-          memoizedRecordData={memoizedRecordData}
-        />
+    <div className="flex items-center justify-between gap-3 text-sm">
+      <div 
+        ref={actionsContainerRef}
+        className={cn(
+          "flex items-center w-full min-w-12",
+          { 
+            'justify-between': actionsBtns.length > 3
+          }
+        )}>
+        {actionsBtns.map((action, index) => (
+          <div
+            className={cn(
+              'flex justify-center pt-1 w-full cursor-pointer border-b-2 border-solid border-transparent',
+              {
+                'border-primary': clickedButtonIndex === index
+              },
+            )}
+            key={index}
+            tabIndex={0}
+            onMouseDown={() => setClickedButtonIndex(index)}
+            onFocus={() => setClickedButtonIndex(index)}
+          >
+            {action}
+          </div>
+        ))}
       </div>
     </div>
   );

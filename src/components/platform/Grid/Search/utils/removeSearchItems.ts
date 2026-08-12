@@ -1,9 +1,11 @@
 import { ISearchItem } from '../types';
 
 export const removeSearchItems = (
-  searchItems: ISearchItem[],
+  filterItems: ISearchItem[],
   filterItem: ISearchItem,
 ) => {
+  const searchItems = [...filterItems ?? []];
+
   const hasFilters = searchItems[0]?.filters?.length ?? 0 > 0;
 
   if (hasFilters) {

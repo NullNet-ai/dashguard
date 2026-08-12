@@ -9,7 +9,7 @@ interface CardsProps {
   headerContent?: React.ReactNode;
   footerContent?: React.ReactNode;
   coverImage?: string | React.ReactNode;
-  body?: string | React.ReactNode;
+  children?: string | React.ReactNode;
   className?: string;
   maxWidth?: string;
   onClick?: () => void;
@@ -20,9 +20,9 @@ export function CardComponent({
   headerContent,
   footerContent,
   coverImage,
-  body,
+  children,
   className,
-  maxWidth = '375px',
+  maxWidth = '100%',
   onClick,
   loading = false,
 }: CardsProps) {
@@ -35,7 +35,7 @@ export function CardComponent({
     <Card
       onClick={onClick}
       className={cn(
-        "relative overflow-clip w-full rounded-[8px]",
+        "relative overflow-clip w-full rounded-[8px] border-none !shadow-slate-200",
         onClick && 'cursor-pointer',
         className
       )}
@@ -59,9 +59,9 @@ export function CardComponent({
 					{headerContent}
 				</CardHeader>
       )}
-      {body && (
+      {children && (
 				<CardContent className="p-0">
-					{body}
+					{children}
 				</CardContent>
       )}
       {footerContent && (

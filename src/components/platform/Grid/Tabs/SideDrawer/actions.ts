@@ -57,6 +57,14 @@ export const duplicateFilterTab = async (
   return url;
 };
 
+export const getTabData = async (tab_id: any, gridKey?: string) => {
+  const tabData = await api.gridFilter.getTabData({
+    tab_id,
+    gridKey,
+  });
+  return tabData;
+};
+
 interface Filter {
   operator: string;
   type: 'criteria' | 'operator';
@@ -142,7 +150,7 @@ export const transformFilterGroups = async ({
 
   // Handle single filter group
   if (filterDetails.filter_groups.length === 1) {
-    let resolveDefaultFilter = filterDetails.filter_groups.reduce(
+    const resolveDefaultFilter = filterDetails.filter_groups.reduce(
       (acc: any, curr) => {
         // Add group operator if accumulator already has items
         if (acc.length) {
@@ -176,13 +184,14 @@ export const transformFilterGroups = async ({
     );
     
     // Add custom default filters if provided
-    if (customDefaultFilter?.length) {
-      resolveDefaultFilter = [
-        ...resolveDefaultFilter,
-        { type: 'operator', operator: 'and', default: true },
-        ...customDefaultFilter,
-      ];
-    }
+     // commented out because this causes duplicate issues in filter items
+    // if (customDefaultFilter?.length) {
+    //   resolveDefaultFilter = [
+    //     ...resolveDefaultFilter,
+    //     { type: 'operator', operator: 'and', default: true },
+    //     ...customDefaultFilter,
+    //   ];
+    // }
 
     return {
       resolveDefaultFilter,
@@ -228,8 +237,8 @@ export const transformFilterGroups = async ({
           ...item,
           filters: [
             ...item.filters,
-            { type: 'operator', operator: 'and', default: true },
-            ...customDefaultFilter,
+            // { type: 'operator', operator: 'and', default: true },
+            // ...customDefaultFilter,
           ],
         };
       }

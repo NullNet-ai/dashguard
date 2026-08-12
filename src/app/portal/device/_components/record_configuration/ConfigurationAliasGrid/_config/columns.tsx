@@ -45,15 +45,19 @@ const gridColumns = [
   },
   {
     header: 'Values',
-    accessorKey: 'value',
+    accessorKey: 'ip',
     search_config: {
       operator: 'like',
+      parse_as: 'text',
+      entity: 'ip_aliases'
     },
     cell: ({ row }) => {
-      const value = row?.original?.value
+      const value = row?.original?.ip_aliases?.ips?.join(' ')
+      // @ts-expect-error - No type yet
+      const value1 = row?.original?.port_aliases?.upper_ports?.map(e => e)?.join(' ')
       return (
         <span>
-          {value?.split(' ').join(', ')}
+          {(value?.trim() || value1?.trim())?.split(' ').join(', ')}
         </span>
       )
     },

@@ -15,7 +15,7 @@ const WizardLayout = async (props: IWizardLayoutProps) => {
   const [, , mainEntity, , identifier, currentStep] = pathname.split("/");
   const wizard_summary = WizardSummaryComponent();
   return (
-    <div className="p-1">
+    <div>
       <PlatformWizard
         config={{
           currentStep: Number(currentStep),
@@ -34,5 +34,7 @@ const WizardLayout = async (props: IWizardLayoutProps) => {
     </div>
   );
 };
+
+export const dynamic = 'force-dynamic';
 
 export default WizardLayout;

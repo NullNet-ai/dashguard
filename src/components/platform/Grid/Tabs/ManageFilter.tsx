@@ -52,6 +52,7 @@ export default function ManageFilter({
   const { actions } = useSideDrawer();
   const { state, actions: gridActions } = useGrid();
   const { config, gridKey } = state ?? {};
+  const isTimeline = config?.searchDialog === 'timeline'
 
   const {
     columns = [],
@@ -74,20 +75,29 @@ export default function ManageFilter({
     data_type: column.data_type,
     entity: column.entity || defaultEntity,
     search_config: column.search_config,
+    sortKey: column.sortKey,
+    sort_config: column.sort_config,
     enableGrouping:
       typeof column.enableGrouping === 'boolean' ? column.enableGrouping : true,
+    filter_config: column.filter_config,
+    value_alias: column?.value_alias,
   }));
+
+  const _tab = isTimeline ? { ...tab, default_filter: tab.default_filter.filter((item: any) => item.field !=='status') } : tab;
+
 
   const handleManageFilter = () => {
 
     actions?.openSideDrawer({
       header: <h1>Manage Filter</h1>,
-      sideDrawerWidth: '1000px',
+      sideDrawerWidth: '900px',
       body: {
         component: () => (
           <ManageFilterProvider
-            tab={tab}
+            isTimeline={isTimeline}
+            tab={_tab}
             columns={gridColumns}
+            filterType={isTimeline ? 'timeline' : 'default'}
             searchConfig={{
               ...searchSuggestionConfig ?? {},
               entity: defaultEntity,

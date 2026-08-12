@@ -9,7 +9,7 @@ const FormServerFetch = async () => {
   const [, , main_entity, application, identifier] = pathname.split('/')
   const fetched_device =  await api.record.getByCode({
     id: identifier!,
-    pluck_fields: ["id", "code", "status", "device_status"],
+    pluck_fields: ["id", "code", "status", "is_device_online"],
     main_entity: main_entity!,
     })
   const defaultValues = fetched_device?.data
@@ -19,6 +19,9 @@ const FormServerFetch = async () => {
     code: identifier!,
   })
 
+  if (!fetched_interfaces) {
+    return null
+  }
   
   return (
     <InteractiveGraph

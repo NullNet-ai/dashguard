@@ -3,15 +3,22 @@ import { headers } from 'next/headers';
 import DeviceCategory from './client';
 
 const optionsByCategory: Record<string, string[]> = {
-  Firewall: ['PFSense', 'OPNSense'],
-  'AppGuard Client': [
-    'ExpressJS',
-    'NextJS',
-    'Nginx',
-    'Actix',
-    'Axum',
-    'Rocket',
-    'SMTP',
+  Firewall: [
+    'PFSense',
+    // 'OPNSense'
+  ],
+  'Appguard Client': [
+    'Linux',
+    'RedHat',
+    'Windows',
+    'Mac OS',
+    // 'ExpressJS',
+    // 'NextJS',
+    // 'Nginx',
+    // 'Actix',
+    // 'Axum',
+    // 'Rocket',
+    // 'SMTP',
   ],
   'Load Balancer': [],
 };
@@ -25,10 +32,11 @@ const FormServerFetch = async () => {
     code: identifier!,
   });
 
-  if (typeof fetched_device === "undefined") {
-    return <>FUCK YOU</>
+  if (typeof fetched_device === 'undefined') {
+    return <>FUCK YOU</>;
   }
 
+  // @ts-expect-error - No type yet
   const options = optionsByCategory[fetched_device!.device_category]?.map(
     (value) => ({ label: value, value }),
   );
@@ -38,6 +46,7 @@ const FormServerFetch = async () => {
       <DeviceCategory
         defaultValues={{ ...fetched_device }}
         params={{
+          // @ts-expect-error - No type yet
           id: fetched_device?.id!,
           shell_type: application! as 'record' | 'wizard',
           entity: main_entity,

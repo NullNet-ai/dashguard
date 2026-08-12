@@ -1,7 +1,12 @@
 {
   "order": [
-    "device",
+    "users",
+    "devices",
     "remote_access",
     "settings"
-  ]
+  ],
+  "roles": {
+    "admin": "*",
+    "developer": ["devices", "remote_access"]
+  }
 }

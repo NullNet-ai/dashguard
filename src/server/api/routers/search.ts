@@ -1,4 +1,4 @@
-// import z from "zod";
+import { z } from 'zod';
 import {
   createTRPCRouter,
   privateProcedure,
@@ -12,6 +12,7 @@ import {
 } from '~/server/utils/queryBuilder';
 import pluralize from 'pluralize';
 import {
+  EOperator,
   EOrderDirection,
   IAdvanceFilters,
   IGroupAdvanceFilters,
@@ -20,26 +21,321 @@ import { formatSorting } from '~/server/utils/formatSorting';
 import ZodSearchSuggestions from '~/server/zodSchema/grid/searchSuggestions';
 import { searchSuggestionTransformer } from '~/components/platform/Grid/Search/utils/searchSuggestionTransformer';
 import { formatPhoneNumber } from '~/utils/formatter';
+import { capitalize } from 'lodash';
+import { getRootCredentials } from '~/server/lib/root-orm';
+const protocolValueToLabel = {
+  'inet/any': 'IPv4/*',
+  'inet/tcp': 'IPv4/TCP',
+  'inet/tcp/udp': 'IPv4/TCP/UDP',
+  'inet6/any': 'IPv6/*',
+  'inet6/tcp': 'IPv6/TCP',
+  'inet6/tcp/udp': 'IPv6/TCP/UDP',
+  'inet46/any': 'IPv4+6/*',
+  'inet46/tcp': 'IPv4+6/TCP',
+  'inet46/tcp/udp': 'IPv4+6/TCP/UDP',
+} as const;
+const protocolLabelToValue = Object.entries(protocolValueToLabel).reduce(
+  (acc, [value, label]) => {
+    acc[label.toLowerCase()] = value;
+    return acc;
+  },
+  {} as Record<string, string>,
+);
+const resolveProtocolFilterValue = (value: unknown) => {
+  if (typeof value !== 'string') return value;
+  const key = value.trim().toLowerCase();
+  if (!key) return value;
+
+  const exact = protocolLabelToValue[key];
+  if (exact) return exact;
+
+  if (key.includes('ipv4+6') || key.includes('ipv4+ipv6') || key.includes('ipv46')) {
+    return 'inet46';
+  }
+  if (key.includes('ipv6')) return 'inet6';
+  if (key.includes('ipv4')) return 'inet';
+
+  return value;
+};
+const resolveProtocolDisplayValue = (value: unknown) => {
+  if (typeof value !== 'string') return value;
+  const key = value.trim().toLowerCase();
+  if (!key) return value;
+  const exact = (protocolValueToLabel as Record<string, string>)[key];
+  if (exact) return exact;
+  if (key === 'inet46') return 'IPv4+6';
+  if (key === 'inet6') return 'IPv6';
+  if (key === 'inet') return 'IPv4';
+  return value.toUpperCase();
+};
+
+const buildDeviceRemoteAccessSessionSuggestions = async ({
+  ctx,
+  input,
+  baseEntity,
+}: {
+  ctx: any;
+  input: z.infer<typeof ZodSearchSuggestions>;
+  baseEntity: 'device_tunnels' | 'device_ssh_sessions' | 'device_tty_sessions';
+}) => {
+  const tunnelEntity = 'device_tunnels';
+  let {
+    advance_filters: _advance_filters = [],
+    sorting,
+    group_advance_filters: _group_advance_filters = [],
+    searchable_fields = [],
+  } = input;
+
+  const pluck_object: Record<string, any> = {
+    ...addCommonGridPluckObject(),
+    devices: ['device_name', 'id'],
+    device_services: ['address', 'port'],
+    [baseEntity]: input.pluck,
+  };
+
+  const query = ctx.dnaClient.searchSuggestions({
+    entity: baseEntity,
+    token: ctx.token.value,
+    query: {
+      pluck: input.pluck,
+      track_total_records: true,
+      pluck_object,
+      advance_filters: [...(_advance_filters as IAdvanceFilters[])],
+      group_advance_filters: _group_advance_filters as IGroupAdvanceFilters<string | number>[],
+      order: {
+        starts_at:
+          (input.current || 0) === 0
+            ? 0
+            : (input.current || 1) * (input.limit || 100) - (input.limit || 100),
+        limit: input.limit || 1,
+        by_field: input?.sorting?.length === 1 ? input.sorting[0]?.id : 'code',
+        by_direction:
+          input?.sorting?.length === 1
+            ? input.sorting[0]?.desc
+              ? EOrderDirection.DESC
+              : EOrderDirection.ASC
+            : EOrderDirection.DESC,
+      },
+      multiple_sort:
+        sorting?.length && sorting?.length > 1
+          // @ts-expect-error - No type yet
+          ? formatSorting(sorting)
+          : [],
+      concatenate_fields: [...addCommonGridConcatenates(baseEntity), {
+        fields: ['last_access_date', 'last_access_time'],
+        field_name: 'last_access_date_time',
+        separator: ' ',
+        entity: baseEntity,
+      }],
+    },
+  });
+
+  if (baseEntity === tunnelEntity) {
+    query
+      .join({
+        type: 'left',
+        field_relation: {
+          to: {
+            entity: 'devices',
+            field: 'id',
+          },
+          from: {
+            entity: tunnelEntity,
+            field: 'device_id',
+          },
+        },
+      })
+      .join({
+        type: 'left',
+        field_relation: {
+          to: {
+            entity: 'device_services',
+            field: 'id',
+          },
+          from: {
+            entity: tunnelEntity,
+            field: 'service_id',
+          },
+        },
+      })
+      ;
+  }
+
+  if (baseEntity === 'device_ssh_sessions' || baseEntity === 'device_tty_sessions') {
+    query
+      .join({
+        type: 'left',
+        field_relation: {
+          to: {
+            entity: 'devices',
+            field: 'id',
+          },
+          from: {
+            entity: baseEntity,
+            field: 'device_id',
+          },
+        },
+      })
+      .join({
+        type: 'left',
+        field_relation: {
+          to: {
+            entity: tunnelEntity,
+            field: 'id',
+          },
+          from: {
+            entity: baseEntity,
+            field: 'device_tunnel_id',
+          },
+        },
+      })
+      .nestedJoin({
+        type: 'left',
+        field_relation: {
+          to: {
+            entity: 'device_services',
+            field: 'id',
+          },
+          from: {
+            entity: tunnelEntity,
+            field: 'service_id',
+          },
+        },
+      });
+  }
+
+  addCommonGridJoins(query, baseEntity);
+
+  const { data: items } = await query.execute();
+  let suggestions = searchSuggestionTransformer(items, searchable_fields);
+  // @ts-expect-error - No type yet
+  suggestions = suggestions.map((e) => {
+        let updatedSuggestion = e
+        if (e.field === 'tunnel_type') {
+          updatedSuggestion = {
+            ...e,
+            display_value: e.values?.[0].toUpperCase(),
+          }
+        } else if (e.field === 'tunnel_status') {
+          updatedSuggestion = {
+            ...e,
+            display_value: capitalize(e.values?.[0]),
+          }
+        }
+        return updatedSuggestion
+      });
+  return { items: suggestions };
+};
 const entity = '';
 export const searchRouter = createTRPCRouter({
   ...createDefineRoutes(entity),
   searchSuggestions: privateProcedure
     // Define input using zod for validation
     .input(ZodSearchSuggestions)
-    .query(async ({ input, ctx }) => {
-      const {
+    .mutation(async ({ input, ctx }) => {
+      let {
         advance_filters: _advance_filters = [],
         entity,
         sorting,
         group_advance_filters: _group_advance_filters = [],
         searchable_fields = [],
-        is_case_sensitive_sorting = 'false',
       } = input;
 
       const pluck_object = {
         ...addCommonGridPluckObject(),
         [pluralize(entity)]: input.pluck,
       };
+      if (entity === 'device_filter_rules' || entity === 'device_nat_rules') {
+        // @ts-expect-error - No type yet
+        _advance_filters = _advance_filters.reduce((acc, curr) => {
+          let updatedFilter = curr
+          if (curr.field === 'order' || curr.field === 'disabled') {
+            updatedFilter = {
+              ...curr,
+              parse_as: 'text',
+            }
+          }
+          if (curr.field === 'ipprotocol_protocol') {
+            return [
+              ...acc,
+              ...(curr.values?.reduce((acc1, curr1) => {
+                const values = curr1.split(' ').map(resolveProtocolFilterValue)
+                return [
+                  ...acc1,
+                  {
+                    ...curr,
+                    field: 'ipprotocol',
+                    values,
+                  },
+                  {
+                    operator: 'or',
+                    type: 'operator',
+                  },
+                  {
+                    ...curr,
+                    field: 'protocol',
+                    values,
+                  }
+                ]
+              }, []) ?? [])
+            ].flatMap(e => e)
+          }
+          else if (curr.field === 'disabled') {
+            updatedFilter = {
+              ...updatedFilter,
+              values: updatedFilter.values?.map(v => {
+                if ('enabled'.toLowerCase().includes(v.toLowerCase())) {
+                  return 'false'
+                } else if ('disabled'.toLowerCase().includes(v.toLowerCase())) {
+                  return 'true'
+                }
+                return v
+              }),
+            }
+          }
+          return [
+            ...acc,
+            updatedFilter,
+          ]
+        }, [])
+      } else if (entity === 'device') {
+        _advance_filters = _advance_filters.map(e => {
+          let updatedFilter = e
+          if (e.field === 'is_device_authorized' || e.field === 'is_device_online') {
+            updatedFilter = {
+              ...e,
+              parse_as: 'text',
+            }
+          }
+          if (e.field === 'is_device_authorized') {
+            updatedFilter = {
+              ...updatedFilter,
+              values: updatedFilter.values?.map(v => {
+                if ('authorized'.toLowerCase().includes(v.toLowerCase())) {
+                  return 'true'
+                } else if ('unauthorized'.toLowerCase().includes(v.toLowerCase())) {
+                  return 'false'
+                }
+                return v
+              }),
+            }
+          }
+          else if (e.field === 'is_device_online') {
+            updatedFilter = {
+              ...updatedFilter,
+              values: updatedFilter.values?.map(v => {
+                if ('online'.toLowerCase().includes(v.toLowerCase())) {
+                  return 'true'
+                } else if ('offline'.toLowerCase().includes(v.toLowerCase())) {
+                  return 'false'
+                }
+                return v
+              }),
+            }
+          }
+          return updatedFilter
+        })
+      }
 
       const query = ctx.dnaClient.searchSuggestions({
         entity,
@@ -69,20 +365,428 @@ export const searchRouter = createTRPCRouter({
                   : EOrderDirection.ASC
                 : EOrderDirection.DESC,
           },
-          //@ts-expect-error - multiple sort
           multiple_sort:
             sorting?.length && sorting?.length > 1
-              ? formatSorting(sorting, entity, is_case_sensitive_sorting)
+              // @ts-expect-error - No type yet
+              ? formatSorting(sorting)
               : [],
-          concatenate_fields: [...addCommonGridConcatenates(input?.entity)],
+          concatenate_fields: [
+            ...addCommonGridConcatenates(pluralize(entity)),
+            ...(entity === 'device_filter_rules' || entity === 'device_nat_rules'
+              ? [{
+                  fields: ['ipprotocol', 'protocol'],
+                  field_name: 'protocol',
+                  separator: ' ',
+                  entity,
+                }]
+              : []),
+          ],
         },
       });
       addCommonGridJoins(query, entity);
 
       const { data: items } = await query.execute();
+      
+      console.log("$$$ ~ items:", items)
 
       // Calculate total number of pages
-      const suggestions = searchSuggestionTransformer(items, searchable_fields);
+      let suggestions = searchSuggestionTransformer(items, searchable_fields)
+      // @ts-expect-error - No type yet
+      suggestions = suggestions.map((e) => {
+        let updatedSuggestion = e
+        if (e.field === 'is_device_authorized') {
+          updatedSuggestion = {
+            ...e,
+            display_value: e.values?.[0] === 'true' ? 'Authorized' : 'Unauthorized'
+          }
+        } else if (e.field === 'is_device_online') {
+          updatedSuggestion = {
+            ...e,
+            display_value: e.values?.[0] === 'true' ? 'Online' : 'Offline'
+          }
+        } else if (e.field === 'ipprotocol' || e.field === 'protocol') {
+          const displayValue = Array.isArray(e.values)
+          // @ts-expect-error - No type yet
+            ? e.values.map((e) => (typeof e === 'string' ? e.split(' ') : [e]).map(resolveProtocolDisplayValue).join(' ')).join(', ')
+            : e.display_value
+          updatedSuggestion = {
+            ...e,
+            label: 'Protocol',
+            field: 'protocol',
+            display_value: displayValue,
+          }
+        } else if (e.field === 'disabled') {
+          updatedSuggestion = {
+            ...e,
+            display_value: e.values?.[0] === 'true' ? 'Disabled' : 'Enabled'
+          }
+        }
+        return updatedSuggestion
+      });
+      
+      return { items: suggestions };
+    }),
+  deviceSearch: privateProcedure
+    .input(ZodSearchSuggestions)
+    .mutation(async ({ input, ctx }) => {
+      let {
+        advance_filters: _advance_filters = [],
+        sorting,
+        group_advance_filters: _group_advance_filters = [],
+        searchable_fields = [],
+      } = input;
+
+      // Hardcoded: this resolver is only for the device entity.
+      // Root credentials are required because device is a root-managed entity.
+      const entity = 'device';
+
+      _advance_filters = _advance_filters.map((e) => {
+        let updatedFilter = e;
+        if (
+          e.field === 'is_device_authorized' ||
+          e.field === 'is_device_online'
+        ) {
+          updatedFilter = { ...e, parse_as: 'text' };
+        }
+        if (e.field === 'is_device_authorized') {
+          updatedFilter = {
+            ...updatedFilter,
+            values: updatedFilter.values?.map((v) => {
+              if ('authorized'.toLowerCase().includes(v.toLowerCase()))
+                return 'true';
+              if ('unauthorized'.toLowerCase().includes(v.toLowerCase()))
+                return 'false';
+              return v;
+            }),
+          };
+        } else if (e.field === 'is_device_online') {
+          updatedFilter = {
+            ...updatedFilter,
+            values: updatedFilter.values?.map((v) => {
+              if ('online'.toLowerCase().includes(v.toLowerCase()))
+                return 'true';
+              if ('offline'.toLowerCase().includes(v.toLowerCase()))
+                return 'false';
+              return v;
+            }),
+          };
+        } else if (e.field === 'protocol') {
+          updatedFilter = {
+            ...updatedFilter,
+            values: updatedFilter.values?.flatMap((v) =>
+              'ui'.includes(v.toLowerCase()) ? ['http', 'https'] : v,
+            ),
+          };
+        }
+        return updatedFilter;
+      });
+      const { token: rootToken } = await getRootCredentials(ctx.dnaClient);
+
+      const pluck_object = {
+        ...addCommonGridPluckObject(),
+        [pluralize(entity)]: input.pluck,
+        device_services: ['protocol', 'status'],
+      };
+
+      const query = ctx.dnaClient
+        .searchSuggestions({
+          entity,
+          token: rootToken,
+          as_root: true,
+          query: {
+            pluck: input.pluck,
+            track_total_records: true,
+            pluck_object,
+            advance_filters: [...(_advance_filters as IAdvanceFilters[])],
+            group_advance_filters:
+              _group_advance_filters as IGroupAdvanceFilters<string | number>[],
+            order: {
+              starts_at:
+                (input.current || 0) === 0
+                  ? 0
+                  : (input.current || 1) * (input.limit || 100) -
+                    (input.limit || 100),
+              limit: input.limit || 1,
+              by_field:
+                input?.sorting?.length === 1 ? input.sorting[0]?.id : 'code',
+              by_direction:
+                input?.sorting?.length === 1
+                  ? input.sorting[0]?.desc
+                    ? EOrderDirection.DESC
+                    : EOrderDirection.ASC
+                  : EOrderDirection.DESC,
+            },
+            multiple_sort:
+              sorting?.length && sorting?.length > 1
+                ? // @ts-expect-error - No type yet
+                  formatSorting(sorting)
+                : [],
+            concatenate_fields: [
+              ...addCommonGridConcatenates(pluralize(entity)),
+            ],
+          },
+        })
+        .join({
+          type: 'left',
+          field_relation: {
+            to: { entity: 'device_services', field: 'device_id' },
+            from: { entity, field: 'id' },
+          },
+        });
+
+      addCommonGridJoins(query, entity);
+
+      const { data: items } = await query.execute();
+
+      const suggestions = searchSuggestionTransformer(
+        items,
+        searchable_fields,
+      )
+      // @ts-expect-error - No type yet
+      .map((e) => {
+        let updatedSuggestion = e;
+        if (e.field === 'is_device_authorized') {
+          updatedSuggestion = {
+            ...e,
+            display_value:
+              e.values?.[0] === 'true' ? 'Authorized' : 'Unauthorized',
+          };
+        } else if (e.field === 'is_device_online') {
+          updatedSuggestion = {
+            ...e,
+            display_value: e.values?.[0] === 'true' ? 'Online' : 'Offline',
+          };
+        } else if (e.field === 'protocol') {
+          updatedSuggestion = {
+            ...e,
+            label: 'Connection Types',
+            display_value: Array.isArray(e.values)
+                ? [
+                    ...new Set(
+                      e.values.map((v: unknown) => {
+                        if (typeof v !== 'string') return v;
+                        const lower = v.toLowerCase();
+                        if (lower === 'http' || lower === 'https') return 'UI';
+                        return v.toUpperCase();
+                      }),
+                    ),
+                  ].join(', ')
+              : e.display_value,
+          };
+        }
+        return updatedSuggestion;
+      });
+
+      const mergedProtocol = new Map<string, any>();
+      const dedupedSuggestions: any[] = [];
+      for (const s of suggestions) {
+        if (s.field !== 'protocol') {
+          dedupedSuggestions.push(s);
+          continue;
+        }
+        const existing = mergedProtocol.get(s.display_value);
+        if (existing) {
+          existing.values = [...new Set([...existing.values, ...s.values])];
+          existing.count = (existing.count ?? 0) + (s.count ?? 0);
+        } else {
+          const copy = { ...s, values: [...s.values] };
+          mergedProtocol.set(s.display_value, copy);
+          dedupedSuggestions.push(copy);
+        }
+      }
+
+      return { items: dedupedSuggestions };
+    }),
+  aliasSearch: privateProcedure
+    .input(
+      ZodSearchSuggestions.extend({
+        device_id: z.string(),
+      }),
+    )
+    .mutation(async ({ input, ctx }) => {
+      let {
+        advance_filters: _advance_filters = [],
+        entity,
+        sorting,
+        group_advance_filters: _group_advance_filters = [],
+        searchable_fields = [],
+        device_id,
+      } = input;
+
+      const pluck_object = {
+        ...addCommonGridPluckObject(),
+        aliases: input.pluck,
+        ip_aliases: ['ip'],
+        port_aliases: ['upper_port'],
+      };
+
+      const device_configuration = await ctx.dnaClient.findAll({
+        entity: 'device_configurations',
+        token: ctx.token.value,
+        query: {
+          pluck: ['id', 'created_date', 'timestamp'],
+          advance_filters: [
+            {
+              type: 'criteria',
+              field: 'device_id',
+              entity: 'device_configurations',
+              operator: EOperator.EQUAL,
+              values: [device_id],
+            },
+          ],
+          order: {
+            limit: 1,
+            by_field: 'timestamp',
+            by_direction: EOrderDirection.DESC,
+            is_case_sensitive_sorting: true,
+          },
+          // multiple_sort: [
+          //   {
+          //     by_field: 'created_date',
+          //     by_direction: EOrderDirection.DESC,
+          //   },
+          //   {
+          //     by_field: 'created_time',
+          //     by_direction: EOrderDirection.DESC,
+          //   },
+          // ],
+        },
+
+      }).execute()
+
+      const device_conf_id = device_configuration?.data?.[0]?.id as string
+
+      // @ts-expect-error - No type yet
+      _advance_filters = _advance_filters.reduce((acc, curr) => {
+        if (curr.entity === 'ip_aliases') {
+          return [
+            ...acc,
+            curr,
+            { type: 'operator', operator: 'or', entity: 'aliases' },
+            {
+              type: 'criteria',
+              field: 'upper_port',
+              entity: 'port_aliases',
+              operator: 'like',
+              values: _advance_filters[0]?.values,
+              parse_as: 'text',
+              is_search: true
+            }
+          ]
+        }
+        return acc
+      }, [])
+      
+
+      const query = ctx.dnaClient
+        .searchSuggestions({
+          entity,
+          token: ctx.token.value,
+          query: {
+            pluck: input.pluck,
+            track_total_records: true,
+            pluck_group_object: {
+              ip_aliases: ['ip'],
+              port_aliases: ['upper_port'],
+            },
+            pluck_object,
+            advance_filters: [
+              ..._advance_filters.map(e => {
+                if (!e.entity) {
+                  return {
+                    ...e,
+                    entity: 'aliases',
+                  }
+                }
+                return e
+              }),
+              {
+                operator: 'and',
+                type: 'operator',
+                default: true,
+              },
+              {
+                type: 'criteria',
+                field: 'device_configuration_id',
+                entity: 'aliases',
+                operator: EOperator.EQUAL,
+                values: [device_conf_id],
+              },
+            ] as IAdvanceFilters[],
+            group_advance_filters: _group_advance_filters as IGroupAdvanceFilters<
+              string | number
+            >[],
+            order: {
+              starts_at:
+                (input.current || 0) === 0
+                  ? 0
+                  : (input.current || 1) * (input.limit || 100) -
+                    (input.limit || 100),
+              limit: input.limit || 1,
+              by_field:
+                input?.sorting?.length === 1 ? input.sorting[0]?.id : 'code',
+              by_direction:
+                input?.sorting?.length === 1
+                  ? input.sorting[0]?.desc
+                    ? EOrderDirection.DESC
+                    : EOrderDirection.ASC
+                  : EOrderDirection.DESC,
+            },
+            multiple_sort:
+              sorting?.length && sorting?.length > 1
+                // @ts-expect-error - No type yet
+                ? formatSorting(sorting)
+                : [],
+            concatenate_fields: [...addCommonGridConcatenates(input?.entity)],
+          },
+        })
+        .join({
+          type: 'left',
+          field_relation: {
+            to: {
+              entity: 'ip_aliases',
+              field: 'alias_id',
+            },
+            from: {
+              entity: 'aliases',
+              field: 'id',
+            },
+          },
+        })
+        .join({
+          type: 'left',
+          field_relation: {
+            to: {
+              entity: 'port_aliases',
+              field: 'alias_id',
+            },
+            from: {
+              entity: 'aliases',
+              field: 'id',
+            },
+          },
+        });
+
+      addCommonGridJoins(query, entity);
+
+      const { data: items } = await query.execute();
+
+      let suggestions = searchSuggestionTransformer(items, searchable_fields);
+      // @ts-expect-error - No type yet
+      suggestions = suggestions.map((e) => {
+        let updatedSuggestion = e
+        if (e.entity === 'port_aliases') {
+          updatedSuggestion = {
+            ...e,
+            accessorKey: 'upper_port',
+            label: 'Values',
+            operator: 'like',
+            parse_as: 'text',
+          }
+        }
+        return updatedSuggestion
+      });
+
       return { items: suggestions };
     }),
   contactSearch: privateProcedure
@@ -136,9 +840,9 @@ export const searchRouter = createTRPCRouter({
               // by_field: "created_date",
               // by_direction: EOrderDirection.ASC,
             },
-            // @ts-expect-error - multiple sort
             multiple_sort: input.sorting?.length
-              ? formatSorting(input.sorting, input.entity, input.is_case_sensitive_sorting)
+              // @ts-expect-error - No type yet
+              ? formatSorting(input.sorting)
               : [],
             concatenate_fields: [...addCommonGridConcatenates(input?.entity)],
           },
@@ -184,7 +888,6 @@ export const searchRouter = createTRPCRouter({
         })
         .nestedJoin({
           type: 'left',
-          nested: true,
           field_relation: {
             to: {
               entity: 'organizations',
@@ -269,9 +972,9 @@ export const searchRouter = createTRPCRouter({
                     (input.limit || 100),
               limit: input.limit || 1,
             },
-            // @ts-expect-error - multiple sort
             multiple_sort: input.sorting?.length
-              ? formatSorting(input.sorting, input.entity, input.is_case_sensitive_sorting)
+              // @ts-expect-error - No type yet
+              ? formatSorting(input.sorting)
               : [],
             concatenate_fields: [
               {
@@ -320,7 +1023,6 @@ export const searchRouter = createTRPCRouter({
         })
         .nestedJoin({
           type: 'left',
-          nested: true,
           field_relation: {
             to: {
               alias: 'created_by',
@@ -349,7 +1051,6 @@ export const searchRouter = createTRPCRouter({
         })
         .nestedJoin({
           type: 'left',
-          nested: true,
           field_relation: {
             to: {
               alias: 'updated_by',
@@ -369,193 +1070,67 @@ export const searchRouter = createTRPCRouter({
       const suggestions = searchSuggestionTransformer(items, searchable_fields);
       return { items: suggestions };
     }),
-  deviceSearch: privateProcedure
-  // Define input using zod for validation
-  .input(ZodSearchSuggestions)
-  .query(async ({ input, ctx }) => {
-    const {
-      advance_filters: _advance_filters = [],
-      entity,
-      group_advance_filters: _group_advance_filters = [],
-      searchable_fields = [],
-    } = input;
-
-    const query = ctx.dnaClient
-      .searchSuggestions({
-        entity: input?.entity,
-        token: ctx.token.value,
-        query: {
-          pluck_group_object: {
-            contact_phone_numbers: ['raw_phone_number', 'is_primary'],
-            contact_emails: ['email', 'is_primary'],
-            organization_contacts: ['id', 'contact_organization_id'],
-            organizations: ['id', 'name', 'categories'],
-          },
-
-          pluck_object: {
-            ...addCommonGridPluckObject(),
-            contacts: ['first_name', 'last_name', 'id', 'previous_status'],
-            organization_accounts: ['contact_id', 'id', 'device_id'],
-            organizations: ['id', 'name', 'categories'],
-            organization_contacts: ['id', 'contact_organization_id'],
-            devices: ['id', 'code', 'categories', 'status', 'created_date', 'created_time', 'created_by', 'updated_date', 'updated_time', 'instance_name', 'model', 'updated_by'],
-            device_group_devices: ['device_group_setting_id', 'device_id', 'id'],
-            device_groups: ['device_group_setting_id', 'device_id', 'id'],
-            device_group_settings: ['name', 'id'],
-            device_interfaces: ['id', 'device_configuration_id', 'name'],
-            device_interface_addresses: ['id', 'device_interface_id', 'address'],
-            device_configurations: ['id', 'device_id', 'hostname', 'created_date', 'created_time', 'timestamp'],
-          },
-          track_total_records: true,
-          advance_filters: input?.advance_filters as IAdvanceFilters[],
-          group_advance_filters: (input.group_advance_filters ||
-            []) as IGroupAdvanceFilters<string | number>[],
-          order: {
-            starts_at:
-              // current 5 *  input.limit 50 = 250
-              (input.current || 0) === 0
-                ? 0
-                : (input.current || 1) * (input.limit || 100) -
-                  (input.limit || 100),
-            limit: input.limit || 1,
-            // by_field: "created_date",
-            // by_direction: EOrderDirection.ASC,
-          },
-          // @ts-expect-error - multiple sort
-          multiple_sort: input.sorting?.length
-            ? formatSorting(input.sorting, input.entity, input.is_case_sensitive_sorting)
-            : [],
-          concatenate_fields: [...addCommonGridConcatenates(input?.entity)],
-        },
-      })
-      .join({
-        type: 'left',
-        field_relation: {
-          to: {
-            alias: 'device_group_devices',
-            entity: 'device_groups',
-            field: 'device_id',
-          },
-          from: {
-            entity: input?.entity,
-            field: 'id',
-          },
-        },
-      })
-      .nestedJoin({
-        type: 'left',
-        nested: true,
-        field_relation: {
-          to: {
-            entity: 'device_group_settings',
-            field: 'id',
-          },
-          from: {
-            entity: 'device_group_devices',
-            field: 'device_group_setting_id',
-          },
-        },
-      })
-      .join({
-        type: 'left',
-        field_relation: {
-          to: {
-            entity: 'device_configurations',
-            field: 'device_id',
-            order_by: 'timestamp',
-            limit: 1,
-            order_direction: EOrderDirection.DESC,
-          },
-          from: {
-            entity: input?.entity,
-            field: 'id',
-          },
-        },
-      })
-    addCommonGridJoins(query, entity);
-
-    const { data: items } = await query.execute();
-
-    // Calculate total number of pages
-    const suggestions = searchSuggestionTransformer(items, searchable_fields);
-    const resolvedSuggestions = suggestions.map((suggestion: any) => {
-      return suggestion;
-    });
-    return { items: resolvedSuggestions };
-  }),
-
+  // Project Level
   deviceRemoteAccessSessionSearch: privateProcedure
-  // Define input using zod for validation
-  .input(ZodSearchSuggestions)
-  .query(async ({ input, ctx }) => {
-    const {
-      advance_filters: _advance_filters = [],
-      entity,
-      group_advance_filters: _group_advance_filters = [],
-      searchable_fields = [],
-    } = input;
+    .input(ZodSearchSuggestions)
+    .mutation(async ({ input, ctx }) => {
+      const resolvedEntity = (input?.entity ?? 'device_tunnels') as
+        | 'device_tunnels'
+        | 'device_ssh_sessions'
+        | 'device_tty_sessions';
 
-    const query = ctx.dnaClient
-      .searchSuggestions({
-        entity: input?.entity,
-        token: ctx.token.value,
-        query: {
-          pluck_group_object: {
-            contact_phone_numbers: ['raw_phone_number', 'is_primary'],
-            contact_emails: ['email', 'is_primary'],
-            organization_contacts: ['id', 'contact_organization_id'],
-            organizations: ['id', 'name', 'categories'],
-          },
+      if (
+        resolvedEntity !== 'device_tunnels'
+        && resolvedEntity !== 'device_ssh_sessions'
+        && resolvedEntity !== 'device_tty_sessions'
+      ) {
+        return buildDeviceRemoteAccessSessionSuggestions({
+          ctx,
+          input,
+          baseEntity: 'device_tunnels',
+        });
+      }
 
-          pluck_object: {
-            ...addCommonGridPluckObject(),
-            devices: ['instance_name', 'id'],
-            [pluralize(input?.entity)]: ['id', 'code', 'categories', 'status', 'created_date', 'created_time', 'created_by', 'updated_date', 'updated_time', 'remote_access_category', 'remote_access_type','remote_access_status', 'updated_by'],
-          },
-          track_total_records: true,
-          advance_filters: input?.advance_filters as IAdvanceFilters[],
-          group_advance_filters: (input.group_advance_filters ||
-            []) as IGroupAdvanceFilters<string | number>[],
-          order: {
-            starts_at:
-              // current 5 *  input.limit 50 = 250
-              (input.current || 0) === 0
-                ? 0
-                : (input.current || 1) * (input.limit || 100) -
-                  (input.limit || 100),
-            limit: input.limit || 1,
-            // by_field: "created_date",
-            // by_direction: EOrderDirection.ASC,
-          },
-          // @ts-expect-error - multiple sort
-          multiple_sort: input.sorting?.length
-            ? formatSorting(input.sorting, input.entity, input.is_case_sensitive_sorting)
-            : [],
-          concatenate_fields: [...addCommonGridConcatenates(input?.entity)],
+      return buildDeviceRemoteAccessSessionSuggestions({
+        ctx,
+        input,
+        baseEntity: resolvedEntity,
+      });
+    }),
+  deviceRemoteAccessSessionUiSearch: privateProcedure
+    .input(ZodSearchSuggestions)
+    .mutation(async ({ input, ctx }) => {
+      return buildDeviceRemoteAccessSessionSuggestions({
+        ctx,
+        input: {
+          ...input,
+          entity: 'device_tunnels',
         },
-      })
-      .join({
-        type: 'left',
-        field_relation: {
-          to: {
-            entity: 'devices',
-            field: 'id',
-          },
-          from: {
-            entity,
-            field: 'device_id',
-          },
+        baseEntity: 'device_tunnels',
+      });
+    }),
+  deviceRemoteAccessSessionSshSearch: privateProcedure
+    .input(ZodSearchSuggestions)
+    .mutation(async ({ input, ctx }) => {
+      return buildDeviceRemoteAccessSessionSuggestions({
+        ctx,
+        input: {
+          ...input,
+          entity: 'device_ssh_sessions',
         },
-      })
-    addCommonGridJoins(query, entity);
-
-    const { data: items } = await query.execute();
-
-    // Calculate total number of pages
-    const suggestions = searchSuggestionTransformer(items, searchable_fields);
-    const resolvedSuggestions = suggestions.map((suggestion: any) => {
-      return suggestion;
-    });
-    return { items: resolvedSuggestions };
-  }),
+        baseEntity: 'device_ssh_sessions',
+      });
+    }),
+  deviceRemoteAccessSessionTtySearch: privateProcedure
+    .input(ZodSearchSuggestions)
+    .mutation(async ({ input, ctx }) => {
+      return buildDeviceRemoteAccessSessionSuggestions({
+        ctx,
+        input: {
+          ...input,
+          entity: 'device_tty_sessions',
+        },
+        baseEntity: 'device_tty_sessions',
+      });
+    }),
 });

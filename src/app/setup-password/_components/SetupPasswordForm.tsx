@@ -34,12 +34,15 @@ const SetupPasswordForm = () => {
         account_secret: data.new_password as string,
         id: accountId!,
       })
+    } catch (error: unknown) {
+      // redirect() throws NEXT_REDIRECT sentinel — rethrow so Next navigates
+      if ((error as { digest?: string })?.digest?.startsWith('NEXT_REDIRECT')) {
+        throw error;
     }
-    catch (error: unknown) {
       setError('Something went wrong')
       setIsSubmitting(false)
     }
-  }
+  };
 
   return (
     <Form {...form}>
@@ -77,7 +80,7 @@ const SetupPasswordForm = () => {
           className={
             'justify-center\\\\ !mt-8 flex h-auto w-full items-center rounded py-1.5 text-md font-semibold text-white shadow-sm'
           }
-          data-test-id='login-submit-btn'
+          data-test-id='login-submit-button'
           loading={isSubmitting}
           type='submit'
         >

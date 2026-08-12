@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState, useCallback } from 'react'
+import { useEffect, useState, useCallback, useRef, useMemo } from 'react'
 import { getFlagDetails } from '~/app/api/device/get_flags'
 import { getLastTimeStamp } from '~/app/portal/device/utils/timeRange'
 import { useEventEmitter } from '~/context/EventEmitterProvider'
@@ -8,6 +8,9 @@ import { api } from '~/trpc/react'
 
 import MapComponent from './components/MapComponent'
 import { useSocketConnection } from '../../custom-hooks/useSocketConnection'
+import Filter from '../../timeline/Filter'
+import { Card, CardHeader, CardTitle } from '~/components/ui/card'
+import { Alert, AlertContent } from '~/components/ui/alert'
 
 /**
  * Formats IP data with country information, handling cases where country info is missing
@@ -258,7 +261,9 @@ export function prepareMapComponentData(formattedData: Record<string, any>) {
   return mapReadyData
 }
 
-export default function TrafficMaps({ params }: Record<string, any>) {
+const THREE_SECONDS_MS  = 3_000
+
+export default function TrafficMaps({ params, defaultValues }: Record<string, any>) {
   const eventEmitter = useEventEmitter()
   const [filterId, setFilterID] = useState('01JNQ9WPA2JWNTC27YCTCYC1FE')
   const [searchBy, setSearchBy] = useState()
@@ -272,28 +277,23 @@ export default function TrafficMaps({ params }: Record<string, any>) {
     cityToCityConnections: [],
   })
   const [isLoading, setIsLoading] = useState(true)
-  const [timeSettings, setTimeSettings] = useState<Record<string, any>>({
-    time_count: 12,
-    time_unit: 'hour',
-    resolution: '1h',
-  })
 
   const [token, setToken] = useState<string | null>(null)
   const [org_acc_id, setOrgAccountID] = useState<string | null>(null)
   const channel_name = 'live_map'
-  const {socket} = useSocketConnection({channel_name, token})
+  const {socket, isConnected} = useSocketConnection({channel_name, token})
   const getAccount = api.organizationAccount.getAccountID.useMutation()
-  
+  const isUnmountedRef = useRef(false)
+  const [isInitialized, setIsInitialized] = useState(false)
+  const isFetchRunningRef = useRef(false)
+  const fetchInitialDataRef = useRef<((isInitial: boolean) => Promise<void>) | null>(null)
+
   // API hooks
   const getUniqueSourceAndDestinationIP = api.packet.getUniqueSourceAndDestinationIP.useMutation()
-  const { refetch: refetchTimeUnitandResolution } = api.cachedFilter.fetchCachedFilterTimeUnitandResolution.useQuery(
-    {
-      type: 'timeline_filter',
-      filter_id: filterId,
-    }, {
-      enabled: false,
-    }
-  )
+
+  const pollingInterval = useMemo(() => {
+    return THREE_SECONDS_MS
+  }, [])
 
   // Process and enhance IP data with country flags
   const processIPData = useCallback(async (ipData: Record<string, any>) => {
@@ -303,7 +303,7 @@ export default function TrafficMaps({ params }: Record<string, any>) {
       
       // Process source country flag
       if (ipData.source_country) {
-        const sourceFlagDetails = await getFlagDetails(ipData.source_country);
+        const sourceFlagDetails = await getFlagDetails(ipData.source_country?.country);
         if (sourceFlagDetails?.name) {
           updatedData.source_country = {
             country: sourceFlagDetails.name,
@@ -313,7 +313,7 @@ export default function TrafficMaps({ params }: Record<string, any>) {
       
       // Process destination country flag
       if (ipData.destination_country) {
-        const destFlagDetails = await getFlagDetails(ipData.destination_country);
+        const destFlagDetails = await getFlagDetails(ipData.destination_country?.country);
         if (destFlagDetails?.name) {
           updatedData.destination_country = {
             country: destFlagDetails.name,
@@ -342,51 +342,57 @@ export default function TrafficMaps({ params }: Record<string, any>) {
     };
     
     fetchAccount();
-  }, [getAccount]);
+  }, [
+    // getAccount
+  ]);
 
   // Fetch time settings
   useEffect(() => {
     if (!filterId) return;
 
+    setIsInitialized(false)
+    isFetchRunningRef.current = false
+
     const fetchTimeSettings = async () => {
       try {
-        const { data: time_unit_resolution } = await refetchTimeUnitandResolution();
-        const { time, resolution = '1h' } = time_unit_resolution || {};
-        const { time_count = 12, time_unit = 'hour' } = time || {};
-
-        setTimeSettings({
-          time_count,
-          time_unit,
-          resolution,
-        });
-        
-        // After time settings are updated, fetch initial data
-        fetchInitialData();
+       
+        fetchInitialDataRef.current = fetchInitialData
+        await fetchInitialDataRef.current?.(true)
       } catch (error) {
         console.error('Failed to fetch time settings:', error);
       }
     };
     
     fetchTimeSettings();
-  }, [filterId, searchBy, refetchTimeUnitandResolution]);
+  }, [filterId, searchBy]);
 
   // Fetch initial data (just one record for initial display)
-  const fetchInitialData = useCallback(async () => {
+  const fetchInitialData = useCallback(async (isInitial: boolean) => {
+    if (isFetchRunningRef.current) return
+    isFetchRunningRef.current = true
+    console.debug(`[pooling] - fetchInitialData`)
     setIsLoading(true);
     
     try {
-      const timeRange = getLastTimeStamp({
-        count: timeSettings.time_count,
-        unit: timeSettings.time_unit,
+      const timeRange = isInitial ? getLastTimeStamp({
+          count: 1,
+          unit: 'minute',
+          add_remaining_time: true,
+          _now: new Date(Date.now() - 10_000)
+        }) : getLastTimeStamp({
+        count: 2,  // timeSettings.time_count,
+        unit: 'second', // timeSettings.time_unit,
         add_remaining_time: true,
+        _now: new Date(Date.now() - 10_000)
       });
       
       const input: any = {
         device_id: params?.id || '',
         time_range: timeRange,
         filter_id: filterId,
-        batch_size: 1, // Just fetch one record for initial display
-        batch_offset: 0,
+        // batch_size: isInitial ? 1 : 100, // Just fetch one record for initial display
+        // batch_offset: 0,
+        address: defaultValues?.address
       };
       
       const result = await getUniqueSourceAndDestinationIP.mutateAsync(input);
@@ -394,14 +400,15 @@ export default function TrafficMaps({ params }: Record<string, any>) {
       
       if (ipData.length > 0) {
         // Process the IP data
-        const processedData = await processIPData(ipData[0]);
+        let processedDatas = []
+          processedDatas = await Promise.all(ipData.map(async (ip) => await processIPData(ip)))
         
         // Update map data with the processed data
         setMapData((prev: any) => {
           return ({
           ...prev,
           countryTrafficData: {
-            ipData: [processedData]
+            ipData: processedDatas // .filter(e => e.source_country.country !== 'No IP Info')
           }
         })});
       }
@@ -409,16 +416,19 @@ export default function TrafficMaps({ params }: Record<string, any>) {
       console.error('Error fetching initial data:', error);
     } finally {
       setIsLoading(false);
+      isFetchRunningRef.current = false
+      if (!isUnmountedRef.current) setIsInitialized(true)
     }
-  }, [filterId, params?.id, getUniqueSourceAndDestinationIP, timeSettings, processIPData]);
-
+  }, [filterId, params?.id, getUniqueSourceAndDestinationIP, processIPData]);
   // Listen for socket updates
   useEffect(() => {
+    console.debug(`[socket] event - ${channel_name} listener isnt created yet`)
     if (!socket || !org_acc_id || filterId !== '01JNQ9WPA2JWNTC27YCTCYC1FE') return;
-  
     const eventKey = `${channel_name}-${params?.id}-${org_acc_id}`;
-  
+    
+    console.debug(`[socket] event - ${eventKey} listener created`)
     socket.on(eventKey, async (data: any) => {
+      console.debug(`[socket] event ${eventKey} - data`, data)
       // Format the incoming data
       const formattedData = {
         id: data.id,
@@ -476,18 +486,46 @@ export default function TrafficMaps({ params }: Record<string, any>) {
     };
   }, [eventEmitter]);
 
-  // Function to reload data
-  const reloadData = () => {
-    fetchInitialData();
-  };
+  useEffect(() => {
+    isUnmountedRef.current = false
+    return () => {
+      isUnmountedRef.current = true
+    }
+  }, [])
+
+  useEffect(() => {
+    if (!isInitialized) return
+    const id = window.setInterval(() => void fetchInitialDataRef.current?.(false), pollingInterval)
+    return () => window.clearInterval(id)
+  }, [isInitialized, pollingInterval])
+
+  useEffect(() => {
+    if (!filterId) return
+
+    eventEmitter.emit('timeline_filter_id_active_label', filterId)
+  }, [filterId])
 
   return (
-    <div>
-      {/* <Filter params={params} type='map_filter' />
-      <Search filter_type='map_search' params={{ ...params, router: 'packet', resolver: 'filterPackets' }} /> */}
-      <h1>Traffic Flow</h1>
+    <Card className='overflow-hidden'>
+      {/* <Filter params={params} type='map_filter' /> */}
+      {/* <Search filter_type='map_search' params={{ ...params, router: 'packet', resolver: 'filterPackets' }} /> */}
+      <CardHeader className={"flex flex-row items-center justify-between bg-slate-100"}>
+        <CardTitle className="flex gap-3 items-center text-md text-foreground">
+          Traffic Flow
+          {defaultValues.is_device_online && isConnected && (
+            <div className="flex gap-1 items-center leading-[0] text-[10px] text-success"><div className="size-1.5 rounded-full bg-success" /> LIVE</div>
+          )}
+        </CardTitle>
+      </CardHeader>
+      {!(defaultValues?.address?.country || defaultValues?.address?.city) && (
+        <Alert variant="warning" dismissible className="mt-2 mb-2">
+          <AlertContent>
+            Select Device Location 1st
+          </AlertContent>
+        </Alert>
+      )}
 
-      {isLoading ? (
+      {false ? (// isLoading ? (
         <div className='flex justify-center items-center h-64'>
           <div className='text-center'>
             <p className='mb-2'>Loading map data...</p>
@@ -495,16 +533,17 @@ export default function TrafficMaps({ params }: Record<string, any>) {
           </div>
         </div>
       ) : (
-        <div className='relative z-[1]'>
+        <div className='relative z-[1] overflow-hidden'>
           { (
             <>
-              <MapComponent 
+              <MapComponent
                 countryTrafficData={mapData.countryTrafficData}
+                filterId={filterId}
               />
             </>
           )}
         </div>
       )}
-    </div>
+    </Card>
   )
 }

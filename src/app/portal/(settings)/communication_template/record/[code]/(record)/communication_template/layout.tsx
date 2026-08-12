@@ -6,4 +6,6 @@ const RecordLayout: React.FC<any> = (props) => {
   return <div className="space-y-2">{forms}</div>;
 };
 
+export const dynamic = 'force-dynamic';
+
 export default RecordLayout;

@@ -1,10 +1,13 @@
 import { createTRPCRouter, privateProcedure } from '~/server/api/trpc';
 import { z } from 'zod';
-import {  type IAdvanceFilters } from '@dna-platform/common-orm';
+import { EOperator, type IAdvanceFilters } from '@dna-platform/common-orm';
 import { TRPCError } from '@trpc/server';
 import Entities from '~/auto-generated/entities';
 import { headers } from 'next/headers';
 import { createAdvancedFilter } from '~/server/utils/transformAdvanceFilter';
+import { addCommonGridJoins, addCommonGridPluckObject } from '~/server/utils/queryBuilder';
+import pluralize from 'pluralize';
+import { setMetaHeader } from '~/utils/request-header';
 
 const { ROOT_ACCOUNT_PASSWORD = 'pl3@s3ch@ng3m3!!' } = process.env;
 
@@ -47,17 +50,15 @@ export const recordRouter = createTRPCRouter({
       if (!input?.id) return null;
       try {
         const recordByCode = await ctx.dnaClient
-        .findByCode(input.id, {
-          entity: input.main_entity,
-          token: ctx.token.value,
-          query: {
-            pluck: input.pluck_fields,
-          },
-        })
-        .execute();
-        
+          .findByCode(input.id, {
+            entity: input.main_entity,
+            token: ctx.token.value,
+            query: {
+              pluck: input.pluck_fields,
+            },
+          })
+          .execute();
         const { data, ...rest } = recordByCode ?? {};
-        
         return {
           ...rest,
           data: data?.[0],
@@ -72,7 +73,7 @@ export const recordRouter = createTRPCRouter({
         } as Record<string, any>;
       }
     }),
-  getByCodeWithJoin: privateProcedure
+    getByCodeWithJoin: privateProcedure
     .input(
       z.object({
         id: z.string().min(1),
@@ -82,10 +83,7 @@ export const recordRouter = createTRPCRouter({
     )
     .query(async ({ input, ctx }) => {
       const { id, pluck_fields, main_entity: entity } = input;
-      const join_type =
-        entity === 'contact'
-          ? 'self'
-          : ('left' as 'self' | 'left' | 'right' | 'inner');
+
       const base_query = {
         entity,
         token: ctx.token.value,
@@ -99,87 +97,40 @@ export const recordRouter = createTRPCRouter({
             },
           ] as IAdvanceFilters<string | number>[],
           pluck_object: {
-            [`${entity}s`]: pluck_fields,
-            ...(join_type === 'self'
-              ? {}
-              : { contacts: ['first_name', 'last_name'] }),
+            ...addCommonGridPluckObject(),
+            [`${pluralize(entity)}`]: pluck_fields,
           },
         },
       };
-      const created_by_join = {
-        type: join_type,
-        field_relation:
-          join_type === 'self'
-            ? {
-                to: {
-                  entity,
-                  field: 'created_by',
-                },
-                from: {
-                  ...(join_type === 'self' ? { alias: 'created_by_data' } : {}),
-                  entity: 'contact',
-                  field: 'id',
-                },
-              }
-            : {
-                from: {
-                  entity,
-                  field: 'created_by',
-                },
-                to: {
-                  ...(join_type === 'left' ? { alias: 'created_by_data' } : {}),
-                  entity: 'contact',
-                  field: 'id',
-                },
-              },
-      };
-      const updated_by_join = {
-        type: join_type,
-        field_relation:
-          join_type === 'self'
-            ? {
-                to: {
-                  entity,
-                  field: 'updated_by',
-                },
-                from: {
-                  ...(join_type === 'self' ? { alias: 'updated_by_data' } : {}),
-                  entity: 'contact',
-                  field: 'id',
-                },
-              }
-            : {
-                from: {
-                  entity,
-                  field: 'updated_by',
-                },
-                to: {
-                  ...(join_type === 'left' ? { alias: 'updated_by_data' } : {}),
-                  entity: 'contact',
-                  field: 'id',
-                },
-              },
-      };
-      const query = ctx.dnaClient
-        .findAll(base_query)
-        .join(created_by_join)
-        .join(updated_by_join);
+   
+      const query = ctx.dnaClient.findAll(base_query);
+      addCommonGridJoins(query, entity);
 
       const response = await query.execute();
 
       const { data } = response;
 
-      const {
-        created_by_data,
-        updated_by_data,
-        [entity + 's']: entity_data,
+      let {
+        created_by,
+        updated_by,
+        [pluralize(entity)]: entity_data,
       } = data?.[0] ?? {};
+
+      if (!entity_data)
+        entity_data = data?.[0];
+
+      if (Array.isArray(created_by))
+        created_by = created_by[0];
+      
+      if (Array.isArray(updated_by))
+        updated_by = updated_by[0];
+      
       const formatted_data = {
         ...response,
         data: {
           ...entity_data,
-          created_by_data,
-          updated_by_data,
+          created_by_data: created_by,
+          updated_by_data: updated_by,
         },
       };
       return formatted_data;
@@ -264,13 +215,26 @@ export const recordRouter = createTRPCRouter({
 
     const accountOrganizations = accounts.data?.reduce(
       (orgs: any, account: any) => {
-        const {
+        let {
           account_organizations,
           contacts,
           organizations,
           user_roles,
           external_contacts,
         } = account ?? {};
+
+        if (Array.isArray(contacts)) {
+          contacts = contacts[0];
+        }
+
+        if (Array.isArray(organizations)) {
+          organizations = organizations[0];
+        }
+
+        if (Array.isArray(user_roles)) {
+          user_roles = user_roles[0];
+        }
+        
         const firstname = `${contacts?.first_name || external_contacts?.first_name}`;
         const lastname = `${contacts?.last_name || external_contacts?.last_name}`;
         if (organizations?.id === response?.organization_id) {
@@ -315,6 +279,7 @@ export const recordRouter = createTRPCRouter({
       }),
     )
     .mutation(async ({ input, ctx }) => {
+      await setMetaHeader(ctx, input.entity);
       return ctx.dnaClient
         .update(input.id, {
           entity: input.entity,
@@ -344,6 +309,7 @@ export const recordRouter = createTRPCRouter({
       }),
     )
     .mutation(async ({ input, ctx }) => {
+      await setMetaHeader(ctx, input.entity);
       const record = await ctx.dnaClient
         .findByCode(input.identifier, {
           entity: input.entity,
@@ -383,7 +349,7 @@ export const recordRouter = createTRPCRouter({
       }),
     )
     .mutation(async ({ input, ctx }) => {
-
+      await setMetaHeader(ctx, input.entity);
       const result = await ctx.dnaClient
         .update(input.id, {
           entity: input.entity,
@@ -406,6 +372,7 @@ export const recordRouter = createTRPCRouter({
       }),
     )
     .mutation(async ({ input, ctx }) => {
+      await setMetaHeader(ctx, input.entity);
       const headerList = await headers();
       const pathName = headerList.get('x-pathname') || '';
       const [, , , , identifier] = pathName.split('/');

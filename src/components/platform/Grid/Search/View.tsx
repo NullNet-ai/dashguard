@@ -22,7 +22,7 @@ import { testIDFormatter } from '~/utils/formatter'
 export default function Search({ gridType }: any) {
   const { state, actions } = useContext(SearchGridContext);
   const { state: gridState } = useContext(GridContext);
-
+  const { enableSearch = true } = gridState?.config ?? {};
   const path =  usePathname()
   const [, , path1, path2] = path.split('/')
   const { width } = useWindowSize();
@@ -42,6 +42,10 @@ export default function Search({ gridType }: any) {
   const { handleOldSearchQuery } = actions ?? {};
 
   const debouncedSearchInput = useDebounce(query, 500);
+
+  if (!enableSearch) {
+    return null;
+  }
 
   const data = handleOldSearchQuery!(
     {

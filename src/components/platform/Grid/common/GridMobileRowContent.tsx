@@ -97,7 +97,7 @@ const GridMobileRowContent = ({
             ...statColumn.getContext(),
             view_mode: 'card',
           }) : null}
-              <div>
+              {/* <div>
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild={true}>
                     <div className="flex cursor-pointer items-center gap-2 px-1 py-1.5 text-left text-sm">
@@ -146,7 +146,7 @@ const GridMobileRowContent = ({
                       })}
                   </DropdownMenuContent>
                 </DropdownMenu>
-              </div>
+              </div> */}
               </div>
             )
           : null}

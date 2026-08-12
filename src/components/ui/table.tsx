@@ -18,6 +18,8 @@ const Table = React.forwardRef<
     withVerticalLines?: boolean;
     zebra?: boolean;
     responsive?: boolean;
+    containerClassname?: string
+    showScrollbar?: boolean; 
   }
 >(
   (
@@ -27,15 +29,18 @@ const Table = React.forwardRef<
       withVerticalLines,
       zebra,
       responsive = true,
+      containerClassname,
+      showScrollbar = false,
       ...props
     },
     ref,
   ) => (
-    <div className={responsive ? 'w-full' : undefined}>
+    <div className={cn(responsive ? 'w-full' : undefined, containerClassname)}>
       <table
         ref={ref}
         className={cn(
           responsive ? 'w-full' : 'min-w-full',
+          showScrollbar && 'scrollbar-visible', 
           (withStripedRows || zebra) &&
             '[&_tbody_tr:nth-child(even)]:bg-slate-50',
           withVerticalLines &&
@@ -191,6 +196,15 @@ const TableCell = React.forwardRef<
               });
             return;
           }
+
+          const labelField = config?.recordLabelField;
+          if (labelField && row.original?.[labelField]) {
+            sessionStorage.setItem(
+              `tab-label:${edit.code}`,
+              row.original[labelField],
+            );
+          }
+
           router.push(
             `/portal/${edit?.entity}/record/${edit?.code}/${edit?.entity}`,
           );

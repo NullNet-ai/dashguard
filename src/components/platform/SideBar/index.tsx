@@ -49,6 +49,39 @@ import {
   TooltipTrigger,
 } from '~/components/ui/tooltip'
 
+const isImageIcon = (icon?: string) => {
+  if (!icon) return false
+  const lower = icon.toLowerCase()
+  return (
+    lower.startsWith('/') &&
+    (lower.endsWith('.png') ||
+      lower.endsWith('.svg') ||
+      lower.endsWith('.jpg') ||
+      lower.endsWith('.jpeg') ||
+      lower.endsWith('.webp') ||
+      lower.endsWith('.gif'))
+  )
+}
+
+const ImageMaskIcon = ({
+  src,
+  className,
+}: {
+  src: string
+  className?: string
+}) => {
+  return (
+    <span
+      aria-hidden={true}
+      style={{ WebkitMaskImage: `url(${src})`, maskImage: `url(${src})` }}
+      className={cn(
+        'inline-block bg-current [-webkit-mask-repeat:no-repeat] [-webkit-mask-position:center] [-webkit-mask-size:contain] [mask-repeat:no-repeat] [mask-position:center] [mask-size:contain]',
+        className,
+      )}
+    />
+  )
+}
+
 export default function AppSideBar(config: ISideBarProps) {
   const {
     headerComponent,
@@ -68,6 +101,11 @@ export default function AppSideBar(config: ISideBarProps) {
   const handleLogout = async () => {
     await apiAuth.mutateAsync().then(() => {
       localStorage.removeItem('entity-last-paths');
+      Object.keys(localStorage).forEach(key => {
+        if (key.startsWith('grid_persistence')) {
+          localStorage.removeItem(key);
+        }
+      });
       navigate.push('/login')
     })
   };
@@ -75,12 +113,13 @@ export default function AppSideBar(config: ISideBarProps) {
   const { width } = useWindowSize()
   const screen = useScreenType() || screenType
   const isMobile = screen !== 'lg' && screen !== 'xl' && screen !== '2xl'
+  const mobileView = (open && isMobile) || openMobile || (open && !openMobile)
 
   if (screenType !== screen && screen) {
-    Cookies.set('screen-type', `${screen}`, { expires: 7 })
+    Cookies.set('screen-type', `${screen}`, { expires: 7 });
   }
 
-
+  const sidebarIsOpen = isMobile ? openMobile : open;
 
   // Use provided configs or fall back to static items
   const favoriteItems = favoritesMenuConfig || [];
@@ -96,9 +135,9 @@ export default function AppSideBar(config: ISideBarProps) {
         icon: tabsDisplayVariant === 'icon-only' ? (
           <TooltipProvider >
             <Tooltip delayDuration={100}>
-              <TooltipTrigger asChild>
+              {/* <TooltipTrigger asChild>
                 <Bars3Icon className="h-5 w-5" />
-              </TooltipTrigger>
+              </TooltipTrigger> */}
               <TooltipContent side="top">
                 <p>Menu</p>
               </TooltipContent>
@@ -128,70 +167,70 @@ export default function AppSideBar(config: ISideBarProps) {
           </>
         )
       },
-      {
-        id: 'favorites',
-        label: tabsDisplayVariant === 'label-only' ? "Favorites" : "",
-        icon: tabsDisplayVariant === 'icon-only' ? (
-          <TooltipProvider>
-            <Tooltip delayDuration={100}>
-              <TooltipTrigger asChild>
-                <StarIcon className="h-5 w-5" />
-              </TooltipTrigger>
-              <TooltipContent side="top">
-                <p>Favorites</p>
-              </TooltipContent>
-            </Tooltip>
-          </TooltipProvider>
-        ) : undefined,
-        content: (
-          <>
-            {favoriteItems.length > 0 ? (
-              favoriteItems.map((item, index) => (
-                <Fragment key={index}>
-                  <Menu item={item} screenType={screen || screenType} />
-                  {index % 5 === 4 && <Separator className="my-2" />}
-                </Fragment>
-              ))
-            ) : (
-              <div className="flex h-32 w-full items-center justify-center text-muted-foreground">
-                <p>Favorites Coming Soon</p>
-              </div>
-            )}
-          </>
-        )
-      },
-      {
-        id: 'history',
-        label: tabsDisplayVariant === 'label-only' ? "History" : "",
-        icon: tabsDisplayVariant === 'icon-only' ? (
-          <TooltipProvider>
-            <Tooltip delayDuration={100}>
-              <TooltipTrigger asChild>
-                <ClipboardDocumentListIcon className="h-5 w-5" />
-              </TooltipTrigger>
-              <TooltipContent side="top">
-                <p>History</p>
-              </TooltipContent>
-            </Tooltip>
-          </TooltipProvider>
-        ) : undefined,
-        content: (
-          <>
-            {historyItems.length > 0 ? (
-              historyItems.map((item, index) => (
-                <Fragment key={index}>
-                  <Menu item={item} screenType={screen || screenType} />
-                  {index % 5 === 4 && <Separator className="my-2" />}
-                </Fragment>
-              ))
-            ) : (
-              <div className="flex h-32 w-full items-center justify-center text-muted-foreground">
-                <p>History Coming Soon</p>
-              </div>
-            )}
-          </>
-        )
-      }
+      // {
+      //   id: 'favorites',
+      //   label: tabsDisplayVariant === 'label-only' ? "Favorites" : "",
+      //   icon: tabsDisplayVariant === 'icon-only' ? (
+      //     <TooltipProvider>
+      //       <Tooltip delayDuration={100}>
+      //         <TooltipTrigger asChild>
+      //           <StarIcon className="h-5 w-5" />
+      //         </TooltipTrigger>
+      //         <TooltipContent side="top">
+      //           <p>Favorites</p>
+      //         </TooltipContent>
+      //       </Tooltip>
+      //     </TooltipProvider>
+      //   ) : undefined,
+      //   content: (
+      //     <>
+      //       {favoriteItems.length > 0 ? (
+      //         favoriteItems.map((item, index) => (
+      //           <Fragment key={index}>
+      //             <Menu item={item} screenType={screen || screenType} />
+      //             {index % 5 === 4 && <Separator className="my-2" />}
+      //           </Fragment>
+      //         ))
+      //       ) : (
+      //         <div className="flex h-32 w-full items-center justify-center text-muted-foreground">
+      //           <p>Favorites Coming Soon</p>
+      //         </div>
+      //       )}
+      //     </>
+      //   )
+      // },
+      // {
+      //   id: 'history',
+      //   label: tabsDisplayVariant === 'label-only' ? "History" : "",
+      //   icon: tabsDisplayVariant === 'icon-only' ? (
+      //     <TooltipProvider>
+      //       <Tooltip delayDuration={100}>
+      //         <TooltipTrigger asChild>
+      //           <ClipboardDocumentListIcon className="h-5 w-5" />
+      //         </TooltipTrigger>
+      //         <TooltipContent side="top">
+      //           <p>History</p>
+      //         </TooltipContent>
+      //       </Tooltip>
+      //     </TooltipProvider>
+      //   ) : undefined,
+      //   content: (
+      //     <>
+      //       {historyItems.length > 0 ? (
+      //         historyItems.map((item, index) => (
+      //           <Fragment key={index}>
+      //             <Menu item={item} screenType={screen || screenType} />
+      //             {index % 5 === 4 && <Separator className="my-2" />}
+      //           </Fragment>
+      //         ))
+      //       ) : (
+      //         <div className="flex h-32 w-full items-center justify-center text-muted-foreground">
+      //           <p>History Coming Soon</p>
+      //         </div>
+      //       )}
+      //     </>
+      //   )
+      // }
     ];
 
   return (
@@ -204,7 +243,7 @@ export default function AppSideBar(config: ISideBarProps) {
         <SidebarHeader className="group relative">
           <SidebarTrigger
             Icon={TriggerOpenCloseSidebarComponent}
-            className={`absolute right-2 top-10 z-50 flex group-hover:flex ${open || openMobile ? 'hidden' : 'lg:flex'}`}
+            className={`absolute right-2 top-10 z-50  flex group-hover:flex ${open || openMobile ? 'hidden' : 'lg:flex'}`}
             data-test-id="sdnavmenu-trigger-btn"
           />
           <SidebarMenu>
@@ -213,18 +252,25 @@ export default function AppSideBar(config: ISideBarProps) {
         </SidebarHeader>
       )}
       <SidebarContent>
-        <div className="px-1">
-          <StateTab
-            tabs={tabItems}
-            variant='underline'
-            size="md"
-            className={cn(
-              "w-full",
-              !open && "flex"
-            )}
-            defaultValue="menu"
-            persistKey="sidebar-tabs" // Changed to match the expected key in StateTab component
-          />
+        <div className="px-1 mt-4">
+          {mainMenuConfig?.map((item, index) => {
+            return (
+              <Fragment key={index}>
+                {!item?.groups?.length
+                  ? (
+                    <Menu item={item} screenType={screen || screenType} />
+                  )
+                  : (
+                    <GroupMenu
+                      title={item?.groupTitle || ''}
+                      groups={item.groups}
+                      screenType={screen || screenType || ''}
+                    />
+                  )}
+                {item?.separator && <Separator className="my-2" />}
+              </Fragment>
+            )
+          })}
         </div>
       </SidebarContent>
       {footerComponent && (
@@ -233,52 +279,39 @@ export default function AppSideBar(config: ISideBarProps) {
             <SidebarMenuItem>
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
-                  {open
-                    ? (
-                      <div
-                        className={cn(`${open ? 'w-full border-b opacity-100 py-2' : 'h-0 w-0 opacity-0'} `)}
-                      >
-                        <SidebarMenuButton
-                          data-test-id="sdnavmenu-ftr-btn"
-                          size="lg"
-                          className="h-12 w-full p-1 data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground"
-                        >
-                          {footerComponent}
-                          <ChevronUpDownIcon className="ml-auto size-4" />
-                        </SidebarMenuButton>
-                      </div>
-                    )
-                    : (
-                      <div
-                        className={cn(
-                          `cursor-pointer ${!open ? 'w-full opacity-100' : 'h-0 w-0 opacity-0'}`,
-                        )}
-                      >
-                        {footerComponent}
-                      </div>
+                  <SidebarMenuButton
+                    data-test-id="sdnavmenu-ftr-btn"
+                    size="lg"
+                    className={cn(
+                      'h-12 p-1 data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground',
+                      open
+                        ? 'w-full border-b py-2 opacity-100'
+                        : cn('flex w-full cursor-pointer opacity-100', {
+                            'justify-center': !sidebarIsOpen,
+                          }),
                     )}
+                  >
+                    {footerComponent}
+                    {open && <ChevronUpDownIcon className="ml-auto size-4" />}
+                  </SidebarMenuButton>
                 </DropdownMenuTrigger>
                 <Button
                   variant="ghost"
                   onClick={() => handleLogout()}
                   data-test-id="sdnavmenu-ftr-logout-btn"
                   className={cn(
-                    `h-8 w-full text-destructive hover:bg-secondary hover:text-destructive`, `${open && !isMobile ? 'justify-start' : 'justify-center'}`, `${openMobile ? 'justify-start px-2' : ''}`,
+                    `h-8 w-full text-destructive hover:bg-secondary hover:text-destructive`, `${mobileView ? 'justify-start' : 'justify-center'}`, `${openMobile ? 'justify-start px-2' : ''}`,
                   )}
                 >
                   <ArrowLeftStartOnRectangleIcon
                     className="mr-2 ms-3 h-5 w-5"
                   />
-                  {(open && !isMobile)
-                    || (openMobile && isMobile)
-                    || (open && !openMobile && !isMobile)
-                    ? (
+                  {mobileView && (
                       <p>Logout</p>
-                    )
-                    : null}
+                    )}
                 </Button>
                 <footer className="mt-1 grid h-10 w-full place-items-center text-nowrap bg-muted text-[10px] text-muted-foreground/70">
-                  {(open && !isMobile) || (openMobile && isMobile)
+                  {mobileView
                     ? (
                       <span>
                         &copy;
@@ -310,6 +343,7 @@ export default function AppSideBar(config: ISideBarProps) {
                       // @ts-expect-error - TS doesn't know about dynamic imports
                       // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, import/namespace
                       const ICON = _ICON?.[item?.icon] ?? ChevronUpDownIcon
+                      const iconIsImage = isImageIcon(item?.icon)
                       return (
                         <DropdownMenuItem
                           key={index}
@@ -317,7 +351,11 @@ export default function AppSideBar(config: ISideBarProps) {
                             'sdnavmenu-ftr-' + item.title?.split('').join(''),
                           )}
                         >
-                          <ICON className="mr-2 h-5 w-5" />
+                          {iconIsImage ? (
+                            <ImageMaskIcon src={item.icon ?? ''} className="mr-2 h-5 w-5" />
+                          ) : (
+                            <ICON className="mr-2 h-5 w-5" />
+                          )}
                           {item.title}
                         </DropdownMenuItem>
                       )

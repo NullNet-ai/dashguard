@@ -9,39 +9,59 @@ import {
   ChartTooltipContent,
 } from '~/components/ui/chart'
 import { formatNumber, modifyAxis } from './LineChart';
-import { useMemo, useRef } from 'react';
-import { graphColors } from './graph-color';
+import { useMemo } from 'react';
+import { getInterfaceColor } from './graph-color';
+import { formatBytes } from '../../pie-chart/function/formatBytes'
 
 const BarChartComponent = ({ filteredData, interfaces }: { filteredData: Record<string, any>[], interfaces: any }) => {
-  // Store the previous yAxisMax value
-  const previousYAxisMaxRef = useRef<number | null>(null);
-
-  // Dynamically calculate the Y-axis domain
-  const { yAxisMax: calculatedYAxisMax, yAxisMin } = useMemo(() => modifyAxis(filteredData), [filteredData]);
-
-  // Update the Y-axis max only if the new value is greater than the previous value
-  const yAxisMax = useMemo(() => {
-    if (previousYAxisMaxRef.current === null || calculatedYAxisMax > previousYAxisMaxRef.current) {
-      previousYAxisMaxRef.current = calculatedYAxisMax;
-    }
-    return previousYAxisMaxRef.current;
-  }, [calculatedYAxisMax]);
+  const formatTooltipValue = (value: unknown, item: any) => {
+    const { payload, dataKey } = item;
+    const packet = payload[`${dataKey}_packet`];
+    const originalValue = payload[`${dataKey}_original`] ?? value;
+    const numericValue =
+      typeof originalValue === 'number' ? originalValue : Number(originalValue);
+    return `${Number.isFinite(numericValue) ? formatBytes(numericValue) : String(originalValue ?? '')} (${packet} Packet${packet > 1 ? 's' : ''})`;
+  };
+  const { yAxisMax, yAxisMin } = useMemo(
+    () => modifyAxis(filteredData),
+    [filteredData],
+  );
 
   const number_of_ticks = 4; // Fixed to 4 ticks for Y-axis
 
+  const yDomain = useMemo(() => {
+    if (yAxisMax == null || yAxisMin == null) return ['auto', 'auto'];
+    if (yAxisMax === 0 && yAxisMin === 0) return [0, 1];
+    return [yAxisMin, yAxisMax];
+  }, [yAxisMin, yAxisMax]);
+
   const yticks = useMemo(() => {
-    if (!yAxisMax || !yAxisMin) return [];
+    if (yAxisMax == null || yAxisMin == null) return [];
+    if (yAxisMax === 0 && yAxisMin === 0) return [0];
     const ticks = [yAxisMin]; // Start from yAxisMin
     for (let i = 1; i < number_of_ticks; i++) {
       ticks.push(Math.round(yAxisMin + i * ((yAxisMax - yAxisMin) / (number_of_ticks - 1))));
     }
     return ticks;
-  }, [yAxisMin, yAxisMax]);
+  }, [yAxisMin, yAxisMax, number_of_ticks]);
 
   return (
     <ResponsiveContainer width="100%" height={300}>
       <BarChart
-        data={filteredData}
+        data={filteredData.map((e: Record<string, any>) => {
+          const [, firstTick] = yticks;
+          if (!firstTick) return e;
+          const transformed: Record<string, any> = { ...e };
+          interfaces?.forEach((item: any) => {
+            const key = item.value;
+            const original = e[key];
+            transformed[`${key}_original`] = original;
+            if (original !== 0 && original < firstTick) {
+              transformed[key] = firstTick * 0.2 - original * 0.2;
+            }
+          });
+          return transformed;
+        })}
         height={300}
         margin={{ top: 20, right: 30, bottom: 20, left: 30 }} // Adjusted margin for better spacing
       >
@@ -69,7 +89,7 @@ const BarChartComponent = ({ filteredData, interfaces }: { filteredData: Record<
         <YAxis
           allowDataOverflow={true}
           axisLine={false}
-          domain={[yAxisMin || 'auto', yAxisMax || 'auto']} // Dynamically adjust the domain
+          domain={yDomain}
           tickCount={number_of_ticks}
           tickFormatter={(value) => formatNumber(value)} // Format all values dynamically
           tickLine={false}
@@ -85,14 +105,25 @@ const BarChartComponent = ({ filteredData, interfaces }: { filteredData: Record<
           content={
             <ChartTooltipContent
               indicator="dot"
-              labelFormatter={(value) => {
-                if (value.includes(':')) {
-                  return value; // Display time directly if it includes ':'
-                }
-                return new Date(value).toLocaleDateString('en-US', {
-                  month: 'short',
-                  day: 'numeric',
-                });
+              valueFormatter={formatTooltipValue}
+              labelFormatter={(value, payload) => {
+                const total = payload?.reduce((sum, entry) => {
+                  const num = typeof entry.value === 'number' ? entry.value : Number(entry.value)
+                  return sum + (Number.isFinite(num) ? num : 0)
+                }, 0) ?? 0
+
+                const highest = payload?.reduce<{ num: number; key: string } | null>((max, entry) => {
+                  const num = typeof entry.value === 'number' ? entry.value : Number(entry.value)
+                  if (!Number.isFinite(num)) return max
+                  return !max || num > max.num ? { num, key: String(entry.dataKey) } : max
+                }, null)
+
+                const label = value.includes(':')
+                  ? value
+                  : new Date(value).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
+
+                const highestStr = highest ? ` | Top: ${highest.key} (${formatBytes(highest.num)})` : ''
+                return `${label} — Total: ${formatBytes(total)}${highestStr}`
               }}
             />
           }
@@ -108,7 +139,7 @@ const BarChartComponent = ({ filteredData, interfaces }: { filteredData: Record<
           <Bar
             key={item.value}
             dataKey={item.value}
-            fill={graphColors[item.value] || '#16a34a'}
+            fill={getInterfaceColor(item.value, item.value1)}
             isAnimationActive={false}
           />
         ))}

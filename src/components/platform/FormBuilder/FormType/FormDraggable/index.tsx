@@ -3,8 +3,8 @@ import React, {
   type ChangeEventHandler,
   useEffect,
   useRef,
-} from "react";
-import { GripVerticalIcon, MinusIcon, PlusIcon } from "lucide-react";
+} from 'react';
+import { GripVerticalIcon, MinusIcon, PlusIcon } from 'lucide-react';
 // import { DevTool } from "@hookform/devtools";
 import {
   Controller,
@@ -12,7 +12,7 @@ import {
   type ControllerRenderProps,
   useFieldArray,
   type UseFormReturn,
-} from "react-hook-form";
+} from 'react-hook-form';
 import {
   Form,
   FormControl,
@@ -21,37 +21,38 @@ import {
   FormLabel,
   FormMessage,
   useFormField,
-} from "~/components/ui/form";
-import { Input } from "~/components/ui/input";
+} from '~/components/ui/form';
+import { Input } from '~/components/ui/input';
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "~/components/ui/select";
-import { Button } from "~/components/ui/button";
+} from '~/components/ui/select';
+import { Button } from '~/components/ui/button';
 import {
   Sortable,
   SortableDragHandle,
   SortableItem,
-} from "~/components/ui/sortable";
+} from '~/components/ui/sortable';
 import {
   type ICheckboxOptions,
   type IRadioOptions,
   type ISelectOptions,
   type IField,
-} from "../../types/global/interfaces";
-import { cn } from "~/lib/utils";
-import AutosizeTextarea from "~/components/ui/autosize-textarea";
-import { RadioGroup, RadioGroupItem } from "~/components/ui/radio-group";
-import { Checkbox } from "~/components/ui/checkbox";
-import moment from "moment";
-import { SmartDatetimeInput } from "~/components/ui/smart-datetime-picker";
-import TimePicker from "~/components/ui/time-picker";
-import { toast } from "sonner";
-import { Alert, AlertContent, AlertTitle } from "~/components/ui/alert";
-import { format, isValid, parse, set } from "date-fns";
+} from '../../types/global/interfaces';
+import { cn } from '~/lib/utils';
+import AutosizeTextarea from '~/components/ui/autosize-textarea';
+import { RadioGroup, RadioGroupItem } from '~/components/ui/radio-group';
+import { Checkbox } from '~/components/ui/checkbox';
+import moment from 'moment';
+import { SmartDatetimeInput } from '~/components/ui/smart-datetime-picker';
+import CodeEditor from '~/components/ui/code-editor';
+import TimePicker from '~/components/ui/time-picker';
+import { toast } from 'sonner';
+import { Alert, AlertContent, AlertTitle } from '~/components/ui/alert';
+import { format, isValid, parse, set } from 'date-fns';
 
 interface IProps {
   fieldConfig: IField;
@@ -80,20 +81,20 @@ const FormDraggable = ({
   const timePickerRef = useRef(null);
   const timePickerProps = fieldConfig.timePickerProps;
   const is24Hour = timePickerProps?.is24Hour;
-  const timeFormat = is24Hour ? "HH:mm" : "hh:mm a";
+  const timeFormat = is24Hour ? 'HH:mm' : 'hh:mm a';
 
   const isDraggable = fieldConfig?.isDraggable ?? true;
-  const draggableRowClassName = fieldConfig?.draggableRowClassName ?? "";
+  const draggableRowClassName = fieldConfig?.draggableRowClassName ?? '';
   const canAddRow = fieldConfig?.draggableCanAddRow ?? true;
   const canRemoveRow = fieldConfig?.draggableCanRemoveRow ?? true;
 
   const parseTimeString = (timeStr: string): Date | null => {
     // Try parsing as 24-hour format first
-    let date = parse(timeStr, "HH:mm", new Date());
+    let date = parse(timeStr, 'HH:mm', new Date());
 
     if (!isValid(date)) {
       // Try parsing as hour:minute without period
-      date = parse(timeStr, "h:mm", new Date());
+      date = parse(timeStr, 'h:mm', new Date());
 
       if (isValid(date)) {
         // If no AM/PM specified, assume AM for 12-hour format
@@ -102,7 +103,7 @@ const FormDraggable = ({
         }
       } else {
         // Try parsing with AM/PM
-        date = parse(timeStr, "h:mm a", new Date());
+        date = parse(timeStr, 'h:mm a', new Date());
       }
     } else if (!is24Hour) {
       // Convert 24-hour time to 12-hour format
@@ -118,7 +119,7 @@ const FormDraggable = ({
   const defValue = fieldConfig.draggableConfig?.reduce(
     (acc: Record<string, any>, config) => {
       if (config) {
-        acc[`${config.fields.name}`] = "";
+        acc[`${config.fields.name}`] = '';
       }
       return acc;
     },
@@ -136,9 +137,10 @@ const FormDraggable = ({
 
   const renderFormControl = (
     field: IField & {
-      selectOptions?: ISelectOptions[];
+      selectOptions?: ISelectOptions[] | ((data: any) => ISelectOptions[]);
       radioOptions?: IRadioOptions[];
       checkboxOptions?: ICheckboxOptions[];
+      draggableComponent?: any;
     },
     index: number,
   ) => {
@@ -146,11 +148,11 @@ const FormDraggable = ({
 
     const commonProps = {
       disabled: ISDisabled,
-      className: `h-10 px-3 ${error && "border-destructive"}`,
+      className: `h-10 px-3 ${error && 'border-destructive'}`,
     };
 
     switch (field.formType) {
-      case "input":
+      case 'input':
         return (
           <FormItem>
             {index === 0 && <FormLabel>{field.label}</FormLabel>}
@@ -158,10 +160,12 @@ const FormDraggable = ({
               <Input
                 {...register(`${fieldConfig.name}.${index}.${field.name}`)}
                 {...commonProps}
+                disabled={false}
                 readOnly={
                   (formRenderProps.field.disabled ||
                     field?.readonly ||
                     fieldConfig.readonly ||
+                    isDisabled ||
                     field.readonly) ??
                   false
                 }
@@ -172,7 +176,7 @@ const FormDraggable = ({
             {error?.[index] && (
               <p
                 id={field?.id}
-                className={cn("py-1 text-md font-medium text-destructive")}
+                className={cn('py-1 text-md font-medium text-destructive')}
                 data-test-id={`${formKey}-err-msg-${index + 1}-${fieldConfig.name}-${field.name}`}
               >
                 {error?.[index]?.[field.name]?.message}
@@ -187,14 +191,14 @@ const FormDraggable = ({
           </FormItem>
         );
 
-      case "number-input":
+      case 'number-input':
         const handleNumberInputChange: ChangeEventHandler<HTMLInputElement> = (
           e,
         ) => {
           const value = e.target.value;
           // If the input is empty (user cleared it), set to undefined
           // Otherwise convert to number
-          const finalValue = value === "" ? undefined : +value;
+          const finalValue = value === '' ? undefined : +value;
 
           form.setValue(
             `${fieldConfig.name}.${index}.${field.name}`,
@@ -222,7 +226,7 @@ const FormDraggable = ({
                 }
                 onChange={handleNumberInputChange}
                 hasError={!!formRenderProps.fieldState.error}
-                disabled={ISDisabled}
+                disabled={false}
                 type="number"
                 inputMode="decimal"
                 className={`no-spinner`}
@@ -234,7 +238,7 @@ const FormDraggable = ({
             {error?.[index] && (
               <p
                 id={field?.id}
-                className={cn("py-1 text-md font-medium text-destructive")}
+                className={cn('py-1 text-md font-medium text-destructive')}
                 data-test-id={`${formKey}-err-msg-${index + 1}-${fieldConfig.name}-${field.name}`}
               >
                 {error?.[index]?.[field.name]?.message}
@@ -248,7 +252,7 @@ const FormDraggable = ({
             )}
           </FormItem>
         );
-      case "textarea":
+      case 'textarea':
         const handleTextAreaChange = (
           event: ChangeEvent<HTMLTextAreaElement>,
         ) => {
@@ -284,20 +288,20 @@ const FormDraggable = ({
                 }
                 placeholder={field?.placeholder}
                 className={`${
-                  formRenderProps.fieldState.error && "border-destructive"
+                  formRenderProps.fieldState.error && 'border-destructive'
                 } !h-10`}
                 disabled={ISDisabled}
                 value={
                   form.getValues(
                     `${fieldConfig.name}.${index}.${field.name}`,
-                  ) ?? ""
+                  ) ?? ''
                 }
               />
             </FormControl>
             {error?.[index] && (
               <p
                 id={field?.id}
-                className={cn("py-1 text-md font-medium text-destructive")}
+                className={cn('py-1 text-md font-medium text-destructive')}
                 data-test-id={`${formKey}-err-msg-${index + 1}-${fieldConfig.name}-${field.name}`}
               >
                 {error?.[index]?.[field.name]?.message}
@@ -311,7 +315,7 @@ const FormDraggable = ({
             )}
           </FormItem>
         );
-      case "select":
+      case 'select':
         const handleChange = (e: string) => {
           form.setValue(`${fieldConfig.name}.${index}.${field.name}`, e, {
             shouldDirty: true,
@@ -328,16 +332,23 @@ const FormDraggable = ({
                 defaultValue={form.getValues(
                   `${fieldConfig.name}.${index}.${field.name}`,
                 )}
-                onValueChange={handleChange}
+                onValueChange={fieldConfig.readonly || field.readonly ? undefined : handleChange}
+                disabled={false}
               >
                 {fieldConfig.readonly || field.readonly ? (
                   <Input
                     {...register(`${fieldConfig.name}.${index}.${field.name}`)}
                     {...commonProps}
                     readOnly
+                    disabled={false}
                   />
                 ) : (
-                  <SelectTrigger {...commonProps} disabled={ISDisabled}>
+                  <SelectTrigger 
+                    {...commonProps} 
+                    disabled={false}
+                    className={`${commonProps.className || ''}`}
+                    //  ${fieldConfig.readonly || field.readonly || ISDisabled ? 'pointer-events-none' : ''}
+                  >
                     <SelectValue
                       placeholder={field.placeholder}
                       className="text-muted-foreground"
@@ -346,21 +357,33 @@ const FormDraggable = ({
                 )}
 
                 {/* {!ISDisabled && ( */}
-                  <SelectContent>
-                    {Array.isArray(field.selectOptions) &&
-                      field.selectOptions.map((option) => (
+                <SelectContent
+                   isReadonly={ISDisabled}
+                >
+                  {Array.isArray(field.selectOptions) &&
+                    field.selectOptions.map((option) => (
+                      <SelectItem key={option.value} value={option.value}>
+                        {option.label}
+                      </SelectItem>
+                    ))}
+                  {typeof field.selectOptions === 'function' &&
+                    field
+                      .selectOptions(
+                        form.getValues(`${fieldConfig.name}.${index}`),
+                      )
+                      .map((option) => (
                         <SelectItem key={option.value} value={option.value}>
                           {option.label}
                         </SelectItem>
                       ))}
-                  </SelectContent>
+                </SelectContent>
                 {/* )} */}
               </Select>
             </FormControl>
             {error?.[index] && (
               <p
                 id={field?.id}
-                className={cn("py-1 text-md font-medium text-destructive")}
+                className={cn('py-1 text-md font-medium text-destructive')}
                 data-test-id={`${formKey}-err-msg-${index + 1}-${fieldConfig.name}-${field.name}`}
               >
                 {error?.[index]?.[field.name]?.message}
@@ -374,7 +397,21 @@ const FormDraggable = ({
             )}
           </FormItem>
         );
-      case "radio":
+      case 'custom-component':
+        return (
+          <div>
+            {field.draggableComponent({
+              index,
+              field,
+              form,
+              fieldConfig,
+              formRenderProps,
+              error,
+              formKey,
+            })}
+          </div>
+        );
+      case 'radio':
         const handleRadioChange = (e: string) => {
           form.setValue(`${fieldConfig.name}.${index}.${field.name}`, e, {
             shouldDirty: true,
@@ -393,7 +430,7 @@ const FormDraggable = ({
                 disabled={ISDisabled}
                 onValueChange={handleRadioChange}
                 value={formRenderProps.field.value[0]?.[field.name]}
-                className={`${fieldConfig.radioOrientation === "vertical" && "flex-col"} flex gap-2`}
+                className={`${fieldConfig.radioOrientation === 'vertical' && 'flex-col'} flex gap-2`}
               >
                 {radioOptions?.map((option, index) => (
                   <FormItem
@@ -405,7 +442,7 @@ const FormDraggable = ({
                         disabled={ISDisabled}
                         value={String(option.value)}
                         data-test-id={`${formKey}-opt-${index + 1}-${fieldConfig.name}`}
-                        className={`${formRenderProps.fieldState.error && "border-destructive"}`}
+                        className={`${formRenderProps.fieldState.error && 'border-destructive'}`}
                       />
                     </FormControl>
                     <FormLabel
@@ -421,7 +458,7 @@ const FormDraggable = ({
             {error?.[index] && (
               <p
                 id={field?.id}
-                className={cn("py-1 text-md font-medium text-destructive")}
+                className={cn('py-1 text-md font-medium text-destructive')}
                 data-test-id={`${formKey}-err-msg-${index + 1}-${fieldConfig.name}-${field.name}`}
               >
                 {error?.[index]?.[field.name]?.message}
@@ -435,7 +472,7 @@ const FormDraggable = ({
             )}
           </FormItem>
         );
-      case "checkbox":
+      case 'checkbox':
         const handleCheckboxChange = (
           field: ControllerRenderProps<Record<string, any>>,
           item?: ICheckboxOptions,
@@ -470,7 +507,7 @@ const FormDraggable = ({
           if (!item) {
             // Single checkbox case - treat any truthy value as boolean true
             const value = field.value;
-            return typeof value === "boolean" ? value : Boolean(value);
+            return typeof value === 'boolean' ? value : Boolean(value);
           }
           // Multiple checkboxes case
           const currentValue = field.value;
@@ -486,7 +523,7 @@ const FormDraggable = ({
             {index === 0 && <FormLabel>{field.label}</FormLabel>}
             <FormControl>
               <div
-                className={`${fieldConfig.checkboxOrientation === "vertical" && "flex-col"} flex gap-2`}
+                className={`${fieldConfig.checkboxOrientation === 'vertical' && 'flex-col'} flex gap-2`}
               >
                 {(!checkboxOptions || (checkboxOptions?.length ?? 0) === 0) && (
                   <FormItem className="flex h-10 items-center gap-2 space-y-0">
@@ -495,7 +532,7 @@ const FormDraggable = ({
                         {...register(
                           `${fieldConfig.name}.${index}.${field.name}`,
                         )}
-                        className={`${formRenderProps.fieldState.error && "border-destructive"}`}
+                        className={`${formRenderProps.fieldState.error && 'border-destructive'}`}
                         disabled={ISDisabled}
                         data-test-id={`${formKey}-chk-${fieldConfig?.name}`}
                         checked={isChecked(
@@ -514,7 +551,7 @@ const FormDraggable = ({
                       <p
                         id={field?.id}
                         className={cn(
-                          "py-1 text-md font-medium text-destructive",
+                          'py-1 text-md font-medium text-destructive',
                         )}
                         data-test-id={`${formKey}-err-msg-${index + 1}-${fieldConfig.name}-${field.name}`}
                       >
@@ -540,7 +577,7 @@ const FormDraggable = ({
                         control={form.control}
                         render={({ field }) => (
                           <Checkbox
-                            className={`${formRenderProps.fieldState.error && "border-destructive"}`}
+                            className={`${formRenderProps.fieldState.error && 'border-destructive'}`}
                             disabled={ISDisabled}
                             data-test-id={`${formKey}-chk-${fieldConfig?.name}-${idx + 1}`}
                             checked={isChecked(field, item)}
@@ -559,7 +596,7 @@ const FormDraggable = ({
                       <p
                         id={field?.id}
                         className={cn(
-                          "py-1 text-md font-medium text-destructive",
+                          'py-1 text-md font-medium text-destructive',
                         )}
                         data-test-id={`${formKey}-err-msg-${index + 1}-${fieldConfig.name}-${field.name}`}
                       >
@@ -581,19 +618,19 @@ const FormDraggable = ({
             />
           </FormItem>
         );
-      case "smart-date":
+      case 'smart-date':
         const { dateGranularity, name: fieldName } = field;
         const name = `${fieldConfig.name}.${index}.${fieldName}`;
         const handleDateChange = (date: Date | null | string) => {
           if (date) {
             const formattedDate =
-              dateGranularity === "year"
-                ? moment(date).format("YYYY")
-                : dateGranularity === "month"
-                  ? moment(date).format("YYYY-MM")
-                  : moment(date).format("MM/DD/YYYY");
+              dateGranularity === 'year'
+                ? moment(date).format('YYYY')
+                : dateGranularity === 'month'
+                  ? moment(date).format('YYYY-MM')
+                  : moment(date).format('MM/DD/YYYY');
 
-            const formatted_date = formattedDate?.includes("Invalid date")
+            const formatted_date = formattedDate?.includes('Invalid date')
               ? date
               : formattedDate;
 
@@ -609,7 +646,7 @@ const FormDraggable = ({
               shouldTouch: true,
             });
           } else {
-            form.setValue(`${name}`, "");
+            form.setValue(`${name}`, '');
             form.setValue(`${name}_date`, null);
           }
         };
@@ -648,7 +685,7 @@ const FormDraggable = ({
             {error?.[index] && (
               <p
                 id={field?.id}
-                className={cn("py-1 text-md font-medium text-destructive")}
+                className={cn('py-1 text-md font-medium text-destructive')}
                 data-test-id={`${formKey}-err-msg-${index + 1}-${fieldConfig.name}-${field.name}`}
               >
                 {error?.[index]?.[field.name]?.message}
@@ -662,16 +699,16 @@ const FormDraggable = ({
             )}
           </FormItem>
         );
-      case "time-picker":
+      case 'time-picker':
         const handleTimeChange = (input: Date | string | undefined) => {
-          if (input === "" || input === null || input === undefined) {
+          if (input === '' || input === null || input === undefined) {
             form.clearErrors(formKey);
             return;
           }
 
           let date: Date | null;
 
-          if (typeof input === "string") {
+          if (typeof input === 'string') {
             date = parseTimeString(input);
           } else {
             date = input;
@@ -679,7 +716,7 @@ const FormDraggable = ({
 
           if (!date || !isValid(date)) {
             form.setError(formKey, {
-              type: "pattern",
+              type: 'pattern',
               message: `Invalid Time Format. Please use the correct format (${timeFormat}).`,
             });
             return;
@@ -698,8 +735,8 @@ const FormDraggable = ({
               <div
                 className={cn(
                   `!m-0 w-full rounded-md border border-input focus-within:border-primary focus-within:ring-1 focus-within:ring-primary focus-within:ring-offset-0`,
-                  formRenderProps.fieldState.error && "border-destructive",
-                  isDisabled && "bg-secondary text-muted-foreground",
+                  formRenderProps.fieldState.error && 'border-destructive',
+                  isDisabled && 'bg-secondary text-muted-foreground',
                 )}
               >
                 <TimePicker
@@ -721,7 +758,7 @@ const FormDraggable = ({
                       ? parseTimeString(
                           form.getValues(
                             `${fieldConfig.name}.${index}.${field.name}`,
-                          ) ?? "",
+                          ) ?? '',
                         ) || undefined
                       : undefined
                   }
@@ -731,7 +768,55 @@ const FormDraggable = ({
             {error?.[index] && (
               <p
                 id={field?.id}
-                className={cn("py-1 text-md font-medium text-destructive")}
+                className={cn('py-1 text-md font-medium text-destructive')}
+                data-test-id={`${formKey}-err-msg-${index + 1}-${fieldConfig.name}-${field.name}`}
+              >
+                {error?.[index]?.[field.name]?.message}
+              </p>
+            )}
+
+            {(error?.root?.message || error?.message) && (
+              <FormMessage
+                data-test-id={`${formKey}-err-msg-${fieldConfig.name}-${field.name}`}
+              />
+            )}
+          </FormItem>
+        );
+      case 'code-editor':
+        const handleCodeChange = (value: string) => {
+          form.setValue(
+            `${fieldConfig.name}.${index}.${field.name}`,
+            value,
+            {
+              shouldDirty: true,
+              shouldValidate: true,
+              shouldTouch: true,
+            },
+          );
+        };
+        return (
+          <FormItem>
+            {index === 0 && <FormLabel>{field.label}</FormLabel>}
+            <FormControl>
+              <CodeEditor
+                data-test-id={`${formKey}-code-editor-${fieldConfig.name}`}
+                enable_editor_tools={field.codeEditorProps?.enable_editor_tools}
+                enable_auto_height={field.codeEditorProps?.enable_auto_height}
+                defaultTheme={field.codeEditorProps?.defaultTheme}
+                maxHeight={field.codeEditorProps?.enable_auto_height ? field.codeEditorProps?.maxHeight : undefined}
+                minHeight={field.codeEditorProps?.minHeight || ""}
+                editorCode={form.getValues(`${fieldConfig.name}.${index}.${field.name}`) || ''}
+                placeholder={field?.placeholder}
+                disabled={ISDisabled}
+                readOnly={fieldConfig?.readonly || field?.readonly}
+                hasError={!!formRenderProps.fieldState.error}
+                onCodeChange={handleCodeChange}
+              />
+            </FormControl>
+            {error?.[index] && (
+              <p
+                id={field?.id}
+                className={cn('py-1 text-md font-medium text-destructive')}
                 data-test-id={`${formKey}-err-msg-${index + 1}-${fieldConfig.name}-${field.name}`}
               >
                 {error?.[index]?.[field.name]?.message}
@@ -765,35 +850,52 @@ const FormDraggable = ({
             {fields.map((field, index) => (
               <SortableItem key={field.id} value={field.id} asChild>
                 <div
-                  className={draggableRowClassName ? draggableRowClassName : cn(
-                    `relative grid items-end gap-2`,
-                    fieldLength === 1
-                      ? "grid-cols-[auto_1fr_auto]"
-                      : fieldLength === 2
-                        ? "grid-cols-[auto_1fr_1fr_auto]"
-                        : "grid-cols-[auto_1fr_1fr_1fr_auto]",
-                  )}
+                  className={
+                    draggableRowClassName
+                      ? draggableRowClassName
+                      : cn(
+                          `relative grid items-start gap-2`,
+                          fieldLength === 1
+                            ? 'grid-cols-[auto_1fr_auto]'
+                            : fieldLength === 2
+                              ? 'grid-cols-[auto_1fr_1fr_auto]'
+                              : 'grid-cols-[auto_1fr_1fr_1fr_auto]',
+                        )
+                  }
                 >
-                  {fieldConfig?.draggableRowCustomAction ? React.createElement(fieldConfig.draggableRowCustomAction, {
-                    index,
-                    field,
-                    formRenderProps,
-                    formKey,
-                    form,
-                  }) : null}
-                  {isDraggable ? <SortableDragHandle
-                    variant="ghost"
-                    size="icon"
-                    className="mb-1 size-8 shrink-0 text-muted-foreground"
-                  >
-                    <GripVerticalIcon className="size-6" aria-hidden="true" />
-                  </SortableDragHandle> : null }
-                  
+                  {fieldConfig?.draggableRowCustomAction
+                    ? React.createElement(
+                        fieldConfig.draggableRowCustomAction,
+                        {
+                          index,
+                          field,
+                          formRenderProps,
+                          formKey,
+                          form,
+                        },
+                      )
+                    : null}
+                  {isDraggable ? (
+                    <div className={cn(`flex  h-full flex-1`, `${fieldConfig?.actionPosition ==='center' ? 'items-center justify-center' : ''}`)}>
+                      <SortableDragHandle
+                        variant="ghost"
+                        size="icon"
+                        className={cn(
+                          `${index === 0 ? 'mt-9' : 'mt-2'}`,
+                          'size-8 shrink-0 text-muted-foreground',
+                          fieldConfig?.draggableConfig?.[0]?.fields?.draggableTriggerClassname,
+                        )}
+                      >
+                        <GripVerticalIcon className="size-6" aria-hidden="true" />
+                      </SortableDragHandle>
+                    </div>
+                  ) : null}
+
                   {fieldConfig.draggableConfig?.map((config) => (
                     <FormField
                       key={config?.fields?.id ?? index}
                       control={form.control}
-                      name={`${formRenderProps.field.name}-${index}-${config?.fields?.name ?? ""}`}
+                      name={`${formRenderProps.field.name}-${index}-${config?.fields?.name ?? ''}`}
                       render={() =>
                         config ? (
                           (renderFormControl(config.fields, index) ?? <div />)
@@ -804,33 +906,39 @@ const FormDraggable = ({
                     />
                   ))}
                   {!isDisabled && canRemoveRow && (
-                    <Button
-                      type="button"
-                      variant="softDestructive"
-                      size="icon"
-                      className="mb-1 size-6 shrink-0 rounded-full"
-                      onClick={() => {
-                        if (isDisabled) return;
-                        if (index === 0 && fields.length === 1) {
-                          toast(
-                            <Alert variant="error" dismissible>
-                              <AlertTitle>Not Allowed</AlertTitle>
-                              <AlertContent>
-                                At least one group field is required.
-                              </AlertContent>
-                            </Alert>,
-                          );
-                          return;
-                        }
-                        remove(index);
-                      }}
-                    >
-                      <MinusIcon
-                        className="size-4 text-destructive"
-                        aria-hidden="true"
-                      />
-                      <span className="sr-only">Remove</span>
-                    </Button>
+                       <div className={cn(`flex  h-full flex-1`, `${fieldConfig?.actionPosition ==='center' ? 'items-center justify-center' : ''}`)}>
+                        <Button
+                          type="button"
+                          variant="softDestructive"
+                          size="icon"
+                          className={cn(
+                            `${index === 0 ? 'mt-10' : 'mt-2'}`,
+                            `size-6 shrink-0 rounded-full`,
+                          )}
+                          onClick={() => {
+                            if (isDisabled) return;
+                            if (index === 0 && fields.length === 1) {
+                              toast(
+                                <Alert variant="error" dismissible>
+                                  <AlertTitle>Not Allowed</AlertTitle>
+                                  <AlertContent>
+                                    At least one group field is required.
+                                  </AlertContent>
+                                </Alert>,
+                              );
+                              return;
+                            }
+                            remove(index);
+                          }}
+                        >
+                          <MinusIcon
+                            className="size-4 text-destructive"
+                            aria-hidden="true"
+                          />
+                          <span className="sr-only">Remove</span>
+                        </Button>
+                      </div>
+                    
                   )}
 
                   {index === fields.length - 1 &&
@@ -843,7 +951,7 @@ const FormDraggable = ({
                 </div>
               </SortableItem>
             ))}
-            {!isDisabled && canAddRow &&  (
+            {!isDisabled && canAddRow && (
               <Button
                 className="mr-auto ms-7 gap-1 text-md text-primary hover:bg-transparent hover:opacity-70"
                 variant="ghost"

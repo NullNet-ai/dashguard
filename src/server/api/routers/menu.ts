@@ -3,53 +3,70 @@ import { createTRPCRouter, publicProcedure } from "~/server/api/trpc";
 import { type ISidebarMenu } from "~/components/platform/SideBar/type";
 import { headers } from "next/headers";
 import arrangement from "../../menu/arrangement.json";
+import { z } from 'zod';
 export const menuRouter = createTRPCRouter({
-  getMenuConfig: publicProcedure.query(async () => {
-    const headerList = await headers();
-    const pathName = headerList.get("x-pathname") || "";
+  getMenuConfig: publicProcedure
+    .input(z.object({ role: z.string().nullish() }))
+    .query(async ({ input }) => {
+      const headerList = await headers();
+      const pathName = headerList.get('x-pathname') || '';
 
-    const menuItems = MENU as ISidebarMenu[];
-    // Update isActive for groups based on their items
-    menuItems.forEach((item) => {
-      item.isActive = item?.items?.some((subItem) =>
-        pathName?.includes(subItem.url!),
+      const menuItems = MENU as ISidebarMenu[];
+      // Update isActive for groups based on their items
+      menuItems.forEach((item) => {
+        item.isActive = item?.items?.some((subItem) =>
+          pathName?.includes(subItem.url!),
+        );
+        if (item.groups) {
+          item.groups.forEach((group) => {
+            group.isActive = group?.items?.some((subItem) =>
+              pathName?.includes(subItem.url!),
+            );
+          });
+        }
+      });
+
+      const menuMap = menuItems.reduce(
+        (acc, item) => {
+          const itemTitle = item?.title
+            ?.toLowerCase()
+            .replace(/\s+/g, '_') as string;
+          return {
+            ...acc,
+            [itemTitle]: item,
+          };
+        },
+        {} as Record<string, ISidebarMenu>,
       );
-      if (item.groups) {
-        item.groups.forEach((group) => {
-          group.isActive = group?.items?.some((subItem) =>
-            pathName?.includes(subItem.url!),
-          );
-        });
+
+      const newMenuItems = arrangement.order.map(
+        (key) => menuMap[key],
+      ) as ISidebarMenu[];
+
+      // Get the remaining items that are not in the newMenuItems array
+      const remainingItems = menuItems.filter(
+        (item) => !newMenuItems.includes(item),
+      );
+
+      if (remainingItems.length > 0) {
+        // Add the remaining items to the end of the newMenuItems array
+        newMenuItems.unshift(...remainingItems);
       }
-    });
 
-    const menuMap = menuItems.reduce(
-      (acc, item) => {
-        const itemTitle = item?.title
-          ?.toLowerCase()
-          .replace(/\s+/g, "_") as string;
-        return {
-          ...acc,
-          [itemTitle]: item,
-        };
-      },
-      {} as Record<string, ISidebarMenu>,
-    );
+      // Filter menu by role
+      const roleKey = (input?.role ?? '').toLowerCase();
+      const allowed = (arrangement.roles as Record<string, string[] | '*'>)[
+        roleKey
+      ];
 
-    const newMenuItems = arrangement.order.map(
-      (key) => menuMap[key],
-    ) as ISidebarMenu[];
-
-    // Get the remaining items that are not in the newMenuItems array
-    const remainingItems = menuItems.filter(
-      (item) => !newMenuItems.includes(item),
-    );
-
-    if (remainingItems.length > 0) {
-      // Add the remaining items to the end of the newMenuItems array
-      newMenuItems.unshift(...remainingItems);
-    }
-
-    return newMenuItems;
-  }),
+      if (allowed === '*') return newMenuItems;
+      if (Array.isArray(allowed)) {
+        return newMenuItems.filter((item) =>
+          allowed.includes(
+            item?.title?.toLowerCase().replace(/\s+/g, '_') ?? '',
+          ),
+        );
+      }
+      return [];
+    }),
 });

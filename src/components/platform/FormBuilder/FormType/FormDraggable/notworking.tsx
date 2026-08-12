@@ -97,7 +97,7 @@ const FormDraggable = ({
 
   const renderFormControl = (
     field: IField & {
-      selectOptions?: ISelectOptions[];
+      selectOptions?: ISelectOptions[] | ((data: any) => ISelectOptions[]);
       radioOptions?: IRadioOptions[];
       checkboxOptions?: ICheckboxOptions[];
     },

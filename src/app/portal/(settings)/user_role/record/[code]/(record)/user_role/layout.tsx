@@ -8,6 +8,8 @@ type LayoutProps = {
   [key: string]: ReactNode | undefined
 }
 
+export const dynamic = 'force-dynamic'
+
 export default function Layout(props: {
   user_role: React.ReactNode
   category_details: React.ReactNode

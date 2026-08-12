@@ -107,7 +107,7 @@ const InnerDropTabItem = ({
       <TabMenu
         current={!!tab.href.match(pathname)}
         href={tab.href}
-        tabs={dropItems}
+        tab={dropItems}
         name={tabNameRole}
         entity={entityName ?? ''}
       />

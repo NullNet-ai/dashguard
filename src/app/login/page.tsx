@@ -12,7 +12,7 @@ export default function Login() {
                 height={35}
                 width={58}
                 alt="Tailwind CSS Logo"
-                src="/tailwindLogo.svg"
+                src="/appguard-logo.png"
                 className="mb-4"
               />
               <h2 className="mt-8 text-center text-2xl font-bold tracking-tight text-foreground lg:text-left">

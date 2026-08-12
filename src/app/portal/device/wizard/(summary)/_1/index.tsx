@@ -1,27 +1,21 @@
 'use client';
-
-import { startCase } from 'lodash';
 import { usePathname } from 'next/navigation';
+import { useMemo } from 'react';
 import { api } from '~/trpc/react';
 import useRefetchRecord from '../hooks/useFetchMainRecord';
 
-const fields = {
-  device_category: 'device_category',
-};
-
-const Summary = ({ form_key }: { form_key: string }) => {
+const SetupSummary = ({ form_key }: { form_key: string }) => {
   const pathName = usePathname();
-
-  const [, , , , identifier] = pathName.split('/');
+  const [, , , _, identifier] = pathName.split('/');
   const {
-    data: record = { data: { id: null } },
+    data: record,
     refetch,
     error,
-  } = api.device.fetchDeviceInfo.useQuery({
-    code: identifier!,
+  } = api.device.getAccountSetUpDetailsByDeviceCode.useQuery({
+    device_code: identifier!
   });
 
-  const { data } = record ?? {};
+  const deviceData = record?.data?.[0];
 
   useRefetchRecord({
     refetch,
@@ -29,39 +23,76 @@ const Summary = ({ form_key }: { form_key: string }) => {
   });
 
   if (error) {
-    return (
-      <div>
-        {'Error:'}
-        {error.message}
-      </div>
-    );
+    return <div>Error: {error.message}</div>;
   }
 
   return (
     <div>
-      {Object.entries(fields).map(([key, value]) => (
-        <p className="mb-[8px]" key={key}>
-          <strong data-test-id={`device_${key}-wzd_sumry-key-${key}`}>
-            {startCase(key)}:
-          </strong>
-          &nbsp;
-          <span data-test-id={`device_${key}-wzd_sumry-value-${key}`}>
-            {(data as { [key: string]: any })?.[value] || 'None'}
-          </span>
-        </p>
-      ))}
+      <p className="mb-[8px] no-underline text-[#334155]">
+        <strong>Category: </strong>
+        &nbsp; {deviceData?.devices?.device_category || 'None'}
+      </p>
     </div>
   );
 };
 
-const DeviceBasicDetailsSummary = {
+const DeviceLocationSummary = ({ form_key }: { form_key: string }) => {
+  const pathName = usePathname();
+  const [, , , _, identifier] = pathName.split('/');
+  const {
+    data: record,
+    refetch,
+    error,
+  } = api.device.getAccountSetUpDetailsByDeviceCode.useQuery({
+    device_code: identifier!,
+  });
+
+  const deviceData = record?.data?.[0];
+  const locationLabel = useMemo(() => {
+    const address = Array.isArray(deviceData?.addresses)
+      ? deviceData?.addresses?.[0]
+      : deviceData?.addresses;
+    const city = address?.city;
+    const country = address?.country;
+
+    if (city && country) return `${city}, ${country}`;
+    if (city) return city;
+    if (country) return country;
+    return 'None';
+  }, [deviceData?.addresses]);
+
+  useRefetchRecord({
+    refetch,
+    form_key,
+  });
+
+  if (error) {
+    return <div>Error: {error.message}</div>;
+  }
+
+  return (
+    <div>
+      <p className="mb-[8px] no-underline text-[#334155]">
+        <strong>Location: </strong>
+        &nbsp; {locationLabel}
+      </p>
+    </div>
+  );
+};
+
+const SummaryConfig = {
   label: 'Step 1',
-  required: false,
+  required: true,
   components: [
     {
       label: 'Device Category',
-      component: <Summary form_key={'device_basic_details'} />,
+      component: <SetupSummary form_key={'deviceCategoryForm'} />,
+    },
+    {
+      label: 'Device Location',
+      component: <DeviceLocationSummary form_key={'deviceLocationForm'} />,
     },
   ],
 };
-export default DeviceBasicDetailsSummary;
+
+export default SummaryConfig;

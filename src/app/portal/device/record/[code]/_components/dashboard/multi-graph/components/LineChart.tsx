@@ -1,17 +1,34 @@
 'use client'
 
-import { useMemo, useRef } from 'react';
+import { useMemo } from 'react';
 import { CartesianGrid, Line, LineChart, ResponsiveContainer, XAxis, YAxis } from 'recharts';
 
 import {
   ChartTooltip,
   ChartTooltipContent,
 } from '~/components/ui/chart';
-import { graphColors } from './graph-color';
+import { getInterfaceColor } from './graph-color';
+import { formatBytes as formatBytesTooltip } from '../../pie-chart/function/formatBytes'
 
 export const modifyAxis = (data: any[]) => {
-  const yAxisMax = Math.max(...data.map((d) => Math.max(...Object.values(d).filter((v) => typeof v === 'number'))));
-  const yAxisMin = Math.min(...data.map((d) => Math.min(...Object.values(d).filter((v) => typeof v === 'number'))));
+  const numericValues = (data ?? [])
+    .flatMap((d) => Object.values(d).filter((v) => typeof v === 'number'))
+    .map((v) => Number(v))
+    .filter((v) => Number.isFinite(v))
+
+  if (numericValues.length === 0) {
+    return { yAxisMax: 0, yAxisMin: 0 };
+  }
+
+  const minValue = Math.min(...numericValues)
+  const maxValue = Math.max(...numericValues)
+
+  const range = maxValue - minValue
+  const padding = range === 0 ? maxValue * 0.25 : range * 0.25
+
+  const yAxisMax = Math.ceil(maxValue + padding)
+  const yAxisMin = Math.floor(Math.max(0, minValue - padding))
+
   return { yAxisMax, yAxisMin };
 };
 
@@ -29,26 +46,36 @@ export const formatNumber = (num: number) => {
 };
 
 const LineChartComponent = ({ filteredData, interfaces }: any) => {
-  // Store the previous yAxisMax value
-  const previousYAxisMaxRef = useRef<number | null>(null);
-
-  // Dynamically calculate the Y-axis domain
-  const { yAxisMax: calculatedYAxisMax, yAxisMin } = useMemo(() => modifyAxis(filteredData || []), [filteredData]);
-
-  // Update the Y-axis max only if the new value is greater than the previous value
-  const yAxisMax = useMemo(() => {
-    if (previousYAxisMaxRef.current === null || calculatedYAxisMax > previousYAxisMaxRef.current) {
-      previousYAxisMaxRef.current = calculatedYAxisMax;
-    }
-    return previousYAxisMaxRef.current;
-  }, [calculatedYAxisMax]);
+  const formatTooltipValue = (value: unknown, item: any) => {
+    const { payload, dataKey } = item;
+    const packet = payload[`${dataKey}_packet`];
+    const originalValue = payload[`${dataKey}_original`] ?? value;
+    const numericValue =
+      typeof originalValue === 'number' ? originalValue : Number(originalValue);
+    return `${
+      Number.isFinite(numericValue)
+        ? formatBytesTooltip(numericValue)
+        : String(originalValue ?? '')
+    } (${packet} Packet${packet > 1 ? 's' : ''})`;
+  };
+  const { yAxisMax, yAxisMin } = useMemo(
+    () => modifyAxis(filteredData || []),
+    [filteredData],
+  );
 
   const number_of_ticks = useMemo(() => {
     return yAxisMax >= 100000 ? 10 : 5;
   }, [yAxisMax]);
 
+  const yDomain = useMemo(() => {
+    if (yAxisMax == null || yAxisMin == null) return ['auto', 'auto'];
+    if (yAxisMax === 0 && yAxisMin === 0) return [0, 1];
+    return [yAxisMin, yAxisMax];
+  }, [yAxisMin, yAxisMax]);
+
   const yticks = useMemo(() => {
-    if (!yAxisMax || !yAxisMin) return [];
+    if (yAxisMax == null || yAxisMin == null) return [];
+    if (yAxisMax === 0 && yAxisMin === 0) return [0];
     const ticks = [yAxisMin]; // Start from yAxisMin
     for (let i = 1; i < number_of_ticks; i++) {
       ticks.push(Math.round(yAxisMin + i * ((yAxisMax - yAxisMin) / (number_of_ticks - 1))));
@@ -59,7 +86,20 @@ const LineChartComponent = ({ filteredData, interfaces }: any) => {
   return (
     <ResponsiveContainer width="100%" height={300}>
       <LineChart
-        data={filteredData}
+        data={filteredData.map((e: Record<string, any>) => {
+          const [, firstTick] = yticks;
+          if (!firstTick) return e;
+          const transformed: Record<string, any> = { ...e };
+          interfaces?.forEach((item: any) => {
+            const key = item.value;
+            const original = e[key];
+            transformed[`${key}_original`] = original;
+            if (original !== 0 && original < firstTick) {
+              transformed[key] = firstTick * 0.2 - original * 0.2;
+            }
+          });
+          return transformed;
+        })}
         height={300}
         margin={{ top: 20, right: 30, bottom: 20, left: 30 }}
       >
@@ -86,7 +126,7 @@ const LineChartComponent = ({ filteredData, interfaces }: any) => {
         <YAxis
           allowDataOverflow={true}
           axisLine={false}
-          domain={[yAxisMin || 'auto', yAxisMax || 'auto']} // Dynamically adjust the domain
+          domain={yDomain}
           tickCount={number_of_ticks}
           tickFormatter={(value) => formatNumber(value)} // Format all values dynamically
           tickLine={false}
@@ -102,14 +142,25 @@ const LineChartComponent = ({ filteredData, interfaces }: any) => {
           content={
             <ChartTooltipContent
               indicator="dot"
-              labelFormatter={(value) => {
-                if (value.includes(':')) {
-                  return value; // Display time directly if it includes ':'
-                }
-                return new Date(value).toLocaleDateString('en-US', {
-                  month: 'short',
-                  day: 'numeric',
-                });
+              valueFormatter={formatTooltipValue}
+              labelFormatter={(value, payload) => {
+                const total = payload?.reduce((sum, entry) => {
+                  const num = typeof entry.value === 'number' ? entry.value : Number(entry.value)
+                  return sum + (Number.isFinite(num) ? num : 0)
+                }, 0) ?? 0
+
+                const highest = payload?.reduce<{ num: number; key: string } | null>((max, entry) => {
+                  const num = typeof entry.value === 'number' ? entry.value : Number(entry.value)
+                  if (!Number.isFinite(num)) return max
+                  return !max || num > max.num ? { num, key: String(entry.dataKey) } : max
+                }, null)
+
+                const label = value.includes(':')
+                  ? value
+                  : new Date(value).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
+
+                const highestStr = highest ? ` | Top: ${highest.key} (${formatBytesTooltip(highest.num)})` : ''
+                return `${label} — Total: ${formatBytesTooltip(total)}${highestStr}`
               }}
             />
           }
@@ -125,7 +176,7 @@ const LineChartComponent = ({ filteredData, interfaces }: any) => {
           <Line
             key={item.value}
             dataKey={item.value}
-            stroke={graphColors[item.value] || '#16a34a'}
+            stroke={getInterfaceColor(item.value, item.value1)}
             dot={false}
             type="monotone"
             isAnimationActive={false}

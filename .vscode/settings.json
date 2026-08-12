@@ -9,14 +9,9 @@
   "editor.codeActionsOnSave": {
     // "source.fixAll.eslint": "explicit"
   },
-  "workbench.colorCustomizations": {
-    "activityBar.background": "#145201",
-    "activityBar.foreground": "#06deff",
-    "activityBar.inactiveForeground": "#f4f4f4"
-  },
   "files.exclude": {
     "node_modules": false,
-    "package-lock.json": true,
+    "package-lock.json": false,
     "build": true,
     ".eslintrc.js": true,
     ".npmrc": false,
@@ -25,7 +20,7 @@
     ".prettierrc": true,
     "tsconfig.json": false,
     "nest-cli.json": true,
-    "yarn.lock": true,
+    "yarn.lock": false,
     ".orm.env": false,
     "src/auto-generated": false,
     "public/_template_page": false

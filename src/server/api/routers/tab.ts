@@ -1,3 +1,4 @@
+import { ta } from 'date-fns/locale'
 import { headers } from 'next/headers'
 import { z } from 'zod'
 
@@ -41,7 +42,7 @@ export const tabRouter = createTRPCRouter({
         return []
       })
 
-    return response
+    return response?.filter((tab: Record<string, any>) => !!tab.name);
   }),
   updateMainTabItem: privateProcedure
    .input(
@@ -322,7 +323,7 @@ export const tabRouter = createTRPCRouter({
         })
 
       const update_tabs = response?.tabs?.filter(
-        (tab: Record<string, any>) => tab.name !== "new" && tab.id !== "new"
+        (tab: Record<string, any>) => tab.name !== "new" && tab.label !== "new"
       )
 
       response = {
@@ -490,6 +491,50 @@ export const tabRouter = createTRPCRouter({
       redis : response,
       cookies : cookieVisitedLinks
     };
+  }),
+  updateNewInnerTabs: privateProcedure
+  .input(
+    z.object({
+      current_context: z.string().min(1),
+      code: z.string().min(1),
+    }),
+  )
+  .mutation(async ({ input, ctx }) => {
+    const tabs = ctx.redisClient;
+    const key = `sub-tabs:${input.current_context}:${ctx.session.account.account_organization_id}`;
+    const response = await tabs
+      .getCachedData(key)
+      .then((res) => {
+        return res || [];
+      })
+      .catch(() => {
+        return [];
+      });
+    const update_tabs = response?.tabs?.map((tab: Record<string, any>) => {
+      if (tab.name === 'new') {
+        const href = tab?.href?.split('/');
+        href[4] = input?.code;
+
+        return {
+          ...tab,
+          name: input?.code,
+          label: input?.code,
+          href: href?.join('/'),
+        };
+      }
+
+      return tab;
+    });
+
+    await tabs.cacheData(
+      key,
+      {
+        current_context: response?.current_context,
+        tabs: update_tabs,
+      },
+      90000000,
+    );
+    return [];
   }),
 
   getEntityLastPath: privateProcedure

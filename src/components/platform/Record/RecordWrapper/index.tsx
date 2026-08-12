@@ -5,6 +5,7 @@ import RecordSummaryMobile from "~/components/platform/Record/Summary/RecordSumm
 import { ResizablePanel, ResizablePanelGroup } from "~/components/ui/resizable";
 import type { IProps } from "./types";
 import RecordProvider from "~/components/platform/Record/Provider";
+import RecordContainer from './_component/RecordContainer';
 
 const Wrapper = (props: IProps) => {
   const { record, record_summary, customProps, tabs } = props;
@@ -13,24 +14,24 @@ const Wrapper = (props: IProps) => {
 
   return (
     <RecordProvider config={config!}>
-      <section className="mt-0 min-h-[calc(100vh-110px)] lg:mt-[0rem]">
-        <ResizablePanelGroup direction="horizontal" className="flex">
-          <div className="hidden h-full min-h-[calc(100vh-105px)] w-full border-r border-slate-100 md:block md:w-[240px] lg:w-[300px]">
-            <RecordWrapperProvider>{record_summary}</RecordWrapperProvider>
-          </div>
-          <ResizablePanel
-            defaultSize={95}
-            minSize={25}
-            className="min-h-60 flex-grow-[6] bg-transparent"
-          >
-            <HeaderTabs tabs={tabs} />
-            <MainContent className="p-4">{record}</MainContent>
-          </ResizablePanel>
-        </ResizablePanelGroup>
-      </section>
-      {/* <Tabs>{tabs} </Tabs>
-      <MainContent>{children}</MainContent> */}
-      <RecordSummaryMobile>{record_summary}</RecordSummaryMobile>
+      <RecordWrapperProvider>
+        <section className="mt-0 h-[calc(100vh-85px)] lg:mt-[0rem]">
+          <ResizablePanelGroup direction="horizontal" className="flex gap-2 p-2">
+            <RecordContainer>{record_summary}</RecordContainer>
+            <ResizablePanel
+              defaultSize={95}
+              minSize={25}
+              className="flex flex-col gap-2 min-h-60 flex-grow-[6] bg-transparent"
+            >
+              <HeaderTabs tabs={tabs} />
+              <MainContent>{record}</MainContent>
+            </ResizablePanel>
+          </ResizablePanelGroup>
+        </section>
+        {/* <Tabs>{tabs} </Tabs>
+        <MainContent>{children}</MainContent> */}
+        <RecordSummaryMobile>{record_summary}</RecordSummaryMobile>
+      </RecordWrapperProvider>
     </RecordProvider>
   );
 };

@@ -52,24 +52,6 @@ export default function GroupAdvFilter({ group, groupIndex, handleUpdateGroupOpe
                 <GroupAdvOperator group={group} groupIndex={groupIndex} handleUpdateGroupOperator={handleUpdateGroupOperator} />
               )}
             </div>
-
-            <div className="flex items-center gap-2">
-
-              {groupIndex > 0 && (
-                <>
-                  <FilterGroupActions
-                    onAppendFilter={() => handleAppendFilter(groupIndex) }
-                  />
-                  <Button
-                    size = "sm"
-                    variant = "ghost"
-                    onClick = { () => handleRemoveFilterGroup(groupIndex)}
-                  >
-                    <Trash2 className="h-4 w-4 text-red-600" />
-                  </Button>
-                </>
-              )}
-            </div>
           </div>
 
           <FilterGroup
@@ -78,12 +60,26 @@ export default function GroupAdvFilter({ group, groupIndex, handleUpdateGroupOpe
             groupIndex={ groupIndex }
             key={groupIndex}
             onRemoveFilter = { (index) => handleRemoveFilter(groupIndex, index) }
-
             onUpdateJunctionOperator= {
               handleUpdateJunctionOperator as any
             }
-
           />
+
+            <div className="flex items-center gap-2">
+
+                <>
+                  <FilterGroupActions
+                    onAppendFilter={() => handleAppendFilter(groupIndex) }
+                  />
+                  {/* <Button
+                    size = "sm"
+                    variant = "ghost"
+                    onClick = { () => handleRemoveFilterGroup(groupIndex)}
+                  >
+                    <Trash2 className="h-4 w-4 text-red-600" />
+                  </Button> */}
+                </>
+            </div>
         </div>
       </div>
     </div>

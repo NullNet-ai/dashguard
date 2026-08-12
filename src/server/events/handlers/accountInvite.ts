@@ -1,4 +1,4 @@
-'use server'
+'use server';
 import { type TMethod, createSchedule, dateToCron } from '~/lib/createSchedule';
 import { api } from '~/trpc/server';
 import { replaceTemplateVariables } from '~/lib/template-parser';
@@ -11,6 +11,7 @@ const INVITATION_LINK_EXPIRED = parseInt(
 );
 export const eventHandler = async (eventName: string, data: any) => {
   try {
+    console.info('🚀 ~ Event Handler Trigger:', eventName);
     const { loggedInUser, invitationRecord, account_record_id } = data;
     const communicationTemplate =
       await api.communicationTemplate.getCommunicationTemplate({
@@ -60,6 +61,9 @@ export const eventHandler = async (eventName: string, data: any) => {
       wait_for_completion: true,
     };
     createSchedule(scheduleConfig);
+    return {
+      data: { account_record_id },
+    };
   } catch (error) {
     console.error('🚀 ~ accountInvite ~ error:', error);
     throw error;

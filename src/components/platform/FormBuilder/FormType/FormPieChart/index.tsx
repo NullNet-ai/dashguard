@@ -3,6 +3,7 @@
 import { capitalize } from "lodash";
 import React, { useMemo } from "react";
 import { LabelList, Pie, PieChart, Tooltip } from "recharts";
+import { CardComponent as Card } from '~/components/ui/card/index';
 
 import {
   CardContent,
@@ -70,7 +71,7 @@ const FormPieChart = (props: IFormPieChartProps) => {
   }, [items.length]);
 
   return (
-    <div className="p-4 shadow-md">
+    <Card className="p-4 shadow-md bg-background">
       <CardHeader className="items-center pb-0">
         <CardTitle>{capitalize(entity)}</CardTitle>
         <CardDescription>{`Total Records: ${totalRecordsCount}`}</CardDescription>
@@ -85,7 +86,7 @@ const FormPieChart = (props: IFormPieChartProps) => {
             <Pie
               data={chartData}
               dataKey="value"
-              label={renderCustomPieChartLabel ?? true}
+              label={renderCustomPieChartLabel as any ?? true}
               nameKey="key"
               labelLine={false}
               />
@@ -96,7 +97,7 @@ const FormPieChart = (props: IFormPieChartProps) => {
           </PieChart>
         </ChartContainer>
       </CardContent>
-    </div>
+    </Card>
   );
 };
 

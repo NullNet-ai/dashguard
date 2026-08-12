@@ -21,21 +21,35 @@ export default function SystemDates({
   updated_by_last_name,
   'data-test-id': testId,
 }: IProps) {
+
+  const removeSeconds = (timeString: string) => {
+    if (!timeString) return timeString;
+    return timeString.replace(/(\d{2}:\d{2}):\d{2}/, '$1');
+  };
+  
+  const truncateName = (firstName: string, lastName: string) => {
+    const fullName = firstName + ' ' + lastName;
+    return fullName.length > 11 ? fullName.substring(0, 11) + '...' : fullName;
+  };
+  
+  const createdByName = truncateName(created_by_first_name, created_by_last_name);
+  const updatedByName = truncateName(updated_by_first_name, updated_by_last_name);
+
   return (
-    <div className="px-4" data-test-id={testId}>
-      <div className="p-2 text-sm" data-test-id={`${testId}-container`}>
-        <div className="mb-2" data-test-id={`${testId}-created`}>
-          <span className="text-slate-400">Created: </span>
-          <span data-test-id={`${testId}-created-details`}>
-            {created_date} {created_time}{" "}
-            {`${created_by_first_name} ${created_by_last_name}`}
+    <div data-test-id={testId}>
+      <div className="flex flex-col gap-1 text-sm" data-test-id={`${testId}-container`}>
+        <div className="flex justify-between gap-2" data-test-id={`${testId}-created`}>
+          <span className="text-slate-500 whitespace-nowrap">Created </span>
+          <span className='break-all' data-test-id={`${testId}-created-details`}>
+            {created_date} {removeSeconds(created_time)}{created_by_first_name && ", "}
+            {createdByName}
           </span>
         </div>
-        <div data-test-id={`${testId}-modified`}>
-          <span className="text-slate-400">Modified </span>
-          <span data-test-id={`${testId}-modified-details`}>
-            {updated_date} {updated_time}{" "}
-            {`${updated_by_first_name} ${updated_by_last_name}`}
+        <div className='flex justify-between gap-2' data-test-id={`${testId}-modified`}>
+          <span className="text-slate-500 whitespace-nowrap">Modified </span>
+          <span className='break-all' data-test-id={`${testId}-modified-details`}>
+            {updated_date} {removeSeconds(updated_time)}{updated_by_first_name && ", "}
+            {updatedByName}
           </span>
         </div>
       </div>

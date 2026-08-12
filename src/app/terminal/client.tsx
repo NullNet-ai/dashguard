@@ -2,80 +2,231 @@
 
 import { AttachAddon } from '@xterm/addon-attach'
 import { FitAddon } from '@xterm/addon-fit'
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react';
 import { useXTerm } from 'react-xtermjs'
+import { isHeartbeatWithinSeconds } from '~/app/portal/device/utils/getHeartbeat'
 import { api } from '~/trpc/react'
+// The gateway is a raw byte passthrough that reads WebSocket frames into a
+// fixed buffer, so one giant frame (e.g. pasting a 150KB CSV) overruns it and
+// the connection drops. Chunk outbound data to keep every frame small.
+// ponytail: splits by UTF-16 code unit — fine for shell/ASCII paste; a
+// surrogate pair straddling a boundary would corrupt that one char.
+const PASTE_CHUNK_SIZE = 1024;
+const sendToSocket = (sock: WebSocket, data: string) => {
+  if (sock.readyState !== WebSocket.OPEN) return;
+  if (data.length <= PASTE_CHUNK_SIZE) {
+    sock.send(data);
+    return;
+  }
+  for (let i = 0; i < data.length; i += PASTE_CHUNK_SIZE) {
+    sock.send(data.slice(i, i + PASTE_CHUNK_SIZE));
+  }
+};
 
 export default function WebTerminal() {
   const { instance, ref } = useXTerm()
-  const fitAddon = new FitAddon()
+  const fitAddonRef = useRef<FitAddon | null>(null);
+  if (!fitAddonRef.current) fitAddonRef.current = new FitAddon();
+  const socketRef = useRef<WebSocket | null>(null); // stable socket for resize handler
+  const dataDisposableRef = useRef<{ dispose: () => void } | null>(null); // terminal→socket sender
   const [socket, setSocket] = useState<WebSocket | null>(null) // Track WebSocket instance
+  const [isInitializing, setIsInitializing] = useState(true);
   const [isReconnecting, setIsReconnecting] = useState(false)
   const [isConnectionClosed, setIsConnectionClosed] = useState(false) // Track WebSocket connection status
+  const [connectionEndReason, setConnectionEndReason] = useState<'unexpected_end' | 'session_expired' | null>(null)
+  const [deviceId, setDeviceId] = useState('')
+  const [terminalSessionType, setTerminalSessionType] = useState<'ssh' | 'tty' | null>(null)
+  const [terminalSessionToken, setTerminalSessionToken] = useState('')
   const createUpdate = api.deviceRemoteAccessSession.createUpdateDeviceRemoteAccessSessions.useMutation()
 
-  const device_id = localStorage.getItem('device_id')
+  useEffect(() => {
+    setDeviceId(localStorage.getItem('device_id') || '')
 
-  const { data: devices, refetch } = api.deviceRemoteAccessSession.fetchDevices.useQuery({
-    limit: 100,
-    device_id: device_id || ""
-  })
+    const currentSessionKey = localStorage.getItem('current_terminal_session')
+    if (!currentSessionKey) {
+      setTerminalSessionType(null)
+      setTerminalSessionToken('')
+      return
+    }
+    const websocketUrl = localStorage.getItem(currentSessionKey)
+    if (!websocketUrl) {
+      setTerminalSessionType(null)
+      setTerminalSessionToken('')
+      return
+    }
+    try {
+      const url = new URL(websocketUrl)
+      const sessionToken = url.hostname.split('.')[0] || ''
+      setTerminalSessionToken(sessionToken.toUpperCase())
+
+      const storedSessionType = localStorage.getItem('current_terminal_session_type')
+      if (storedSessionType === 'ssh' || storedSessionType === 'tty') {
+        setTerminalSessionType(storedSessionType)
+      } else if (url.pathname.includes('/ssh')) {
+        setTerminalSessionType('ssh')
+      } else if (url.pathname.includes('/tty')) {
+        setTerminalSessionType('tty')
+      } else {
+        setTerminalSessionType(null)
+      }
+    } catch {
+      setTerminalSessionToken('')
+      setTerminalSessionType(null)
+    }
+  }, [])
+
+  const { data: lastHeartbeat, isLoading: isLastHeartbeatLoading } =
+    api.deviceHeartbeat.getLastHeartbeat.useQuery(
+      { device_id: deviceId, timezone: Intl.DateTimeFormat().resolvedOptions().timeZone, },
+      { enabled: Boolean(deviceId), refetchInterval: 1000 },
+    )
+
+  const { data: deviceSummary } = api.device.fetchRecordShellSummary.useQuery(
+    { id: deviceId },
+    { enabled: Boolean(deviceId) },
+  );
+
+  const remoteAccessSessionQueryInput =
+    terminalSessionType && terminalSessionToken
+      ? {
+          remote_access_type: terminalSessionType,
+          remote_access_session: terminalSessionToken,
+        }
+      : {
+          remote_access_type: 'ssh' as const,
+          remote_access_session: '',
+        }
+
+  const { data: remoteAccessSessionStatus } =
+    api.deviceRemoteAccessSession.getRemoteAccessSessionStatus.useQuery(
+      remoteAccessSessionQueryInput,
+      {
+        enabled: Boolean(terminalSessionType && terminalSessionToken && connectionEndReason !== 'session_expired'),
+        refetchInterval: (query) => {
+          const status = String((query.state.data as any)?.session_status || '').toLowerCase()
+          if (status === 'terminated' || status === 'expired') return false
+          return 2000
+        },
+      },
+    )
 
   const handleReconnect = async () => {
+    setIsConnectionClosed(false)
+    setConnectionEndReason(null)
     setIsReconnecting(true)
+    initializeWebSocket()
+    return
+    setIsReconnecting(true)
+
+    const remote_access_type = localStorage.getItem('current_terminal_session_type')
+
     const res = await createUpdate.mutateAsync({
-      device_id: device_id || '',
-      remote_access_type: 'Shell',
-      category: 'Console'
+      device_id: deviceId || '',
+      // @ts-expect-error - No type yet
+      remote_access_type,
+      // @ts-expect-error - No type yet
+      category: remote_access_type
     })
     if (res.success) {
+
+      const { remote_access_session } = res?.data[0] as Record<string, any>
+
+      const wsUrl = {
+          ssh: `wss://${remote_access_session}.${process.env.NEXT_PUBLIC_REMOTE_ACCESS_URL?.replace('https://', '')}/wallguard/gateway/ssh`,
+          tty: `wss://${remote_access_session}.${process.env.NEXT_PUBLIC_REMOTE_ACCESS_URL?.replace('https://', '')}/wallguard/gateway/tty`,
+          // @ts-expect-error - No type yet
+        }[remote_access_type]
+      
       setIsConnectionClosed(false) // Reset connection status
       setIsReconnecting(false)
-      initializeWebSocket() // Reinitialize the WebSocket connection
+      initializeWebSocket(wsUrl) // Reinitialize the WebSocket connection
     }
   }
 
-  const initializeWebSocket = () => {
+  // The WallGuard gateway is a raw byte passthrough with no resize control
+  // channel, so the only way to set the server PTY winsize is to type the
+  // command into the shell. Leading space skips shell history (HISTCONTROL=ignorespace).
+  const syncPtySize = (cols: number, rows: number) => {
+    if (!cols || !rows) return;
+    if (socketRef.current?.readyState === WebSocket.OPEN) {
+      socketRef.current.send(` stty rows ${rows} cols ${cols}\r`);
+    }
+  };
+
+  const initializeWebSocket = (wsUrl?: string) => {
     const currentSessionKey = localStorage.getItem('current_terminal_session')
-    if (!currentSessionKey) {
+    if (!currentSessionKey && !wsUrl) {
       console.error('No active terminal session found')
       instance?.write('\x1b[31mError: No active terminal session found\x1b[0m\r\n')
       return
     }
 
+    // @ts-expect-error - No type yet
     const websocketUrl = localStorage.getItem(currentSessionKey)
-    if (!websocketUrl) {
+    if (!websocketUrl && !wsUrl) {
       console.error('WebSocket URL not found')
       instance?.write('\x1b[31mError: Terminal session not found or expired\x1b[0m\r\n')
       return
     }
 
     try {
-      const newSocket = new WebSocket(websocketUrl)
+      socket?.close()
+      // @ts-expect-error - No type yet
+      const newSocket = new WebSocket(websocketUrl || wsUrl)
+      socketRef.current = newSocket;
 
       newSocket.onopen = () => {
         instance?.write('\x1b[32mConnected to terminal server\x1b[0m\r\n')
         setIsConnectionClosed(false) // Reset connection status when connected
-      }
+        setConnectionEndReason(null)
+        setIsReconnecting(false)
+        // Wait for the shell prompt before injecting the resize command.
+        setTimeout(() => {
+          if (instance) syncPtySize(instance.cols, instance.rows);
+          setIsInitializing(false);
+        }, 1500);
+      };
 
       newSocket.onerror = (error) => {
         console.error('WebSocket error:', error)
-        instance?.write(`\x1b[31mConnection error: ${websocketUrl}\x1b[0m\r\n`)
-      }
+        instance?.write('\x1b[31mYour session has expired. Please start a new session to keep going.\x1b[0m\r\n')
+        setConnectionEndReason('session_expired')
+        setIsConnectionClosed(true)
+        setIsReconnecting(false)
+        setIsInitializing(false);
+      };
 
-      newSocket.onclose = () => {
+      newSocket.onclose = (event) => {
+        // code 1009 = message too big, 1006 = abnormal (no close frame).
+        console.error('@@@ WebSocket closed:', {
+          code: event.code,
+          reason: event.reason,
+          wasClean: event.wasClean,
+        });
+        socketRef.current = null;
         instance?.write('\x1b[33mConnection closed\x1b[0m\r\n')
         setIsConnectionClosed(true) // Set connection status to closed dynamically
-        localStorage.removeItem('current_terminal_session')
+        setConnectionEndReason((prev) => (prev === 'session_expired' ? prev : 'unexpected_end'))
+        setIsReconnecting(false)
+        setIsInitializing(false);
+        // localStorage.removeItem('current_terminal_session')
       }
 
-      const addon = new AttachAddon(newSocket)
-      instance?.loadAddon(addon)
+      // bidirectional:false → AttachAddon only pipes server→terminal. We send
+      // terminal→server ourselves (chunked) so large pastes don't blow the
+      // gateway's frame buffer and drop the connection.
+      const addon = new AttachAddon(newSocket, { bidirectional: false });
+      instance?.loadAddon(addon);
+
+      dataDisposableRef.current?.dispose(); // avoid stacking senders across reconnects
+      dataDisposableRef.current =
+        instance?.onData((data) => sendToSocket(newSocket, data)) ?? null;
 
       setSocket(newSocket) // Update the WebSocket instance in state
     } catch (error: any) {
       console.error('Error connecting to WebSocket:', error)
       instance?.write(`\x1b[31mError: ${error.message}\x1b[0m\r\n`)
+      setIsReconnecting(false)
     }
   }
 
@@ -87,52 +238,100 @@ export default function WebTerminal() {
     return () => {
       // Close the WebSocket connection when the component unmounts
       socket?.close()
+      dataDisposableRef.current?.dispose();
     }
   }, [instance])
 
   useEffect(() => {
-    // Load the fit addon
-    instance?.loadAddon(fitAddon)
+    if (!instance || !ref.current) return;
+    const fit = fitAddonRef.current!;
+    instance.loadAddon(fit);
 
-    const handleResize = () => fitAddon.fit()
+    const doFit = () => {
+      try {
+        fit.fit();
+      } catch {}
+    };
 
-    // Fit terminal when component mounts
-    if (ref.current) {
-      handleResize()
-    }
+    // Fit once the container has its real laid-out width
+    const raf = requestAnimationFrame(doFit);
 
-    // Handle resize event
-    window.addEventListener('resize', handleResize)
+    // Refit on initial layout + any container/window size change
+    const ro = new ResizeObserver(() => doFit());
+    ro.observe(ref.current);
+
+    // When xterm's grid changes, push the new size to the server PTY.
+    const onResize = instance.onResize(({ cols, rows }) => {
+      syncPtySize(cols, rows);
+    });
+
     return () => {
-      window.removeEventListener('resize', handleResize)
-    }
-  }, [ref, instance])
+      cancelAnimationFrame(raf);
+      ro.disconnect();
+      onResize.dispose();
+    };
+  }, [instance]);
 
-  // If the remote session is terminated or WebSocket is closed, display a message and reconnect button
-  if (devices?.[0]?.device_status?.toLowerCase() === 'offline' || isConnectionClosed) {
-    localStorage.removeItem('device_id')
-    return (
-      <div className="relative h-screen w-screen flex flex-col justify-center items-center bg-gray-800">
-        <p className="text-white text-lg mb-4">
-          {devices?.[0]?.device_status?.toLowerCase() === 'offline' || !devices?.length
-            ? `The remote session has been terminated. Please log in to Proxmox and restart pfSense to bring it back online before attempting to reconnect.`
-            : 'Connection is closed. Please log in to Proxmox and restart pfSense to bring it back online before attempting to reconnect.'}
-        </p>
-        <button
-          onClick={handleReconnect}
-          className={isReconnecting || isConnectionClosed || devices?.[0]?.device_status?.toLowerCase() === 'offline' || !devices?.length ? "px-4 py-2 bg-gray-500 text-white rounded hover:bg-gray-600" :"px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"}
-          disabled={isReconnecting || isConnectionClosed || devices?.[0]?.device_status?.toLowerCase() === 'offline' || !devices?.length}
-        >
-          {isReconnecting ? 'Reconnecting...' : 'Reconnect'}
-        </button>
-      </div>
-    )
-  }
+  useEffect(() => {
+    const deviceName = deviceSummary?.data?.device_name;
+    if (!deviceName) return;
+    const previousTitle = document.title;
+    document.title = terminalSessionType
+      ? `${deviceName} (${terminalSessionType.toUpperCase()}) - Terminal`
+      : `${deviceName} - Terminal`;
+    return () => {
+      document.title = previousTitle;
+    };
+  }, [deviceSummary?.data?.device_name, terminalSessionType]);
+
+  const lastHeartbeatTimestamp = lastHeartbeat?.data?.[0]?.bucket
+  // const isDeviceOfflineOrMissing =
+  //   Boolean(deviceId) &&
+  //   !isLastHeartbeatLoading &&
+  //   !isHeartbeatWithinSeconds(lastHeartbeatTimestamp, 60)
+  const isDeviceOfflineOrMissing = false
+
+  const isSessionTerminated =
+    String(remoteAccessSessionStatus?.session_status || '').toLowerCase() === 'terminated'
+
+  const shouldShowPopup = isSessionTerminated || isConnectionClosed || isDeviceOfflineOrMissing
+  const shouldShowReconnectButton = !isSessionTerminated && connectionEndReason !== 'session_expired'
+  const popupMessage =
+    isSessionTerminated
+      ? 'Your session has terminated. Please start a new session to keep going.'
+      : connectionEndReason === 'session_expired'
+      ? 'Your session has expired. Please start a new session to keep going.'
+      : isDeviceOfflineOrMissing
+        ? 'The connection was closed. Please restart pfSense or the WallGuard agent, then try connecting again.'
+        : 'The connection ended unexpectedly. Please reconnect to continue.'
+
+  useEffect(() => {
+    if (!shouldShowPopup) return
+    // localStorage.removeItem('device_id')
+  }, [shouldShowPopup])
 
   // Render the terminal if the session is active
   return (
     <div className="relative h-screen w-screen">
       <div ref={ref as React.RefObject<HTMLDivElement>} style={{ width: '100%', height: '100%' }} />
+      {isInitializing ? (
+        <div className="absolute inset-0 flex flex-col items-center justify-center bg-gray-800/95">
+          <div className="h-8 w-8 animate-spin rounded-full border-4 border-white border-t-transparent" />
+        </div>
+      ) : shouldShowPopup ? (
+        <div className="absolute inset-0 flex flex-col items-center justify-center bg-gray-800/95">
+          <p className="mb-4 text-lg text-white">{popupMessage}</p>
+          {shouldShowReconnectButton ? (
+            <button
+              onClick={handleReconnect}
+              className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
+              disabled={isReconnecting}
+            >
+              {isReconnecting ? 'Reconnecting...' : 'Reconnect'}
+            </button>
+          ) : null}
+        </div>
+      ) : null}
     </div>
   )
 }

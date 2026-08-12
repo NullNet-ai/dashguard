@@ -2,9 +2,7 @@
 import Redis from "ioredis";
 
 const {
-  REDIS_CACHE_ENDPOINT = "localhost",
-  REDIS_CACHE_INDEX = 1,
-  REDIS_CACHE_PORT = 6379,
+  REDIS_URL = "redis://localhost:6379",
 } = process.env;
 
 // PACHOYCHOY
@@ -26,11 +24,7 @@ export let redisClient: Redis | null = null;
 
 redisClient =
   globalForRedis.redis ||
-  new Redis({
-    port: +REDIS_CACHE_PORT || 6379,
-    host: REDIS_CACHE_ENDPOINT || "localhost",
-    db: +(REDIS_CACHE_INDEX ?? "9"),
-  });
+  new Redis(REDIS_URL);
 
 if (redisClient) {
   redisClient.on("error", (e: Error) => {

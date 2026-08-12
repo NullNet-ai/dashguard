@@ -1,0 +1,22 @@
+meta {
+  name: update policy
+  type: http
+  seq: 2
+}
+
+patch {
+  url: {{raas}}/api/policy/1001
+  body: json
+  auth: none
+}
+
+body:json {
+  {
+    "hypertable": "public.test_hypertables",
+    "drop_after": "5 seconds",
+    "schedule_interval": "1 day",
+    "initial_start": "2026-06-01T00:00:00Z",
+    "timezone": "UTC",
+    "if_not_exists": false
+  }
+}

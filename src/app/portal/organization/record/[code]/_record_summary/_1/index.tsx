@@ -4,6 +4,8 @@ import { api } from "~/trpc/react";
 import useRefetchRecord from "../hooks/useFetchMainRecord";
 import { RecordWrapperContext } from '~/components/platform/Record/providers/RecordWrapperProvider';
 import { useContext } from 'react';
+import { CardComponent as Card } from '~/components/ui/card/index';
+import { Separator } from '~/components/ui/separator';
 
 const fields = {
   Name: "name",
@@ -44,22 +46,24 @@ const RecordShellSummary = ({
   if(isCollapseRecordSummary) return null
 
   return (
-    <div>
-      {Object.entries(fields).map(([key, value], index) => (
-        <div className="pt-2" key={index}>
-          <div className="px-5">
-            <div className="p-1 text-sm">
-              <div>
-                <span className="text-slate-400">{key}: </span>
-                <span>
-                  {(data as { [key: string]: any })?.[value] || "None"}
-                </span>
-              </div>
-            </div>
-          </div>
+    <Card className='p-3'>
+      <div className="flex flex-col gap-1">
+        <div>
+          <span className="text-md font-medium text-foreground">
+            Organization Details
+          </span>
         </div>
-      ))}
-    </div>
+        <Separator />
+        {Object.entries(fields).map(([key, value], index) => (
+          <div className="flex justify-between gap-2 text-sm" key={index}>
+            <span className="text-slate-400 whitespace-nowrap">{key} </span>
+            <span className='break-all text-slate-700'>
+              {(data as { [key: string]: any })?.[value] || "None"}
+            </span>
+          </div>
+        ))}
+      </div>
+    </Card>
   );
 };
 

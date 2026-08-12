@@ -133,7 +133,7 @@ function MainClient({
                       parentType={parentType}
                       showAction={showAction}
                       showPagination={showPagination ?? false}
-                      isLoading
+                      isLoading={isLoading}
                       gridLevel={gridLevel}
                       parentExpanded={parentExpanded}
                     />
@@ -145,7 +145,7 @@ function MainClient({
                     parentType={parentType}
                     showAction={showAction}
                     showPagination={showPagination ?? false}
-                    isLoading
+                    isLoading={isLoading}
                     gridLevel={gridLevel}
                     parentExpanded={parentExpanded}
                   />
@@ -185,6 +185,7 @@ function MainClient({
               parentExpanded={parentExpanded}
               gridType={gridType}
               cardListOption={cardListOption}
+              switchable={config?.switchable || false}
             />
           )}
     </GridProvider>

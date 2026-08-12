@@ -26,14 +26,35 @@ export interface FlowElement {
 
 }
 
+export interface IBandwidthBucket {
+  bucket: string
+  bandwidth: string
+}
+
 export interface IBandwidth {
   source_ip: string
-  destination_ip: string
-  result: Record<string, any>
+  result: IBandwidthBucket[]
+  flag: string
+  name: string
+  country: string
+  time_unit: string
+  time_count: number
+  resolution: string
+  time_range: [string, string]
+  total_bandwidths: number
+  total_active_packets: number
+  isNew?: boolean
 }
+
+/** Raw item returned by the bandwidth API before we overlay the local time settings. */
+export interface IRawBandwidthItem extends Omit<IBandwidth, 'time_unit' | 'time_count' | 'resolution'> {}
 
 export interface IState {
   flowData: any[]
+  topTrafficData: IBandwidth[]
+  recentIPData: IBandwidth[]
+  pollingIntervalTopTraffic: number
+  pollingIntervalRecentIP: number
   loading: boolean
   fetchMoreData: () => any
   unique_source_ips: string[]
@@ -41,7 +62,8 @@ export interface IState {
     name: string
     flag: string
   }
-  fetchBandwidthLoading?:boolean
+  fetchBandwidthLoading?: boolean
+  ipPollTick: number
 }
 
 export interface IAction {
@@ -53,4 +75,10 @@ export interface IAction {
 export interface INetworkFlowContext {
   state?: IState
   actions?: IAction
+}
+
+export interface Tick {
+  isMajor:  boolean
+  label:    string
+  position: 'first' | 'middle' | 'last' | 'none'
 }

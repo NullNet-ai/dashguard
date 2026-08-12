@@ -168,12 +168,12 @@ const Avatar = React.forwardRef<
         {...props}
       />
       {statusProps && <AvatarStatus 
-        containerRef={containerRef} 
+        containerRef={containerRef as React.RefObject<HTMLElement>} 
         size={size} 
         {...statusProps} 
       />}
       {badgeProps && <AvatarBadge
-        containerRef={containerRef}
+        containerRef={containerRef as React.RefObject<HTMLElement>}
         size={size}
         {...badgeProps}
       />}
@@ -226,13 +226,9 @@ const AvatarPlaceholder = React.forwardRef<
   >
     {icon ? (
       <div className="flex h-full w-full items-center justify-center p-0">
-        {React.isValidElement(icon)
-          ? React.cloneElement(icon as React.ReactElement<{ className?: string }>, {
-              className: cn(
-                "h-full w-full",
-                (icon as React.ReactElement<{ className?: string }>).props
-                  .className,
-              ),
+        {React.isValidElement(icon) 
+          ? React.cloneElement(icon as any, { 
+              className: cn("h-full w-full", (icon as any).props.className) 
             }) 
           : icon}
       </div>
@@ -335,21 +331,13 @@ const AvatarGroup = React.forwardRef<
             }}
             className="relative"
           >
-            {React.cloneElement(
-              child as React.ReactElement<{ className?: string; size?: string }>,
-              {
-                className: cn(
-                  "border-[2.5px] border-white",
-                  (
-                    child as React.ReactElement<{
-                      className?: string;
-                      size?: string;
-                    }>
-                  ).props.className,
-                ),
-                size,
-              },
-            )}
+            {React.cloneElement(child as any, {
+              className: cn(
+                "border-[2.5px] border-white", 
+                (child as any).props.className
+              ),
+              size: size
+            })}
           </div>
         );
       })}

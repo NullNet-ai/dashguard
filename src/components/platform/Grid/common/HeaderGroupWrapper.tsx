@@ -3,6 +3,7 @@
 import { ChevronDownIcon, X } from 'lucide-react';
 import { Badge } from '~/components/ui/badge';
 import { type IState } from '../types';
+import { testIDFormatter } from '~/utils/formatter';
 import React, { useContext, useEffect, useMemo, useState } from 'react';
 import { cn } from '~/lib/utils';
 import {
@@ -40,8 +41,8 @@ export const HeaderGroupWrapper = ({
       const allItems: any[] = [];
       const newData = param_items || items;
       // clear width, more width, and search by
-      let totalWidth = 0;
-      const containerWidth = parentRef.current?.offsetWidth || 0;
+      let totalWidth = 24;
+      const containerWidth = 200;
 
       for (let index = 0; index < newData?.length; index++) {
         if (itemsRef.current[index]?.offsetWidth) {
@@ -97,7 +98,7 @@ export const HeaderGroupWrapper = ({
       <div
         ref={parentRef}
         className={cn(
-          `header-table-grid flex w-[250px] flex-1 items-center gap-1`,
+          `header-table-grid flex max-w-[270px] flex-1 items-center gap-1`,
           `overflow-hidden`,
         )}
       >
@@ -117,12 +118,18 @@ export const HeaderGroupWrapper = ({
               className={cn({ 'opacity-0': isHidden })}
             >
               <Badge
+                data-test-id={testIDFormatter(
+                  `${state?.config?.entity}-group-by-badge`,
+                )}
                 borderRadius={'md'}
                 variant="primary"
-                className="flex items-center gap-1 px-2"
+                className="flex min-w-[60px] items-center justify-between gap-1 px-2"
               >
                 {column?.columnDef?.header as string}
                 <X
+                  data-test-id={testIDFormatter(
+                    `${state?.config?.entity}-remove-grouping-button`,
+                  )}
                   className="h-3 w-3 cursor-pointer text-gray-400 hover:text-destructive"
                   onClick={() => {
                     if (!isHidden) {
@@ -142,7 +149,7 @@ export const HeaderGroupWrapper = ({
         <DropdownMenu open={isDropdownOpen} onOpenChange={setIsDropdownOpen}>
           <DropdownMenuTrigger
             className="fborder absolute flex min-h-[24px] items-center gap-1 rounded-md border-transparent bg-primary/10 px-2 py-0.5 text-sm font-normal text-primary transition-colors focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2"
-            data-test-id="apptab-ddn-btn"
+            data-test-id="app-tab-dropdown-button"
             style={{
               left: `${getTotalWidthShownItems}px`,
             }}
@@ -155,7 +162,7 @@ export const HeaderGroupWrapper = ({
             </span>
           </DropdownMenuTrigger>
           <DropdownMenuContent
-            className="pt-2"
+            className="px-2 py-2 pb-1"
             align="end"
             alignOffset={10}
             side="bottom"

@@ -15,8 +15,10 @@ const getInitials = (name: string) => {
 };
 
 export default async function SideBarMenu() {
-  const mainConfig = await MainMenuConfig();
-  const accountOrganization =  await api.record.getSessionInfo();
+  const accountOrganization = await api.record.getSessionInfo();
+  const mainConfig = await MainMenuConfig(
+    accountOrganization?.current_organization?.role,
+  );
   const { account_name, username, organization } = accountOrganization?.current_organization ?? {}
   const initials = getInitials(account_name);
   const cookieStore = await cookies(); // Access cookies
@@ -38,9 +40,9 @@ export default async function SideBarMenu() {
         <div className="flex items-center justify-start py-1.5 text-sm lg:justify-center">
           <Image
             alt="Company Logo"
-            className="h-8 w-auto"
+            className="h-12 w-auto"
             height={50}
-            src="/tailwindLogo.svg"
+            src="/appguard-logo.png"
             width={50}
           />
           <Clock />

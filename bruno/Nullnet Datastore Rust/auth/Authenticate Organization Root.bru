@@ -1,0 +1,48 @@
+meta {
+  name: Authenticate Organization Root
+  type: http
+  seq: 1
+}
+
+post {
+  url: {{baseUrl}}/api/organizations/auth?is_root=true
+  body: json
+  auth: none
+}
+
+params:query {
+  is_root: true
+}
+
+body:json {
+  {
+      "data": {
+          "account_id": "root",
+          "account_secret": "pl3@s3ch@ng3m3!!"
+      }
+  }
+}
+
+vars:pre-request {
+  baseUrl: https://store.appguard.ai
+}
+
+script:post-response {
+  const body = res.getBody();
+  const token =
+    body?.data?.token ||
+    body?.data?.access_token ||
+    body?.token ||
+    body?.access_token;
+  
+  if (token) {
+    bru.setVar("sessionToken", token);
+  } else {
+    console.log("No auth token found in login response.");
+  }
+}
+
+settings {
+  encodeUrl: true
+  timeout: 0
+}

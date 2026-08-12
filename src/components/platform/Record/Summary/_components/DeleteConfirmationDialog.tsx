@@ -1,4 +1,4 @@
-import { ShieldMinus } from 'lucide-react'
+import { Trash2 } from 'lucide-react'
 import React from 'react'
 
 import { Button } from '~/components/ui/button'
@@ -18,9 +18,9 @@ const DeleteConfirmationDialog = ({
 
   return (
     <Dialog open={open} onOpenChange={onChangeContext}>
-      <DialogContent className="w-5/6 bg-white sm:w-1/3">
+      <DialogContent className="w-5/6 bg-white md:w-3/6">
         <div className="mb-2 text-sm flex items-center gap-x-2 ">
-          <ShieldMinus
+          <Trash2
             size={35}
             className='rounded-full border border-red-300 bg-red-100 p-2 text-destructive'
           />
@@ -28,9 +28,8 @@ const DeleteConfirmationDialog = ({
             Delete Image Confirmation
           </div>
         </div>
-        <Separator className="my-2 mt-1" />
         
-        <div className="flex flex-1 gap-2 text-base min-h-[72px] py-4">
+        <div className="flex flex-1 gap-2 text-base min-h-[65px] py-4">
           Are you sure you want to delete the image?
         </div>
         <Separator className="my-2" />

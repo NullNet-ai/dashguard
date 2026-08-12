@@ -34,6 +34,7 @@ const FormBuilderLayout = ({
   appendFormKey,
   checkboxOptions,
   multiSelectOptions,
+  savedCardOptions,
   multiSelectOnSearch,
   radioOptions,
   selectOptions,
@@ -68,6 +69,8 @@ const FormBuilderLayout = ({
   customRender,
   onSelectFieldFilterGrid,
   handleSearchOpen,
+  formSaveButtonTitle,
+  formSaveIcon,
   properties = {
     isEditable: true,
   },
@@ -168,6 +171,8 @@ const FormBuilderLayout = ({
                       isButtonLoading={isSaveLoading}
                       saveForm={saveForm}
                       properties={properties}
+                      formSaveButtonTitle={formSaveButtonTitle}
+                      formSaveIcon={formSaveIcon}
                     />
                   </CardContent>
                 ) : (
@@ -209,6 +214,7 @@ const FormBuilderLayout = ({
                   handleUpdateDisplayType={handleUpdateDisplayType}
                   multiSelectOnSearch={multiSelectOnSearch}
                   multiSelectOptions={multiSelectOptions}
+                  savedCardOptions={savedCardOptions}
                   myParent={myParent}
                   radioOptions={radioOptions}
                   selectOptions={selectOptions}

@@ -4,17 +4,19 @@ import { z } from 'zod';
 import { type ISortBy } from '~/components/platform/Grid/Category/type';
 import {
   EOperator,
-  type IGroupAdvanceFilters,
+  IGroupAdvanceFilters,
   type IAdvanceFilters,
   type IResponse,
 } from '@dna-platform/common-orm';
 import { EOrderDirection } from '@dna-platform/common-orm/build/enums/model';
 
 import {
+  type IPagination,
   type ISearchItem,
 } from '~/components/platform/Grid/Search/types';
 import {
   gridCacheId,
+  type TReportDataType,
 } from '~/components/platform/Grid/utils/grid-cache-id';
 import {
   SetIdTab,
@@ -29,13 +31,13 @@ import ZodGetFilters from '~/server/zodSchema/grid/getFilters';
 import ZodItems from '~/server/zodSchema/grid/items';
 import ZodSaveFilters from '~/server/zodSchema/grid/saveFilters';
 
-import { pluralize } from '../../utils/pluralize';
 import { EStatus, type IGridFilterBy, type ITabGrid } from '../types';
 import {
   addCommonGridConcatenates,
   addCommonGridJoins,
   addCommonGridPluckObject,
 } from '~/server/utils/queryBuilder';
+import pluralize from 'pluralize';
 
 export const gridRouter = createTRPCRouter({
   createEntity: privateProcedure
@@ -121,9 +123,9 @@ export const gridRouter = createTRPCRouter({
         application: z.string(),
       }),
     )
-    .mutation(async ({  ctx }) => {
+    .mutation(async ({ input, ctx }) => {
       const headerList = await headers();
-      // const gridTabId = headerList.get('x-grid-tab-id') || '';
+      const gridTabId = headerList.get('x-grid-tab-id') || '';
       const pathName = headerList.get('x-pathname') || '';
       const [, , mainEntity, application] = pathName.split('/');
 
@@ -218,9 +220,10 @@ export const gridRouter = createTRPCRouter({
         advance_filters: _advance_filters = [],
         entity,
         sorting,
-        is_case_sensitive_sorting = 'false',
-        group_advance_filters : _group_advance_filters = []
+        group_advance_filters: _group_advance_filters = [],
       } = input;
+
+      console.log('$ [gridRouter] items - input', input);
 
       const pluck_object = {
         ...addCommonGridPluckObject(),
@@ -229,6 +232,7 @@ export const gridRouter = createTRPCRouter({
 
       const query = ctx.dnaClient.findAll({
         entity,
+        no_caching: true,
         token: ctx.token.value,
         query: {
           pluck: input.pluck,
@@ -247,20 +251,25 @@ export const gridRouter = createTRPCRouter({
                   (input.limit || 100),
             limit: input.limit || 1,
             by_field:
-              input?.sorting?.length === 1 ? input.sorting[0]?.id : 'code',
+              input?.sorting?.length === 1
+                ? input.sorting[0]?.sort_key
+                  ? input.sorting[0]?.sort_key
+                  : (input.sorting[0] as any)?.sort_key ?? input.sorting[0]?.id
+                : 'code',
             by_direction:
               input?.sorting?.length === 1
                 ? input.sorting[0]?.desc
                   ? EOrderDirection.DESC
                   : EOrderDirection.ASC
                 : EOrderDirection.DESC,
+              is_case_sensitive_sorting: true,
           },
-          //@ts-expect-error - multiple sort
           multiple_sort:
             sorting?.length && sorting?.length > 1
-              ? formatSorting(sorting, entity, is_case_sensitive_sorting)
+              // @ts-expect-error - No type yet
+              ? formatSorting(sorting)
               : [],
-          concatenate_fields: [...addCommonGridConcatenates(input?.entity)],
+          concatenate_fields: [...addCommonGridConcatenates(pluralize(input?.entity))],
         },
       });
       addCommonGridJoins(query, entity);
@@ -289,12 +298,14 @@ export const gridRouter = createTRPCRouter({
       }
 
       const formatted_items = items?.map((item: Record<string, any>) => {
-        const {
+        let {
           [pluralize(input?.entity)]: entity_data,
           created_by,
           updated_by,
           ...rest
         } = item;
+        if (Array.isArray(created_by)) created_by = created_by?.[0];
+        if (Array.isArray(updated_by)) updated_by = updated_by?.[0];
         return {
           ...entity_data,
           ...rest,
@@ -606,13 +617,19 @@ export const gridRouter = createTRPCRouter({
     )
     .mutation(async ({ input, ctx }) => {
       const result = await ctx.dnaClient
-        .getPreviousStatus(input.id, {
+        .findOne(input.id, {
           entity: input?.entity,
           token: ctx.token.value,
+          query: {
+            pluck: ['previous_status'],
+          },
         })
         .execute();
 
-      const [previous_status] = result?.data || [];
+      const data = result?.data?.[0] ?? {};
+      if (!data.previous_status) {
+        throw new Error('Previous status not found');
+      }
 
       return ctx.dnaClient
         .update(input?.id, {
@@ -620,7 +637,7 @@ export const gridRouter = createTRPCRouter({
           token: ctx.token.value,
           mutation: {
             params: {
-              status: previous_status?.value || EStatus.DRAFT,
+              status: data.previous_status,
             },
           },
         })
@@ -658,6 +675,7 @@ export const gridRouter = createTRPCRouter({
           z.object({
             id: z.string(),
             desc: z.boolean(),
+            type: z.string().optional(),
             sort_key: z.string().optional(),
             is_case_sensitive_sorting: z.boolean().optional(),
           }),
@@ -731,6 +749,10 @@ export const gridRouter = createTRPCRouter({
             display_value: z.any().optional(),
             filters: z.array(z.any()).optional(),
             parse_as: z.string().optional(),
+            is_custom_value: z.boolean().optional(),
+            raw_value: z.any().optional(),
+            custom_value: z.any().optional(),
+            key: z.string().optional(),
           }),
         ),
         gridKey: z.string().optional(),
@@ -773,8 +795,8 @@ export const gridRouter = createTRPCRouter({
             default_filter: [],
             pagination: {
               ...(tab?.pagination ?? {}),
-              current_page: 1
-            }
+              current_page: 1,
+            },
           };
         }
         return tab;
@@ -890,8 +912,8 @@ export const gridRouter = createTRPCRouter({
       //   typeof pagination === 'object' ? pagination : {};
 
       const currentGridTab = filter_id
-        ? tabDetails?.find((tab) => tab.id === filter_id)
-        : null;
+          ? tabDetails?.find((tab) => tab.id === filter_id)
+          : null;
 
       const filterDetails = currentGridTab
         ? currentGridTab
@@ -900,7 +922,7 @@ export const gridRouter = createTRPCRouter({
       const filter = filterDetails?.advance_filters?.length
         ? filterDetails.advance_filters
         : filterDetails?.default_filter || [];
-        
+
       const groupAdvanceFilters: ISearchItem[] = filter_id
         ? (tabDetails?.find((tab) => tab.id === filter_id)
             ?.group_advance_filters ?? [])
@@ -931,6 +953,7 @@ export const gridRouter = createTRPCRouter({
         desc: typeof item.desc === 'boolean' ? item.desc : false,
         sort_key: item.field,
         is_case_sensitive_sorting: item.is_case_sensitive_sorting ?? false,
+        type: item.type,
       }));
       const currentTab = filterDetails ? filterDetails : defaultFilter;
 
@@ -941,6 +964,7 @@ export const gridRouter = createTRPCRouter({
       }));
 
       return {
+        current_tab_id: filterDetails?.id,
         grid_tabs: gridtabs,
         filters: {
           reportFilters: filter,
@@ -1033,6 +1057,7 @@ export const gridRouter = createTRPCRouter({
             field: z.string(),
             desc: z.boolean(),
             is_case_sensitive_sorting: z.boolean().optional(),
+            type: z.string().optional(),
           }),
         ),
         gridKey: z.string().optional(),
@@ -1100,14 +1125,19 @@ export const gridRouter = createTRPCRouter({
         application: z.string().optional(),
         identifier: z.string().optional(),
         defaultGridTabs: z.array(z.any()).optional(),
+        defaultAllTabName: z.string().optional(),
         pathname: z.string().optional(),
         defaultSorting: z.array(z.any()).optional(),
         additionalFilters: z.array(z.any()).optional(),
+        defaultGrouping: z.array(z.any()).optional(),
+        gridEntity: z.string().optional(),
+        defaultAdvanceFilter: z.array(z.any()).optional(),
+        hideDefaultAllTab: z.boolean().optional(),
       }),
     )
     .query(async ({ ctx, input }) => {
       const headerList = await headers();
-      // const gridTabId = headerList.get('x-grid-tab-id') || '';
+      const gridTabId = headerList.get('x-grid-tab-id') || '';
       const pathName = input?.pathname || headerList.get('x-pathname') || '';
       const [, , _mainEntity, _application, _identifier] = pathName.split('/');
       const mainEntity = input?.entity || _mainEntity;
@@ -1134,6 +1164,11 @@ export const gridRouter = createTRPCRouter({
           defaultGridTabs: input.defaultGridTabs,
           defaultSorting: input.defaultSorting,
           additionalFilters: input.additionalFilters,
+          defaultGrouping: input.defaultGrouping,
+          gridEntity: input.gridEntity,
+          defaultAdvanceFilter: input.defaultAdvanceFilter ?? [],
+          defaultAllTabName: input.defaultAllTabName,
+          hideDefaultAllTab: input.hideDefaultAllTab,
         });
         await ctx.redisClient.cacheData(_tabMenuId, defaultTab);
         return defaultTab;
@@ -1217,5 +1252,47 @@ export const gridRouter = createTRPCRouter({
         return merged_tabs;
       }
       return tabs;
+    }),
+  setCurrentGridTab: privateProcedure
+    .input(
+      z
+        .object({
+          gridTabId: z.string(),
+          gridKey: z.string().optional(),
+          application: z.string().optional(),
+          entity: z.string().optional(),
+          identifier: z.string().optional(),
+          pathname: z.string().optional(),
+        })
+        .optional(),
+    )
+    .query(async ({ ctx, input }) => {
+      const headerList = await headers();
+      const pathName = input?.pathname || headerList.get('x-pathname') || '';
+      const [, , _mainEntity, _application, _identifier] = pathName.split('/');
+
+      const application = input?.application || _application;
+      const mainEntity = input?.entity || _mainEntity;
+      const identifier = input?.identifier || _identifier;
+
+      const _tabMenuId = tabMenuId({
+        _mainEntity: mainEntity || '',
+        _application: application || '',
+        _id: ctx.session.account.account_organization_id,
+        _gridKey: input?.gridKey,
+        _identifier: identifier || '',
+      });
+
+      const grid_tabs = await ctx.redisClient.getCachedData(_tabMenuId);
+      const tabDetails = Array.isArray(grid_tabs) ? grid_tabs : [];
+      const currentTab = tabDetails.find((tab) => tab.id === input?.gridTabId);
+      if (!currentTab) return;
+      const updateTabs = tabDetails.map((tab) => ({
+        ...tab,
+        current: tab.id === input?.gridTabId,
+      }));
+
+      await ctx.redisClient.cacheData(_tabMenuId, updateTabs);
+      return;
     }),
 });

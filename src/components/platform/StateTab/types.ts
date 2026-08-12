@@ -24,4 +24,6 @@ export interface StateTabProps extends StateTabContextType {
   className?: string
   persistKey?: string
   tablistClassName?: string
+  isStickyContainer?: boolean
+  stickyClassName?: string
 }

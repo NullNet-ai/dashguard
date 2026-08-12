@@ -12,6 +12,8 @@ import SelectedView from './components/SelectedView';
 import { api } from '~/trpc/react';
 import { UserRoleFormSchema } from '~/server/zodSchema/user_role/basicDetails';
 import { useRouter } from 'next/navigation';
+import { useFormNavigationStateMachine } from '~/components/platform/FormBuilder/Utils/formNavigation';
+
 
 export default function RoleDetails({
   params,
@@ -24,6 +26,7 @@ export default function RoleDetails({
   const router = useRouter();
 
   const saveUserRole = api.user_role.saveUserRole.useMutation();
+  const { handleFormSubmission } = useFormNavigationStateMachine();
 
   const handleSave = async ({
     data,
@@ -31,6 +34,66 @@ export default function RoleDetails({
     form,
   }: IHandleSubmit<z.infer<typeof UserRoleFormSchema>>): Promise<any[]> => {
     try {
+
+      await handleFormSubmission({
+        action_type,
+        stateMachine: {
+          create: {
+            invoke: async (): Promise<{ code: string; data: any }> => {
+              const response = await saveUserRole.mutateAsync({
+                id: params.id,
+                ...data,
+              });
+        
+              return {
+                code: response?.data?.[0]?.code!,
+                data: response,
+              };
+            },
+            validate: async (response) => {
+              if (response?.existing) {
+                form?.setError('role', {
+                  type: 'manual',
+                  message,
+                });
+              }
+
+              return null
+            },
+            toast_message: 'Basic Details submit sucessfully',
+          },
+          update: {
+            invoke: async (): Promise<{ code: string; data: any }> => {
+              const response = await saveUserRole.mutateAsync({
+                id: params.id,
+                ...data,
+              });
+              return {
+                code: response?.data?.[0]?.code!,
+                data: response,
+              };
+            },
+            validate: async (response) => {
+              if (response?.existing) {
+                form?.setError('role', {
+                  type: 'manual',
+                  message,
+                });
+              }
+
+              return null
+            },
+            toast_message: 'Basic Details submit sucessfully',
+          },
+          wizard: {
+            new: {},
+            code: {},
+          },
+          record: true,
+        },
+      });
+
+      // old
       const res = await saveUserRole.mutateAsync({
         id: params.id,
         ...data,
@@ -38,30 +101,30 @@ export default function RoleDetails({
 
       const { existing = false, message } = res as any;
 
-      if (existing) {
-        form?.setError('role', {
-          type: 'manual',
-          message,
-        });
-      }
-      if (res?.status_code == 200) {
-        const [user_role_data] = res?.data;
-        const wizardPath = `/portal/user_role/wizard/${user_role_data?.code}`;
+      // if (existing) {
+      //   form?.setError('role', {
+      //     type: 'manual',
+      //     message,
+      //   });
+      // }
+      // if (res?.status_code == 200) {
+      //   const [user_role_data] = res?.data;
+      //   const wizardPath = `/portal/user_role/wizard/${user_role_data?.code}`;
 
-        toast.success('Basic Details submit sucessfully');
-        if (action_type && ['Create', 'Next', 'Paste'].includes(action_type)) {
-          await savedRecord({ code: user_role_data?.code, action_type });
+      //   toast.success('Basic Details submit sucessfully');
+      //   if (action_type && ['Create', 'Next', 'Paste'].includes(action_type)) {
+      //     await savedRecord({ code: user_role_data?.code, action_type });
 
-          await utils.invalidate(); // use to ignore the cache
-          const targetPath =
-            action_type === 'Next' ? `${wizardPath}/2` : `${wizardPath}/1`;
-          router.push(targetPath);
+      //     await utils.invalidate(); // use to ignore the cache
+      //     const targetPath =
+      //       action_type === 'Next' ? `${wizardPath}/2` : `${wizardPath}/1`;
+      //     router.push(targetPath);
 
-          // For Next action, we've already navigated, so return empty array
-          if (action_type === 'Next') return [];
-        }
-        return res.data;
-      }
+      //     // For Next action, we've already navigated, so return empty array
+      //     if (action_type === 'Next') return [];
+      //   }
+      //   return res.data;
+      // }
 
       return [];
     } catch (error) {
@@ -84,7 +147,8 @@ export default function RoleDetails({
         filter_entity,
         main_entity_id: '',
       };
-    } catch (error) {
+    } catch (error: any) {
+      if (error.message === 'NEXT_REDIRECT') return;
       toast.error('Failed to submit Basic Details');
     }
   };
@@ -105,7 +169,8 @@ export default function RoleDetails({
         filter_entity,
         main_entity_id,
       };
-    } catch (error) {
+    } catch (error: any) {
+      if (error.message === 'NEXT_REDIRECT') return;
       toast.error('Failed to submit Basic Details');
     }
   };

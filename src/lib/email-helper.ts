@@ -32,7 +32,7 @@ export const sendEmail = async ({
       subject,
       html,
     });
-    console.info('Email sent successfully');
+    console.info('Email sent successfully', { from, to , timestamp: new Date().getTime() , pid: process.pid});
   } catch (error) {
     console.error('Error sending email:', error);
     throw error;

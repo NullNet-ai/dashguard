@@ -2,14 +2,13 @@ import { headers } from "next/headers";
 import { redirect } from "next/navigation";
 import { api } from "~/trpc/server";
 
-export default async function Page(
-  props: {
-    params: Promise<{
-      code: string;
-    }>;
-  }
-) {
-  const params = await props.params;
+export default async function Page({
+  params,
+}: {
+  params: {
+    code: string;
+  };
+}) {
   const headerList = await headers();
   const pathname = headerList.get("x-pathname") || "";
   const [, , mainEntity, ,] = pathname.split("/");

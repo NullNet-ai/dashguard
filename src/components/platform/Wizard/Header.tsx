@@ -6,6 +6,7 @@ import {
   ChevronLeftIcon,
   ChevronRightIcon,
   ChevronUpIcon,
+  PresentationChartLineIcon,
 } from "@heroicons/react/24/outline";
 import { useContext, useMemo } from "react";
 import { Button } from "~/components/ui/button";
@@ -25,10 +26,13 @@ import numberToWords from "./Utils/steptoWords";
 import { type NumberWords } from "./type";
 import { testIDFormatter } from "~/utils/formatter";
 import { SaveIcon } from "lucide-react";
+import { CardComponent as Card } from '~/components/ui/card/index';
+import { useSideDrawer } from '../SideDrawer';
+import TimelineWizardRecord from './TimelineRecord';
 
 export default function Header() {
   const { state, actions } = useContext(WizardContext);
-
+    const { actions: sideDrawerAction } = useSideDrawer();
   const {
     currentStep = 1,
     totalSteps = 5,
@@ -42,6 +46,8 @@ export default function Header() {
     debugOn,
     entityName,
     stepsNavigation,
+    enableTimeline,
+    metadata
   } = state ?? {};
 
   const {
@@ -52,9 +58,21 @@ export default function Header() {
     handleSaveAndClose,
     handleSaveAndNew,
     handleDebug,
+
   } = actions ?? {};
 
   const [isOpen, setIsOpen] = React.useState(false);
+
+  const handleOpenTimeline = () => {
+    if (!enableTimeline) return;
+    sideDrawerAction?.openSideDrawer({
+      header: <h1 className='flex items-center gap-x-1'> <PresentationChartLineIcon className="size-5" /> <span>{metadata?.timeline_title ?? 'Timeline Records'} </span></h1>,
+      sideDrawerWidth: '800px',
+      body: {
+        component: TimelineWizardRecord
+      },
+    });
+  }
 
   const {
     next: enabled_next = true,
@@ -75,7 +93,7 @@ export default function Header() {
   const customizedButton = state?.callbackHandlers?.customizeWizardButtonSave;
 
   return (
-    <>
+    <Card>
       <div className="flex md:h-[44px] gap-y-2 md:gap-0 w-full md:flex-row flex-col items-start md:items-center justify-start md:justify-between rounded px-2 pb-2 md:pb-1 py-2 md:py-1 text-foreground sm:items-center">
         <div className="flex flex-row items-center justify-start">
           <Collapsible
@@ -111,9 +129,25 @@ export default function Header() {
           </div>
         </div>
         <div className="flex items-center space-x-2">
+          
+          {enableTimeline && 
+          <div className='border-r border-gray-200'>
+            <Button
+              variant={"outline"}
+              className='flex gap-x-1 mr-2'
+              size={"xs"}
+              onClick={() => {
+                handleOpenTimeline()
+              }}
+            >
+              <PresentationChartLineIcon className='size-4 text-primary'/>
+              <span className='text-primary'>Timeline Record</span>
+            </Button>
+          </div> }
+          
           {currentStep > 1 && (
             <Button
-              data-test-id={testIDFormatter(`${entityName}-wzrd-prev-btn`)}
+              data-test-id={testIDFormatter(`${entityName}-wizard-previous-button`)}
               disabled={!enabled_prev || currentStep === 1 || prevLoading}
               variant={"outline"}
               loading={prevLoading}
@@ -129,24 +163,26 @@ export default function Header() {
               <span className="text-foreground">Prev</span>
             </Button>
           )}
-          <Button
-            name="wizardDebugButton"
-            data-test-id={testIDFormatter(`${entityName}-wzrd-debug-btn`)}
-            size={"icon"}
-            variant={"ghost"}
-            className="m-auto h-6 w-6 rounded-full bg-rose-200"
-            onClick={handleDebug}
-          >
-            <BugAntIcon className="h-4 w-4 cursor-pointer rounded-full border text-red-500" />
-          </Button>
+          {process.env.NODE_ENV !== "production" && (
+            <Button
+              name="wizardDebugButton"
+              data-test-id={testIDFormatter(`${entityName}-wizard-debug-button`)}
+              size={"icon"}
+              variant={"ghost"}
+              className="m-auto h-6 w-6 rounded-full bg-rose-200"
+              onClick={handleDebug}
+            >
+              <BugAntIcon className="h-4 w-4 cursor-pointer rounded-full border text-red-500" />
+            </Button>
+          )}
 
           {currentStep === totalSteps ? (
             <div className="flex flex-row items-center">
               <Button
                 data-test-id={testIDFormatter(
-                  `${entityName}-wzrd-save-continue-btn`,
+                  `${entityName}-wizard-save-continue-button`,
                 )}
-                className="gap-1 rounded-r-none"
+                className="gap-1"
                 loading={saveContinueLoading}
                 size={"sm"}
                 onClick={handleSaveAndContinue}
@@ -161,7 +197,7 @@ export default function Header() {
                 )}
                 <span>{customizedButton?.label || "Save & Continue"}</span>
               </Button>
-              {!!customizedButton?.disableDropdown ? null : (
+              {/* {!!customizedButton?.disableDropdown ? null : (
                 <ButtonWithDropdown
                   entity={entityName}
                   buttonClassName="rounded-l-none"
@@ -186,13 +222,13 @@ export default function Header() {
                     saveContinueLoading || saveCloseLoading || saveNewLoading
                   }
                 />
-              )}
+              )} */}
             </div>
           ) : (
             <>
               {currentStep > 1 && (
                 <Button
-                  data-test-id={testIDFormatter(`${entityName}-wzrd-skip-btn`)}
+                  data-test-id={testIDFormatter(`${entityName}-wizard-skip-button`)}
                   variant={"outline"}
                   loading={skipLoading}
                   size={"sm"}
@@ -210,7 +246,7 @@ export default function Header() {
               )}
 
               <Button
-                data-test-id={testIDFormatter(`${entityName}-wzrd-next-btn`)}
+                data-test-id={testIDFormatter(`${entityName}-wizard-next-button`)}
                 loading={nextLoading}
                 size={"sm"}
                 disabled={
@@ -228,9 +264,9 @@ export default function Header() {
       </div>
       {debugOn && <DebuggerComponent />}
       <Validation
-        dataTestId={testIDFormatter(`${entityName}-wzrd-validation-msg`)}
+        dataTestId={testIDFormatter(`${entityName}-wizard-validation-message`)}
         messages={errorMessage ?? {}}
       />
-    </>
+    </Card>
   );
 }

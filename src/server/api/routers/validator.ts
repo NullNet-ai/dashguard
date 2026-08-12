@@ -4,9 +4,9 @@ import { createTRPCRouter, privateProcedure } from "~/server/api/trpc";
 import { createAdvancedFilter } from "../../utils/transformAdvanceFilter";
 import { EOperator, type IAdvanceFilters } from "@dna-platform/common-orm";
 import {
-  type EmailArraySchema,
+  EmailArraySchema,
   EmailSchema,
-  type PhoneArraySchema,
+  PhoneArraySchema,
   PhoneSchemaValidation,
 } from "~/server/zodSchema/contact/contactPhoneEmail";
 
@@ -54,32 +54,32 @@ export const validatorRouter = createTRPCRouter({
         fieldKey: string,
         pluckFields: string[],
       ) => {
-        return Promise.all(
-          items?.map((item) => {
-            const field_value = (item as { [key: string]: any })?.[fieldKey];
+        const tasks: Array<Promise<any>> = (items ?? []).map((item) => {
+          const field_value = (item as { [key: string]: any })?.[fieldKey];
 
-            if (!field_value) return null;
+          if (!field_value) return Promise.resolve(null);
 
-            const filters = [
-              ...createAdvancedFilter({
-                [fieldKey]: field_value,
-                status: "Active",
-              }),
-              {
-                operator: EOperator.AND,
-                type: "operator",
-              },
-              {
-                field: "contact_id",
-                operator: EOperator.NOT_EQUAL,
-                type: "criteria",
-                values: [contact_id],
-              },
-            ];
+          const filters = [
+            ...createAdvancedFilter({
+              [fieldKey]: field_value,
+              status: "Active",
+            }),
+            {
+              operator: EOperator.AND,
+              type: "operator",
+            },
+            {
+              field: "contact_id",
+              operator: EOperator.NOT_EQUAL,
+              type: "criteria",
+              values: [contact_id],
+            },
+          ];
 
-            return fetchContactData(entity, filters, pluckFields);
-          }),
-        );
+          return fetchContactData(entity, filters, pluckFields);
+        });
+
+        return Promise.all(tasks);
       };
 
       const [phones_exist, email_exist] = await Bluebird.all([

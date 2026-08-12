@@ -61,6 +61,7 @@ export type CustomColumnDef<TData> = ColumnDef<TData> & {
   sortKey?: string | Array<string>;
   sort_config?: {
     is_case_sensitive_sorting?: boolean;
+    type?: string;
   };
   data_type?: string;
   search_config?: {
@@ -103,6 +104,10 @@ export interface IRowClickCustomConfig {
 
 export type TActionUIState = 'disabled' | 'hidden';
 export interface IConfigGrid {
+  switchable?: boolean
+  showScrollToTop?: boolean;
+  showGridTab?: boolean;
+  isDraggable?: boolean;
   entity: string;
   title?: string;
   columns: CustomColumnDef<any>[];
@@ -133,6 +138,7 @@ export interface IConfigGrid {
   // toggle for single and multi select
   enableMultiRowSelection?: boolean;
   enableRowClick?: boolean;
+  recordLabelField?: string;
   rowClickCustomAction?:
     | ((args: DefaultRowActions) => void)
     | IRowClickCustomConfig;
@@ -152,11 +158,12 @@ export interface IConfigGrid {
   };
   hideCreateButton?: boolean;
   enableRowExpansion?: boolean;
+  searchDialog?: 'timeline' | 'default';
   viewMode?: 'table' | 'card';
   // for custom row expansion component
   rowExpansionBuilder?:
-    | ReactElement<IExpansionComponentProps>
-    | ((props: IExpansionComponentProps) => React.ReactNode);
+    | ReactElement
+    | ((rowData: any, viewMode?: string) => React.JSX.Element);
   // to hide/show checkbox
   enableRowSelection?: boolean;
   // to identify if grid is a child grid
@@ -227,6 +234,13 @@ export interface IConfigGrid {
     hide?: boolean;
     disabled?: boolean;
   };
+  hideFilterHeader?: boolean;
+  showPagination?: boolean;
+  removeResetSorting?: boolean;
+  isCreatable?: boolean
+  addNewButtonPosition?: 'default' | 'in-tabs';
+  noResultText?: string;
+  enableSearch?: boolean;
 }
 
 interface IRowToArchive extends Row<any> {
@@ -278,6 +292,8 @@ export interface IState {
     actions: IAction | undefined;
   }) => ReactNode | ReactElement;
   hideCreateNewFilter?: boolean;
+  defaultGrouping?: IGroupBy[];
+  current_tab_id?: string;
 }
 
 export interface IAction {
@@ -306,6 +322,7 @@ export interface IAction {
   handleUpdateGrouping: (updater: Updater<GroupingState>) => Promise<void>;
   handleCustomBulkAction: () => Promise<void>;
   setColumnsOrder?: React.Dispatch<any>;
+  handleResetGrouping?: () => void
 }
 
 export interface ICreateContext {
@@ -322,11 +339,11 @@ export type IParentType =
   | 'grid'
   | 'form'
   | 'field'
-  | 'record'
   | 'grid_expansion'
   | 'side_drawer'
   | 'grouping_expansion'
-  | 'record';
+  | 'record'
+  | 'wizard';
 export interface IPropsGrid {
   config: IConfigGrid;
   data: any;
@@ -350,6 +367,17 @@ export interface IPropsGrid {
   }) => ReactNode | ReactElement;
   hideCreateNewFilter?: boolean;
   grid_tabs?: any[];
+  isLoading?: boolean;
+  defaultGrouping?: IGroupBy[];
+  current_tab_id?: string;
+  gridParentClass?: string;
+  withVerticalTabs?: boolean;
+  gridChildClass?: string;
+  gridDesktopClass?: string;
+  sidebarTab?: {
+    closed: boolean;
+    useSidebar: boolean;
+  };
 }
 
 export interface IExpandedRow {
@@ -374,5 +402,8 @@ export interface IGridGroupingExpansionProps {
   gridState?: IState;
   parentGroupFields?: IGroupBy[];
   metadata?: any;
+  rowIndex: number
   parentType?: string
+  originalGroups?: GroupingState;
+  current_tab_id?: string;
 }

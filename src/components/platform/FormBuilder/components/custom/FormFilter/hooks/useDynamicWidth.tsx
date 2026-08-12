@@ -6,15 +6,15 @@ const useDynamicWidth = (open: unknown, state: IState | undefined , className: u
     if (className) return className;
     if (open && state?.isSummaryOpen) return 'w-full';
     if (!open && state?.isSummaryOpen) return 'w-auto';
-    if (open && !state?.isSummaryOpen) return 'w-[calc(100vw-320px)]';
+    if (open && !state?.isSummaryOpen) return 'w-[calc(100vw-369px)]';
     return '';
   }, [open, state?.isSummaryOpen, className]);
 
   const containerWidth = useMemo(() => {
     if (className) return className;
-    if (open && state?.isSummaryOpen) return 'lg:w-[calc(100vw-550px)]';
+    if (open && state?.isSummaryOpen) return 'lg:w-[calc(100vw-592px)]';
     if (!open && state?.isSummaryOpen) return 'w-auto';
-    if (open && !state?.isSummaryOpen) return 'w-[calc(100vw-320px)]';
+    if (open && !state?.isSummaryOpen) return 'w-[calc(100vw-369px)]';
     return '';
   }, [open, state?.isSummaryOpen, className]);
 

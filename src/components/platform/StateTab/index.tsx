@@ -3,6 +3,7 @@
 import React, { useEffect, useState } from 'react';
 import { useSidebar } from '~/components/ui/sidebar';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '~/components/ui/tabs';
+import { Card } from '~/components/ui/card';
 import { cn } from '~/lib/utils';
 import { StateTabProvider, useStateTab } from './Provider';
 import { type StateTabProps } from './types';
@@ -11,10 +12,14 @@ function StateTabList({
   className,
   tablistClassName,
   persistKey,
+  isStickyContainer = false,
+  stickyClassName
 }: {
   className?: string;
   persistKey?: string;
   tablistClassName?: string;
+  isStickyContainer?: boolean;
+  stickyClassName?: string
 }) {
   const {
     tabs,
@@ -66,6 +71,76 @@ function StateTabList({
     return tabs;
   }, [tabs, activeTab, shouldCollapse]);
 
+  const TabsTriggerWrapper = orientation === 'vertical' ? Card : React.Fragment;
+  const tabsTriggerWrapperProps = orientation === 'vertical' ? { className: 'border-none shadow-none' } : {};
+
+  // Reusable function to render tab triggers
+  const renderTabTriggers = () => {
+    return visibleTabs.map((tab) => (
+      <TabsTriggerWrapper key={tab.id} {...tabsTriggerWrapperProps}>
+        <TabsTrigger
+          value={tab.id}
+          disabled={tab.disabled}
+          size={size}
+          variant={variant}
+          iconPosition={tab.iconPosition}
+          rotateText={rotateText}
+          position={position}
+          className={cn(
+            // visibleTabs?.length <= 1 ? '' : 'w-full',
+            orientation === 'vertical' && 'w-full justify-start',
+            orientation === 'vertical' &&
+              rotateText &&
+              'writing-mode-vertical-rl',
+            // orientation === 'horizontal' && 'w-full justify-center',
+            // Improved centering for collapsed sidebar (desktop only)
+            shouldCollapse &&
+              'mx-auto flex flex-1 items-center justify-center',
+              'w-full'
+          )}
+        >
+          {tab.icon && (
+            <span
+              className={cn(
+                orientation === 'vertical' &&
+                  rotateText &&
+                  position === 'right' &&
+                  '-rotate-90 transform',
+                orientation === 'vertical' &&
+                  rotateText &&
+                  position === 'left' &&
+                  'rotate-90 transform',
+                // Center icon when sidebar is collapsed (desktop only)
+                shouldCollapse &&
+                  'mx-auto flex items-center justify-center',
+              )}
+            >
+              {tab.icon}
+            </span>
+          )}
+          {tab.label && (
+            <span
+              className={cn(
+                orientation === 'vertical' &&
+                  rotateText &&
+                  position === 'right' &&
+                  'rotate-180 transform',
+                orientation === 'vertical' &&
+                  rotateText &&
+                  position === 'left' &&
+                  'rotate-0 transform',
+                // Center text when sidebar is collapsed (desktop only)
+                shouldCollapse && 'mx-auto text-center',
+              )}
+            >
+              {tab.label}
+            </span>
+          )}
+        </TabsTrigger>
+      </TabsTriggerWrapper>
+    ));
+  };
+
   return (
     <Tabs
       defaultValue={activeTab}
@@ -76,7 +151,7 @@ function StateTabList({
       <div
         className={cn(
           'flex',
-          orientation === 'vertical' ? 'flex-row' : 'flex-col',
+          orientation === 'vertical' ? 'flex-row' : 'flex-col w-full',
           orientation === 'vertical' &&
             position === 'left' &&
             'flex-row-reverse',
@@ -96,65 +171,13 @@ function StateTabList({
             tablistClassName,
           )}
         >
-          {visibleTabs.map((tab) => (
-            <TabsTrigger
-              key={tab.id}
-              value={tab.id}
-              disabled={tab.disabled}
-              size={size}
-              variant={variant}
-              iconPosition={tab.iconPosition}
-              rotateText={rotateText}
-              position={position}
-              className={cn(
-                visibleTabs?.length <= 1 ? '' : 'w-full',
-                orientation === 'vertical' && 'w-full justify-start',
-                orientation === 'vertical' &&
-                  rotateText &&
-                  'writing-mode-vertical-rl',
-                // orientation === 'horizontal' && 'w-full justify-center',
-                // Improved centering for collapsed sidebar (desktop only)
-                shouldCollapse &&
-                  'mx-auto flex flex-1 items-center justify-center',
-              )}
-            >
-              {tab.icon && (
-                <span
-                  className={cn(
-                    orientation === 'vertical' &&
-                      rotateText &&
-                      position === 'right' &&
-                      '-rotate-90 transform',
-                    orientation === 'vertical' &&
-                      rotateText &&
-                      position === 'left' &&
-                      'rotate-90 transform',
-                    // Center icon when sidebar is collapsed (desktop only)
-                    shouldCollapse &&
-                      'mx-auto flex items-center justify-center',
-                  )}
-                >
-                  {tab.icon}
-                </span>
-              )}
-              <span
-                className={cn(
-                  orientation === 'vertical' &&
-                    rotateText &&
-                    position === 'right' &&
-                    'rotate-180 transform',
-                  orientation === 'vertical' &&
-                    rotateText &&
-                    position === 'left' &&
-                    'rotate-0 transform',
-                  // Center text when sidebar is collapsed (desktop only)
-                  shouldCollapse && 'mx-auto text-center',
-                )}
-              >
-                {tab.label}
-              </span>
-            </TabsTrigger>
-          ))}
+          {isStickyContainer ? (
+            <div className={cn(`sticky top-0 z-10`, stickyClassName)}>
+              {renderTabTriggers()}
+            </div>
+          ) : (
+            renderTabTriggers()
+          )}
         </TabsList>
 
         {/* Content section remains the same */}
@@ -191,6 +214,8 @@ const StateTab = ({
   defaultValue,
   rotateText,
   tablistClassName,
+  isStickyContainer,
+  stickyClassName
 }: StateTabProps) => {
   return (
     <StateTabProvider
@@ -208,6 +233,8 @@ const StateTab = ({
         className={className}
         persistKey={persistKey}
         tablistClassName={tablistClassName}
+        isStickyContainer={isStickyContainer}
+        stickyClassName={stickyClassName}
       />
     </StateTabProvider>
   );

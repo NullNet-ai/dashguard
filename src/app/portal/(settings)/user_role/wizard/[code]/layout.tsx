@@ -1,26 +1,30 @@
-import { headers } from 'next/headers'
-import React from 'react'
+import { headers } from 'next/headers';
+import React from 'react';
 
-import PlatformWizard from '~/components/platform/Wizard'
-import { stepValidator } from '~/components/platform/Wizard/Utils/stepValidation'
+import PlatformWizard from '~/components/platform/Wizard';
+import { stepValidator } from '~/components/platform/Wizard/Utils/stepValidation';
 
-import roleWizardSummary from '../(summary)/wizard-summary-config'
-import { type IWizardLayoutProps } from '../types'
+import roleWizardSummary from '../(summary)/wizard-summary-config';
+import { type IWizardLayoutProps } from '../types';
+import { api } from '~/trpc/server';
 
-const WizardLayout = async ({ children }: IWizardLayoutProps) => {
-  const headerList = await headers()
-  const pathname = headerList.get('x-pathname') || ''
-  const [, , mainEntity, , identifier, currentStep] = pathname.split('/')
-  const wizard_summary = roleWizardSummary()
-
+const WizardLayout = async ({ children, params }: IWizardLayoutProps) => {
+  const { code } = await params;
+  const headerList = await headers();
+  const pathname = headerList.get('x-pathname') || '';
+  const [, , mainEntity, , identifier, currentStep] = pathname.split('/');
+  const wizard_summary = roleWizardSummary();
+  const traverseData = await api.wizard.getTraverseStepped(
+    `${mainEntity}:wizard:${identifier}`,
+  );
   await stepValidator({
     currentStep: currentStep!,
     identifier: identifier!,
     mainEntity: mainEntity!,
-  })
+  });
 
   return (
-    <div className="p-1">
+    <div>
       <PlatformWizard
         config={{
           currentStep: Number(currentStep),
@@ -33,13 +37,16 @@ const WizardLayout = async ({ children }: IWizardLayoutProps) => {
             2: 'Category Details',
             3: 'Confirmation',
           },
+          traverseSteps: traverseData?.traverse,
         }}
         summary={wizard_summary}
       >
         {children}
       </PlatformWizard>
     </div>
-  )
-}
+  );
+};
 
-export default WizardLayout
+export const dynamic = 'force-dynamic'
+
+export default WizardLayout;

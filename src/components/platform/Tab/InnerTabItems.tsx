@@ -51,9 +51,8 @@ export interface ITabs {
 }
 
 export interface IArgs {
-  pathname: string;
-  current: boolean;
-  tabs: ITabs[];
+  tab: ITabs;
+  current?: boolean
 }
 
 const InnerTabItems = ({ tabs, pathname, variant }: InnerTabItemsProps) => {
@@ -298,7 +297,7 @@ const InnerTabItems = ({ tabs, pathname, variant }: InnerTabItemsProps) => {
     setTablists(newTablist);
   };
 
-  const handleCloseTab = ({ pathname, current, tabs }: IArgs) => {
+  const handleCloseTab = ({ current, tab }: IArgs) => {
     // IF current close the current tab then move to the left index tab
     // Push the current tab to the left index tab
     // IF not current close the current tab then move to the right index tab
@@ -348,7 +347,7 @@ const InnerTabItems = ({ tabs, pathname, variant }: InnerTabItemsProps) => {
     }
   };
 
-  const handleCloseOtherTabs = ({ pathname, current, tabs }: IArgs) => {
+  const handleCloseOtherTabs = ({ current, tab }: IArgs) => {
     if (current) {
       const filteredTabs = tablists?.filter((tab: any) => {
         return tab?.href === pathname || tab?.name?.toLowerCase() === 'grid';
@@ -386,7 +385,7 @@ const InnerTabItems = ({ tabs, pathname, variant }: InnerTabItemsProps) => {
     <nav
       aria-label="Tabs"
       className={cn(
-        'scrollbar-hide fixed top-[89px] z-[49] flex w-full justify-between gap-x-2 border-b bg-white pl-0 md:static md:min-h-[2.3rem] md:bg-none lg:pl-0',
+        'scrollbar-hide fixed top-[89px] z-[49] flex w-full justify-between gap-x-2 border-b bg-white pl-0 pr-2 md:static md:min-h-[2.3rem] md:bg-none lg:pl-0',
         isBannerPresent ? 'mt-12 md:mt-7' : 'md:mt-[-4px]',
       )}
     >

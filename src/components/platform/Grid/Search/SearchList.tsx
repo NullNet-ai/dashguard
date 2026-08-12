@@ -155,17 +155,18 @@ const SearchList = ({parentType} : any) => {
     };
   }, [defaultSearchItems, open, data]);
 
-  if (parentType !== 'grid') {
-    return null
-  }
+  // if (parentType !== 'grid') {
+  //   return null
+  // }
 
   return (
     <div
       className={cn(`container-ref relative flex flex-col items-center gap-2 overflow-hidden md:flex-row`)}
       ref={conref}
     >
+      
       <div className='flex flex-row justify-between flex-1 items-center'>
-        <div className="flex flex-row items-center flex-1 gap-x-[5px] max-w-[387px]">
+      {defaultSearchItems.length ?   <div className="flex flex-row items-center flex-1 gap-x-[5px] max-w-[387px]">
           <span
             className={cn(
               `whitespace-nowrap text-xs text-black`,
@@ -183,8 +184,9 @@ const SearchList = ({parentType} : any) => {
                   item.type === 'criteria'
                   ?  `${item?.label || formatAndCapitalize(item?.field ?? '')} is "${item?.display_value ? item?.display_value : item?.values?.[0]}"`
                   : item?.operator, 
-                  (path2 === 'record' || path2 === 'wizard') ? 10 : 15,
+                  (path2 === 'record' || path2 === 'wizard') ? 10 : 25,
                 )
+                 const pillLabel = item.label?.toLowerCase().replace(/\s+/g, '-');
                 return (
                       <TooltipProvider key={index}>
                         <Tooltip delayDuration={100} defaultOpen={false}>
@@ -194,6 +196,7 @@ const SearchList = ({parentType} : any) => {
                                 `item-ref my-1 flex items-center whitespace-nowrap`,
                                 { 'opacity-0': isHidden },
                               )}
+                              data-test-id={`${testIDFormatter(`${path1}-${path2}-srch-by-pill-${pillLabel}`)}`}
                               key={item.id}
                               ref={(el) => {
                                 if (el) {
@@ -270,36 +273,55 @@ const SearchList = ({parentType} : any) => {
                           ) {
                             return null;
                           }
+
+                           const searchText = shortentext(
+                              item.type === 'criteria'
+                              ?  `${item?.label || formatAndCapitalize(item?.field ?? '')} is "${item?.display_value ? item?.display_value : item?.values?.[0]}"`
+                              : item?.operator, 
+                              (path2 === 'record' || path2 === 'wizard') ? 50 : 50,
+                            )
+
                           return (
-                            <Badge
-                              className="flex items-center gap-1 self-start whitespace-nowrap"
-                              key={item.id}
-                              ref={(el: any) => (itemsRef.current[index] = el)}
-                              variant="secondary"
-                            >
-                              {item.type === 'criteria'
-                                ? `${item?.label || formatAndCapitalize(item?.field ?? '')} is "${item?.display_value ? item?.display_value : item?.values?.[0]}"`
-                                : item?.operator}
-                              {item.type === 'criteria' && !item.default && (
-                                <Button
-                                  className="h-auto w-auto text-nowrap p-0 text-default/40 hover:bg-transparent focus:outline-none"
-                                  key={`${item.id}-remove`}
-                                  name="removeSortingButton"
-                                  size="xs"
-                                  variant="ghost"
-                                  onClick={() => {
-                                    setData((prev) =>
-                                      prev.filter(
-                                        (prevData) => prevData.id !== item.id,
-                                      ),
-                                    );
-                                    actions?.handleRemoveSearchItem(item);
-                                  }}
-                                >
-                                  <X className="h-3 w-3" />
-                                </Button>
-                              )}
-                            </Badge>
+                               <TooltipProvider key={index}>
+                                <Tooltip delayDuration={100} defaultOpen={false}>
+                                  <TooltipTrigger asChild>
+                                    <Badge
+                                      className="flex items-center gap-1 self-start whitespace-nowrap"
+                                      key={item.id}
+                                      ref={(el: any) => (itemsRef.current[index] = el)}
+                                      variant="secondary"
+                                    >
+                                      {searchText}
+                                      {item.type === 'criteria' && !item.default && (
+                                        <Button
+                                          className="h-auto w-auto text-nowrap p-0 text-default/40 hover:bg-transparent focus:outline-none"
+                                          key={`${item.id}-remove`}
+                                          name="removeSortingButton"
+                                          size="xs"
+                                          variant="ghost"
+                                          onClick={() => {
+                                            setData((prev) =>
+                                              prev.filter(
+                                                (prevData) => prevData.id !== item.id,
+                                              ),
+                                            );
+                                            actions?.handleRemoveSearchItem(item);
+                                          }}
+                                        >
+                                          <X className="h-3 w-3" />
+                                        </Button>
+                                      )}
+                                    </Badge>
+                                    </TooltipTrigger>
+                                    <TooltipContent side="top" align='end'>
+                                    {
+                                      item.type === 'criteria'
+                                      ? `${item?.label || formatAndCapitalize(item?.field ?? '')} is "${item?.display_value ? item?.display_value : item?.values?.[0]}"`
+                                      : item?.operator
+                                    }
+                                    </TooltipContent>
+                                  </Tooltip>
+                                </TooltipProvider>
                           );
                         })}
                       </div>
@@ -313,7 +335,7 @@ const SearchList = ({parentType} : any) => {
                   `h-[30px] text-default/60 underline hover:no-underline`,
                   `${data?.length && data.some((item) => item.hidden) ? 'mt-[2px]' : ''}`,
                 )}
-                name="resetSortButton"
+                name="resetSearchButton"
                 variant="link"
                 onClick={() => {
                   actions?.handleClearSearchItems();
@@ -323,7 +345,7 @@ const SearchList = ({parentType} : any) => {
               </Button>
             </div>
           ) : null}
-        </div>
+        </div> : <div></div>}
         <div>
          <SearchDialog />
         </div>

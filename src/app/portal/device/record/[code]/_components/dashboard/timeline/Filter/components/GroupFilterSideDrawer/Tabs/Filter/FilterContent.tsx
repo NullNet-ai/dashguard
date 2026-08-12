@@ -31,7 +31,15 @@ export default function FilterContent({ filter_type }: { filter_type: string }) 
     }
 
     return {
-      default_group_item: filterGroups[0],
+      // default_group_item: filterGroups[0],
+      default_group_item: {
+        ...filterGroups[0],
+        filters: [
+          // @ts-expect-error - No type yet
+          ...filterGroups[0]?.filters,
+          ...(filterGroups.slice(1)[0]?.filters || []),
+        ]
+      },
       rest_group_items: filterGroups.slice(1),
     }
   }, [filterGroups])
@@ -57,7 +65,7 @@ export default function FilterContent({ filter_type }: { filter_type: string }) 
             handleFilterGroupMove(activeIndex + 1, overIndex + 1)
           } }
         >
-          {rest_group_items.map((group, idx) => {
+          {/* {rest_group_items.map((group, idx) => {
             const groupIndex = idx + 1
             return (
               <SortableItem
@@ -80,19 +88,19 @@ export default function FilterContent({ filter_type }: { filter_type: string }) 
                 />
               </SortableItem>
             )
-          })}
+          })} */}
         </Sortable>
       </Form>
 
-      <Button
+      {/* <Button
         className = "flex items-center gap-1 text-blue-600 hover:bg-blue-50 hover:text-blue-700"
         size = "sm"
         variant = "ghost"
         onClick = { handleAddFilterGroup }
       >
         <Plus className="h-4 w-4" />
-        Add Group Filter
-      </Button>
+        Add Filter
+      </Button> */}
     </div>
   )
 }

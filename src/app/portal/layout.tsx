@@ -37,4 +37,6 @@ const layout = async ({ children }: Props) => {
   )
 }
 
+export const dynamic = 'force-dynamic'
+
 export default layout

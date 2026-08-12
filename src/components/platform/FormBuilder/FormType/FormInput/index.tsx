@@ -12,6 +12,7 @@ import {
 } from '~/components/ui/form';
 import { Input } from '~/components/ui/input';
 import { useEffect } from 'react';
+import { testIDFormatter } from '~/utils/formatter';
 
 interface IProps {
   fieldConfig: IField;
@@ -38,6 +39,7 @@ export default function FormInput({
   const isDisabled = formRenderProps.field.disabled;
   const isHidden = fieldConfig.hidden;
   const { handleSearch, ...restFieldFilterActions } = fieldFilterActions ?? {};
+  const fieldNameTestId = testIDFormatter(fieldConfig.name);
 
   //! FOR NOW DIRTY IMPLEMENTATION WILL BE HANDLE LATER
   // const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -63,14 +65,15 @@ export default function FormInput({
     <FormItem>
       <FormLabel
         required={fieldConfig?.required}
-        data-test-id={`${formKey}-lbl-${fieldConfig.name}`}
+        data-test-id={`${formKey}-label-${fieldNameTestId}`}
       >
         {fieldConfig?.label}
       </FormLabel>
       <FormControl>
         <Input
           // onChange={handleChange}
-          data-test-id={`${formKey}-inp-${fieldConfig.name}`}
+          type='text'
+          data-test-id={`${formKey}-input-${fieldNameTestId}`}
           placeholder={fieldConfig?.placeholder}
           iconPlacement="left"
           Icon={icon}
@@ -97,7 +100,7 @@ export default function FormInput({
         />
       </FormControl>
       <FormMessage
-        data-test-id={`${formKey}-err-msg-${fieldConfig.name}`}
+        data-test-id={`${formKey}-error-message-${fieldNameTestId}`}
         detail={fieldConfig.detail}
       />
       {/* <DevTool  control={form.control} /> */}

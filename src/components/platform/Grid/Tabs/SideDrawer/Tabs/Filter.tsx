@@ -25,8 +25,14 @@ import { ZodSchema } from './schemas/filter';
 export default function FilterContent() {
   const { actions, state } = useManageFilter();
   const { handleUpdateFilter } = actions;
-  const { filterDetails, columns, searchConfig, customTabDefaults } =
+  const { filterDetails, columns: _column, searchConfig, customTabDefaults } =
     state ?? {};
+
+  const columns = state?.filterType !== 'timeline' ? _column : _column.filter(col => {
+    return ['action', 'record_created_date', 'record_updated_date'].includes(col.accessorKey)
+  })
+
+    
 
   // Convert existing filters to the new group structure if needed
   const initialFilterGroups = useMemo(() => {
@@ -53,6 +59,15 @@ export default function FilterContent() {
         },
       ];
     }
+
+    if (
+      !!filterDetails.default &&
+      filterDetails.filter_groups &&
+      !!filterDetails.filter_groups?.length
+    ) {
+      return filterDetails.filter_groups;
+    }
+
     return (
       filterDetails.filter_groups || [
         {
@@ -126,7 +141,6 @@ export default function FilterContent() {
           }
         }
       }
-
       handleUpdateFilter({ filter_groups: data.filterGroups });
     }
   });
@@ -256,7 +270,7 @@ export default function FilterContent() {
   };
 
   return (
-    <div className="mt-3 max-h-[70vh] space-y-1 overflow-y-auto rounded-lg">
+    <div className="mt-5 max-h-[70vh] space-y-1 overflow-y-auto rounded-lg">
       <Form {...form}>
         <Sortable
           value={filterGroups.map((group) => ({ ...group, id: group.id }))}
@@ -290,27 +304,25 @@ export default function FilterContent() {
                     )}
 
                     {/* Main content area */}
-                    <div className="flex-1 p-1.5 pb-2">
-                      <div className="flex items-center justify-between">
-                        <div className="flex items-center gap-2">
-                          {groupIndex > 0 && (
-                            <Select
-                              value={group.groupOperator}
-                              onValueChange={(value: 'and' | 'or') =>
-                                handleUpdateGroupOperator(groupIndex, value)
-                              }
-                            >
-                              <SelectTrigger className="h-8 w-fit border-gray-200 bg-white">
-                                <SelectValue />
-                              </SelectTrigger>
-                              <SelectContent>
-                                <SelectItem value="and">AND</SelectItem>
-                                <SelectItem value="or">OR</SelectItem>
-                              </SelectContent>
-                            </Select>
-                          )}
+                    <div className="flex-1 px-4 pb-4 pt-2">
+                      {groupIndex > 0 && (
+                        <div className="flex items-center justify-between gap-2">
+                          <Select
+                            value={group.groupOperator}
+                            onValueChange={(value: 'and' | 'or') =>
+                              handleUpdateGroupOperator(groupIndex, value)
+                            }
+                          >
+                            <SelectTrigger className="h-8 w-fit border-gray-200 bg-white">
+                              <SelectValue />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="and">AND</SelectItem>
+                              <SelectItem value="or">OR</SelectItem>
+                            </SelectContent>
+                          </Select>
                         </div>
-                      </div>
+                      )}
 
                       {/* Individual filter group content with simplified props */}
                       <FilterGroup
@@ -339,7 +351,7 @@ export default function FilterContent() {
                           )
                         }
                       />
-                      <div className="flex items-center gap-2">
+                      <div className="mt-4 flex items-center gap-2">
                         <FilterGroupActions
                           onAppendFilter={() => handleAppendFilter(groupIndex)}
                         />
@@ -370,7 +382,7 @@ export default function FilterContent() {
         className="flex items-center gap-1 text-blue-600 hover:bg-blue-50 hover:text-blue-700"
       >
         <Plus className="h-4 w-4" />
-        Add Group Filter
+        Add Filter
       </Button> */}
     </div>
   );

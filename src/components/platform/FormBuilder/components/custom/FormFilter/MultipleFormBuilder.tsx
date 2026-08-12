@@ -64,6 +64,7 @@ export const MultipleFormBuilder: React.FC<IPropsForms> = (props) => {
     customDesign,
     customFormFilterViewFormActions,
     customFormFilterLockFormActions,
+    savedCardOptions,
   } = props;
 
   const { actions, state } = useWizard();
@@ -320,6 +321,8 @@ export const MultipleFormBuilder: React.FC<IPropsForms> = (props) => {
           status: 'done',
           form_key: formKey,
         });
+        eventEmitter.emit('record:summary_content');
+
         setIsSaveLoading(false);
         return;
       }
@@ -364,7 +367,7 @@ export const MultipleFormBuilder: React.FC<IPropsForms> = (props) => {
           status: 'done',
           form_key: formKey,
         });
-
+        eventEmitter.emit('record:summary_content');
         form.control._disableForm(true);
 
         setIsSaveLoading(false);
@@ -649,6 +652,7 @@ export const MultipleFormBuilder: React.FC<IPropsForms> = (props) => {
                           </>
                           {displayType === 'form' && !searchActive && (
                             <OpenedFormLayout
+                              savedCardOptions={savedCardOptions}
                               fieldConfig={fieldConfig}
                               myParent={myParent}
                               customDesign={customDesign}

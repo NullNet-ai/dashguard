@@ -7,4 +7,6 @@ export interface IPropsTabList {
 
 export interface InnerTabsProps  {
   variant?: 'dropdown' | 'drawer'
+  hasNewButton?: boolean;
+  recordLabelField?: string;
 }

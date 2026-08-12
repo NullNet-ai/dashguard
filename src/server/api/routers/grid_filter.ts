@@ -4,7 +4,8 @@ import { z } from 'zod';
 import { tabMenuId } from '~/lib/tab-menu-id';
 import { createTRPCRouter, privateProcedure } from '~/server/api/trpc';
 import { createDefineRoutes } from '../baseCrud';
-import { type ITabGrid } from '../types';
+import { ITabGrid } from '../types';
+import { get_meta_header } from '~/utils/request-header';
 
 const ENTITY = 'grid_filter';
 
@@ -16,11 +17,16 @@ const filterCriteriaSchema = z.object({
   values: z.array(z.string()).optional(),
   default: z.boolean().optional(),
   entity: z.string().optional(),
+  disabled: z.boolean().optional(),
+  parse_as: z.string().optional(),
 });
 
 const sortSchema = z.object({
   id: z.string(),
   desc: z.boolean(),
+  type: z.string().optional(),
+  sort_key: z.string().optional(),
+  is_case_sensitive_sorting: z.boolean().optional(),
 });
 
 const groupSchema = z.object({
@@ -28,6 +34,8 @@ const groupSchema = z.object({
   label: z.string(),
   value: z.string(),
   desc: z.boolean(),
+  is_case_sensitive_sorting: z.boolean().optional(),
+  type: z.string().optional(),
 });
 
 const columnSchema = z.object({
@@ -50,12 +58,13 @@ const gridFilterSchema = z.object({
   default_filter: z.array(filterCriteriaSchema).or(z.array(z.any())),
   sorts: z.array(sortSchema),
   groups: z.array(groupSchema).optional(),
-  columns: z.array(columnSchema),
-  default_sorts: z.array(sortSchema),
+  columns: z.array(z.any()),
+  default_sorts: z.array(sortSchema).optional(),
   id: z.string().optional(),
   filter_groups: z.array(filterGroupSchema),
   group_advance_filters: z.array(filterCriteriaSchema).or(z.array(z.any())),
   gridKey: z.string().optional(),
+  advance_filters: z.array(filterCriteriaSchema).or(z.array(z.any())),
 });
 
 export const gridFilterRouter = createTRPCRouter({
@@ -92,7 +101,10 @@ export const gridFilterRouter = createTRPCRouter({
         ...rest,
         id: filter_id,
         entity: mainEntity,
-        advance_filters: input?.default_filter,
+        default_filter: input?.default_filter || [],
+        advance_filters: input.advance_filters?.length
+          ? input.advance_filters
+          : input.default_filter,
         is_current: false,
         is_default: false,
         href,
@@ -100,10 +112,12 @@ export const gridFilterRouter = createTRPCRouter({
 
       const updatedGridTabs = [...gridTabFilterList, additionalTab];
       await ctx.redisClient.cacheData(_tabMenuId, updatedGridTabs);
+      const meta_header = await get_meta_header();
       ctx.dnaClient
         .create({
           entity: ENTITY,
           token,
+          ...meta_header,
           mutation: {
             params: {
               id: filter_id,
@@ -148,8 +162,9 @@ export const gridFilterRouter = createTRPCRouter({
   updateGridAllFilter: privateProcedure
     .input(z.any())
     .mutation(async ({ ctx, input }) => {
+      const meta_header = await get_meta_header();
       const token = ctx?.token.value;
-      // const id = ctx?.session?.account?.contact?.id;
+      const id = ctx?.session?.account?.contact?.id;
       const headerList = await headers();
       const pathName = headerList.get('x-pathname') || '';
       const [, , mainEntity, application] = pathName.split('/');
@@ -167,6 +182,7 @@ export const gridFilterRouter = createTRPCRouter({
           .update(tab.id, {
             entity: ENTITY,
             token,
+            ...meta_header,
             mutation: {
               params: {
                 is_current: tab.current,
@@ -180,16 +196,20 @@ export const gridFilterRouter = createTRPCRouter({
   updateGridFilter: privateProcedure
     .input(gridFilterSchema)
     .mutation(async ({ ctx, input }) => {
+      
       const token = ctx?.token.value;
 
       const headerList = await headers();
       const pathName = headerList.get('x-pathname') || '';
       const [, , mainEntity, application, identifier] = pathName.split('/');
 
+      const meta_header = await get_meta_header();
+
       ctx.dnaClient
         .update(input.id!, {
           entity: ENTITY,
           token,
+          ...meta_header,
           mutation: {
             params: {
               name: input.name,
@@ -246,7 +266,9 @@ export const gridFilterRouter = createTRPCRouter({
             columns: input.columns,
             groups: input.groups,
             sorts: input.sorts,
-            advance_filters: input.default_filter,
+            advance_filters: input.advance_filters?.length
+              ? input.advance_filters
+              : input.default_filter,
             default_sorts: input.default_sorts,
             default_filter: input.default_filter,
             filter_groups: input.filter_groups,
@@ -272,6 +294,7 @@ export const gridFilterRouter = createTRPCRouter({
       const pathName = headerList.get('x-pathname') || '';
       const [, , mainEntity, application, indentifier] = pathName.split('/');
 
+      const meta_header = await get_meta_header();
       const token = ctx?.token.value;
 
       // drop by
@@ -279,6 +302,7 @@ export const gridFilterRouter = createTRPCRouter({
         .delete(input.id, {
           is_permanent: false,
           entity: ENTITY,
+          ...meta_header,
           token,
           mutation: {
             params: {
@@ -327,6 +351,7 @@ export const gridFilterRouter = createTRPCRouter({
       }),
     )
     .mutation(async ({ ctx, input }) => {
+      const meta_header = await get_meta_header();
       const token = ctx?.token.value;
       const id = ctx?.session?.account?.contact?.id;
 
@@ -342,6 +367,7 @@ export const gridFilterRouter = createTRPCRouter({
         .create({
           entity: ENTITY,
           token,
+          ...meta_header,
           mutation: {
             params: {
               id: filter_id,
@@ -417,5 +443,34 @@ export const gridFilterRouter = createTRPCRouter({
       await ctx.redisClient.cacheData(_tabMenuId, tabs);
 
       return filter?.link;
+    }),
+    getTabData: privateProcedure
+    .input(
+      z.object({
+        tab_id: z.string(),
+        gridKey: z.string().optional(),
+      }),
+    )
+    .mutation(async ({ ctx, input }) => {
+      const meta_header = await get_meta_header();
+      const token = ctx?.token.value;
+
+      const headerList = await headers();
+      const pathName = headerList.get('x-pathname') || '';
+      const [, , mainEntity, application, identifier] = pathName.split('/');
+
+      const _tabMenuId = tabMenuId({
+        _mainEntity: mainEntity || '',
+        _application: application || '',
+        _id: ctx.session.account.account_organization_id,
+        _gridKey: input?.gridKey || '',
+        _identifier: identifier || '',
+      });
+
+      const tabs = (await ctx.redisClient.getCachedData(
+        _tabMenuId,
+      )) as ITabGrid[];
+
+      return tabs?.find((tab) => tab.id === input.tab_id);
     }),
 });

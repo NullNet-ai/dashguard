@@ -24,12 +24,12 @@ type InnerTabitemProps = {
   handleClick?: (tab: any) => void;
   tabsAction?: {
     handleCloseTab?: (args: IArgs) => void;
-    handleCloseOtherTabs: ({ pathname, current, tabs }: IArgs) => void;
+    handleCloseOtherTabs: ({ current, tab }: IArgs) => void;
     handleCloseAllTabs: () => void;
   };
 };
 const InnerTabitem = forwardRef<HTMLDivElement, InnerTabitemProps>(
-  ({ tab, pathname, newItems, className, isHidden, tabsAction }, ref) => {
+  ({ tab, pathname, newItems, className, isHidden, tabsAction, handleClick }, ref) => {
     const isGrid = tab.name === 'Grid' || tab.name === 'grid';
     const newPathname = usePathname();
     const [, , entityName, application, code] = (newPathname || '').split('/');
@@ -61,22 +61,17 @@ const InnerTabitem = forwardRef<HTMLDivElement, InnerTabitemProps>(
         key={tabNameRole}
         className={cn(
           `group relative flex h-[36px] items-center whitespace-nowrap md:h-[32px]`,
-          `${isGrid ? 'pl-0' : 'pl-[3px]'} `,
+          `${isGrid ? 'pl-0' : 'pl-[5px]'} `,
           className,
         )}
       >
-        {toLower(formatTabName(tab.name)) !== 'grid' ? (
-          <SortableDragHandleRawItem className="mr-1 cursor-grab">
-            <GripVerticalIcon
-              className="h-3.5 w-3.5 text-default-foreground/60"
-              aria-hidden="true"
-            />
-          </SortableDragHandleRawItem>
-        ) : null}
-
-        <Link
+        <div
           data-test-id={entityName + '-apptab-' + tabNameRole}
-          href={tab.href}
+          // href={tab.href}
+          onClick={e => {
+            e.preventDefault()
+            // handleClick?.(tab?.id)
+          }}
           aria-current={isActive ? 'page' : undefined}
           className={cn(
             isActive ? 'text-primary' : 'text-default-foreground/60',
@@ -89,14 +84,14 @@ const InnerTabitem = forwardRef<HTMLDivElement, InnerTabitemProps>(
         >
           {formatTabName(tabNameRole)}
           <span className="absolute right-0 h-[50%] w-[1px] bg-default/20" />
-        </Link>
+        </div>
 
         {!isHidden && !isGrid ? (
           <TabMenu
-            current={!!tab.href.match(pathname?.split('?')[0])}
+            current={tab?.current}
             href={tab.href}
-            tabs={newItems}
-            name={tabNameRole}
+            tab={tab}
+            name={tab?.name}
             entity={entityName || ''}
             tabsAction={tabsAction}
           />

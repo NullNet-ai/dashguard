@@ -10,6 +10,23 @@ import { createDefineRoutes } from '../baseCrud';
 
 export const userRolesRouter = createTRPCRouter({
   ...createDefineRoutes('user_roles'),
+  updateUserRoleWithTags: privateProcedure
+    .input(z.object({ id: z.string(), tags: z.array(z.string()).optional() }))
+    .mutation(async ({ input, ctx }) => {
+      const { tags } = input;
+
+      return ctx.dnaClient
+        .update(input.id, {
+          entity: 'user_roles',
+          token: ctx.token.value,
+          mutation: {
+            params: {
+              tags,
+            },
+          },
+        })
+        .execute();
+    }),
   saveUserRole: privateProcedure
     .input(UserRoleFormSchema.extend({ id: z.string().optional() }))
     .mutation(async ({ input, ctx }) => {
@@ -73,14 +90,14 @@ export const userRolesRouter = createTRPCRouter({
       }
 
       if (!user_role_id) {
-          const record = await ctx.dnaClient
+        const record = await ctx.dnaClient
           .create({
             entity: 'user_role',
             token: ctx.token.value,
             mutation: {
               params: {
                 status: 'Draft',
-                role
+                role,
               },
               pluck: ['id', 'code', 'role'],
             },
@@ -88,8 +105,6 @@ export const userRolesRouter = createTRPCRouter({
           .execute();
 
         return record;
-        
-        
       }
 
       const res = await ctx.dnaClient

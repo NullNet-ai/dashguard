@@ -114,7 +114,7 @@ const SignUpForm = (props: SignUpFormProps) => {
               name: 'organization_name',
               id: 'organization_name',
               label: 'Organization Name',
-              placeholder: 'Example: DNA Micro',
+              placeholder: 'Organization Name',
               type: 'text',
               readonly: !!recordData?.organization_name,
             },
@@ -123,7 +123,7 @@ const SignUpForm = (props: SignUpFormProps) => {
               name: 'first_name',
               id: 'first_name',
               label: 'First Name',
-              placeholder: 'Example: John',
+              placeholder: 'First Name',
               type: 'text',
               required: true,
             },
@@ -132,7 +132,7 @@ const SignUpForm = (props: SignUpFormProps) => {
               name: 'last_name',
               id: 'last_name',
               label: 'Last Name',
-              placeholder: 'Example: John',
+              placeholder: 'Last Name',
               type: 'text',
               required: true,
             },
@@ -141,7 +141,7 @@ const SignUpForm = (props: SignUpFormProps) => {
               name: 'email',
               id: 'email',
               label: 'Email',
-              placeholder: 'Example: john@example.com',
+              placeholder: 'Email',
               type: 'email',
               required: true,
               readonly: !!recordData?.email,
@@ -162,7 +162,7 @@ const SignUpForm = (props: SignUpFormProps) => {
               name: 'confirmed_password',
               id: 'confirmed_password',
               label: 'Confirm Password',
-              placeholder: 'Enter your password',
+              placeholder: 'Confirm your password',
               type: 'text',
               required: true,
             },
@@ -175,7 +175,7 @@ const SignUpForm = (props: SignUpFormProps) => {
           className={
             'justify-center\\\\ !mt-8 flex h-auto w-full items-center rounded py-1.5 text-md font-semibold text-white shadow-sm'
           }
-          data-test-id="login-submit-btn"
+          data-test-id="login-submit-button"
           loading={isSubmitting}
           type="submit"
         >

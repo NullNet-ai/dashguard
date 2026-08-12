@@ -47,6 +47,12 @@ export default function FormMultiSelect({
   const isAlphabeticalSorting = fieldConfig.isMultiSelectAlphabetical ?? true;
   const useStringValues = fieldConfig.multiSelectUseStringValues ?? false;
 
+  //additional check for fieldConfig?.metadata?.columns
+  const metadata = fieldConfig?.metadata ?? {};
+  const columns = metadata?.columns && Array.isArray(metadata?.columns) ? metadata?.columns : [];
+  const meta_field = metadata?.field ? metadata?.field?.field : undefined;
+  const selectedColumnAlias = columns?.find((column) => column.accessorKey === meta_field)?.value_alias ?? undefined;
+
   const createNewRecord = async (query: string) => {
     if (!fieldConfig?.selectOnCreateRecord) {
       toast.error("selectOnCreateRecord is not defined in fieldConfig");
@@ -89,6 +95,7 @@ export default function FormMultiSelect({
         <MultipleSelector
           {...register(fieldConfig.name)}
           {...formRenderProps.field}
+          keyAlias={selectedColumnAlias}
           readOnly={
             (formRenderProps.field.disabled || fieldConfig?.readonly) ?? false
           }

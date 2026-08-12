@@ -40,7 +40,7 @@ export const resolveAdvanceFilter = ({
 
   const searchItemResolver = [
     ...currentAdvanceFilter,
-    ...(additionalFilter.length
+    ...(additionalFilter.length && currentAdvanceFilter.length
       ? [{ type: 'operator', operator: 'and', default: false }]
       : []),
     ...additionalFilter,

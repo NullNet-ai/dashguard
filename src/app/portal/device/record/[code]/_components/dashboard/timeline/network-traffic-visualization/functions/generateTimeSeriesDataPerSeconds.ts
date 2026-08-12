@@ -63,7 +63,8 @@ export function generateTimeSeriesData(
   sampleData: any,
   resolution: string,
   time_count: number,
-  time_unit: string
+  time_unit: string,
+  sharedNow?: Date
 ) {
   // Parse resolution
   const resolution_value = parseInt(resolution.slice(0, -1));
@@ -93,6 +94,7 @@ export function generateTimeSeriesData(
   });
 
   let startDate = new Date(refDate);
+  // startDate.setMinutes(0, 0, 0); // Align to the top of the current hour (e.g., 8:14 PM -> 8:00 PM)
   if (resolution_unit === 'h') {
     startDate.setHours(0, 0, 0, 0); // Start from 00:00:00 if hourly
   } else {
@@ -103,14 +105,55 @@ export function generateTimeSeriesData(
   // Build a map for fast lookup
   const bucketMap: Record<string, any> = {};
   sampleData.forEach((item: any) => {
-    bucketMap[item.bucket] = item.bandwidth;
+    bucketMap[item.bucket.replace('T', ' ')] = item.bandwidth;
   });
 
   // Calculate number of intervals (inclusive)
-  const intervals = Math.floor(totalSpanMs / intervalMs);
+  const intervals = 60 // Math.floor(totalSpanMs / intervalMs);
 
   // Generate the full range of time intervals
-  let currentDate = new Date(startDate);
+  const now = sharedNow ?? new Date()
+  const endDate = new Date(now)
+  if (resolution_unit === 's') {
+    // endDate.setSeconds(endDate.getSeconds() - 3)
+  }
+  if (resolution_unit === 's') {
+    const needsAdvance = endDate.getMilliseconds() !== 0
+    endDate.setMilliseconds(0)
+    const currentSeconds = endDate.getSeconds()
+    const remainder = currentSeconds % resolution_value
+    if (remainder !== 0) {
+      endDate.setSeconds(currentSeconds + (resolution_value - remainder))
+    } else if (needsAdvance) {
+      endDate.setSeconds(currentSeconds + resolution_value)
+    }
+  } else if (resolution_unit === 'm') {
+    endDate.setSeconds(0, 0)
+    const currentMinutes = endDate.getMinutes()
+    const remainder = currentMinutes % resolution_value
+    if (remainder !== 0) {
+      endDate.setMinutes(currentMinutes - remainder)
+    }
+  } else if (resolution_unit === 'h') {
+    const needsAdvance =
+      endDate.getMinutes() !== 0 || endDate.getSeconds() !== 0 || endDate.getMilliseconds() !== 0
+    endDate.setMinutes(0, 0, 0)
+    const currentHours = endDate.getHours()
+    const remainder = currentHours % resolution_value
+    if (remainder !== 0) {
+      endDate.setHours(currentHours + (resolution_value - remainder))
+    } else if (needsAdvance) {
+      endDate.setHours(currentHours + resolution_value)
+    }
+  }
+
+  let currentDate = new Date(endDate.getTime() - intervals * intervalMs)
+  if (resolution_unit === 'm') {
+    const snapped = snapToInterval(resolution_value, resolution_unit, currentDate)
+    const [hh, mm] = snapped.split(':').map(Number) as [number, number]
+    currentDate.setHours(hh, mm, 0, 0)
+  }
+  
   let timeSeriesArray: { time: string, bandwidth: string }[] = [];
 
   for (let i = 0; i <= intervals; i++) {
@@ -122,7 +165,7 @@ export function generateTimeSeriesData(
       pad(currentDate.getHours()) + ':' +
       pad(currentDate.getMinutes()) + ':' +
       pad(currentDate.getSeconds());
-    timeSeriesArray.push({
+    timeSeriesArray.push({ 
       time: formattedDate,
       bandwidth: bucketMap[formattedDate] !== undefined ? bucketMap[formattedDate] : "0"
     });
@@ -130,5 +173,46 @@ export function generateTimeSeriesData(
     currentDate = new Date(currentDate.getTime() + intervalMs);
   }
 
+  if (time_unit === 'hour') {
+    // return timeSeriesArray.slice(-24)
+  } 
   return timeSeriesArray;
+}
+
+/**
+ * Snap a time to the nearest lower interval mark.
+ * @param {number} resolution - e.g. 24
+ * @param {string} unit       - 'm' (minutes) | 'h' (hours) | 's' (seconds)
+ * @param {string|Date} startDate - e.g. "20:59", "2024-01-15T20:59:00", or a Date object
+ * @returns {string} - "HH:MM" of the closest lower interval
+ */
+function snapToInterval(resolution: number, unit: string, startDate: string | Date) {
+  // --- normalize input to total minutes from midnight ---
+  let totalMinutes;
+
+  if (typeof startDate === 'string' && /^\d{2}:\d{2}/.test(startDate)) {
+    const [h, m] = startDate.split(':').map(Number) as [number, number];
+    totalMinutes = h * 60 + m;
+  } else {
+    const d = new Date(startDate);
+    totalMinutes = d.getHours() * 60 + d.getMinutes();
+  }
+
+  // --- convert resolution to minutes ---
+  let resolutionInMinutes;
+  switch (unit) {
+    case 's': resolutionInMinutes = resolution / 60;  break;
+    case 'm': resolutionInMinutes = resolution;        break;
+    case 'h': resolutionInMinutes = resolution * 60;   break;
+    default:  throw new Error(`Unknown unit: "${unit}". Use 's', 'm', or 'h'.`);
+  }
+
+  // --- floor to nearest lower interval ---
+  const snapped = Math.floor(totalMinutes / resolutionInMinutes) * resolutionInMinutes;
+
+  // --- format back to HH:MM ---
+  const h = String(Math.floor(snapped / 60) % 24).padStart(2, '0');
+  const m = String(Math.round(snapped % 60)).padStart(2, '0');
+
+  return `${h}:${m}`;
 }

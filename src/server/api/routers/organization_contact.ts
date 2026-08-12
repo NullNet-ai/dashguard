@@ -4,6 +4,7 @@ import { z } from 'zod';
 import { EOperator, EOrderDirection } from '@dna-platform/common-orm';
 import { createAdvancedFilter } from '~/server/utils/transformAdvanceFilter';
 import { EStatus } from '../types';
+import { get_meta_header } from '~/utils/request-header';
 
 const entity = 'organization_contacts';
 
@@ -17,6 +18,7 @@ export const organizationContactsRouter = createTRPCRouter({
       }),
     )
     .mutation(async ({ input, ctx }) => {
+      const meta_header = await get_meta_header();
       const { contact_id, contact_organization_ids } = input;
 
       const findAll = async ({
@@ -60,7 +62,6 @@ export const organizationContactsRouter = createTRPCRouter({
         mutation: {
           params: {
             status: EStatus.ARCHIVED,
-            tombstone: 1,
           },
         },
       };
@@ -68,6 +69,7 @@ export const organizationContactsRouter = createTRPCRouter({
         ...org_contact_ids.map((id: string) =>
           ctx.dnaClient
             .update(id, {
+              ...meta_header,
               entity: 'organization_contacts',
               ...add_params,
             })
@@ -81,7 +83,7 @@ export const organizationContactsRouter = createTRPCRouter({
             .create({
               entity: 'organization_contacts',
               token: ctx.token.value,
-
+              ...meta_header,
               mutation: {
                 pluck: ['id'],
                 params: {

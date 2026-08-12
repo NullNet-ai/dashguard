@@ -33,12 +33,12 @@ const Summary = ({ form_key }: { form_key: string }) => {
 
   return (
     <div>
-      <p className='mb-[8px] no-underline'>
+      <p className='mb-[8px] no-underline text-[#334155]'>
         <strong>{' Username: '}</strong>
         &nbsp;
         {record?.account_id || 'None'}
       </p>
-      <p className='mb-[8px] no-underline'>
+      <p className='mb-[8px] no-underline text-[#334155]'>
         <strong>{' Role: '}</strong>
         &nbsp;
         {record?.role || 'None'}

@@ -31,6 +31,7 @@ import { testIDFormatter } from '~/utils/formatter'
 export default function SearchDialog() {
   const { state, actions } = useContext(SearchGridContext);
   const { state: gridState } = useContext(GridContext);
+  const { enableSearch = true } = gridState?.config ?? {};
   const [openDialog, setOpenDialog] = useState(false);
   const path =  usePathname()
   const [, , path1, path2] = path.split('/')
@@ -71,7 +72,11 @@ export default function SearchDialog() {
 
   const debouncedSearchInput = useDebounce(query, 500);
 
-  const data = handleSearchQuery!(
+  if (!enableSearch) {
+    return null;
+  }
+
+  const result = handleSearchQuery!(
     {
       entity,
       current: 0,
@@ -97,6 +102,8 @@ export default function SearchDialog() {
     },
   );
 
+  // @ts-expect-error - No type yet
+  const { data, isError = false, refetch } = result ?? {}
   const { items } = data ?? {};
   const handleOpenDialog = () => {
     setOpenDialog(true);
@@ -113,7 +120,7 @@ export default function SearchDialog() {
         size="md"
         variant="softPrimary"
         onClick={() => handleOpenDialog()}
-        data-test-id={`${testIDFormatter(`${path1}-${path2}-srch-btn`)}`}
+        data-test-id={`${testIDFormatter(`${path1}-${path2}-search-button`)}`}
       >
         <SearchIcon className="size-4" />
         <span className="mr-1">Search</span>
@@ -148,7 +155,7 @@ export default function SearchDialog() {
                   autoFocus
                   className="h-12 w-full border-0 bg-transparent pl-11 pr-4 text-gray-900 placeholder:text-gray-400 focus:ring-0 sm:text-sm"
                   placeholder="Search..."
-                  data-test-id={`${testIDFormatter(`${path1}-${path2}-srch-input`)}`}
+                  data-test-id={`${testIDFormatter(`${path1}-${path2}-search-input`)}`}
                   value={query}
                   onChange={(event) => {
                     actions?.handleQuery(event.target.value);
@@ -224,7 +231,7 @@ export default function SearchDialog() {
                     className={cn(
                       `h-[30px] text-default/60 underline hover:no-underline`,
                     )}
-                    name="resetSortButton"
+                    name="resetSearchButton"
                     variant="link"
                     onClick={() => {
                       actions?.handleClearSearchItems();

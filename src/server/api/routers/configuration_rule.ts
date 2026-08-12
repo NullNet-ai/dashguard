@@ -11,9 +11,78 @@ import ZodItems from '~/server/zodSchema/grid/items'
 
 import { createDefineRoutes } from '../baseCrud'
 import { formatSorting } from '~/server/utils/formatSorting';
+import { createRootOrm } from '~/server/lib/root-orm';
 const entity = 'device_rules'
 export const deviceRuleRouter = createTRPCRouter({
   ...createDefineRoutes(entity),
+  getInterfaces: privateProcedure
+    .input(z.object({ device_id: z.string() }))
+    .query(async ({ input, ctx }) => {
+      const { device_id } = input
+
+      const rootOrm = await createRootOrm(ctx.dnaClient);
+
+      const deviceConfiguration = await rootOrm.findAll({
+        entity: 'device_configurations',
+        query: {
+          pluck: ['id'],
+          advance_filters: [
+            {
+              type: 'criteria',
+              field: 'device_id',
+              entity: 'device_configurations',
+              operator: EOperator.EQUAL,
+              values: [device_id],
+            },
+          ],
+          order: {
+            limit: 1,
+            by_field: 'timestamp',
+            by_direction: EOrderDirection.DESC,
+            is_case_sensitive_sorting: true,
+          },
+        },
+      }).execute()
+
+      const deviceConfigId = deviceConfiguration?.data?.[0]?.id
+      if (!deviceConfigId) return []
+
+      const PAGE_SIZE = 100
+      let startsAt = 0
+      let totalCount: number | null = null
+      let allInterfaces: string[] = []
+
+      do {
+        const { total_count, data } = await rootOrm.findAll({
+          entity: 'device_filter_rules',
+          query: {
+            track_total_records: true,
+            pluck: ['interface'],
+            advance_filters: createAdvancedFilter({
+              device_configuration_id: deviceConfigId,
+              status: 'Active',
+            }) as IAdvanceFilters[],
+            order: {
+              starts_at: startsAt,
+              limit: PAGE_SIZE,
+              by_field: 'interface',
+              by_direction: EOrderDirection.ASC,
+            },
+          },
+        }).execute()
+
+        if (totalCount === null) totalCount = total_count ?? 0
+        const pageInterfaces = (data ?? [] as Record<string, unknown>[])
+          .map((r: Record<string, unknown>) => r.interface)
+          // @ts-expect-error - No type yet
+          .filter((networkInterface): networkInterface is string => typeof networkInterface === 'string')
+        allInterfaces = [...allInterfaces, ...pageInterfaces]
+        startsAt += PAGE_SIZE
+      } while (startsAt < (totalCount ?? 0))
+
+      return [...new Set(allInterfaces)]
+    }),
+
   mainGrid: privateProcedure
     .input(ZodItems.extend({
       device_id: z.string(),
@@ -26,13 +95,15 @@ export const deviceRuleRouter = createTRPCRouter({
         pluck,
         device_id,
         sorting,
+        // @ts-expect-error - No type yet
         is_case_sensitive_sorting = "false"
       } = input
-      const _sorting = sorting?.filter(({id}: {id: string}) => ['created_by', 'updated_by'].includes(id))
+      const _sorting = sorting // ?.filter(({id}: {id: string}) => ['created_by', 'updated_by'].includes(id))
 
-      const device_configuration = await ctx.dnaClient.findAll({
+      const rootOrm = await createRootOrm(ctx.dnaClient);
+      
+      const device_configuration = await rootOrm.findAll({
         entity: 'device_configurations',
-        token: ctx.token.value,
         query: {
           pluck: ['id', 'created_date', 'timestamp'],
           advance_filters: [
@@ -48,6 +119,7 @@ export const deviceRuleRouter = createTRPCRouter({
             limit: 1,
             by_field: 'timestamp',
             by_direction: EOrderDirection.DESC,
+            is_case_sensitive_sorting: true,
           },
           // multiple_sort: [
           //   {
@@ -74,17 +146,26 @@ export const deviceRuleRouter = createTRPCRouter({
         }
       }
 
-      const device_rules = await ctx.dnaClient.findAll({
-        entity: 'device_rules',
-        token: ctx.token.value,
+      const device_rules = rootOrm.findAll({
+        entity: 'device_filter_rules',
         query: {
           track_total_records: true,
           pluck,
-          pluck_object:{
-            device_rules: pluck
-          },
           advance_filters: _advance_filters?.length
-            ? _advance_filters as IAdvanceFilters[]
+            ? [
+              ..._advance_filters,
+              {
+                operator: 'and',
+                type: 'operator',
+              },
+              {
+                type: 'criteria',
+                field: 'device_configuration_id',
+                entity: 'device_filter_rules',
+                operator: 'equal',
+                values: [device_conf_id],
+              }
+            ] as IAdvanceFilters[]
             : createAdvancedFilter({
               device_configuration_id: device_conf_id,
               status: 'Active',
@@ -100,17 +181,71 @@ export const deviceRuleRouter = createTRPCRouter({
             by_field: 'code',
             by_direction: EOrderDirection.DESC,
           },
-          // @ts-expect-error - multiple_sort is not defined in the type
           multiple_sort: _sorting?.length
-            ? formatSorting(_sorting, 'device_rules', is_case_sensitive_sorting)
+            ? formatSorting(_sorting, 'device_filter_rules', is_case_sensitive_sorting)
             : [],
+            concatenate_fields: [
+            {
+              fields: ['ipprotocol', 'protocol'],
+              field_name: 'ipprotocol_protocol',
+              separator: ' ',
+              entity: 'device_filter_rules',
+            },
+          ]
         },
       })
-        .execute()
+      if (input.grouping?.length) {
+        device_rules.groupBy({
+          query: {
+            fields: input.grouping,
+            has_count: true,
+          },
+        });
+      }
 
-      const { total_count: totalCount = 1, data: items }
-      = device_rules
+      let { total_count: totalCount = 1, data: items }
+      = await device_rules.execute()
 
+      // Calculate total number of pages
+      const totalPages = Math.ceil(totalCount / limit);
+
+      if (input.grouping?.length) {
+        return {
+          totalCount,
+          items: items,
+          currentPage: 0,
+          totalPages,
+        };
+      }
+
+      // @ts-expect-error - No type yet
+      const groupedItems = items.reduce((acc, curr) => {
+        if (curr.interface === 'wan') {
+          return {
+            ...acc,
+            wan: [...acc.wan, curr]
+          }
+        } else {
+          return {
+            ...acc,
+            lan: [...acc.lan, curr]
+          }
+        }
+      }, {
+        wan: [],
+        lan: []
+      })
+      const orderSort = _sorting?.find?.((s: { id?: string, desc?: boolean }) => s?.id === 'order')
+      const isOrderDesc = orderSort?.desc === true
+      const lanLength = groupedItems.lan.length
+      items = [
+        ...groupedItems.wan,
+        ...groupedItems.lan.map((e: Record<string, any>, index: number) => {
+          return {
+            ...e,
+            order: isOrderDesc ? (lanLength - 1 - index) : index,
+          }
+        })]
       const formatted_items = items?.map((item: Record<string, any>) => {
         const {
           [pluralize(input?.entity)]: entity_data,
@@ -125,7 +260,6 @@ export const deviceRuleRouter = createTRPCRouter({
         }
       })
 
-      const totalPages = Math.ceil(totalCount / limit)
       return {
         totalCount,
         items: formatted_items,

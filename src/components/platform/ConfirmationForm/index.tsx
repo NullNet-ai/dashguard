@@ -24,10 +24,10 @@ export const ConfirmationSummary = () => {
         .join(' ');
 
   return (
-    <Card className="border-none p-0 shadow-none sm:p-2">
+    <Card>
       <CardHeader className={"flex flex-row items-center justify-between bg-slate-100"}>
         <CardDescription 
-          className="text-md text-foreground font-bold"
+          className="text-md font-bold"
           data-testid={testIDFormatter(`${entityName}-confirmation-title`)}
         >
           {formatEntityName} Confirmation

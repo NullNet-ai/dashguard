@@ -1,115 +1,150 @@
 import { headers } from 'next/headers';
+import { Suspense } from 'react';
 
 import Grid from '~/components/platform/Grid';
+import { Loader } from '~/components/ui/loader';
 
 import { api } from '~/trpc/server';
 
 import { defaultSorting } from './_config/sorting';
 import { getGridCacheData } from '~/components/platform/Grid/utils/grid-get-cache-data';
 import { gridDataResolver } from '~/components/platform/Grid/utils/gridDataResolver';
-import { CustomNewButton } from './_components/CustomNewButton';
-import gridColumns from './_config/columns';
+import uiGridColumns from './_config/columns';
 import { CustomRowActions } from './_components/CustomRowActions';
 
 export default async function Page() {
   const headerList = await headers();
   const pathname = headerList.get('x-pathname') || '';
-  const [, , main_entity, ,] = pathname.split('/');
-  const _pluck = [
-    'id',
-    'categories',
-    'code',
-    'status',
-    'remote_access_type',
-    'remote_access_category',
-    'remote_access_session',
-    'remote_access_status',
-    'created_date',
-    'created_time',
-    'created_by',
-    'updated_date',
-    'updated_time',
-    'updated_by',
-  ];
+  const buildGridData = async ({
+    entity,
+    pluck,
+    gridKey,
+    defaultAllTabName,
+  }: {
+    entity: string;
+    pluck: string[];
+    gridKey: string;
+    defaultAllTabName: string;
+  }) => {
+    const gridCacheData =
+      (await getGridCacheData({
+        gridKey,
+        entity: 'device_remote_access_session',
+        pathname,
+        defaultSorting: defaultSorting,
+        gridEntity: entity,
+        defaultAllTabName,
+      })) ?? {};
 
-  const gridCacheData =
-    (await getGridCacheData({
-      defaultSorting: defaultSorting,
-    })) ?? {};
-  const { gridParams, gridProps } = gridDataResolver({
-    entity: main_entity!,
-    pluck: _pluck,
-    gridCacheData,
-    defaults: {
-      defaultSorting,
+    const { gridParams, gridProps } = gridDataResolver({
+      entity,
+      pluck,
+      gridCacheData,
+      defaults: {
+        defaultSorting,
+      },
+    });
+
+    const { items = [], totalCount } = await api.deviceRemoteAccessSession.mainGrid({
+      ...gridParams,
+    });
+
+    return { gridProps, items, totalCount };
+  };
+
+  const mainGrid = await buildGridData({
+    gridKey: 'device_remote_access',
+    entity: 'device_tunnels',
+    defaultAllTabName: 'All Remote Access',
+    pluck: [
+      'id',
+      'categories',
+      'code',
+      'status',
+      'created_date',
+      'created_time',
+      'created_by',
+      'updated_date',
+      'updated_time',
+      'updated_by',
+      'device_id',
+      'service_id',
+      'tunnel_type',
+      'tunnel_status',
+      'last_access_date',
+      'last_access_time',
+    ],
+  });
+
+  const fallback = (
+    <div className="flex h-[500px] w-full items-center justify-center">
+      <div className="flex items-center justify-center">
+        <Loader
+          className="h-8 w-8 bg-primary text-primary"
+          label=""
+          variant="spinner"
+        />
+      </div>
+    </div>
+  );
+
+  const gridBaseConfig = {
+    title: 'Remote Access',
+    defaultValues: {
+      entity_prefix: 'RA',
     },
-  });
-  const { items = [], totalCount } = await api.deviceRemoteAccessSession.mainGrid({
-    ...gridParams,
-  });
+    enableRowClick: false,
+    customRowAction: CustomRowActions,
+    enableRowSelection: false,
+    disableDefaultAction: true,
+  };
 
   return (
-    // <Grid
-    //   {...gridProps}
-    //   data={items}
-    //   totalCount={totalCount || 0}
-    //   config={{
-    //     enableRowClick: false,
-    //     entity: main_entity!,
-    //     title: 'Remote Access',
-    //     columns: gridColumns,
-    //     columnsOrder: gridCacheData?.columns,
-    //     disableDefaultAction: true,
-    //     customRowAction: CustomRowActions,
-    //     searchConfig: {
-    //       router: 'deviceRemoteAccessSession',
-    //       resolver: 'mainGrid',
-    //       query_params: {
-    //         entity: main_entity!,
-    //         pluck: _pluck,
-    //       },
-    //     },
-    //   }}
-    //   customCreateButton={
-    //     <CustomNewButton />
-    //   }
-    // />
-    <Grid
-    // advanceFilter={filters?.advanceFilter || []}
-    {...gridProps}
-    config={{
-      entity: main_entity!,
-      title: 'Remote Access',
-      columns: gridColumns,
-      defaultValues: {
-        entity_prefix: 'RA',
-      },
-      disableDefaultAction: true,
-      enableRowClick: false,
-      customRowAction: CustomRowActions,
-      searchConfig: {
-        router: 'deviceRemoteAccessSession',
-        resolver: 'mainGrid',
-        query_params: {
-          entity: main_entity!,
-          pluck: _pluck,
-        },
-      },
-      searchSuggestionConfig: {
-        router: 'search',
-        resolver: 'deviceRemoteAccessSessionSearch',
-      }
-    }}
-    customCreateButton={
-      <CustomNewButton />
-    }
-    
-    data={items}
-    // defaultAdvanceFilter={defaultAdvanceFilter || []}
-    defaultSorting={defaultSorting}
-    // pagination={pagination}
-    // sorting={sorts?.sorting?.length ? sorts?.sorting : []}
-    totalCount={totalCount || 0}
-  />
+    <div className="space-y-2">
+      <Suspense fallback={fallback}>
+        <Grid
+          {...mainGrid.gridProps}
+          gridChildClass='!h-[calc(100vh-12.6em)]'
+          gridKey="device_remote_access"
+          config={{
+            ...gridBaseConfig,
+            columns: uiGridColumns,
+            entity: 'device_tunnels',
+            searchSuggestionConfig: {
+              router: 'search',
+              resolver: 'deviceRemoteAccessSessionSearch',
+            },
+            searchConfig: {
+              router: 'deviceRemoteAccessSession',
+              resolver: 'mainGrid',
+              query_params: {
+                entity: 'device_tunnels',
+                pluck: [
+                  'id',
+                  'categories',
+                  'code',
+                  'status',
+                  'created_date',
+                  'created_time',
+                  'created_by',
+                  'updated_date',
+                  'updated_time',
+                  'updated_by',
+                  'device_id',
+                  'service_id',
+                  'tunnel_type',
+                  'tunnel_status',
+                  'last_accessed',
+                ],
+              },
+            },
+          }}
+          customCreateButton={<div></div>}
+          data={mainGrid.items}
+          defaultSorting={defaultSorting}
+          totalCount={mainGrid.totalCount || 0}
+        />
+      </Suspense>
+    </div>
   );
 }

@@ -6,7 +6,7 @@ const menu = {
   url: getGridLink({
     mainEntity: "device_remote_access_session",
   }),
-  icon: "QuestionMarkCircle",
+  icon: "/remote_access.png",
 } as ISidebarMenu;
 
 export default menu;

@@ -9,7 +9,7 @@ ENV REDIS_CACHE_ENDPOINT "redis"
 ENV REDIS_CACHE_PORT "6379"
 
 ENV STORE_URL "http://localhost:3000"
-
+ENV NEXT_PUBLIC_ORIGIN_WEBSITE_URL "https://portal.platform.dnaqa.net"
 
 WORKDIR /var/app
 COPY package.json /var/app/package.json

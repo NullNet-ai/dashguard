@@ -2,11 +2,11 @@ import Grid from '~/components/platform/Grid/';
 import { getGridCacheData } from '~/components/platform/Grid/utils/grid-get-cache-data';
 import { gridDataResolver } from '~/components/platform/Grid/utils/gridDataResolver';
 import { api } from '~/trpc/server';
-import AccountGridExpansion from '../_components/grids/AccountGridExpansion';
 import { defaultAdvanceFilter } from './_config/advanceFilter';
 import gridColumns, { TO_HIDE_COLUMNS_WHEN_MOBILE } from './_config/columns';
 import { customTabs } from './_config/customGridTabs';
 import { defaultSorting } from './_config/sorting';
+// import ContactListView from '../_components/contact-list-view';
 
 // import EditComponent from "./customDefaultActions/Edit";
 export default async function Page() {
@@ -40,7 +40,7 @@ export default async function Page() {
     gridCacheData,
     defaults: {
       defaultSorting,
-      defaultAdvanceFilter
+      defaultAdvanceFilter,
     },
   });
 
@@ -55,9 +55,13 @@ export default async function Page() {
       data={items}
       config={{
         isInfinite: true,
+        addNewButtonPosition: 'in-tabs',
+        isDraggable: true,
         entity: 'contact',
         title: 'Contacts',
         columnsOrder: gridCacheData?.columns,
+        // viewMode:'card',
+        // CustomRenderCardParent: ContactListView,
         columns: gridColumns,
         defaultValues: {
           categories: ['Contact', 'Employee'],

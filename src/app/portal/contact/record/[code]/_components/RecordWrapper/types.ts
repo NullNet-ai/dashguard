@@ -4,4 +4,8 @@ export interface IProps {
     entity_code: string;
     entity_name: string;
     is_applicant: boolean;
+    enableTimeline?: boolean;
+    metadata?: {
+        timeline_title?: string;
+    };
 }

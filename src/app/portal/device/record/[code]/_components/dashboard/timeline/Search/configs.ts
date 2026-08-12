@@ -3,7 +3,7 @@ export const searchableFields = [
   //   accessorKey: 'interface_name',
   //   field: 'interface_name',
   //   label: 'Instance Name',
-  //   entity: 'packets',
+  //   entity: 'connections',
   //   operator: 'equal',
   // },
   {
@@ -17,28 +17,28 @@ export const searchableFields = [
   //   accessorKey: 'destination_ip',
   //   field: 'destination_ip',
   //   label: 'Destination IP',
-  //   entity: 'packets',
+  //   entity: 'connections',
   //   operator: 'equal',
   // },
   // {
   //   accessorKey: 'source_port',
   //   field: 'source_port',
   //   label: 'Source Port',
-  //   entity: 'packets',
+  //   entity: 'connections',
   //   operator: 'equal',
   // },
   // {
   //   accessorKey: 'destination_port',
   //   field: 'destination_port',
   //   label: 'Destination Port',
-  //   entity: 'packets',
+  //   entity: 'connections',
   //   operator: 'equal',
   // },
   // {
   //   accessorKey: 'protocol',
   //   field: 'protocol',
   //   label: 'Protocol',
-  //   entity: 'packets',
+  //   entity: 'connections',
   //   operator: 'equal',
   // },
   // {
@@ -62,6 +62,13 @@ export const searchableFields = [
   //   entity: 'packets',
   //   operator: 'equal',
   // },
+  {
+    accessorKey: 'country',
+    field: 'country',
+    label: 'Country',
+    entity: 'ip_infos',
+    operator: 'equal',
+  }
 ]
 
 export const searchConfig = {

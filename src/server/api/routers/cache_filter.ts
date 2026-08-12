@@ -61,7 +61,8 @@ export const cachedFilterRouter = createTRPCRouter({
       })
       console.log("%c Line:53 🍎 updatedData", "color:#465975", updatedData);
       await ctx.redisClient.cacheData(`${type}_${contact.id}`, updatedData)
-      return updatedData?.[0]
+      // @ts-expect-error - No type yet
+      return updatedData?.find(e => e.id === input_data?.id)
     }
   }),
     updateSearchFilter: privateProcedure
@@ -138,9 +139,37 @@ export const cachedFilterRouter = createTRPCRouter({
 
     }
     ),
+    getGraphInterfacePreferences: privateProcedure
+    .input(z.object({ device_id: z.string().min(1) }))
+    .mutation(async ({ ctx, input }) => {
+      const key = `device_graph_interfaces:${input.device_id}`
+      return await ctx.redisClient.getCachedData(key) as {
+        interfaces: { label: string; value: string }[]
+        pie_chart_interfaces: { label: string; value: string }[]
+      } | null
+    }),
+    saveGraphInterfacePreferences: privateProcedure
+    .input(z.object({
+      device_id: z.string().min(1),
+      interfaces: z.array(z.object({ label: z.string(), value: z.string() })),
+      pie_chart_interfaces: z.array(z.object({ label: z.string(), value: z.string() })),
+    }))
+    .mutation(async ({ ctx, input }) => {
+      const { device_id, interfaces, pie_chart_interfaces } = input
+      const key = `device_graph_interfaces:${device_id}`
+      await ctx.redisClient.cacheData(key, { interfaces, pie_chart_interfaces }, 86400 * 30)
+      return { success: true }
+    }),
     fetchCachedFilterTimeUnitandResolution: privateProcedure
     .input(z.object({ type: z.string(), filter_id: z.string() }))
     .query(async ({ input, ctx }) => {
+      // return {
+      //     time: {
+      //       time_count: 1,
+      //       time_unit: 'hour'
+      //     },
+      //     resolution: '1s',
+      //   }
       const { type, filter_id } = input
       
       const { account } = ctx.session
@@ -151,6 +180,17 @@ export const cachedFilterRouter = createTRPCRouter({
 
       
       const filter = cached_data?.find((data: any) => data.id === filter_id)
+
+      if (type === 'timeline_filter' && filter_id === '01JNQ9WPA2JWNTC27YCTCYC1FE') {
+        return {
+          time: {
+            time_count: 60,
+            time_unit: 'second'
+          },
+          resolution: '1s',
+        }
+      }
+
       if(!filter) {
         return {
           time: {

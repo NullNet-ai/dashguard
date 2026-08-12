@@ -8,10 +8,12 @@ type Props = {
 const Layout = (props: Props) => {
   return (
     <Fragment>
-      <InnerTabs variant='dropdown'/>
+      <InnerTabs variant='dropdown' hasNewButton={false} />
       {props.children}
     </Fragment>
   );
 };
+
+export const dynamic = 'force-dynamic'
 
 export default Layout;

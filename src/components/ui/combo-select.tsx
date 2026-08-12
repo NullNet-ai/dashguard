@@ -11,6 +11,7 @@ import { ChevronDownIcon } from "lucide-react";
 import React, { type ElementType, useEffect, useState } from "react";
 import { usePopper } from "react-popper";
 import { cn } from "~/lib/utils";
+import { testIDFormatter } from '~/utils/formatter';
 import { Avatar, AvatarFallback, AvatarImage } from "./avatar";
 import InfiniteScroll from 'react-infinite-scroll-component';
 import { ulid } from 'ulid';
@@ -193,6 +194,16 @@ export function ComboSelect({
 
     const uniqueKey = ulid()
 
+  // Sync newItems with filtered results when search query changes (infiniteScroll mode only)
+  useEffect(() => {
+    if (!infiniteScroll?.enabled) return;
+    setNewItems(filteredOptions.slice(0, initialLimit));
+    setHasMoreData(filteredOptions.length > initialLimit);
+    setDisplayLimit(initialLimit);
+    // filteredOptions is a new array every render; depend on query + options + initialLimit
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [query, options, initialLimit]);
+
     const inputReadOnly = !searchable || readOnly || disabled;
 
           // Handle key down events in the input
@@ -220,7 +231,7 @@ export function ComboSelect({
                 
                 // Fallback to clicking the create button if it exists
                 if (renderCreateOption) {
-                    const createButton = document.querySelector('[data-test-id$="-opt-create-new-"]') as HTMLButtonElement;
+                    const createButton = document.querySelector('[data-test-id*="-option-create-new-"]') as HTMLButtonElement;
                     if (createButton) {
                         createButton.click();
                     }
@@ -290,7 +301,7 @@ export function ComboSelect({
                     autoComplete='off'
                     ref={setReferenceElement}
                     className={cn(
-                        "block w-full  rounded-md border-border py-[5px] md:text-md text-base text-foreground placeholder:text-muted-foreground focus:border-primary focus:ring-primary disabled:border-gray-300 disabled:bg-secondary disabled:text-gray-400 sm:text-sm/6",
+                        "block w-full  rounded-md border-border py-[5px] md:text-md text-base text-slate-700 placeholder:text-muted-foreground focus:border-primary focus:ring-primary disabled:border-gray-300 disabled:bg-secondary disabled:text-gray-400 sm:text-sm/6",
                         {
                             "outline-destructive": error,
                             "border-destructive": error,
@@ -429,7 +440,7 @@ export function ComboSelect({
                                             onClick={()=> {
                                                 setOpen(false);
                                             }}
-                                            data-test-id={testId ? `${testId}-option-${option.value}` : undefined}
+                                            data-test-id={testId ? `${testId}-option-${testIDFormatter(String(option.value))}` : undefined}
                                         >
                                             {/* Left side container with avatar, status, checkmark and label */}
                                             <div className="flex items-center">

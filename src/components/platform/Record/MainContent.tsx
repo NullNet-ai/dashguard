@@ -13,6 +13,7 @@ const MainContent = ({
   children,
   className,
   application,
+  style,
   ...props
 }: MainContentProps) => {
   const { open } = useSidebar();
@@ -27,19 +28,21 @@ const MainContent = ({
     width: isCollapseRecordSummary ? '100%' : !open
       ? application === "record"
         ? (isOpen && isPinned && !!width) ? `calc(100vw - ${width})` : '100%'
-        : "calc(100vw - 300px - 3rem)"
-      : `calc(100vw - 300px - 16rem ${isOpen && isPinned && !!width  ? ` - ${width}` : ''} )`,
-    height: "calc(100vh - 200px)",
+        : "md:calc(100vw - 300px - 3rem)"
+      : `md:calc(100vw - 300px - 17.5rem ${isOpen && isPinned && !!width  ? ` - ${width}` : ''} )`,
+    height: "calc(100vh - 160px)",
   };
+
+  const mergedStyle = { ...customStyle, ...(style ?? {}) };
 
 
   return (
     <section
       className={cn(
-        "main-content max-h-full space-y-2 overflow-auto overflow-x-auto",
+        "main-content max-h-full space-y-2 overflow-auto overflow-x-auto rounded-t-[2px] rounded-b-[8px]",
         className,
       )}
-      style={customStyle}
+      style={mergedStyle}
       {...props}
     >
       {children}

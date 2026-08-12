@@ -16,11 +16,17 @@ export const formatGroupByResult = ({
 }) => {
   return data.map((item) => {
     const { [pluralize(entity)]: entity_data } = item;
-    const sourceData = entity_data ? entity_data : item[entity];
+    // ORM group_by returns the grouped value under a flat "<entity>_<field>" key
+    // (e.g. device_services_protocol), not nested — fall back to that.
+    const flatKey = `${entity}_${field}`;
+    const sourceData =
+      entity_data ??
+      item[entity] ??
+      (flatKey in item ? { [field]: item[flatKey] } : undefined);
     const formatted_value =
       formatValue(sourceData, accessorKey) || formatValue(sourceData, field);
     return {
-      id: ulid(),
+      id: sourceData?.[field] || 'null',
       is_group_by: true,
       value: sourceData?.[field],
       formatted_value,

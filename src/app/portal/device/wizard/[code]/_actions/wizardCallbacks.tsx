@@ -16,7 +16,8 @@ const wizardCallbacks = {
       }
       toast.error('Failed to activate the device');
       return;
-    } catch {
+    } catch (error: any) {
+      if (error.message === 'NEXT_REDIRECT') return
       toast.error('Failed to activate account');
       return;
     }

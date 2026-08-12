@@ -3,7 +3,7 @@ import { api } from '~/trpc/server'
 
 export const saveGridFilter = async (data: any, filter_type: string) => {
     try {
-    const saveGridFilter = await api.cachedFilter.createFilter({type: filter_type, data})
+        const saveGridFilter = await api.cachedFilter.createFilter({type: filter_type, data})
 
     return saveGridFilter
   }

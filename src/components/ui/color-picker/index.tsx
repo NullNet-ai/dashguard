@@ -367,8 +367,9 @@ export function ColorPicker({
             </div>
           </Button>
         </PopoverTrigger>
-        <PopoverContent className="w-[280px] p-4">
-          <div className="flex flex-col gap-4">
+        <PopoverContent className="w-[280px] p-0">
+          <div className="overflow-auto scroll-py-2" style={{ maxHeight: 'calc(var(--radix-popover-content-available-height) - 16px)' }}>
+            <div className="flex flex-col gap-2 p-6">
             {/* Color preview */}
             {colorPreviewComponent}
 
@@ -403,6 +404,7 @@ export function ColorPicker({
                 onFormatChange={handleFormatChange}
               />
             </div>
+          </div>
           </div>
         </PopoverContent>
       </Popover>

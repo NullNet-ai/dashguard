@@ -31,6 +31,8 @@ const GridGroupRows = ({
     parentExpanded,
     showAction,
     reachEnd,
+    originalGroups,
+    groupLevel
 }: any) => {
     const { state, actions } = useContext(GridContext);
     const context = useContext(ScrollContainerContext);
@@ -83,7 +85,7 @@ const GridGroupRows = ({
               state?.table.getRowModel().rows.map((row, index) => {
                 //remove duplicate column id
                 const uniqueVisibleCells: any = removeDuplicateColumnIds([...row.getVisibleCells()])
-
+                const selectedIndex = uniqueVisibleCells?.[0]?.column?.id === 'select' ? 1 : 0
                 return <>
                   <TableRow
                     className={cn(
@@ -97,10 +99,10 @@ const GridGroupRows = ({
                     )}
                   >
                     {uniqueVisibleCells.map((cell:any, index: number) => {
-
-
                       const parentCellSize = getParentCellSize(cell.column.id)
     
+                      
+
                       if (
                         cell.column.id === 'action' &&
                         !row?.original?.is_group_by
@@ -109,7 +111,7 @@ const GridGroupRows = ({
                           <td
                             key={cell.id + index}
                             className={cn(
-                              'right-0 sticky',
+                              'right-0 sticky z-50',
                               // isEndReached || reachEnd ? '' : 'sticky',
                             )}
                           >
@@ -150,7 +152,8 @@ const GridGroupRows = ({
                             `${state?.config.entity}-grd-tbl-tbody-row-cell-${cell.column.id + '-' + (index + 1)}`,
                           )}
                           style={{
-                            width: parentCellSize !== 0 ? parentCellSize - 25 : cell.column.getSize(),
+                            width: ((cell.id.includes('group_by') || cell.id.includes('expand')) && index === selectedIndex) 
+                              ? 50 : parentCellSize !== 0 ? parentCellSize - 25 : cell.column.getSize(),
                             minWidth: cell.column.columnDef.minSize,
                             ...getCommonPinningStyles(cell.column).style,
                           }}
@@ -174,11 +177,16 @@ const GridGroupRows = ({
                                     cell.column.columnDef.cell,
                                     cell.getContext(),
                                   )}
-                                </div>
+                              </div>
                               )}
                             </>
                           ) : (
-                            <>
+                            <div className='flex items-center'>
+                             {cell.column.id === 'expand' || cell.column.id === 'grouping' ? <div style={{
+                              padding: 7 * groupLevel,
+                              height: 1
+                              
+                             }}></div> : null}
                               {['grouping', 'select', 'expand'].includes(
                                 cell.column.id,
                               ) && (
@@ -189,7 +197,7 @@ const GridGroupRows = ({
                                   )}
                                 </div>
                               )}
-                            </>
+                            </div>
                           )}
     
                           <div
@@ -207,6 +215,8 @@ const GridGroupRows = ({
                   {row.getIsExpanded() &&
                     (row.original.is_group_by ? (
                         <GridGroupingExpansion
+                          originalGroups={originalGroups}
+                          rowIndex={index}
                           rowData={row.original}
                           config={state.config}
                           initialColumns={
@@ -254,7 +264,7 @@ const GridGroupRows = ({
                               })
                             ) : (
                               React.cloneElement(
-                                state?.config?.rowExpansionBuilder,
+                                state?.config?.rowExpansionBuilder as any,
                                 {
                                   rowData: row.original,
                                   parentExpanded: allExpandedRows,

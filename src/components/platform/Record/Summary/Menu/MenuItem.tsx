@@ -2,14 +2,16 @@
 import { Fragment } from "react";
 import { RecordMenuOptionContext } from '~/components/RecordMenuOptionProvider/RecordMenuOptionsProvider';
 import { DropdownMenuItem, DropdownMenuSeparator } from "~/components/ui/dropdown-menu";
+import { cn } from '~/lib/utils';
 
 interface IMenuItemProps {
   children: React.ReactNode;
   onClick: () => void;
   disabled?: boolean;
+  className?: string;
 }
 
-export default function MenuItem({ children, onClick,...props  }: IMenuItemProps) {
+export default function MenuItem({ children, onClick, className, ...props  }: IMenuItemProps) {
   
 
  
@@ -20,7 +22,7 @@ export default function MenuItem({ children, onClick,...props  }: IMenuItemProps
 
   return (
     <Fragment>
-      <DropdownMenuItem className="w-full flex-1" onClick={handleClick} {...props}>{children}</DropdownMenuItem>
+      <DropdownMenuItem className={cn("w-full flex-1", className)} onClick={handleClick} {...props}>{children}</DropdownMenuItem>
       {/* TODO: add item separator */}
     </Fragment>
   );

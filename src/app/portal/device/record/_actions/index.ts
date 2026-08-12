@@ -1,21 +1,32 @@
-"use server";
+"use client";
 
 import { TStatus } from "./types";
+import DeviceRemoteAccessGrid from '../../_components/forms/device-remote-access-grid';
 
 const handleChangeStatus = async (
   status: TStatus,
   recordId: string,
   entityName: string,
+  handleLoadingStateChange?: (itemName: string, isLoading: boolean) => void,
+  sideDrawerActions?: any,
 ) => {
+  console.log("🚀 ~ handleChangeStatus ~ recordId:", recordId)
+  const label = status === 'remote_access' ? 'Remote Access' : status
+  handleLoadingStateChange?.(label, true)
   try {
-    // const response = await changeContactStatus.mutateAsync({
-    //   id: contact_id!,
-    //   contact_status: status,
-    // });
-    // toast.success("Status changed sucessfully.");
-    // return response;
+    sideDrawerActions?.openSideDrawer?.({
+      sideDrawerWidth: '1000px',
+      body: {
+        component: DeviceRemoteAccessGrid,
+        componentProps:   {
+          deviceCode: recordId,
+        },
+      },
+    })
   } catch (error) {
-    // toast.error("Failed to change status.");
+  }
+  finally {
+    handleLoadingStateChange?.(label, false)
   }
 };
 

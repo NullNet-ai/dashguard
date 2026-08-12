@@ -7,7 +7,7 @@ import FilterContent from './Tabs/Filter/FilterContent'
 
 export default function SideDrawer({ filter_type }: { filter_type: string }) {
   const { state, actions } = useManageFilter()
-  const { tab_props, filterDetails, createFilterLoading, updateFilterLoading } = state ?? {}
+  const { tab_props, filterDetails, createFilterLoading, updateFilterLoading, errors } = state ?? {}
   const tabs = [
     {
       id: 'filter',
@@ -31,12 +31,11 @@ export default function SideDrawer({ filter_type }: { filter_type: string }) {
                   {'✓ Update Filter'}
                 </Button>
               <Button
-                  className = "bg-blue-600 text-white hover:bg-blue-700"
                   loading = { createFilterLoading }
-                  variant = "default"
+                  variant = "secondary"
                   onClick = { actions.handleCreateNewFilter }
                 >
-                  {'✓ Create as New Filter'}
+                  {'✓ Apply as New Filter'}
                 </Button>
             </>
             )
@@ -47,7 +46,7 @@ export default function SideDrawer({ filter_type }: { filter_type: string }) {
               variant = "default"
               onClick = { actions.handleCreateNewFilter }
             >
-                ✓ Create New Filter
+                ✓ Apply Filter
             </Button>
             )}
       </div>
@@ -66,6 +65,9 @@ export default function SideDrawer({ filter_type }: { filter_type: string }) {
             }) }
           />
         </div>
+        {errors?.name && (
+          <p className="text-sm text-red-500">{errors.name}</p>
+        )}
       </div>
 
       {/* Tabs */}

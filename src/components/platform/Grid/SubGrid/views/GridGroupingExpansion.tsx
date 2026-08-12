@@ -5,15 +5,15 @@ import { CardFooter } from '~/components/ui/card';
 import { Loader } from '~/components/ui/loader';
 import Pagination from '../../Pagination';
 import GridProvider, { GridContext } from '../../Provider';
-import MyTableBody from '../../TableBody';
 import ErrorPage from '../../common/ErrorPage';
 import { useSidebar } from '~/components/ui/sidebar';
-import { cn } from '~/lib/utils';
 import { resolveAdvanceFilter } from '../../Search/utils/advanceFilterResolver';
 import useFetchGridData from '../../hooks/useFetchGridData';
 import GridGroupRows from './GridGroupRows';
 import { TableRow } from '~/components/ui/table';
 import { useContext } from 'react';
+import { formatSortingFields } from '../../utils/formatSortingFields';
+import { useIsMobile } from '~/hooks/use-mobile';
 
 const GridGroupingExpansion = (props: IGridGroupingExpansionProps) => {
   const {
@@ -25,13 +25,17 @@ const GridGroupingExpansion = (props: IGridGroupingExpansionProps) => {
     parentGroupData,
     gridState,
     parentGroupFields,
-    metadata,
-    parentType
+    parentType,
+    rowIndex,
+    originalGroups,
+    current_tab_id,
   } = props ?? {};
 
+  const level = (originalGroups?.length ?? 0) - (grouping?.length ?? 0);
   const { open } = useSidebar();
   const { state, actions } = useContext(GridContext);
   const groups = state?.table.getState().grouping ?? [];
+  const isMobile = useIsMobile();
 
   const pagination = {
     current_page: 1,
@@ -43,13 +47,19 @@ const GridGroupingExpansion = (props: IGridGroupingExpansionProps) => {
       desc: true,
     },
   ];
+  const resolvedSorting = formatSortingFields(
+    gridState?.sorting ?? [],
+    initialColumns,
+  );
+
   const gridQueryConfigs = {
-    defaultSorting: gridState?.sorting,
+    defaultSorting: resolvedSorting,
     defaultAdvanceFilter: gridState?.defaultAdvanceFilter,
     advanceFilter: gridState?.advanceFilter,
-    sorting: gridState?.sorting,
+    sorting: resolvedSorting,
     pagination: pagination,
   };
+
   const advanceFilterItems = gridState?.advanceFilter?.map((item) => {
     if (item?.type === 'criteria') {
       return {
@@ -65,12 +75,13 @@ const GridGroupingExpansion = (props: IGridGroupingExpansionProps) => {
       const filterItem = {
         type: 'criteria',
         field,
-        operator:
-          value === null || value === undefined
-            ? 'is_null'
-            : 'equal',
+        operator: value === null || value === undefined ? 'is_null' : 'equal',
         entity: entity || config.entity,
-        values: Array.isArray(value) ? value : [value],
+        values: Array.isArray(value)
+          ? value
+          : value === null || value === undefined
+            ? []
+            : [value],
       };
       if (index > 0) {
         return [...acc, { type: 'operator', operator: 'and' }, filterItem];
@@ -82,6 +93,7 @@ const GridGroupingExpansion = (props: IGridGroupingExpansionProps) => {
   };
   const groupAdvanceFilters =
     gridState?.config?.searchConfig?.query_params?.group_advance_filters;
+
   const gridFilters = resolveAdvanceFilter({
     currentAdvanceFilter: groupAdvanceFilters?.length
       ? groupAdvanceFilters
@@ -115,6 +127,7 @@ const GridGroupingExpansion = (props: IGridGroupingExpansionProps) => {
         {
           id: groupSort?.value,
           desc: groupSort?.desc,
+          type: groupSort?.type,
           sort_key: groupSort?.field,
           is_case_sensitive_sorting:
             groupSort?.is_case_sensitive_sorting ?? false,
@@ -126,7 +139,7 @@ const GridGroupingExpansion = (props: IGridGroupingExpansionProps) => {
     {
       ...(config.searchConfig?.query_params || {}),
       current: pagination?.current_page,
-      limit: groupFields?.[0]?.field ? 500 : pagination?.limit_per_page,
+      limit: pagination?.limit_per_page,
       entity: config.entity,
       pluck: config.searchConfig?.query_params?.pluck,
       sorting: newSorting?.length
@@ -144,43 +157,48 @@ const GridGroupingExpansion = (props: IGridGroupingExpansionProps) => {
   );
 
   const { items = [], totalCount = 0 } = data ?? {};
-    const newItems = items.map(item => {
-    return {...item, expand:'', group_by: ''}
-  })
+  const newItems = items.map((item) => {
+    return { ...item, expand: '', group_by: '' };
+  });
 
-  const newColumnOrder =  config?.columnsOrder?.length ? [{
-    "header": "expand",
-    "accessorKey": "expand",
-    "label": "expand",
-    "isShow": true,
-    "order": 0
-  },
-  {
-    "header": "Group By",
-    "accessorKey": "group_by",
-    "label": "Group By",
-    "isShow": true,
-    "order": 1
-  },...config?.columnsOrder ?? []].map((col: any, index: number) => {
-    return {
-      ...col,
-      order: index 
-    }
-  }) : []
-
-
-  let newVisibleColumns = groups?.length <= 1 ? [...visibleColumns].some(
-    (col: any) => col?.accessorKey === 'group_by',
-  )
-    ? [...visibleColumns]
-    : [
+  const newColumnOrder = config?.columnsOrder?.length
+    ? [
         {
-          header: 'group_by',
-          accessorKey: 'group_by',
-          data_type: 'string',
+          header: 'expand',
+          accessorKey: 'expand',
+          label: 'expand',
+          isShow: true,
+          order: 0,
         },
-        ...visibleColumns,
-      ] : [...visibleColumns];
+        {
+          header: 'Group By',
+          accessorKey: 'group_by',
+          label: 'Group By',
+          isShow: true,
+          order: 1,
+        },
+        ...(config?.columnsOrder ?? []),
+      ].map((col: any, index: number) => {
+        return {
+          ...col,
+          order: index,
+        };
+      })
+    : [];
+
+  let newVisibleColumns =
+    groups?.length <= 1
+      ? [...visibleColumns].some((col: any) => col?.accessorKey === 'group_by')
+        ? [...visibleColumns]
+        : [
+            {
+              header: 'group_by',
+              accessorKey: 'group_by',
+              data_type: 'string',
+            },
+            ...visibleColumns,
+          ]
+      : [...visibleColumns];
 
   newVisibleColumns = [...newVisibleColumns].some(
     (col: any) => col?.accessorKey === 'expand',
@@ -193,7 +211,6 @@ const GridGroupingExpansion = (props: IGridGroupingExpansionProps) => {
         },
         ...newVisibleColumns,
       ];
-
 
   if (isLoading && !items?.length) {
     return (
@@ -220,25 +237,45 @@ const GridGroupingExpansion = (props: IGridGroupingExpansionProps) => {
   }
 
   const _width = //{width: '100%'}; // TODO: Uncomment and adjust as needed
-  open
-    ? {
-        width: parentType === 'record' ?  'calc(100dvw - 635px)' : 'calc(100dvw - 264px)',
-      }
-    : {
-       width: parentType === 'record' ?  'calc(100dvw - 450px)' : 'calc(100dvw - 98px)',
-      };
+    open
+      ? {
+          width:
+            parentType === 'record'
+              ? 'calc(100dvw - 635px)'
+              : 'calc(100dvw - 264px)',
+        }
+      : {
+          width:
+            parentType === 'record'
+              ? 'calc(100dvw - 450px)'
+              : 'calc(100dvw - 98px)',
+        };
 
-  
   return (
     <GridProvider
       {...gridQueryConfigs}
+      current_tab_id={current_tab_id}
       config={{
         ...config,
         columnsOrder: newColumnOrder,
+        isInfinite: false,
         columns: newVisibleColumns,
         group_by_initial_columns: initialColumns,
         parentGroupData: [...(parentGroupData ?? []), { ...rowData }],
-        onFetchRecords: fetchData,
+        onFetchRecords: (data) => {
+          fetchData({
+            ...data,
+            ...gridFilters,
+            grouping: groupFields?.[0]?.field
+              ? [groupFields[0].field as string]
+              : [],
+            sorting: newSorting?.length
+              ? newSorting
+              : gridQueryConfigs?.sorting?.length
+                ? gridQueryConfigs?.sorting
+                : defaultSorting,
+          });
+        },
         parentGroupFields: groupFields,
       }}
       parentType="grouping_expansion"
@@ -247,15 +284,29 @@ const GridGroupingExpansion = (props: IGridGroupingExpansionProps) => {
       grouping={grouping}
     >
       {/* <div className={cn(`hidden lg:grid`)}> */}
-      <GridGroupRows />
+      <GridGroupRows
+        rowIndex={rowIndex}
+        originalGroups={originalGroups}
+        groupLevel={level}
+      />
       {/* <MyTableBody 
           parentMeta={metadata?.parentRow}
         /> */}
       <TableRow>
         <td colSpan={newVisibleColumns.length + 1}>
           {!grouping?.length && (
-            <CardFooter style={_width}>
-              <Pagination />
+            <CardFooter
+              style={
+                !isMobile
+                  ? _width
+                  : {
+                      width: 'calc(100dvw - 1rem)',
+                      position: 'sticky',
+                      left: 0,
+                    }
+              }
+            >
+              <Pagination isGroupType={true} />
             </CardFooter>
           )}
         </td>

@@ -2,9 +2,10 @@ import axios from 'axios';
 
 export async function authorizeDevice(device_id: string, token: string) {
   const host = process.env.WG_SERVER_IP;
+  console.log("🚀 ~ authorizeDevice ~ host:", host)
   
   const response = await axios.post(
-    `http://${host}:4444/wallguard/api/v1/authorize_device`,
+    `${host}/wallguard/api/v1/authorize_device`,
     {
       device_id: device_id,
     },
@@ -16,6 +17,8 @@ export async function authorizeDevice(device_id: string, token: string) {
     },
   );
 
-  if (response.status != 200)
+  if (response.status != 200) {
     throw new Error(`Failed to authorize device: ${response.data}`);
+  }
+  return response.data
 }

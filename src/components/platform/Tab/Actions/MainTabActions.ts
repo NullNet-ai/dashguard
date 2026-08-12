@@ -40,3 +40,8 @@ export const closeOtherClassTabs = async ({
   })
   redirect(pathname)
 }
+
+
+export const tabClick = async (href:string) => {
+  redirect(href)
+}

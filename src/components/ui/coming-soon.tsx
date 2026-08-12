@@ -42,7 +42,7 @@ export default function NewComingSoon({ type = "page" }: TComingProps) {
                 width={60}
                 height={60}
                 alt=""
-                src="/tailwindLogo.svg"
+                src="/appguard-logo.png"
                 className="h-8 w-auto relative lg:-top-40"
               />
             </a>
@@ -76,7 +76,7 @@ export default function NewComingSoon({ type = "page" }: TComingProps) {
               width={60}
               height={60}
               alt=""
-              src="/tailwindLogo.svg"
+              src="/appguard-logo.png"
               className="h-8 w-auto"
             />
           </a>

@@ -26,6 +26,7 @@ export const resolveSearchItem = ({
     operator: 'equal',
     // filter_item?.operator === 'like' && !filter_item?.parse_as ? 'equal' : filter_item?.operator,
     default: false,
+    
   };
   if (hasFilters) {
     const searchItemResolver = advanceFilter.map((item: any) => {

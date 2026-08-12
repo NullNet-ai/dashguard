@@ -9,7 +9,7 @@ export const formatSorting = (sorting: SortingState, main_entity: string, is_cas
     return {
       by_field: by_field,
       by_direction: desc ? EOrderDirection.DESC : EOrderDirection.ASC,
-      is_case_sensitive_sorting,
+      is_case_sensitive_sorting: Boolean(is_case_sensitive_sorting),
     };
   });
 };

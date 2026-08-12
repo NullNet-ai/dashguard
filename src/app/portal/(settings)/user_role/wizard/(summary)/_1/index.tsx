@@ -42,7 +42,7 @@ const Summary = ({
   return (
     <div>
       {Object.entries(fields).map(([key, value]) => (
-        <p key={key} className="mb-[8px] no-underline">
+        <p key={key} className="mb-[8px] no-underline text-[#334155]">
           <strong> {key}: </strong>
           &nbsp; {data?.[value] || "None"}
         </p>

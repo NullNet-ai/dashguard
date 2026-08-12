@@ -13,6 +13,7 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from '~/components/ui/tooltip';
+import { testIDFormatter } from '~/utils/formatter';
 
 /**
  *
@@ -85,6 +86,10 @@ export function EditComponent({ row, config, viewMode }: DefaultRowActions) {
             }
             handleEdit({ row, config });
           }}
+          className="px-2 h-full hover:bg-slate-50"
+          data-test-id={testIDFormatter(
+            `${config.entity}-grd-tbl-tbody-row-cell-action-edit`,
+          )}
         >
           <PencilIcon className="h-3 w-3 text-primary" />
         </Button>
@@ -152,6 +157,10 @@ export function DeleteComponent({ row, config, viewMode }: DefaultRowActions) {
       <TooltipTrigger asChild>
         <Button
           disabled={isDisabled}
+          className="px-2 h-full hover:bg-slate-50"
+          data-test-id={testIDFormatter(
+            `${config.entity}-grd-tbl-tbody-row-cell-action-delete`,
+          )}
           onClick={() => {
             if (config?.deleteCustomAction) {
               config?.deleteCustomAction({ row, config });
@@ -242,6 +251,10 @@ export function ArchiveComponent({
             setRecord?.(record);
             setOpen?.(true);
           }}
+          className="px-2 h-full hover:bg-slate-50"
+          data-test-id={testIDFormatter(
+            `${config.entity}-grd-tbl-tbody-row-cell-action-archive`,
+          )}
         >
           <ArchiveIcon
             className={`h-3 w-3 ${row.original.disabled || isDisabled ? 'bg-gray:300 opacity-50' : 'text-destructive'}`}
@@ -309,6 +322,10 @@ export function RestoreComponent({ row, config, viewMode }: DefaultRowActions) {
       <TooltipTrigger asChild>
         <Button
           disabled={isDisabled}
+          className="px-2 h-full hover:bg-slate-50"
+          data-test-id={testIDFormatter(
+            `${config.entity}-grd-tbl-tbody-row-cell-action-restore`,
+          )}
           onClick={() => {
             if (config?.restoreCustomAction) {
               config?.restoreCustomAction({ row, config });

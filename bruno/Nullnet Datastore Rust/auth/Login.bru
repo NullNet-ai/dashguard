@@ -1,0 +1,46 @@
+meta {
+  name: Authenticate Organization
+  type: http
+  seq: 2
+}
+
+post {
+  url: {{baseUrl}}/api/organizations/auth
+  body: json
+  auth: none
+}
+
+body:json {
+  {
+      "data": {
+          "email": "{{loginEmail}}",
+          "password": "{{loginPassword}}"
+      }
+  }
+}
+
+vars:pre-request {
+  baseUrl: https://store.appguard.ai
+  loginEmail: admin@dnamicro.com
+  loginPassword: ch@ng3m3Pl3@s3!!
+}
+
+script:post-response {
+  const body = res.getBody();
+  const token =
+    body?.data?.token ||
+    body?.data?.access_token ||
+    body?.token ||
+    body?.access_token;
+  
+  if (token) {
+    bru.setVar("sessionToken", token);
+  } else {
+    console.log("No auth token found in login response.");
+  }
+}
+
+settings {
+  encodeUrl: true
+  timeout: 0
+}

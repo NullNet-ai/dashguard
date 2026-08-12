@@ -1,6 +1,6 @@
 import { Fragment } from 'react';
 import RecordSummary from '~/components/platform/Record/Summary/RecordSummary';
-import BasicRecordContent from './components/basic_content';
+// import BasicRecordContent from './components/basic_content';
 import { headers } from 'next/headers';
 import NotFound from '~/app/not-found';
 export default async function Page() {
@@ -15,11 +15,11 @@ export default async function Page() {
   return (
     <Fragment>
       <RecordSummary />
-      <BasicRecordContent
+      {/* <BasicRecordContent
         form_key={main_entity}
         identifier={identifier}
         main_entity={main_entity}
-      />
+      /> */}
     </Fragment>
   );
 }

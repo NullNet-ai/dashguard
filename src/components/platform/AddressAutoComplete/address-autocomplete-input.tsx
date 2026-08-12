@@ -109,7 +109,7 @@ export function AddressAutoCompleteInput(props: CommonProps) {
                     {...formRenderProps.field}
                     {...fieldConfig}
                     autoComplete="off"
-                    className="relative h-[36px] w-full flex-grow rounded-md border border-border bg-transparent pl-9 pr-4 text-foreground placeholder:text-muted-foreground focus:border focus:border-primary focus:ring-primary text-md disabled:bg-secondary  disabled:text-gray-400 disabled:border-gray-300"
+                    className="relative h-[36px] w-full  flex-grow rounded-md border border-slate-300 bg-transparent pl-9 pr-4 text-slate-700 placeholder:text-muted-foreground focus:border focus:border-primary focus:ring-primary text-md disabled:bg-secondary  disabled:text-gray-400 disabled:border-gray-300"
                     data-test-id={formKey + '-' + formRenderProps?.field.name}
                     disabled={is_disabled}
                     placeholder="Search..."

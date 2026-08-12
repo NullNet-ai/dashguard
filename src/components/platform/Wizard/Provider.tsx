@@ -15,18 +15,16 @@ import { omit } from 'lodash';
 import { SaveAndContinue } from './Action/SaveAndContinue';
 import { SaveAndNew } from './Action/SaveAndNew';
 import { SaveAndClose } from './Action/SaveAndClose';
-// import { PrevPage } from './Action/PrevPage';
+import { PrevPage } from './Action/PrevPage';
 // import { NextPage } from "./Action/NextPage";
 
-import { api } from '~/trpc/react';
 import useDeepCompareEffect from './Hooks/useDeepCompareEffect';
-import useTraverseStepped from './Hooks/useTraverseStepped';
 import useTraverseSteppedSaved from './Hooks/useTraverseStepSave';
-import usePrefetchWizardTraverse from './Hooks/usePrefetchWizardTraverse';
 import { NextPage } from './Action/NextPage';
 import { Create } from '../Grid/Action/Create';
 import { useSocket } from '~/context/SocketProvider';
 import numberToWords from './Utils/steptoWords';
+import { api } from '~/trpc/react';
 
 // import { redis } from "~/lib/redis";
 export const WizardContext = React.createContext<ICreateContext>({});
@@ -60,25 +58,10 @@ export default function WizardProvider({
   const eventEmitter = useEventEmitter();
   const toast = useToast();
   const searchParams = useSearchParams();
+  const utils = api.useUtils();
   // ! TO FINALIZE THE NAMING AND STRUCTURE OF THE PATH
   const path = usePathname().split('/');
-  let [, portal, mainEntity, application = 'wizard', identifier, step] = path;
-  if (process.env.NEXT_PUBLIC_IS_PLAYGROUND) {
-    const [
-      ,
-      ,
-      playgroundPortal,
-      playgroundApplication,
-      ,
-      playgroundIdentifier,
-      playgroundStep,
-    ] = path;
-    portal = playgroundPortal;
-    application = playgroundApplication || 'wizard';
-    identifier = playgroundIdentifier;
-    step = playgroundStep;
-    mainEntity = 'contact';
-  }
+  const [, portal, mainEntity, application = 'wizard', identifier, step] = path;
   const currentContext = '/' + portal + '/' + mainEntity;
 
   // Now:
@@ -86,14 +69,16 @@ export default function WizardProvider({
   // step -> Represents the specific step or page within the section (e.g., "grid")
 
   /** @HOOKS */
-
   /** @STATES */
   const [formSave, setFormSave] = React.useState<Record<string, string>>({});
   const [traverseSteps, setTraverseStep] = React.useState<
     Record<string, 'Stepped'>
-  >({
-    // one: "Stepped",
-  });
+  >(
+    config?.traverseSteps || {
+      one: 'Stepped',
+    },
+  );
+  console.debug('traverseSteps', traverseSteps);
 
   const [debugOn, setDebugOn] = React.useState(false);
   // const [currentStep, setCurrentStep] = React.useState(+(step || "1"));
@@ -118,11 +103,8 @@ export default function WizardProvider({
   const socketClient = useSocket();
 
   /** @STATES */
-  // const activator = api.wizard.activator.useMutation();
-  // const closeCurrentInnerClassTab =
-  //   api.tab.closeCurrentInnerClassTab.useMutation();
   const nextStep = api.wizard.wizardCreateStep.useMutation();
-  const prevStep = api.wizard.wizardCreateStep.useMutation();
+  // const prevStep = api.wizard.wizardCreateStep.useMutation();
   /** @USE_EFFECT */
   // const successfulHandlers = new Set<string>();
 
@@ -139,6 +121,8 @@ export default function WizardProvider({
 
     if (!filtered_handlers.length) {
       handleIncrementStep(setNextLoading);
+    } else {
+      setNextLoading(false);
     }
     executeHandlers(filtered_handlers);
   };
@@ -152,8 +136,6 @@ export default function WizardProvider({
           }),
       ),
     );
-
-    setNextLoading(false);
     return response;
   };
 
@@ -179,77 +161,78 @@ export default function WizardProvider({
   };
 
   const handleIncrementStep = async (setLoading: (loading: any) => void) => {
-    setLoading(true);
-    const step = currentStep + 1;
-
-    // Call the API to create the step
-    await nextStep.mutateAsync({
-      entity: mainEntity!,
-      identifier: identifier!,
-      step: step.toString(),
-    });
-
-    // Get search params if any
-    const fullSearchQueryParams = searchParams.toString();
-
-    // Construct the URL based on environment
-    let nextUrl = '';
-    if (process.env.NEXT_PUBLIC_IS_PLAYGROUND) {
-      const version = '1'; // Default version
-      nextUrl = `/portal/wizard/version/${version}/${identifier}/${step}`;
-    } else {
-      nextUrl = `/portal/${mainEntity}/wizard/${identifier}/${step}`;
+    try {
+      setNextLoading(true);
+      const next = () => {
+        nextStep
+          .mutateAsync({
+            entity: mainEntity!,
+            identifier: identifier!,
+            step: steps.toString(),
+          })
+          .then(() => {
+            setLoading(false);
+            setFormSave({});
+            router.push(`/portal/${mainEntity}/wizard/${identifier}/${steps}`);
+          });
+      };
+      const steps = currentStep + 1;
+      if (config?.customNextNavigationAction?.[numberToWords(currentStep)]) {
+        await config?.customNextNavigationAction?.[
+          numberToWords(currentStep)
+        ]?.({
+          entity: mainEntity!,
+          identifier: identifier!,
+          next,
+          setNextLoading,
+        });
+        return;
+      }
+      next();
+      // await NextPage()
+      //   .then(() => {
+      //     setNextLoading(false);
+      //     setFormSave({});
+      //   })
+      //   .catch((error) => {
+      //     setNextLoading(false);
+      //     if (error.message !== 'NEXT_REDIRECT') {
+      //       toast.error('Previous step failed');
+      //     }
+      //     setFormSave({});
+      //   })
+      //   .finally(() => {
+      //     setFormSave({});
+      //     setNextLoading(false);
+      //   });
+    } catch (error) {
+      setNextLoading(false);
     }
-
-    // Add search params if they exist
-    if (fullSearchQueryParams) {
-      nextUrl += `?${fullSearchQueryParams}`;
-    }
-
-    // Navigate to the next step
-    router.push(nextUrl);
-    setLoading(false);
-    setFormSave({});
   };
 
   const handleDecrementStep = async () => {
     setPrevLoading(true);
-    try {
-      const step = currentStep - 1;
+    // ! CLIENT ACTIONS
+    // prevStep.mutateAsync({
+    //   entity: mainEntity!,
+    //   identifier: identifier!,
+    //   step: (currentStep - 1).toString(),
+    // });
+    // router.push(
+    //   `/portal/${mainEntity}/wizard/${identifier}/${currentStep - 1}`,
+    // );
 
-      // Call the API to create the step
-      await prevStep.mutateAsync({
-        entity: mainEntity!,
-        identifier: identifier!,
-        step: step.toString(),
+    // ! SERVER ACTIONS
+    PrevPage()
+      .then(() => {
+        setPrevLoading(false);
+      })
+      .catch((error) => {
+        setPrevLoading(false);
+        if (error.message !== 'NEXT_REDIRECT') {
+          toast.error('Previous step failed');
+        }
       });
-
-      // Get search params if any
-      const fullSearchQueryParams = searchParams.toString();
-
-      // Construct the URL based on environment
-      let prevUrl = '';
-      if (process.env.NEXT_PUBLIC_IS_PLAYGROUND) {
-        const version = '1'; // Default version
-        prevUrl = `/portal/wizard/version/${version}/${identifier}/${step}`;
-      } else {
-        prevUrl = `/portal/${mainEntity}/wizard/${identifier}/${step}`;
-      }
-
-      // Add search params if they exist
-      if (fullSearchQueryParams) {
-        prevUrl += `?${fullSearchQueryParams}`;
-      }
-
-      // Navigate to the previous step
-      router.push(prevUrl);
-      setPrevLoading(false);
-      setFormSave({});
-    } catch (error) {
-      console.error('An error occurred while decrementing the step', error);
-      setPrevLoading(false);
-      toast.error('Previous step failed');
-    }
   };
 
   const handleNext = async () => {
@@ -279,6 +262,7 @@ export default function WizardProvider({
         entity: mainEntity!,
         identifier: config?.entityIdentifier,
         currentContext: currentContext,
+        ormEntity: config?.ormEntity,
       };
       const next = async (toastMessage?: string) => {
         if (toastMessage) {
@@ -314,6 +298,7 @@ export default function WizardProvider({
         identifier: config?.entityIdentifier,
         currentContext: currentContext,
         is_from_grid: false,
+        ormEntity: config?.ormEntity,
       };
       const next = async (toastMessage?: string) => {
         if (config?.enableAutoCreate === false) {
@@ -351,38 +336,30 @@ export default function WizardProvider({
         entity: mainEntity!,
         identifier: config?.entityIdentifier,
         currentContext: currentContext,
+        ormEntity: config?.ormEntity,
       };
       const next = async (toastMessage?: string) => {
         if (toastMessage) {
           toast.success(toastMessage);
         }
-        const redirectUrl = await SaveAndContinue({
+        await SaveAndContinue({
           ...data,
           defaultRecordTab: config?.defaultRecordTab,
         });
-        router.push(redirectUrl);
       };
       setSaveContinueLoading(true);
       if (callbackHandlers?.onClickWizardSave) {
-        await callbackHandlers
-          ?.onClickWizardSave({
-            data,
-            action_type: 'save_continue',
-            socketClient,
-            next,
-          })
-          .catch((error) => {
-            console.error(
-              'An error occurred while saving and continuing',
-              error,
-            );
-            setSaveContinueLoading(false);
-          });
-        // setSaveContinueLoading(false);
+        await callbackHandlers?.onClickWizardSave({
+          data,
+          action_type: 'save_continue',
+          socketClient,
+          next,
+        });
+        setSaveContinueLoading(false);
         return;
       }
       await next();
-      // setSaveContinueLoading(false);
+      setSaveContinueLoading(false);
     } catch (error) {
       console.error('An error occurred while saving and continuing', error);
       setSaveContinueLoading(false);
@@ -437,16 +414,11 @@ export default function WizardProvider({
   }, [formSave]);
 
   useEffect(() => {
-    if (savedStep) return;
-    setSavedStep(currentStep);
-  }, [currentStep, savedStep]);
+    setNextLoading(false);
+  }, [step]);
 
-  usePrefetchWizardTraverse(
-    `${mainEntity}:wizard:${identifier}`,
-    setTraverseStep,
-  );
-  useTraverseSteppedSaved(traverseSteps);
-  useTraverseStepped(savedStep, setTraverseStep);
+  useTraverseSteppedSaved(traverseSteps, setTraverseStep);
+
   //get other way don't listen to currentStep
   const state_context = {
     debugOn,
@@ -470,6 +442,8 @@ export default function WizardProvider({
     callbackHandlers,
     title: config?.title,
     customNavigation: config?.customNavigation,
+    enableTimeline: config?.enableTimeline,
+    metadata: config?.metadata,
   } as IState;
 
   const actions = {

@@ -26,6 +26,13 @@ export interface ConfigProps {
   categories?: string[];
   recordId?: string;
   recordDetails?: Record<string, any>;
+  showToolbar?: boolean;
+  showRecordSummary?: boolean;
+  config?: Record<string, any>;
+  enableTimeline?: boolean;
+  metadata?: {
+    timeline_title?: string;
+  };
 }
 export interface RecordProps extends PropsWithChildren {
   config: ConfigProps;

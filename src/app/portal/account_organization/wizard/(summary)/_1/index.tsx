@@ -38,8 +38,9 @@ const Summary = ({ form_key }: { form_key: string }) => {
   return (
     <div className="mt-2">
       {Object.entries(fields).map(([key, value]) => (
-        <p key={key} className="mb-[8px] no-underline">
+        <p key={key} className="mb-[8px] no-underline text-[#334155]">
           <strong> {value}: </strong>
+          {/* @ts-ignore-error - No type yet */}
           &nbsp; {data?.[key as keyof IAccountDetails] || 'None'}
         </p>
       ))}

@@ -22,7 +22,7 @@ const gridColumns = [
     enableResizing: false,
     cell: ({ row }) => {
       const value = row?.original?.device_rule_status
-      return <Badge variant={value == 'Applied' ? 'success' : 'warning'}>{value}</Badge>
+      return <Badge variant={value === 'Applied' ? 'primaryBlue' : 'warning'}>{value}</Badge>
     },
   },
   {
@@ -32,14 +32,11 @@ const gridColumns = [
     cell: ({ row }) => {
       const value = row?.original?.disabled
       if (![true, false]?.includes(value)) return null
-      return <Badge variant={value ? 'destructive' : 'success'}>{value ? 'Disabled' : 'Enabled'}</Badge>
-    },
-  },
-  {
-    header: 'Type',
-    accessorKey: 'type',
-    search_config: {
-      operator: 'like',
+      return (
+        <Badge className="font-medium" variant={value ? 'solidGray' : 'grayOutlined'}>
+          {value ? 'Disabled' : 'Enabled'}
+        </Badge>
+      )
     },
   },
   {
@@ -65,27 +62,51 @@ const gridColumns = [
   },
   {
     header: 'Protocol',
-    accessorKey: 'protocol',
+    accessorKey: 'ipprotocol_protocol',
     search_config: {
       operator: 'like',
     },
-    cell: ({row}) => row.original?.protocol?.toUpperCase() ?? "*"
+    cell: ({row}) => {
+      const [ipprotocol, protocol] = row.original?.ipprotocol_protocol?.split(' ') || []
+      // @ts-expect-error - No type yet
+      const ipProtocolMappedValue = {
+        inet: 'IPv4',
+        inet6: 'IPv6',
+        inet46: 'IPv4+6',
+      }[ipprotocol] ?? ipprotocol ?? ''
+      // @ts-expect-error - No type yet
+      const protocolMappedValue = {
+        'inet/any': 'IPv4/*',
+        'inet/tcp': 'IPv4/TCP',
+        'inet/tcp/udp': 'IPv4/TCP/UDP',
+        'inet6/any': 'IPv6/*',
+        'inet6/tcp': 'IPv6/TCP',
+        'inet6/tcp/udp': 'IPv6/TCP/UDP',
+        'inet46/any': 'IPv4+6/*',
+        'inet46/tcp': 'IPv4+6/TCP',
+        'inet46/tcp/udp': 'IPv4+6/TCP/UDP',
+        'any': '*',
+        'tcp/udp': 'TCP/UDP',
+        'tcp': 'TCP',
+      }[protocol] ?? protocol ?? ''
+      return `${ipProtocolMappedValue} ${protocolMappedValue}`.trim()
+    } 
   },
   {
     header: 'Source',
-    accessorKey: 'source_addr',
+    accessorKey: 'source_ip_value',
     search_config: {
       operator: 'like',
     },
     cell: ({row}) => {
       const source_type = row.original?.source_type ?? "address";
-      const source_addr = row.original?.source_addr ?? "*";
+      const source_addr = row.original?.source_ip_value ?? "*";
       return <>{mapRuleEndpointAddress(source_addr, source_type)}</>
     }
   },
   {
     header: 'Src Port',
-    accessorKey: 'source_port',
+    accessorKey: 'source_port_value',
     search_config: {
       operator: 'like',
     },
@@ -93,19 +114,19 @@ const gridColumns = [
 
   {
     header: 'Destination',
-    accessorKey: 'destination_addr',
+    accessorKey: 'destination_ip_value',
     search_config: {
       operator: 'like',
     },
     cell: ({row}) => {
       const destination_type = row.original?.destination_type ?? "address";
-      const destination_addr = row.original?.destination_addr ?? "*";
+      const destination_addr = row.original?.destination_ip_value ?? "*";
       return <>{mapRuleEndpointAddress(destination_addr, destination_type)}</>
     }
   },
   {
     header: 'Dest Port',
-    accessorKey: 'destination_port',
+    accessorKey: 'destination_port_value',
     search_config: {
       operator: 'like',
     },

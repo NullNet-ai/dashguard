@@ -6,8 +6,8 @@ import {
 import { createDefineRoutes } from '../baseCrud';
 import { z } from 'zod';
 import { TRPCError } from '@trpc/server';
-import { pluralize } from '~/server/utils/pluralize';
 import { createAdvancedFilter } from '~/server/utils/transformAdvanceFilter';
+import pluralize from 'pluralize';
 
 const ENTITY = 'communication_template';
 const { ROOT_ACCOUNT_PASSWORD = 'pl3@s3ch@ng3m3!!' } = process.env;
@@ -41,10 +41,7 @@ export const communicationTemplateRouter = createTRPCRouter({
           });
         }
         console.info('[Update Draft Account]', record);
-        return {
-          ...record,
-          data: record?.data?.[0],
-        };
+        return record?.data?.[0]
       }
       const record = await ctx.dnaClient
         .create({
@@ -66,10 +63,7 @@ export const communicationTemplateRouter = createTRPCRouter({
         });
       }
       console.info('[Create Draft Template]', record);
-      return {
-        ...record,
-        data: record?.data?.[0],
-      };
+      return record?.data?.[0]
     }),
   fetchVariables: privateProcedure
     .input(

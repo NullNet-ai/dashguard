@@ -17,7 +17,7 @@ export default function ShowHideForm({
     <Fragment>
       {open ? (
         <AccordionTrigger
-            className="m-auto h-6 w-6 rounded-full p-0 flex items-center justify-center bg-gray-200"
+            className="m-auto !size-[22px] rounded-full p-0 flex items-center justify-center bg-gray-200"
             {...props}
         >
           {/* <Button

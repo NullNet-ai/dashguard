@@ -1,9 +1,10 @@
 'use client'
 import { useState, useEffect } from "react";
 
-type ScreenType = "xs" | "sm" | "md" | "lg" | "xl" | "2xl";
+type ScreenType = "xs" | "sm" | "md" | "lg" | "xl" | "2xl" | "4xl";
 
 const getScreenType = (width: number): ScreenType => {
+    if (width > 1920) return "4xl"; // 
     if (width >= 1536) return "2xl"; // Tailwind 2xl: ≥ 1536px
     if (width >= 1280) return "xl";  // Tailwind xl: 1280px - 1535px
     if (width >= 1024) return "lg";  // Tailwind lg: 1024px - 1279px

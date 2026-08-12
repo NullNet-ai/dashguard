@@ -40,17 +40,32 @@ import { Separator } from './separator'
  * @returns A `Date` object representing the parsed date and time, or `null` if the string could not be parsed.
  */
 export const parseDateTime = (str: Date | string) => {
-  const is_valid_date = isValidDate(str)
+  const is_valid_date = isValidDate(str);
   if (
-    !is_valid_date
-    && typeof str == 'string'
-    && str?.includes('Invalid Date')
+    !is_valid_date &&
+    typeof str == 'string' &&
+    str?.includes('Invalid Date')
   ) {
-    return parseDate(str as string)
+    return parseDate(str as string);
   }
-  if (str instanceof Date) return str
-  const parsed_date = parseDate(str)
-  return parsed_date ? parsed_date : str
+  if (str instanceof Date) return str;
+
+  // Add this block to handle MMDDYYYY (e.g., 11112023)
+  if (
+    typeof str === 'string' &&
+    /^\d{8}$/.test(str) // 8 digits
+  ) {
+    // Try MMDDYYYY
+    const mm = str.slice(0, 2);
+    const dd = str.slice(2, 4);
+    const yyyy = str.slice(4, 8);
+    const iso = `${yyyy}-${mm}-${dd}`;
+    const date = new Date(iso);
+    if (!isNaN(date.getTime())) return date;
+  }
+
+  const parsed_date = parseDate(str);
+  return parsed_date ? parsed_date : str;
 }
 
 export type DateGranularity = 'time' | 'year' | 'month' | 'date'
@@ -200,7 +215,7 @@ export const SmartDatetimeInput = React.forwardRef<
       <div className='flex items-center justify-center'>
         <div
           className={cn(
-            'flex w-full bg-background items-center h-[36px] justify-between gap-1 rounded-md border  ring-offset-background transition-all focus-within:border-primary focus-within:ring-1 focus-within:ring-ring focus-within:ring-offset-0', 'focus-within:outline-0 focus:outline-0 focus:ring-0', 'placeholder:text-muted-foreground focus-visible:outline-0', !!error && 'border-destructive', className,
+            'flex w-full bg-background items-center h-[36px] justify-between gap-1 rounded-md border border-slate-300 ring-offset-background transition-all focus-within:border-primary focus-within:ring-1 focus-within:ring-ring focus-within:ring-offset-0', 'focus-within:outline-0 focus:outline-0 focus:ring-0', 'placeholder:text-muted-foreground focus-visible:outline-0', !!error && 'border-destructive', className,
           )}
         >
           <DateTimeLocalInput

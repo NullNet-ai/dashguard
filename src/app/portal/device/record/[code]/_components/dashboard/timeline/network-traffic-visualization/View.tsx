@@ -1,191 +1,99 @@
 'use client'
 
-import React, { useRef, useState, useEffect, useCallback } from 'react'
+import { useMemo } from 'react'
 
 import '@xyflow/react/dist/style.css'
 
-import { Loader } from '~/components/ui/loader'
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '~/components/ui/tooltip'
-
 import { useFetchNetworkFlow } from './Provider'
-import { generateTimeSeriesData, generateTimeSeriesDataForLiveData } from './functions/generateTimeSeriesDataPerSeconds'
+import { generateTimeSeriesData } from './functions/generateTimeSeriesDataPerSeconds'
 
-const rowHeight = 20
-const containerHeight = 600 // viewport height for virtualization
-
-function getMaxBandwidth(data: any[]) {
-  let maxBandwidth = 0
-  if (!data) return 0
-  data.forEach((record: Record<string, any>) => {
-    const bandwidth = parseInt(record?.bandwidth, 10)
-    if (bandwidth > maxBandwidth) {
-      maxBandwidth = bandwidth
-    }
-  })
-  return maxBandwidth
-}
-
-function getColorForValue(value: number, maxBandwidth: number) {
-  const range = maxBandwidth / 3
-  if (value === undefined || value <= 0) return '#fff'
-  if (value >= maxBandwidth) return '#00364b'
-  if (value > 2 * range) return '#1d576e'
-  if (value > range) return '#325e6f'
-  return '#556971'
-}
+// import TimelineV2 from './components/TimelineV2'
+// import TimelineV3 from './components/TimelineV3'
+import TimelineV4 from './components/TimelineV4'
+import TrafficSkeleton from './components/TrafficSkeleton'
 
 export default function NetworkFlowView() {
   const { state } = useFetchNetworkFlow();
-  const { flowData, loading } = state ?? {};
+  const {
+    topTrafficData            = [],
+    recentIPData              = [],
+    pollingIntervalTopTraffic = 0,
+    pollingIntervalRecentIP   = 0,
+    loading                   = true,
+    ipPollTick                = 0,
+  } = state ?? {}
 
-  const containerRef = useRef<HTMLDivElement | null>(null);
-  const [scrollTop, setScrollTop] = useState(0);
-  const [prevFormattedArr, setPrevFormattedArr] = useState<any[]>([]);
+  // Single reference time shared across both series so they always cover the same time range.
+  // Advances every time the IP poll fires (every 3 s) so the time axis stays current
+  // independently of whether the bandwidth data itself changed.
+  const sharedNow = useMemo(() => new Date(Date.now() - 15_000), [ipPollTick]);
 
-  // Reset prevFormattedArr if flowData length changes
-  useEffect(() => {
-    if (!flowData) return;
-    setPrevFormattedArr((prev) => {
-      if (prev.length === flowData.length) return prev;
-      return Array(flowData.length).fill(undefined);
-    });
-  }, [flowData?.length]);
+  const topTrafficFormattedArr = useMemo(() => {
+    return (topTrafficData || []).map((el: any) =>
+      generateTimeSeriesData(el.result, el.resolution, el.time_count, el.time_unit, sharedNow)
+    );
+  }, [topTrafficData, sharedNow]);
 
-  // Generate formattedArr for this render
-  const formattedArr = (flowData || []).map((el, idx) => {
-    const isLive = el.time_count === 1 && el.time_unit === "day" && el.resolution === "1s";
-    return isLive
-      ? generateTimeSeriesDataForLiveData(el.result, prevFormattedArr[idx])
-      : generateTimeSeriesData(el.result, el.resolution, el.time_count, el.time_unit);
-  });
+  const recentIPFormattedArr = useMemo(() => {
+    return (recentIPData || []).map((el: any) =>
+      generateTimeSeriesData(el.result, el.resolution, el.time_count, el.time_unit, sharedNow)
+    );
+  }, [recentIPData, sharedNow]);
 
-  // After render, update prevFormattedArr with the latest formattedArr
-  useEffect(() => {
-    setPrevFormattedArr(formattedArr);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [JSON.stringify(formattedArr)]);
-
-  const totalCount = (flowData || []).length;
-  const totalHeight = totalCount * rowHeight;
-
-  const startIndex = Math.floor(scrollTop / rowHeight);
-  const endIndex = Math.min(totalCount - 1, Math.floor((scrollTop + containerHeight) / rowHeight));
-  const visibleData = flowData?.slice(startIndex, endIndex + 1) || [];
-
-  const onScroll = useCallback(() => {
-    if (containerRef.current) {
-      setScrollTop(containerRef.current.scrollTop);
+  const { sortedTopTrafficData, sortedTopTrafficFormattedArr } = useMemo(() => {
+    if (!topTrafficFormattedArr.length) {
+      return {
+        sortedTopTrafficData:        topTrafficData,
+        sortedTopTrafficFormattedArr: topTrafficFormattedArr,
+      }
     }
-  }, []);
 
-  useEffect(() => {
-    const container = containerRef.current;
-    if (container) {
-      container.addEventListener("scroll", onScroll);
-      return () => container.removeEventListener("scroll", onScroll);
+    const paired = topTrafficData.map((ip: any, index: number) => {
+      const series        = topTrafficFormattedArr[index] ?? []
+      const activePackets   = series.filter((entry: any) => Number(entry.bandwidth) > 0).length
+      const totalBandwidths = series.reduce((sum: number, entry: any) => sum + Number(entry.bandwidth), 0)
+      return { ip, series, activePackets, totalBandwidths }
+    })
+
+    paired.sort((a: any, b: any) => {
+      const byPackets = b.activePackets - a.activePackets
+      return byPackets !== 0 ? byPackets : b.totalBandwidths - a.totalBandwidths
+    })
+
+    return {
+      sortedTopTrafficData:        paired.map((p: any) => p.ip),
+      sortedTopTrafficFormattedArr: paired.map((p: any) => p.series),
     }
-  }, [onScroll]);
+  }, [topTrafficData, topTrafficFormattedArr])
 
   if (loading) {
     return (
-      <Loader
-        className="bg-primary text-primary mt-4"
-        label="Fetching unique ips..."
-        size="md"
-        variant="circularShadow"
+      <TrafficSkeleton 
+        sections={[{ 
+          key: 'top_traffic', 
+          label: 'Top Traffic', 
+          description: 'IPs generating the highest traffic within the selected time range', 
+          rows: 5 
+        }, 
+        { 
+          key: 'recent_ip', 
+          label: 'Recent IP', 
+          description: 'Most recently observed IPs regardless of traffic volume', 
+          rows: 10 
+        }]} 
       />
     );
   }
 
   return (
-    <div
-      ref={containerRef}
-      style={{
-        height: `${containerHeight}px`,
-        overflowY: "auto",
-        overflowX: "auto",
-        position: "relative",
-        border: "1px solid #ddd",
-      }}
-      className="custom-scrollbar mt-10"
-    >
-      <div style={{ height: `${totalHeight}px`, position: "relative", minWidth: "1000px" }}>
-        {flowData?.map((el, index) => {
-          const formatted = formattedArr[index] || [];
-          const maxBandwidth = getMaxBandwidth(formatted);
-
-          return (
-            <div
-              key={el.source_ip}
-              className="flex items-start gap-2 px-2 py-1"
-              style={{
-                position: "absolute",
-                top: `${index * rowHeight}px`,
-                left: 0,
-                right: 0,
-                height: `${rowHeight}px`,
-              }}
-            >
-              <div className="flex min-w-[200px] items-center gap-2 text-xs font-semibold">
-                <TooltipProvider>
-                  <Tooltip delayDuration={0}>
-                    <TooltipTrigger>
-                      <div className="flex items-center gap-2">
-                        {el.flag && <img alt="Flag" src={el.flag} className="w-[30px] h-[15px]" />}
-                        <span className={el.active ? "text-red-600" : "text-black"}>{el.source_ip}</span>
-                      </div>
-                    </TooltipTrigger>
-                    <TooltipContent side="top">
-                      <div className="text-sm">
-                        <div>
-                          <strong>Country:</strong> {el.name}
-                        </div>
-                        <div>
-                          <strong>Source IP:</strong> {el.source_ip}
-                        </div>
-                        {el.active && el.lastBandwidth && (
-                          <div>
-                            <strong>New Bandwidth:</strong> {el.lastBandwidth}
-                          </div>
-                        )}
-                      </div>
-                    </TooltipContent>
-                  </Tooltip>
-                </TooltipProvider>
-              </div>
-              <div className="flex items-center]">
-                {formatted.map((item: Record<string, any>, i) => (
-                  <TooltipProvider key={i}>
-                    <Tooltip delayDuration={0}>
-                      <TooltipTrigger>
-                        <div
-                          className="size-4"
-                          style={{
-                            backgroundColor: getColorForValue(item.bandwidth, maxBandwidth),
-                          }}
-                        />
-                      </TooltipTrigger>
-                      <TooltipContent side="top">
-                        <div className="text-xs">
-                          <div>
-                            <strong>Time:</strong> {item?.bucketTime || item.time}
-                          </div>
-                          <div>
-                            <strong>Bandwidth:</strong>{" "}
-                            {item.bandwidth > 1024
-                              ? (item.bandwidth / 1024).toFixed(2) + " KB"
-                              : item.bandwidth + " bytes"}
-                          </div>
-                        </div>
-                      </TooltipContent>
-                    </Tooltip>
-                  </TooltipProvider>
-                ))}
-              </div>
-            </div>
-          );
-        })}
-      </div>
-    </div>
-  );
+    <TimelineV4
+      topTrafficData={sortedTopTrafficData}
+      topTrafficFormatted={sortedTopTrafficFormattedArr}
+      recentIPData={recentIPData}
+      // @ts-expect-error - No type yet
+      recentIPFormatted={recentIPFormattedArr}
+      pollingIntervalTopTraffic={pollingIntervalTopTraffic}
+      pollingIntervalRecentIP={pollingIntervalRecentIP}
+    />
+  )
 }

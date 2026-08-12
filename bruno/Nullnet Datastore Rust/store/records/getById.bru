@@ -1,0 +1,19 @@
+meta {
+  name: Get Sample By Id
+  type: http
+  seq: 3
+}
+
+get {
+  url: {{baseUrl}}/api/store/samples/{{sampleId}}
+  body: json
+  auth: inherit
+}
+
+params:query {
+  ~pluck: id
+}
+
+settings {
+  encodeUrl: true
+}

@@ -1,10 +1,11 @@
-import { TRPCError } from '@trpc/server'
-import { z } from 'zod'
+import { TRPCError } from '@trpc/server';
+import { z } from 'zod';
 
-import Entities from '~/auto-generated/entities'
-import { createTRPCRouter, privateProcedure } from '~/server/api/trpc'
+import Entities from '~/auto-generated/entities';
+import { createTRPCRouter, privateProcedure } from '~/server/api/trpc';
 
-import { EStatus } from '../types'
+import { EStatus } from '../types';
+import numberToWords from '~/utils/number-to-words';
 
 export const wizardRouter = createTRPCRouter({
   // This function here is save step in redis
@@ -15,8 +16,9 @@ export const wizardRouter = createTRPCRouter({
         step: z.string().min(1),
         entity: z.string().refine(
           (value) => {
-            return Entities.includes(value)
-          }, {
+            return Entities.includes(value);
+          },
+          {
             message:
               'Invalid entity name. It must be one of the DnaOrm models.',
           },
@@ -24,10 +26,37 @@ export const wizardRouter = createTRPCRouter({
       }),
     )
     .mutation(async ({ input, ctx }) => {
+      const step = Number(input.step);
+      // Map base on the step
+      // {
+      //   one: 'Stepped',
+      //   two: 'Stepped'
+      // }
+
+      const traverse = Array.from({ length: step }, (_, i) =>
+        numberToWords(i + 1),
+      ).reduce(
+        (acc, cur) => ({
+          ...acc,
+          [cur]: 'Stepped',
+        }),
+        {},
+      );
+
+      const generatedWizardConfig = {
+        key: `${input.entity}:wizard:${input.identifier}`,
+        pathname: `/portal/${input.entity}/wizard/${input.identifier}/${step}`,
+        currentStep: step,
+        traverse: traverse,
+      };
+
       const res = await ctx?.redisClient.cacheData(
-        `wizard_${input.entity}:${input.identifier}`, input?.step,
-      )
-      return res
+        `step_${generatedWizardConfig.key}`,
+        generatedWizardConfig,
+        1209600,
+      );
+
+      return res;
     }),
   // This function here is get step from redis
   getCurrentStep: privateProcedure
@@ -36,8 +65,9 @@ export const wizardRouter = createTRPCRouter({
         identifier: z.string().min(1),
         entity: z.string().refine(
           (value) => {
-            return Entities.includes(value)
-          }, {
+            return Entities.includes(value);
+          },
+          {
             message:
               'Invalid entity name. It must be one of the DnaOrm models.',
           },
@@ -46,13 +76,18 @@ export const wizardRouter = createTRPCRouter({
     )
     .mutation(async ({ input, ctx }) => {
       const res = await ctx?.redisClient.getCachedData(
-        `wizard_${input.entity}:${input.identifier}`,
-      )
+        `step_${input.entity}:wizard:${input.identifier}`,
+      );
       return {
         identifier: input.identifier,
         entity: input.entity,
-        step: res || 1,
-      }
+        step: res?.currentStep || 1,
+        traverse: Object.keys(res?.traverse ?? {})?.length
+          ? res?.traverse
+          : {
+              one: 'Stepped',
+            },
+      };
     }),
   // This function here is activate the entity last step
   activator: privateProcedure
@@ -62,8 +97,9 @@ export const wizardRouter = createTRPCRouter({
         entity: z.string().refine(
           (value) => {
             // activate it here
-            return Entities.includes(value)
-          }, {
+            return Entities.includes(value);
+          },
+          {
             message:
               'Invalid entity name. It must be one of the DnaOrm models.',
           },
@@ -79,13 +115,13 @@ export const wizardRouter = createTRPCRouter({
             pluck: ['id'],
           },
         })
-        .execute()
-      const record_id = record?.data?.[0]?.id
+        .execute();
+      const record_id = record?.data?.[0]?.id;
       if (!record_id) {
         throw new TRPCError({
           code: 'NOT_FOUND',
           message: 'Record not found',
-        })
+        });
       }
 
       await ctx.dnaClient
@@ -99,7 +135,7 @@ export const wizardRouter = createTRPCRouter({
             pluck: ['id', 'code'],
           },
         })
-        .execute()
+        .execute();
 
       const recordFound = await ctx.dnaClient
         .findOne(input.identifier, {
@@ -109,9 +145,9 @@ export const wizardRouter = createTRPCRouter({
             pluck: ['id', 'code'],
           },
         })
-        .execute()
+        .execute();
 
-      return recordFound
+      return recordFound;
     }),
   // This function here is create the entity for Save and New button
   createEntity: privateProcedure
@@ -119,8 +155,9 @@ export const wizardRouter = createTRPCRouter({
       z.object({
         entity: z.string().refine(
           (value) => {
-            return Entities.includes(value)
-          }, {
+            return Entities.includes(value);
+          },
+          {
             message:
               'Invalid entity name. It must be one of the DnaOrm models.',
           },
@@ -129,7 +166,7 @@ export const wizardRouter = createTRPCRouter({
       }),
     )
     .mutation(async ({ input, ctx }) => {
-      const hasDefaultValue = input.defaultValues ? input.defaultValues : {}
+      const hasDefaultValue = input.defaultValues ? input.defaultValues : {};
       const record = await ctx.dnaClient
         .create({
           entity: input.entity,
@@ -142,11 +179,23 @@ export const wizardRouter = createTRPCRouter({
             pluck: ['id', 'code'],
           },
         })
-        .execute()
+        .execute();
+
+      const generatedWizardConfig = {
+        key: `${input.entity}:wizard:${record?.data?.[0]?.code}`,
+        pathname: `/portal/${input.entity}/wizard/${record?.data?.[0]?.code}/1`,
+        currentStep: 1,
+        traverse: {
+          one: 'Stepped',
+        },
+      };
+
       await ctx?.redisClient.cacheData(
-        `wizard_${input.entity}:${record?.data?.[0]?.id}`, JSON.stringify(1),
-      )
-      return record
+        `step_${generatedWizardConfig.key}`,
+        generatedWizardConfig,
+        1209600,
+      );
+      return record;
     }),
   saveTraverseStepped: privateProcedure
     .input(
@@ -160,47 +209,51 @@ export const wizardRouter = createTRPCRouter({
     .mutation(async ({ input, ctx }) => {
       // save the steps here
       // 2 weeks = 1209600 seconds
-      await ctx?.redisClient.cacheData(`step_${input.key}`, input, 1209600)
-      return input
+      await ctx?.redisClient.cacheData(`step_${input.key}`, input, 1209600);
+      return input;
     }),
   getTraverseStepped: privateProcedure
     .input(z.string())
     .mutation(async ({ input, ctx }) => {
-      const res = await ctx?.redisClient.getCachedData(`step_${input}`)
+      const identifier = input.split(':wizard:')[1];
+      if(identifier === 'new'){
+        return null;
+      }
+      const res = await ctx?.redisClient.getCachedData(`step_${input}`);
       if (!res) {
-        return null
+        return null;
       }
       return res as {
-        key: string
-        pathname: string
-        currentStep: number
-        traverse: Record<string, 'Stepped'>
-      }
+        key: string;
+        pathname: string;
+        currentStep: number;
+        traverse: Record<string, 'Stepped'>;
+      };
     }),
-  createRedisRecordsForFormFilter : privateProcedure
-   .input(
-    z.object({
-    entity: z.string(),
-    code : z.string(),
-  }))
-   .mutation(async ({ input, ctx }) => {
-
-      const { code, entity} = input ?? {}
+  createRedisRecordsForFormFilter: privateProcedure
+    .input(
+      z.object({
+        entity: z.string(),
+        code: z.string(),
+      }),
+    )
+    .mutation(async ({ input, ctx }) => {
+      const { code, entity } = input ?? {};
 
       const generatedWizardConfig = {
-        key : `${entity}:wizard:${code}`,
-        pathname : `/portal/${entity}/wizard/${code}/1`,
-        currentStep : 2,
-        traverse : {
-          one : 'Stepped'
-        }
-      }
+        key: `${entity}:wizard:${code}`,
+        pathname: `/portal/${entity}/wizard/${code}/2`,
+        currentStep: 2,
+        traverse: {
+          one: 'Stepped',
+          two: 'Stepped',
+        },
+      };
 
-      await ctx?.redisClient.cacheData(`step_${generatedWizardConfig.key}`, generatedWizardConfig, 1209600)
-      
-      const step = '2'
       await ctx?.redisClient.cacheData(
-        `wizard_${entity}:${code}`, step,
-      )
+        `step_${generatedWizardConfig.key}`,
+        generatedWizardConfig,
+        1209600,
+      );
     }),
-})
+});

@@ -7,13 +7,18 @@ import { Button } from "~/components/ui/button";
 
 export default function EditComponent({ row, config }: DefaultRowActions) {
   const handleEdit = async ({ row, config }: DefaultRowActions) => {
-    if (!row.original?.id) return;
-    await Edit({
-      entity: config?.entity,
-      // id: row.original?.id,
-      code: row.original?.code,
-      status: row.original?.status,
-    });
+    try {
+      if (!row.original?.id) return;
+      await Edit({
+        entity: config?.entity,
+        // id: row.original?.id,
+        code: row.original?.code,
+        status: row.original?.status,
+      });
+    } catch (error: any) {
+      if (error.message === 'NEXT_REDIRECT') return;
+      console.error('Failed to edit record:', error);
+    }
   };
 
   return (
