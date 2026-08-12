@@ -37,11 +37,9 @@
     }
   },
   "include": [
-    ".eslintrc.cjs",
     "next-env.d.ts",
     "**/*.ts",
     "**/*.tsx",
-    "**/*.cjs",
     "**/*.js",
     ".next/types/**/*.ts",
     "cypress/e2e/portal/contacts/contact_applicant_confirmation.spec.cy",

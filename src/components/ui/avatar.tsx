@@ -14,7 +14,7 @@ const AvatarStatus = React.forwardRef<
   React.HTMLAttributes<HTMLSpanElement> & {
     status?: "online" | "offline" | "busy" | "away";
     position?: "top-right" | "bottom-right" | "top-left" | "bottom-left";
-    containerRef?: React.RefObject<HTMLElement>;
+    containerRef?: React.RefObject<HTMLElement | null>;
     size?: "2xs" | "xs" | "sm" | "md" | "lg" | "xl" | "2xl";
   }
 >(({ className, status = "offline", position = "bottom-right", containerRef, size = "md", ...props }, ref) => {
@@ -75,7 +75,7 @@ const AvatarBadge = React.forwardRef<
   React.HTMLAttributes<HTMLDivElement> & {
     content?: React.ReactNode;
     position?: "top-right" | "bottom-right" | "top-left" | "bottom-left";
-    containerRef?: React.RefObject<HTMLElement>;
+    containerRef?: React.RefObject<HTMLElement | null>;
     variant?: VariantProps<typeof badgeVariants>["variant"];
     borderRadius?: VariantProps<typeof badgeVariants>["borderRadius"];
     size?: "2xs" | "xs" | "sm" | "md" | "lg" | "xl" | "2xl";

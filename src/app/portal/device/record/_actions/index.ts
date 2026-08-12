@@ -3,7 +3,7 @@
 import { TStatus } from "./types";
 import DeviceRemoteAccessGrid from '../../_components/forms/device-remote-access-grid';
 
-const handleChangeStatus = (
+const handleChangeStatus = async (
   status: TStatus,
   recordId: string,
   entityName: string,

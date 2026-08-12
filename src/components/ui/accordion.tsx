@@ -45,12 +45,12 @@ const AccordionItem = React.forwardRef<
 AccordionItem.displayName = "AccordionItem";
 
 type IconTypeOption = "chevron" | "plus" | "chevronRight";
-type IconType = IconTypeOption | React.ReactElement;
+type IconType = IconTypeOption | React.ReactElement<{ className?: string }>;
 
 // Define types for open/close icon customization
 type IconStateProps = {
-  openIcon?: React.ReactElement;
-  closeIcon?: React.ReactElement;
+  openIcon?: React.ReactElement<{ className?: string }>;
+  closeIcon?: React.ReactElement<{ className?: string }>;
 };
 
 const AccordionTrigger = React.forwardRef<

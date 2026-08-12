@@ -653,7 +653,7 @@ interface IPropsForms {
 
 interface IFieldFilterActions {
   onBlur?: () => void;
-  onFocus?: () => void;
+  onFocus?: (event: React.ChangeEvent<HTMLInputElement>) => void;
   handleSearch?: (search: string) => void;
   ref?: any;
 }

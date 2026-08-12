@@ -11,11 +11,16 @@ import { api } from '~/trpc/react';
 
 import {
   type IField,
+  type IFieldFilterActions,
   type IFilterGridConfig,
   type ISearchParams,
   type TFormSchema,
 } from '../../../../FormBuilder/types';
 import Grid from '../../../../Grid/SubGrid';
+
+type FieldFilterChildProps = {
+  fieldFilterActions?: IFieldFilterActions
+}
 
 export default function FormInputGridWrapper({
   fieldConfig,

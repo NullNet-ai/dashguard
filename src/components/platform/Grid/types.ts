@@ -183,7 +183,7 @@ export interface IConfigGrid {
       };
     };
   };
-  customRowAction?: React.FC<any>;
+  customRowAction?: (args: any) => React.ReactNode;
   isInfinite?: boolean;
   additionalData?: Record<string, any>;
   gridColumns?: Record<string, any>[];
