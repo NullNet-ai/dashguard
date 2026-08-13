@@ -79,8 +79,8 @@ build_main:
 update_portainer_main:
   stage: update_portainer_main
   variables:
-    ENDPOINT_ID: 2
-    STACK_ID: 306
+    ENDPOINT_ID: 4
+    STACK_ID: 4
     PORTAINER_USERNAME: 'ci'
     PORTAINER_PASSWORD: 'GTA0im1fVaHbNQnyJIxFUZdG'
     PORTAINER_HOST: https://portainer.appguard.ai
