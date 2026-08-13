@@ -1,22 +1,32 @@
 stages:
-  - build
-  - update_portainer-qa
-  - build_appguard-v2
+  - build_qa
+  - update_portainer_qa
+  # - build_staging
+  # - update_portainer_staging
+  - build_main
+  - update_portainer_main
 
-master_build:
-  stage: build
+# QA 
+
+build_qa:
+  stage: build_qa
   variables:
     REGISTRY_ADDRESS: 'registry.dnamicro.com'
     REGISTRY_USERNAME: 'dna'
     REGISTRY_PASSWORD: 'aBGioazrbkrFvG5XSdgB'
     PROJECT_IMAGE_PREFIX: 'portal-template'
   script:
-    - echo 'Image build successfully'    
+    - 'docker login $REGISTRY_ADDRESS -u $REGISTRY_USERNAME -p $REGISTRY_PASSWORD'
+    - "docker build -t $REGISTRY_ADDRESS/$PROJECT_IMAGE_PREFIX-$CI_PROJECT_NAME:$CI_COMMIT_REF_NAME-$CI_PIPELINE_ID -f dockerfile \
+      --build-arg PROJECT=$CI_PROJECT_NAME ."
+    - 'docker tag $REGISTRY_ADDRESS/$PROJECT_IMAGE_PREFIX-$CI_PROJECT_NAME:$CI_COMMIT_REF_NAME-$CI_PIPELINE_ID $REGISTRY_ADDRESS/$PROJECT_IMAGE_PREFIX-$CI_PROJECT_NAME:$CI_COMMIT_REF_NAME'
+    - 'docker push $REGISTRY_ADDRESS/$PROJECT_IMAGE_PREFIX-$CI_PROJECT_NAME:$CI_COMMIT_REF_NAME-$CI_PIPELINE_ID'
+    - 'docker push $REGISTRY_ADDRESS/$PROJECT_IMAGE_PREFIX-$CI_PROJECT_NAME:$CI_COMMIT_REF_NAME'
   only:
-    - 'development'
-
-update_stack:
-  stage: update_portainer-qa
+    - 'qa'
+    
+update_portainer_qa:
+  stage: update_portainer_qa
   variables:
     ENDPOINT_ID: 2
     STACK_ID: 306
@@ -46,10 +56,11 @@ update_stack:
     - echo 'updating portal'
     - PORTAINER_HOST=$PORTAINER_HOST portainer stack:update  $ENDPOINT_ID  $STACK_ID  $FILE_PATH/$PORTAINER_YML_FILE
   only:
-    - 'portal-template-qa'
+    - 'qa'
 
-build_appguard_v2:
-  stage: build_appguard-v2
+# Main
+build_main:
+  stage: build_main
   variables:
     REGISTRY_ADDRESS: 'registry.dnamicro.com'
     REGISTRY_USERNAME: 'dna'
@@ -63,4 +74,37 @@ build_appguard_v2:
     - 'docker push $REGISTRY_ADDRESS/$PROJECT_IMAGE_PREFIX-$CI_PROJECT_NAME:$CI_COMMIT_REF_NAME-$CI_PIPELINE_ID'
     - 'docker push $REGISTRY_ADDRESS/$PROJECT_IMAGE_PREFIX-$CI_PROJECT_NAME:$CI_COMMIT_REF_NAME'
   only:
-    - 'appguard-v2'
+    - 'main'
+
+update_portainer_main:
+  stage: update_portainer_main
+  variables:
+    ENDPOINT_ID: 2
+    STACK_ID: 306
+    PORTAINER_USERNAME: 'ci'
+    PORTAINER_PASSWORD: 'GTA0im1fVaHbNQnyJIxFUZdG'
+    PORTAINER_HOST: https://portainer.appguard.ai
+    PORTAINER_YML_FILE: nullnet-portal-template.yml
+    FILE_PATH: /var/apps/portainer
+    REGISTRY_ADDRESS: 'registry.dnamicro.com'
+    REGISTRY_USERNAME: 'dna'
+    REGISTRY_PASSWORD: 'aBGioazrbkrFvG5XSdgB'
+    PROJECT_IMAGE_PREFIX: 'portal-template'
+  script:
+    - 'docker login $REGISTRY_ADDRESS -u $REGISTRY_USERNAME -p $REGISTRY_PASSWORD'
+    - "docker build -t $REGISTRY_ADDRESS/$PROJECT_IMAGE_PREFIX-$CI_PROJECT_NAME:$CI_COMMIT_REF_NAME-$CI_PIPELINE_ID -f dockerfile \
+      --build-arg PROJECT=$CI_PROJECT_NAME ."
+    - 'docker tag $REGISTRY_ADDRESS/$PROJECT_IMAGE_PREFIX-$CI_PROJECT_NAME:$CI_COMMIT_REF_NAME-$CI_PIPELINE_ID $REGISTRY_ADDRESS/$PROJECT_IMAGE_PREFIX-$CI_PROJECT_NAME:$CI_COMMIT_REF_NAME'
+    - 'docker push $REGISTRY_ADDRESS/$PROJECT_IMAGE_PREFIX-$CI_PROJECT_NAME:$CI_COMMIT_REF_NAME-$CI_PIPELINE_ID'
+    - 'docker push $REGISTRY_ADDRESS/$PROJECT_IMAGE_PREFIX-$CI_PROJECT_NAME:$CI_COMMIT_REF_NAME'
+
+    #------------------------------ Update Portainer ---------------------------------#
+    - echo $REGISTRY_ADDRESS/$PROJECT_IMAGE_PREFIX-$CI_PROJECT_NAME:$BASE_REF_NAME
+    - PORTAINER_HOST=$PORTAINER_HOST portainer login -u $PORTAINER_USERNAME -p $PORTAINER_PASSWORD
+    - touch $FILE_PATH/$PORTAINER_YML_FILE
+    - rm -rf  $FILE_PATH/$PORTAINER_YML_FILE && PORTAINER_HOST=$PORTAINER_HOST portainer stackfile $STACK_ID $FILE_PATH/$PORTAINER_YML_FILE
+    - sed -i "s/${CI_PROJECT_NAME}:.*/${CI_PROJECT_NAME}:${CI_COMMIT_REF_NAME}-${CI_PIPELINE_ID}/g" $FILE_PATH/$PORTAINER_YML_FILE
+    - echo 'updating portal'
+    - PORTAINER_HOST=$PORTAINER_HOST portainer stack:update  $ENDPOINT_ID  $STACK_ID  $FILE_PATH/$PORTAINER_YML_FILE
+  only:
+    - 'main'
