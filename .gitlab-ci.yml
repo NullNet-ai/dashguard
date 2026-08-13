@@ -1,6 +1,6 @@
 stages:
-  # - build_qa
-  # - update_portainer_qa
+  - build_qa
+  - update_portainer_qa
   # - build_staging
   # - update_portainer_staging
   - build_main
