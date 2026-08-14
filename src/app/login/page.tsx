@@ -16,7 +16,7 @@ export default function Login() {
                 className="mb-4"
               />
               <h2 className="mt-8 text-center text-2xl font-bold tracking-tight text-foreground lg:text-left">
-                Sign in to your account
+                Login
               </h2>
             </div>
 
