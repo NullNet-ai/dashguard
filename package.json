@@ -12,6 +12,8 @@
     "lint:strict": "eslint src --config eslint.strict.config.mjs",
     "start": "next start",
     "test": "dotenvx run --env-file=.orm.env -- ts-node ./test.ts",
+    "test:unit": "vitest run",
+    "test:unit:watch": "vitest",
     "clean": "rm -rf .next && rm -rf node_modules && rm -rf pnpm-lock.yaml && pnpm i",
     "test-local": "cypress open",
     "prepare": "husky",
@@ -166,6 +168,8 @@
     "@playwright/test": "^1.59.1",
     "@stylistic/eslint-plugin": "^2.13.0",
     "@tailwindcss/container-queries": "^0.1.1",
+    "@testing-library/jest-dom": "^6",
+    "@testing-library/react": "^16",
     "@types/eslint": "^8.56.12",
     "@types/js-cookie": "^3.0.6",
     "@types/leaflet": "^1.9.21",
@@ -179,6 +183,7 @@
     "@types/uuid": "^10.0.0",
     "@typescript-eslint/eslint-plugin": "^8.11.0",
     "@typescript-eslint/parser": "^8.11.0",
+    "@vitejs/plugin-react": "^4",
     "cypress": "^13.16.0",
     "eslint": "^9.0.0",
     "eslint-config-next": "16.2.6",
@@ -188,12 +193,15 @@
     "eslint-plugin-react": "^7.37.4",
     "eslint-plugin-react-hooks": "^5.1.0",
     "husky": "^9.1.7",
+    "jsdom": "^26.1.0",
     "lint-staged": "^15.4.2",
     "postcss": "^8.4.47",
     "prettier": "^3.3.3",
     "prettier-plugin-tailwindcss": "^0.6.8",
     "tailwindcss": "^3.4.14",
-    "typescript": "^5.6.3"
+    "typescript": "^5.6.3",
+    "vite-tsconfig-paths": "^5",
+    "vitest": "^3"
   },
   "ct3aMetadata": {
     "initVersion": "7.37.0"
