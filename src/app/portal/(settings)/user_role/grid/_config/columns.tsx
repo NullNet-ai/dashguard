@@ -23,28 +23,6 @@ const gridColumns = [
     accessorKey: 'role',
   },
   {
-    header: 'Entity',
-    accessorKey: 'entity',
-  },
-  {
-    header: 'Category',
-    accessorKey: 'categories',
-    enableResizing: false,
-    cell: ({ row }) => {
-      const categories = row?.original?.categories || [];
-      return categories.map((category: string, index: number) => {
-        return <StatusCell key={index} value={category} />;
-      });
-    },
-    search_config: {
-      operator: 'like',
-      parse_as: 'text'
-    },
-    sort_config: {
-      is_case_sensitive_sorting: true
-    },
-  },
-  {
     header: "Updated Date",
     accessorKey: "updated_date_time",
     data_type: "datetime",
