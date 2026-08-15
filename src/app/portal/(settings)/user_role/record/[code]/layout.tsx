@@ -18,7 +18,6 @@ const Layout = async ({ children }: { children: React.ReactNode }) => {
     pluck_fields: [
       'code',
       'role',
-      'categories',
       'status',
       'created_by',
       'updated_by',

@@ -22,7 +22,7 @@ const RecordShellSummary = ({
   const queryResult = api.record.getByCode.useQuery({
     main_entity: main_entity!,
     id: identifier!,
-    pluck_fields: ['id', 'role', 'categories'],
+    pluck_fields: ['id', 'role'],
   })
 
   const record = queryResult.data ?? { data: { id: null } }
@@ -63,13 +63,7 @@ const RecordShellSummary = ({
                     {' '}
                   </span>
                   <span className='break-all text-slate-700'>
-                    {key === 'Category'
-                      ? (dataValue?.length
-                        && dataValue.map((item: string) => {
-                          return <StatusCell key={item} value={item} />
-                        }))
-                        || 'None'
-                      : dataValue || 'None'}
+                    {dataValue || 'None'}
                   </span>
                 </div>
               </div>
