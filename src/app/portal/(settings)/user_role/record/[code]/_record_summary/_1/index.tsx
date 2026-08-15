@@ -8,7 +8,6 @@ import { Separator } from '~/components/ui/separator'
 
 const fields = {
   Role: 'role',
-  Entity: 'entity',
 }
 
 const RecordShellSummary = ({
@@ -23,7 +22,7 @@ const RecordShellSummary = ({
   const queryResult = api.record.getByCode.useQuery({
     main_entity: main_entity!,
     id: identifier!,
-    pluck_fields: ['id', 'role', 'categories', 'entity'],
+    pluck_fields: ['id', 'role', 'categories'],
   })
 
   const record = queryResult.data ?? { data: { id: null } }
