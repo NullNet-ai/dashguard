@@ -1,10 +1,9 @@
 import React from 'react'
 
-import { CategoryDetails, ConfirmationDetails } from '../../../../../_components/forms'
+import { ConfirmationDetails } from '../../../../../_components/forms'
 
 const FormContainer = async () => (
   <div className="space-y-2">
-    <CategoryDetails />
     <ConfirmationDetails />
   </div>
 )
