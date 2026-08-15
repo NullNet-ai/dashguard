@@ -15,8 +15,6 @@ export default async function UserRoleGridPage() {
   const [, , main_entity, ,] = pathname.split('/');
   const _pluck = [
     'id',
-    'entity',
-    'categories',
     'code',
     'role',
     'status',
