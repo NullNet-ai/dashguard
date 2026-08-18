@@ -120,6 +120,14 @@ test.describe('WP-838 — Device Group wizard step 1 "Show Grid" is Draft-only',
     await page.waitForLoadState('networkidle');
 
     const name = `qa-wp838-${runId}-${Date.now()}`;
+
+    // Publish the name BEFORE the click that creates the record. Clicking Next
+    // is what persists the Draft, so if anything after it throws (a waitForURL
+    // timeout, a slow render), afterEach must still know what to delete —
+    // otherwise the run orphans a real record in production. findByName simply
+    // returns [] when nothing was created, so setting it early is always safe.
+    draftName = name;
+
     await page.getByLabel('Device Group', { exact: true }).first().fill(name);
     await page.locator('[data-test-id$="wizard-next-button"]').first().click();
 
@@ -127,7 +135,6 @@ test.describe('WP-838 — Device Group wizard step 1 "Show Grid" is Draft-only',
     await page.waitForURL(/\/portal\/device_group\/wizard\/(?!new)[^/]+\/2$/, {
       timeout: 30_000,
     });
-    draftName = name;
     const [, , , , code] = new URL(page.url()).pathname.split('/');
     expect(code, 'could not read the new record code off the wizard URL').toBeTruthy();
     draftCode = code;
