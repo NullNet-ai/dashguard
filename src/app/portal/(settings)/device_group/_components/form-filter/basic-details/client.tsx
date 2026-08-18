@@ -1,6 +1,7 @@
 'use client';
 
 import { z } from 'zod';
+import { ulid } from 'ulid';
 import { FormBuilder } from '~/components/platform/FormBuilder';
 import { type IHandleSubmit } from '~/components/platform/FormBuilder/types';
 import { api } from '~/trpc/react';
@@ -16,6 +17,22 @@ const FormSchema = z.object({
     .string({ message: 'Name is required' })
     .min(1, { message: 'Name is required' }),
 });
+
+// WP-838: the "Show Grid" list on Device Group Wizard Step 1 must show Draft
+// records only. `statusesIncluded` below only gates row selectability, so the
+// list has to be narrowed by a default advance filter on the grid query.
+const defaultAdvanceFilter = [
+  {
+    entity: 'device_group_settings',
+    operator: 'equal',
+    type: 'criteria',
+    field: 'status',
+    id: ulid(),
+    label: 'Status',
+    values: ['Draft'],
+    default: true,
+  },
+];
 
 export default function DeviceGroupBasicDetails({
   params,
@@ -99,6 +116,19 @@ export default function DeviceGroupBasicDetails({
         current: 1,
         limit: 1000,
         label: 'Device Group',
+        searchConfig: {
+          query_params: {
+            entity: 'device_group_settings',
+            pluck: params?.pluck_fields,
+            default_advance_filters: defaultAdvanceFilter as {
+              entity: string;
+              operator: string;
+              type: string;
+              field: string;
+              values: string[];
+            }[],
+          },
+        },
         async onSelectRecords({ rows }) {
           const response = await handleSelectRecord({ rows });
           return (
