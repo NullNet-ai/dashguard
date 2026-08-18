@@ -103,8 +103,12 @@ test.describe('WP-838 — Device Group wizard step 1 "Show Grid" is Draft-only',
     'QA_E2E_EMAIL / QA_E2E_PASSWORD not set — export them from .env.local',
   );
 
-  // Name of the Draft device group created as this test's prerequisite.
+  // Name of the Draft device group created as this test's prerequisite (used for
+  // lookup + cleanup) and its record code (the only identifying value the
+  // form-filter grid actually renders — its columns are Status, Code, Role,
+  // Updated/Created Date+by; there is NO name column).
   let draftName: string | undefined;
+  let draftCode: string | undefined;
 
   /**
    * Prerequisite: fill out wizard Step 1 and advance once. Saving Step 1 creates
@@ -124,6 +128,9 @@ test.describe('WP-838 — Device Group wizard step 1 "Show Grid" is Draft-only',
       timeout: 30_000,
     });
     draftName = name;
+    const [, , , , code] = new URL(page.url()).pathname.split('/');
+    expect(code, 'could not read the new record code off the wizard URL').toBeTruthy();
+    draftCode = code;
     await page.waitForLoadState('networkidle');
 
     const rows = await findByName(page, name);
@@ -146,6 +153,7 @@ test.describe('WP-838 — Device Group wizard step 1 "Show Grid" is Draft-only',
 
   test.beforeEach(async ({ page }) => {
     draftName = undefined;
+    draftCode = undefined;
     const loginPage = new LoginPage(page);
     await loginPage.goto();
     await loginPage.login(email!, password!);
@@ -187,9 +195,10 @@ test.describe('WP-838 — Device Group wizard step 1 "Show Grid" is Draft-only',
     await expect
       .poll(async () => await statusCells.count(), { timeout: 30_000 })
       .toBeGreaterThan(0);
+    // Identity assertion keyed on the Code column — the grid has no name column.
     await expect(
-      tableBody.getByText(draftName!, { exact: true }),
-      'the Draft created by the prerequisite must be listed',
+      tableBody.getByText(draftCode!, { exact: true }),
+      'the Draft created by the prerequisite must be listed (by code)',
     ).toHaveCount(1);
 
     const statuses = (await statusCells.allInnerTexts()).map((s) => s.trim());
