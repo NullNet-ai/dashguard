@@ -8,6 +8,7 @@ import { useToast } from '~/context/ToastProvider';
 import { type IFormProps } from '../types';
 import { removeRecord, savedRecord, selectRecord } from './actions';
 import gridColumns from './_config/columns';
+import { draftOnlySearchConfig } from './_config/advanceFilter';
 import SelectedView from './components/SelectedView';
 import { api } from '~/trpc/react';
 import { UserRoleFormSchema } from '~/server/zodSchema/user_role/basicDetails';
@@ -189,6 +190,7 @@ export default function RoleDetails({
         current: 1,
         limit: 1000,
         label: 'Role',
+        searchConfig: draftOnlySearchConfig(params?.pluck_fields),
         async onSelectRecords({ filter_entity, main_entity_id, rows }) {
           const response = (await handleSelectRecord({
             rows,
