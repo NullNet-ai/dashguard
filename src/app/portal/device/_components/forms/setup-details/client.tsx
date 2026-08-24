@@ -447,6 +447,10 @@ const SetupDetails: React.FC<{ identifier: string; remoteAccessUrl?: string }> =
   const { data: version } = api.device.fetchLatestVersion.useQuery();
   const fetchInstallationCodeByDeviceIdMutation = api.device.fetchInstallationCodeByDeviceId.useMutation();
   const createInstallationCodeMutation = api.device.createInstallationCode.useMutation();
+  // WP-841: regenerating retires the device's existing code(s) and mints one new
+  // one, so the install steps below re-render against the replacement.
+  const regenerateInstallationCodeMutation = api.device.regenerateInstallationCode.useMutation();
+  const [isRegenerating, setIsRegenerating] = React.useState(false);
 
   useEffect(() => {
     let isCancelled = false;
@@ -548,6 +552,28 @@ const SetupDetails: React.FC<{ identifier: string; remoteAccessUrl?: string }> =
   const controlChannelUrl = toControlChannelUrl(remoteAccessUrl);
   const { subtitle, shellHint } = getDeviceTypeText(deviceType);
 
+  const handleRegenerateJoinCode = React.useCallback(async () => {
+    // @ts-expect-error - No type yet
+    const deviceId = device?.id as string | undefined;
+    // @ts-expect-error - No type yet
+    const deviceCode = device?.code as string | undefined;
+    if (!deviceId || !deviceCode || isRegenerating) return;
+
+    setIsRegenerating(true);
+    try {
+      const regenerated = await regenerateInstallationCodeMutation.mutateAsync({
+        device_id: deviceId,
+        device_code: deviceCode,
+      });
+      // Only replace what is displayed once the new code actually exists;
+      // showing a blank or stale code would have the operator hand out a join
+      // code that no longer works.
+      if (regenerated?.token) setInstallationKey(regenerated.token);
+    } finally {
+      setIsRegenerating(false);
+    }
+  }, [device, isRegenerating, regenerateInstallationCodeMutation]);
+
   const steps = React.useMemo<StepData[]>(
     () =>
       getSteps(
@@ -572,12 +598,29 @@ const SetupDetails: React.FC<{ identifier: string; remoteAccessUrl?: string }> =
             {/* <div className="text-base font-semibold text-slate-900">
               Download and install the WallGuard Package on pfSense
             </div> */}
-          <div className="">
-            <div className="text-sm text-slate-600">{subtitle}</div>
-            <div className="flex items-center gap-1 text-sm text-slate-600">
-              {shellHint}
-              <CircleCheck size={13} fill='#7FCEAB' className='text-white'/>
+          <div className="flex items-start justify-between gap-4">
+            <div className="">
+              <div className="text-sm text-slate-600">{subtitle}</div>
+              <div className="flex items-center gap-1 text-sm text-slate-600">
+                {shellHint}
+                <CircleCheck size={13} fill='#7FCEAB' className='text-white'/>
+              </div>
             </div>
+            {/* WP-841: reissue the join code. Only offered once a code exists —
+                before that the install flow is still minting the first one. */}
+            {!!installationKey && (
+              <Button
+                className="shrink-0"
+                data-test-id="device-regenerate-join-code-button"
+                disabled={isRegenerating}
+                size="xs"
+                type="button"
+                variant="outline"
+                onClick={handleRegenerateJoinCode}
+              >
+                {isRegenerating ? 'Regenerating…' : 'Regenerate join code'}
+              </Button>
+            )}
           </div>
 
           <div>
