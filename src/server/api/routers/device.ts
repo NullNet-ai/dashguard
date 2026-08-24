@@ -22,6 +22,7 @@ import {
   fetchLiveOnlineStatuses,
   resolveDeviceOnline,
 } from '~/server/utils/deviceOnlineStatus';
+import { flattenDeviceGroupNames } from '~/server/utils/deviceGroupNames';
 import { formatSorting } from '~/server/utils/formatSorting';
 import { saveLatestVersion } from '~/server/utils/latestVersion';
 import { get_meta_header } from '~/utils/request-header';
@@ -1202,6 +1203,8 @@ export const deviceRouter = createTRPCRouter({
           ...addCommonGridPluckObject(),
           [pluralEntity]: input.pluck,
           device_services: ['protocol', 'status'],
+          device_groups: ['id', 'device_id', 'device_group_setting_id'],
+          device_group_settings: ['id', 'name'],
           ...(isDeveloper
             ? { device_contacts: ['device_id', 'contact_id'] }
             : {}),
@@ -1266,6 +1269,24 @@ export const deviceRouter = createTRPCRouter({
       });
     }
 
+    // WP-829: device -> device_groups -> device_group_settings, so the grid can
+    // show the group name(s) a device belongs to without a per-row lookup.
+    query
+      .join({
+        type: 'left',
+        field_relation: {
+          to: { entity: 'device_groups', field: 'device_id' },
+          from: { entity: baseEntity, field: 'id' },
+        },
+      })
+      .nestedJoin({
+        type: 'left',
+        field_relation: {
+          to: { entity: 'device_group_settings', field: 'id' },
+          from: { entity: 'device_groups', field: 'device_group_setting_id' },
+        },
+      });
+
     addCommonGridJoins(query, baseEntity);
 
     if (input.grouping?.length) {
@@ -1324,6 +1345,8 @@ export const deviceRouter = createTRPCRouter({
         [pluralEntity]: entity_data,
         device_services_protocols,
         device_services_statuses,
+        device_groups: _device_groups,
+        device_group_settings: _device_group_settings,
         created_by,
         updated_by,
         ...rest
@@ -1346,6 +1369,7 @@ export const deviceRouter = createTRPCRouter({
         ...entity_data,
         ...rest,
         connection_types,
+        device_group_names: flattenDeviceGroupNames(item),
         // WP-843: the row shape is unchanged (is_device_online stays a
         // top-level boolean); only where the value comes from has changed.
         is_device_online: resolveDeviceOnline(
