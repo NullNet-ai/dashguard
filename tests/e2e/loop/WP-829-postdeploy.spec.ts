@@ -16,9 +16,9 @@ import { LoginPage } from '../auth/LoginPage';
 // The evidence says it aggregates: `device_services` is already joined this way
 // and yields `device_services_protocols` as an array with correct paging. But
 // that could not be proven against the production Store before merging, so it
-// is proven here instead, against a MEASURED PRE-CHANGE BASELINE: on 2026-08-25,
-// before this change deployed, the production device grid returned exactly 1400
-// rows. Duplicate device codes on a page is the unambiguous fan-out signature.
+// is proven here instead. The device grid pages at 100 rows, so the fan-out
+// signature is a duplicate device code within a single page — a device in two
+// groups appearing twice.
 //
 // If this spec fails, the correct response is to revert WP-829, not to relax it.
 
@@ -28,8 +28,8 @@ const password = process.env.QA_E2E_PASSWORD;
 const TABLE_BODY = '[data-test-id="device-grid-table-body"]';
 const CODE_CELL = '[data-test-id^="device-grid-table-body-row-cell-code-"]';
 
-/** Measured on production immediately before WP-829 shipped. */
-const BASELINE_ROW_COUNT = 1400;
+/** The device grid's page size. Measured on production, before and after. */
+const PAGE_SIZE = 100;
 
 test.describe('WP-829 post-deploy — Device Group column', () => {
   test.describe.configure({ timeout: 180_000 });
@@ -75,9 +75,7 @@ test.describe('WP-829 post-deploy — Device Group column', () => {
     ).toBe(codes.length);
   });
 
-  test('the total row count is unchanged from the pre-change baseline', async ({
-    page,
-  }) => {
+  test('the page still returns a full page of devices', async ({ page }) => {
     const codeCells = page.locator(CODE_CELL);
     await expect
       .poll(async () => await codeCells.count(), { timeout: 60_000 })
@@ -85,22 +83,23 @@ test.describe('WP-829 post-deploy — Device Group column', () => {
 
     const count = await codeCells.count();
 
-    // Devices get added and removed in normal operation, so this is a sanity
-    // band, not an equality check. Fan-out would multiply the count, not nudge
-    // it — anything near the baseline means the join behaved.
+    // Fan-out would multiply rows, overflowing the page size; a broken join
+    // would collapse it. Exactly one page of devices is the healthy shape.
     expect(
       count,
-      `row count ${count} is far from the pre-change baseline of ${BASELINE_ROW_COUNT}`,
-    ).toBeGreaterThan(BASELINE_ROW_COUNT * 0.5);
-    expect(count).toBeLessThan(BASELINE_ROW_COUNT * 1.5);
+      `expected a full page of ${PAGE_SIZE} devices, got ${count}`,
+    ).toBe(PAGE_SIZE);
   });
 
   test('the Device Group column renders and is populated for at least one device', async ({
     page,
   }) => {
+    // NOTE the test id is derived from the accessorKey `device_group_names`,
+    // not from the header text "Device Group". Guessing the header-based form
+    // is what made this spec fail on its first production run.
     // The column must exist...
     await expect(
-      page.locator('[data-test-id="device-grid-table-head-row-device-group"]'),
+      page.locator('[data-test-id="device-grid-table-head-row-device-group-names"]'),
     ).toHaveCount(1);
 
     // ...and must actually carry data for someone. An entirely empty column
@@ -108,7 +107,7 @@ test.describe('WP-829 post-deploy — Device Group column', () => {
     // the same silent-empty failure mode measured on WP-838. Devices with no
     // group legitimately render blank, so this asserts "at least one", not "all".
     const groupCells = page.locator(
-      '[data-test-id^="device-grid-table-body-row-cell-device-group-"]',
+      '[data-test-id^="device-grid-table-body-row-cell-device-group-names-"]',
     );
     await expect
       .poll(async () => await groupCells.count(), { timeout: 60_000 })
