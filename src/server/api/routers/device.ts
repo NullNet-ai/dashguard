@@ -18,6 +18,8 @@ import {
   addCommonGridPluckObject,
 } from '~/server/utils/queryBuilder';
 import { formatSorting } from '~/server/utils/formatSorting';
+import { saveLatestVersion } from '~/server/utils/latestVersion';
+import { get_meta_header } from '~/utils/request-header';
 import ZodItems from '~/server/zodSchema/grid/items';
 import pluralize from 'pluralize';
 
@@ -355,6 +357,19 @@ export const deviceRouter = createTRPCRouter({
 
     return response?.data?.[0] ?? null
   }),
+  // Settings > Config edits the same single `versions` row fetchLatestVersion reads.
+  updateLatestVersion: privateProcedure
+    .input(z.object({ latest_version: z.string().min(1) }))
+    .mutation(async ({ input, ctx }) => {
+      const meta_header = await get_meta_header();
+
+      return saveLatestVersion(
+        ctx.dnaClient,
+        ctx.token.value,
+        input.latest_version,
+        meta_header,
+      );
+    }),
   fetchDeviceInfo: privateProcedure
     .input(
       z.object({
