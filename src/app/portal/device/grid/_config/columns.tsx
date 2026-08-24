@@ -56,6 +56,25 @@ const gridColumns = [
     },
   },
   {
+    header: 'Device Group',
+    accessorKey: 'device_group_names',
+    data_type: 'array',
+    sortKey: 'device_group_settings.name',
+    search_config: {
+      entity: 'device_group_settings',
+      field: 'name',
+      operator: 'like',
+    },
+    cell: ({ row }) => {
+      const raw = row?.original?.device_group_names;
+      // Group titles pass the grouped value as a scalar, not an array — normalize.
+      const groups = Array.isArray(raw) ? raw : raw ? [raw] : [];
+      return groups.map((name: string, index: number) => (
+        <StatusCell key={index} value={name} renderType="value" />
+      ));
+    },
+  },
+  {
     header: 'Connection Types',
     accessorKey: 'connection_types',
     sortKey: 'device_services.protocol',
