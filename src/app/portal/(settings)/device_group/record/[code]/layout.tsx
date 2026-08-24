@@ -4,6 +4,7 @@ import React, { Suspense } from 'react'
 
 import RecordWrapper from '~/components/platform/Record/RecordWrapper'
 import { api } from '~/trpc/server'
+import tabs from '../_config/tabs';
 import RecordSummaryPage from './_record_summary';
 import ContentLoading from './loading';
 
@@ -38,19 +39,6 @@ const Layout = async ({ children }: { children: React.ReactNode }) => {
   if (status.toLowerCase() === 'draft') {
     return notFound()
   }
-
-  const tabs = [
-    {
-      id: 'dashboard',
-      name: 'Dashboard',
-      tabName: 'dashboard',
-    },
-    {
-      id: 'device_group',
-      name: 'Device Group',
-      tabName: 'device_group',
-    },
-  ]
 
   return (
     <RecordWrapper
