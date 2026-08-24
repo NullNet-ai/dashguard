@@ -26,4 +26,7 @@ export default [
   'device_group_settings',
   'device_group',
   'device_groups',
+  // WP-843: read-only Postgres view deriving live online status from recent
+  // heartbeats; left-joined by device.mainGrid.
+  'device_online_statuses',
 ];
