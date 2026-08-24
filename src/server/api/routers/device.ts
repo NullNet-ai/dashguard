@@ -1,4 +1,5 @@
 import { createTRPCRouter, privateProcedure } from '~/server/api/trpc';
+import { regenerateInstallationCodeForDevice } from '~/server/utils/installationCode';
 import { createDefineRoutes } from '../baseCrud';
 import { z } from 'zod';
 import {
@@ -614,6 +615,33 @@ export const deviceRouter = createTRPCRouter({
         );
 
       return response.data[0];
+    }),
+  // WP-841: issue a fresh join code for an already-enrolled device.
+  //
+  // Deliberately NOT just another createInstallationCode call. That procedure
+  // only ever inserts, and fetchInstallationCodeByDeviceId returns data[0], so
+  // calling it twice would leave the device with several Active codes and the
+  // record displaying an arbitrary one of them. Retiring the old rows first is
+  // what makes this a regeneration rather than a duplicate.
+  //
+  // Note: dashguard can mark the old code Archived, but whether an archived
+  // code is *rejected* at enrolment is enforced by wallguard-server, not here.
+  regenerateInstallationCode: privateProcedure
+    .input(
+      z.object({
+        device_id: z.string().min(1),
+        device_code: z.string().min(1),
+      }),
+    )
+    .mutation(async ({ input, ctx }) => {
+      const { device_id, device_code } = input;
+
+      return regenerateInstallationCodeForDevice({
+        orm: ctx.dnaClient as never,
+        token: ctx.token.value,
+        device_id,
+        device_code,
+      });
     }),
   fetchSetupInstructions: privateProcedure
     .input(
