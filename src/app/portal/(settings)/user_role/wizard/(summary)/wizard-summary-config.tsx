@@ -1,12 +1,12 @@
 import StepOneBasicDetails from './_1'
-import StepTwoCategoryDetails from './_2'
-import ConfirmationSummary from './_3'
+import ConfirmationSummary from './_2'
 
+// WP-839: the Category Details step is removed and Confirmation is renumbered
+// from step 3 to step 2, so the summary panel keys shift with it.
 const roleWizardSummary = () => {
   return {
     one: StepOneBasicDetails,
-    two: StepTwoCategoryDetails,
-    three: ConfirmationSummary,
+    two: ConfirmationSummary,
   }
 }
 

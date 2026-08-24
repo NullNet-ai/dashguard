@@ -29,13 +29,15 @@ const WizardLayout = async ({ children, params }: IWizardLayoutProps) => {
         config={{
           currentStep: Number(currentStep),
           entityIdentifier: identifier!,
-          totalSteps: 3,
+          // WP-839: Category Details removed; Confirmation moves from step 3 to
+          // step 2. This config is the live one — wizard/_config/* is dead for
+          // this wizard (nothing imports it).
+          totalSteps: 2,
           enableAutoCreate: true,
           entityName: mainEntity,
           stepLabels: {
             1: 'Basic Details',
-            2: 'Category Details',
-            3: 'Confirmation',
+            2: 'Confirmation',
           },
           traverseSteps: traverseData?.traverse,
         }}
