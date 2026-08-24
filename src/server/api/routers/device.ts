@@ -18,6 +18,10 @@ import {
   addCommonGridJoins,
   addCommonGridPluckObject,
 } from '~/server/utils/queryBuilder';
+import {
+  fetchLiveOnlineStatuses,
+  resolveDeviceOnline,
+} from '~/server/utils/deviceOnlineStatus';
 import { formatSorting } from '~/server/utils/formatSorting';
 import { saveLatestVersion } from '~/server/utils/latestVersion';
 import { get_meta_header } from '~/utils/request-header';
@@ -1287,6 +1291,23 @@ export const deviceRouter = createTRPCRouter({
       return { totalCount, items: groupedItems, currentPage: 0, totalPages };
     }
 
+    // WP-843: resolve live online status in a SEPARATE query rather than by
+    // joining device_online_statuses into the grid query above.
+    //
+    // This is deliberate. An entity the Store does not accept fails silently
+    // (HTTP 200, error: null, empty result — measured on WP-838), and if that
+    // happened to a join inside the main query it could empty the entire device
+    // grid. Asking separately means the device list is fetched by a query that
+    // never mentions the view, so the worst case is that this lookup returns
+    // nothing and every row falls back to its stored flag — today's behaviour.
+    const liveOnlineByDeviceId = await fetchLiveOnlineStatuses(
+      ctx.dnaClient,
+      ctx.token.value,
+      (items ?? [])
+        .map((item: Record<string, any>) => item?.[pluralEntity]?.id ?? item?.id)
+        .filter(Boolean),
+    );
+
     const protocolToType = (p?: string) =>
       p === 'ssh'
         ? 'ssh'
@@ -1325,6 +1346,12 @@ export const deviceRouter = createTRPCRouter({
         ...entity_data,
         ...rest,
         connection_types,
+        // WP-843: the row shape is unchanged (is_device_online stays a
+        // top-level boolean); only where the value comes from has changed.
+        is_device_online: resolveDeviceOnline(
+          { ...entity_data, ...rest },
+          liveOnlineByDeviceId,
+        ),
         created_by: created_by?.full_name ?? '',
         updated_by: updated_by?.full_name ?? '',
       };
