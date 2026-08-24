@@ -1,6 +1,7 @@
 import communication_template from './communication_template';
 import role from "./role";
 import device_group from './device_group';
+import config from './config';
 
 // Manual add menu to items
 const menu = {
@@ -13,6 +14,7 @@ const menu = {
       items: [role,
         // communication_template
         device_group,
+        config,
       ],
     }
   ],
