@@ -16,6 +16,7 @@ import {
 import {
   readMembershipSnapshot,
   readMembershipsByRowId,
+  readSurvivingGroupMemberships,
   reconcileContactLinks,
   type GroupMembership,
 } from '~/server/utils/deviceGroupContactSync';
@@ -377,6 +378,7 @@ export const deviceGroupRouter = createTRPCRouter({
   unassignDevices: privateProcedure
     .input(z.object({ device_group_ids: z.array(z.string()) }))
     .mutation(async ({ input, ctx }) => {
+      const meta_header = await get_meta_header();
       const { device_group_ids } = input;
 
       const { token: mutateToken, as_root } = await getEntityCredentials(
@@ -404,6 +406,17 @@ export const deviceGroupRouter = createTRPCRouter({
         },
       );
 
+      // The snapshot never sees the OTHER devices of a group this device
+      // merely REMAINS in, so those groups look empty and their still-valid
+      // grant is invisible. One more additive read, merged in code.
+      const { memberships, ok: survivingGroupsRead } =
+        await readSurvivingGroupMemberships(
+          ctx.dnaClient,
+          mutateToken,
+          as_root,
+          { snapshot, removals },
+        );
+
       await Promise.all(
         device_group_ids.map((id) =>
           ctx.dnaClient
@@ -420,8 +433,10 @@ export const deviceGroupRouter = createTRPCRouter({
         dnaClient: ctx.dnaClient,
         token: mutateToken,
         as_root,
-        memberships: snapshot,
+        meta_header,
+        memberships,
         removals,
+        survivingGroupsRead,
       });
 
       return { success: true };
@@ -825,6 +840,14 @@ export const deviceGroupRouter = createTRPCRouter({
         },
       );
 
+      // Same gap on this path for any group the device REMAINS in (present in
+      // neither toCreate nor toDelete).
+      const { memberships, ok: survivingGroupsRead } =
+        await readSurvivingGroupMemberships(ctx.dnaClient, token, as_root, {
+          snapshot,
+          removals,
+        });
+
       await Promise.all([
         ...toCreate.map((device_group_setting_id) =>
           ctx.dnaClient
@@ -860,9 +883,10 @@ export const deviceGroupRouter = createTRPCRouter({
         token,
         as_root,
         meta_header,
-        memberships: [...snapshot, ...additions],
+        memberships: [...memberships, ...additions],
         additions,
         removals,
+        survivingGroupsRead,
       });
 
       return { success: true };

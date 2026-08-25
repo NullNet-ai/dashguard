@@ -57,14 +57,30 @@ export const buildDeviceIdFilters = (deviceIds: string[]): IAdvanceFilters[] =>
 const devicesOfGroup = (
   memberships: GroupMembership[],
   group: string,
-  except: string,
-): string[] => [
-  ...new Set(
-    memberships
-      .filter((m) => m.device_group_setting_id === group && m.device_id !== except)
-      .map((m) => m.device_id),
-  ),
-];
+  except: string | Set<string>,
+): string[] => {
+  const excluded = typeof except === 'string' ? new Set([except]) : except;
+
+  return [
+    ...new Set(
+      memberships
+        .filter(
+          (m) =>
+            m.device_group_setting_id === group && !excluded.has(m.device_id),
+        )
+        .map((m) => m.device_id),
+    ),
+  ];
+};
+
+const mergeMemberships = (...lists: GroupMembership[][]): GroupMembership[] => {
+  const merged = new Map<string, GroupMembership>();
+  lists.flat().forEach((m) =>
+    merged.set(`${m.device_id}::${m.device_group_setting_id}`, m),
+  );
+
+  return [...merged.values()];
+};
 
 const contactsHolding = (links: ContactLink[], deviceIds: string[]): string[] => [
   ...new Set(
@@ -82,12 +98,23 @@ export const planContactLinksToCreate = (input: {
   const planned: Array<{ contact_id: string; device_id: string }> = [];
   const seen = new Set<string>();
 
+  // Every device arriving in THIS call is excluded from the group's evidence,
+  // not just the one being processed. A batch assign of [D1, D2] to an empty
+  // group would otherwise let D1 justify D2 and vice versa, granting contacts
+  // devices nobody assigned them off a device that itself only just arrived.
+  const addedByGroup = new Map<string, Set<string>>();
+  additions.forEach((a) => {
+    const set = addedByGroup.get(a.device_group_setting_id) ?? new Set<string>();
+    set.add(a.device_id);
+    addedByGroup.set(a.device_group_setting_id, set);
+  });
+
   additions.forEach((addition) => {
-    // The added device itself is excluded: it is never evidence of membership.
     const evidence = devicesOfGroup(
       memberships,
       addition.device_group_setting_id,
-      addition.device_id,
+      addedByGroup.get(addition.device_group_setting_id) ??
+        new Set([addition.device_id]),
     );
 
     contactsHolding(links, evidence).forEach((contact_id) => {
@@ -240,6 +267,62 @@ export const readMembershipSnapshot = async (
 };
 
 /**
+ * BLOCKER 2 fix: `readMembershipSnapshot` reads by TOUCHED group id and by
+ * TOUCHED device id, so a group the device merely REMAINS in comes back
+ * holding nothing but the device itself — making `stillReaches` in
+ * `planContactLinkIdsToRemove` permanently false and deleting links a
+ * surviving group still legitimately grants.
+ *
+ * This issues one more ADDITIVE SEPARATE query for those surviving groups and
+ * merges it in code (never a join — a Store-rejected join is HTTP 200 + an
+ * empty array, indistinguishable from "nothing else grants this device").
+ *
+ * `ok` is the canary: every surviving group provably contains the removal
+ * device, so a read that does not come back with those pairs was rejected.
+ * The caller must then skip the deletes — fail closed.
+ */
+export const readSurvivingGroupMemberships = async (
+  dnaClient: any,
+  token: string,
+  as_root: boolean | undefined,
+  opts: { snapshot: GroupMembership[]; removals: GroupMembership[] },
+): Promise<{ memberships: GroupMembership[]; ok: boolean }> => {
+  const { snapshot, removals } = opts;
+  if (!removals.length) return { memberships: snapshot, ok: true };
+
+  const removedPairs = new Set(
+    removals.map((r) => `${r.device_id}::${r.device_group_setting_id}`),
+  );
+  const removedDevices = new Set(removals.map((r) => r.device_id));
+
+  const survivingPairs = snapshot.filter(
+    (m) =>
+      removedDevices.has(m.device_id) &&
+      !removedPairs.has(`${m.device_id}::${m.device_group_setting_id}`),
+  );
+  const survivingGroupIds = [
+    ...new Set(survivingPairs.map((m) => m.device_group_setting_id)),
+  ];
+  if (!survivingGroupIds.length) return { memberships: snapshot, ok: true };
+
+  const extra = await readMembershipSnapshot(dnaClient, token, as_root, {
+    groupIds: survivingGroupIds,
+    deviceIds: [],
+  });
+
+  const covered = survivingPairs.every((p) =>
+    extra.some(
+      (m) =>
+        m.device_id === p.device_id &&
+        m.device_group_setting_id === p.device_group_setting_id,
+    ),
+  );
+  if (!covered) return { memberships: snapshot, ok: false };
+
+  return { memberships: mergeMemberships(snapshot, extra), ok: true };
+};
+
+/**
  * Applies the plan. Never throws into the caller: a failed reconcile leaves the
  * `device_groups` write committed and the links stale, which is today's
  * behaviour and strictly better than failing the user's group edit. Idempotent
@@ -253,6 +336,8 @@ export const reconcileContactLinks = async (opts: {
   memberships: GroupMembership[];
   additions?: GroupMembership[];
   removals?: GroupMembership[];
+  /** false when the surviving-group read was rejected — deletes are skipped. */
+  survivingGroupsRead?: boolean;
 }): Promise<void> => {
   const {
     dnaClient,
@@ -262,6 +347,7 @@ export const reconcileContactLinks = async (opts: {
     memberships,
     additions = [],
     removals = [],
+    survivingGroupsRead = true,
   } = opts;
 
   if (!additions.length && !removals.length) return;
@@ -270,7 +356,9 @@ export const reconcileContactLinks = async (opts: {
     // The canary gates every delete. The removed rows were read from the Store
     // moments ago, so a snapshot missing them is a silent rejection, not proof.
     const safeToRemove =
-      removals.length > 0 && removalsAreCovered(removals, memberships);
+      removals.length > 0 &&
+      survivingGroupsRead &&
+      removalsAreCovered(removals, memberships);
 
     const deviceIds = [
       ...new Set([
@@ -332,8 +420,10 @@ export const reconcileContactLinks = async (opts: {
           .execute(),
       ),
     ]);
-  } catch {
-    // Intentionally swallowed — see the doc comment above.
+  } catch (error) {
+    // Still swallowed by design — see the doc comment above — but a partial
+    // batch must not vanish without a trace an operator can find.
+    console.error('[WP-826] device_contacts reconcile failed', error);
   }
 };
 

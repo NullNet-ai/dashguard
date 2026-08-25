@@ -4,6 +4,7 @@ import {
   buildDeviceIdFilters,
   planContactLinkIdsToRemove,
   planContactLinksToCreate,
+  readSurvivingGroupMemberships,
   removalsAreCovered,
   type ContactLink,
   type GroupMembership,
@@ -95,6 +96,35 @@ describe('planContactLinksToCreate — device ADDED to a group', () => {
     });
 
     expect(result).toEqual([{ contact_id: 'c1', device_id: 'D' }]);
+  });
+
+  it('does not let devices added in the SAME batch justify each other', () => {
+    // Group G is empty. An admin batch-assigns [D1, D2] to it. c1 holds D1 by
+    // DIRECT assignment only. Neither D1 nor D2 may act as evidence of c1
+    // being a member of G - they are both arriving in this very call - or the
+    // batch silently grants c1 a device nobody assigned it.
+    const result = planContactLinksToCreate({
+      additions: [m('D1', 'G'), m('D2', 'G')],
+      memberships: [m('D1', 'G'), m('D2', 'G')],
+      links: [l('l1', 'c1', 'D1')],
+    });
+
+    expect(result).toEqual([]);
+  });
+
+  it('still fans out from devices the group ALREADY held during a batch add', () => {
+    // Same batch shape, but G genuinely held E beforehand and c1 is tied to G
+    // through E. Both added devices must be linked.
+    const result = planContactLinksToCreate({
+      additions: [m('D1', 'G'), m('D2', 'G')],
+      memberships: [m('E', 'G'), m('D1', 'G'), m('D2', 'G')],
+      links: [l('l1', 'c1', 'E')],
+    });
+
+    expect(result).toEqual([
+      { contact_id: 'c1', device_id: 'D1' },
+      { contact_id: 'c1', device_id: 'D2' },
+    ]);
   });
 
   it('returns nothing for empty input', () => {
@@ -257,5 +287,71 @@ describe('buildDeviceIdFilters — OR chain for device_contacts', () => {
 
   it('returns an empty chain for no ids', () => {
     expect(buildDeviceIdFilters([])).toEqual([]);
+  });
+});
+
+describe('readSurvivingGroupMemberships — the surviving group must be READ', () => {
+  // The base snapshot reads device_groups by the TOUCHED group ids and by the
+  // touched device ids. Neither returns the OTHER devices of a group the
+  // device merely remains in, so a surviving group always looked empty and
+  // planContactLinkIdsToRemove could never see the path it still grants.
+  // An ADDITIVE SEPARATE query by surviving group id closes that gap; a join
+  // would come back HTTP 200 + empty array and delete everything.
+  const client = (rows: Array<{ device_id: string; device_group_setting_id: string }>) => ({
+    findAll: () => ({ execute: async () => ({ data: rows }) }),
+  });
+
+  it('keeps a link that a surviving group still grants', async () => {
+    // Site-A holds ONLY device D. c1 is an operator on NOC, which holds D and
+    // D2. Removing D from Site-A must not cost c1 the device NOC grants.
+    const snapshot = [m('D', 'Site-A'), m('D', 'NOC')];
+    const removals = [m('D', 'Site-A')];
+
+    const { memberships, ok } = await readSurvivingGroupMemberships(
+      client([
+        { device_id: 'D', device_group_setting_id: 'NOC' },
+        { device_id: 'D2', device_group_setting_id: 'NOC' },
+      ]),
+      'tok',
+      undefined,
+      { snapshot, removals },
+    );
+
+    expect(ok).toBe(true);
+    expect(memberships).toContainEqual(m('D2', 'NOC'));
+
+    expect(
+      planContactLinkIdsToRemove({
+        removals,
+        memberships,
+        links: [l('l1', 'c1', 'D'), l('l2', 'c1', 'D2')],
+      }),
+    ).toEqual([]);
+  });
+
+  it('reports NOT ok when the surviving-group read comes back empty', async () => {
+    // Every surviving group provably contains the removal device, so a read
+    // that omits it is a silent rejection - fail closed, do not delete.
+    const { memberships, ok } = await readSurvivingGroupMemberships(
+      client([]),
+      'tok',
+      undefined,
+      { snapshot: [m('D', 'Site-A'), m('D', 'NOC')], removals: [m('D', 'Site-A')] },
+    );
+
+    expect(ok).toBe(false);
+    expect(memberships).toEqual([m('D', 'Site-A'), m('D', 'NOC')]);
+  });
+
+  it('is a no-op and ok when the device is in no surviving group', async () => {
+    const { memberships, ok } = await readSurvivingGroupMemberships(
+      client([]),
+      'tok',
+      undefined,
+      { snapshot: [m('D', 'Site-A')], removals: [m('D', 'Site-A')] },
+    );
+
+    expect(ok).toBe(true);
+    expect(memberships).toEqual([m('D', 'Site-A')]);
   });
 });
