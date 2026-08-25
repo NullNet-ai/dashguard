@@ -50,6 +50,7 @@ export default async function UserRoleGridPage() {
       config={{
         entity: main_entity!,
         title: 'User Roles',
+        searchMode: 'live',
         columns: gridColumns,
         columnsOrder: gridCacheData?.columns,
         enableAutoCreate: false,

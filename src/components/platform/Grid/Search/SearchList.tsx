@@ -12,6 +12,9 @@ import {
 } from '~/components/ui/dropdown-menu';
 import { cn, formatAndCapitalize } from '~/lib/utils';
 
+import { GridContext } from '../Provider';
+
+import LiveSearch from './LiveSearch';
 import { SearchGridContext } from './Provider';
 import SearchDialog from './SearchDialog';
 import { usePathname } from 'next/navigation'
@@ -30,6 +33,9 @@ const SearchList = ({parentType} : any) => {
   const conref = useRef<any>(null);
   const itemsRef = useRef<any[]>([]);
   const { state, actions } = useContext(SearchGridContext);
+  const { state: gridConfigState } = useContext(GridContext);
+  // WP-828 — opt-in live search replaces the default modal on the grids that ask for it.
+  const isLiveSearch = gridConfigState?.config?.searchMode === 'live';
   const path =  usePathname()
   const [, , path1, path2] = path.split('/')
 
@@ -347,7 +353,7 @@ const SearchList = ({parentType} : any) => {
           ) : null}
         </div> : <div></div>}
         <div>
-         <SearchDialog />
+         {isLiveSearch ? <LiveSearch /> : <SearchDialog />}
         </div>
       </div>
     </div>

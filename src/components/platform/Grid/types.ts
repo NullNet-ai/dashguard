@@ -241,6 +241,13 @@ export interface IConfigGrid {
   addNewButtonPosition?: 'default' | 'in-tabs';
   noResultText?: string;
   enableSearch?: boolean;
+  /**
+   * WP-828 — which search UI this grid renders. 'default' keeps the modal
+   * SearchDialog; 'live' swaps in the inline LiveSearch input. Opt-in per grid,
+   * so every grid that does not set it is untouched. `enableSearch: false`
+   * remains the separate escape hatch that hides search entirely.
+   */
+  searchMode?: 'default' | 'live';
 }
 
 interface IRowToArchive extends Row<any> {

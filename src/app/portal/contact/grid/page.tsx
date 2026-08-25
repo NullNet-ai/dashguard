@@ -59,6 +59,7 @@ export default async function Page() {
         isDraggable: true,
         entity: 'contact',
         title: 'Contacts',
+        searchMode: 'live',
         columnsOrder: gridCacheData?.columns,
         // viewMode:'card',
         // CustomRenderCardParent: ContactListView,
