@@ -13,6 +13,12 @@ import {
   addCommonGridPluckObject,
   addCommonGridConcatenates,
 } from '~/server/utils/queryBuilder';
+import {
+  readMembershipSnapshot,
+  readMembershipsByRowId,
+  reconcileContactLinks,
+  type GroupMembership,
+} from '~/server/utils/deviceGroupContactSync';
 
 const entity = 'device_group_settings';
 
@@ -322,6 +328,19 @@ export const deviceGroupRouter = createTRPCRouter({
         ctx.token.value,
       );
 
+      // WP-826: snapshot membership BEFORE the write so the reconcile sees the
+      // group as it was, then apply the device_contacts sync afterwards.
+      const additions: GroupMembership[] = device_ids.map((device_id) => ({
+        device_id,
+        device_group_setting_id,
+      }));
+      const snapshot = await readMembershipSnapshot(
+        ctx.dnaClient,
+        mutateToken,
+        as_root,
+        { groupIds: [device_group_setting_id], deviceIds: device_ids },
+      );
+
       const results = await Promise.all(
         device_ids.map((device_id) =>
           ctx.dnaClient
@@ -343,6 +362,15 @@ export const deviceGroupRouter = createTRPCRouter({
         ),
       );
 
+      await reconcileContactLinks({
+        dnaClient: ctx.dnaClient,
+        token: mutateToken,
+        as_root,
+        meta_header,
+        memberships: [...snapshot, ...additions],
+        additions,
+      });
+
       return results;
     }),
 
@@ -357,6 +385,25 @@ export const deviceGroupRouter = createTRPCRouter({
         ctx.token.value,
       );
 
+      // WP-826: the input is junction row ids only, so the (device_id,
+      // device_group_setting_id) pairs MUST be read before the rows are
+      // deleted — afterwards there is nothing left to reconcile from.
+      const removals = await readMembershipsByRowId(
+        ctx.dnaClient,
+        mutateToken,
+        as_root,
+        device_group_ids,
+      );
+      const snapshot = await readMembershipSnapshot(
+        ctx.dnaClient,
+        mutateToken,
+        as_root,
+        {
+          groupIds: removals.map((r) => r.device_group_setting_id),
+          deviceIds: removals.map((r) => r.device_id),
+        },
+      );
+
       await Promise.all(
         device_group_ids.map((id) =>
           ctx.dnaClient
@@ -368,6 +415,14 @@ export const deviceGroupRouter = createTRPCRouter({
             .execute(),
         ),
       );
+
+      await reconcileContactLinks({
+        dnaClient: ctx.dnaClient,
+        token: mutateToken,
+        as_root,
+        memberships: snapshot,
+        removals,
+      });
 
       return { success: true };
     }),
@@ -752,6 +807,24 @@ export const deviceGroupRouter = createTRPCRouter({
         (row) => !group_ids.includes(row.device_group_setting_id),
       );
 
+      // WP-826: snapshot membership BEFORE the writes, reconcile after.
+      const additions: GroupMembership[] = toCreate.map(
+        (device_group_setting_id) => ({ device_id, device_group_setting_id }),
+      );
+      const removals: GroupMembership[] = toDelete.map((row) => ({
+        device_id,
+        device_group_setting_id: row.device_group_setting_id,
+      }));
+      const snapshot = await readMembershipSnapshot(
+        ctx.dnaClient,
+        token,
+        as_root,
+        {
+          groupIds: [...toCreate, ...removals.map((r) => r.device_group_setting_id)],
+          deviceIds: [device_id],
+        },
+      );
+
       await Promise.all([
         ...toCreate.map((device_group_setting_id) =>
           ctx.dnaClient
@@ -781,6 +854,16 @@ export const deviceGroupRouter = createTRPCRouter({
             .execute(),
         ),
       ]);
+
+      await reconcileContactLinks({
+        dnaClient: ctx.dnaClient,
+        token,
+        as_root,
+        meta_header,
+        memberships: [...snapshot, ...additions],
+        additions,
+        removals,
+      });
 
       return { success: true };
     }),
