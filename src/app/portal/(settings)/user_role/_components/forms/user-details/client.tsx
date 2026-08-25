@@ -38,9 +38,13 @@ const MEMBER_PLUCK = [
 
 interface RoleUsersGridProps {
   user_role_id: string;
+  role_name?: string;
 }
 
-export default function RoleUsersGrid({ user_role_id }: RoleUsersGridProps) {
+export default function RoleUsersGrid({
+  user_role_id,
+  role_name,
+}: RoleUsersGridProps) {
   const pathname = usePathname();
   const searchParams = useSearchParams();
   const { actions } = useSideDrawer();
@@ -110,6 +114,7 @@ export default function RoleUsersGrid({ user_role_id }: RoleUsersGridProps) {
           <UserPicker
             actions={actions}
             onFetchRecords={handleFetchRecords}
+            role_name={role_name}
             user_role_id={user_role_id}
           />
         ),
@@ -121,7 +126,7 @@ export default function RoleUsersGrid({ user_role_id }: RoleUsersGridProps) {
         handleFetchRecords();
       },
     } as any);
-  }, [actions, user_role_id, handleFetchRecords]);
+  }, [actions, user_role_id, role_name, handleFetchRecords]);
 
   return (
     <Grid

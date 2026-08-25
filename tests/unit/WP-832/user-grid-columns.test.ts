@@ -26,17 +26,53 @@ describe('WP-832: User tab grid columns match the Users menu grid', () => {
     expect(src, `${COLS} must exist`).not.toBe('');
   });
 
-  it('declares every accessorKey the contact grid declares', () => {
-    const expected = contactGridColumns
+  // Review fix: this used to derive `expected` from contactGridColumns while the
+  // config under test simply RE-EXPORTS contactGridColumns — i.e. it compared the
+  // contact grid to itself and could never fail. The expectation is now an
+  // explicit literal list, and a separate assertion pins the contact grid to that
+  // same list, so drift on EITHER side fails.
+  const EXPECTED_COLUMNS = [
+    'status',
+    'code',
+    'categories',
+    'roles',
+    'device_group_names',
+    'first_name',
+    'last_name',
+    'middle_name',
+    'formatted_raw_phone_number',
+    'email',
+    'organization',
+    'updated_date_time',
+    'updated_by',
+    'created_date_time',
+    'created_by',
+  ];
+
+  it('declares every expected accessorKey explicitly', () => {
+    for (const key of EXPECTED_COLUMNS) {
+      expect(src, `missing column accessorKey '${key}'`).toContain(`'${key}'`);
+    }
+  });
+
+  it('the contact grid still declares exactly that column set (drift guard)', () => {
+    const actual = contactGridColumns
       .map((c: any) => c.accessorKey)
       .filter(Boolean) as string[];
 
-    // Sanity: the reference list is non-empty, so this cannot pass vacuously.
-    expect(expected.length).toBeGreaterThan(10);
+    expect([...actual].sort()).toEqual([...EXPECTED_COLUMNS].sort());
+  });
 
-    for (const key of expected) {
-      expect(src, `missing column accessorKey '${key}'`).toContain(`'${key}'`);
-    }
+  it('strips the accessorKey-less drag handle from BOTH grids', () => {
+    // The contact grid ships a drag-handle column with no accessorKey; neither
+    // grid on this tab reorders rows, so neither may render it.
+    expect(
+      contactGridColumns.some((c: any) => !c.accessorKey),
+      'contact grid should still have an accessorKey-less column, else this guard is vacuous',
+    ).toBe(true);
+    expect(src).not.toMatch(/export const gridColumns = contactGridColumns/);
+    expect(src).toMatch(/export const gridColumns = PARITY_COLUMNS/);
+    expect(src).toMatch(/export const pickerColumns = PARITY_COLUMNS/);
   });
 
   it('includes the key contact columns explicitly', () => {

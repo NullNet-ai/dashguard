@@ -20,7 +20,10 @@ const FormServerFetch = async () => {
 
   return (
     <div className="space-y-2">
-      <RoleUsersGrid user_role_id={user_role_id} />
+      <RoleUsersGrid
+        role_name={record_details?.data?.role as string | undefined}
+        user_role_id={user_role_id}
+      />
     </div>
   );
 };

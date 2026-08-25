@@ -30,14 +30,19 @@ export const USERS_MENU_COLUMNS = [
   'created_by',
 ] as const;
 
-export const gridColumns = contactGridColumns;
-
-// The picker is a selection grid — dragging rows there means nothing.
-export const pickerColumns = contactGridColumns.filter((column) =>
+// The contact grid ships a row DRAG-HANDLE column that carries no accessorKey.
+// Neither of this tab's grids reorders rows (the members grid has
+// enableRowSelection:false, the picker is a selection grid), so the handle is
+// filtered out of BOTH rather than only the picker.
+const PARITY_COLUMNS = contactGridColumns.filter((column) =>
   USERS_MENU_COLUMNS.includes(
     (column as { accessorKey?: string }).accessorKey as never,
   ),
 ) as ColumnDef<any>[];
+
+export const gridColumns = PARITY_COLUMNS;
+
+export const pickerColumns = PARITY_COLUMNS;
 
 export const defaultSorting = [
   { id: 'created_date_time', desc: true, sort_key: 'created_date_time' },
