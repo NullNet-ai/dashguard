@@ -17,6 +17,7 @@ import { api } from '~/trpc/react';
 import CustomCreateButton from '../_components/custom_create_button';
 import gridColumns, { TO_HIDE_COLUMNS_WHEN_MOBILE } from './_config/columns';
 import defaultSorting from './_config/sorting';
+import AssignDeviceGroupButton from './_components/AssignDeviceGroupButton';
 import AuthorizeDeviceAction from './_components/AuthorizeDeviceAction';
 import { ArchiveX, Loader2 } from 'lucide-react';
 
@@ -210,7 +211,12 @@ export default function Page() {
           id: 'code',
         },
         // paginationType: 'default',
-        enableRowSelection: false,
+        // WP-830: selection drives the bulk "Assign Device Group" action. The
+        // built-in bulk button stays hidden — bulk archive would bypass the
+        // wallguard-cli teardown in archiveCustomAction below.
+        enableRowSelection: true,
+        // @ts-expect-error - `hidden` is not on the shared config type yet
+        customBulkButtonConfig: { hidden: true },
         enableAutoCreate: !isDeveloper,
         hideCreateButton: isDeveloper,
         recordLabelField: 'device_name',
@@ -344,12 +350,15 @@ export default function Page() {
         onFetchRecords: handleFetchRecords,
       }}
       customCreateButton={
-        isDeveloper ? undefined : (
-          <CustomCreateButton
-            entity={main_entity!}
-            onFetchRecords={handleFetchRecords}
-          />
-        )
+        <>
+          <AssignDeviceGroupButton onAssigned={handleFetchRecords} />
+          {isDeveloper ? null : (
+            <CustomCreateButton
+              entity={main_entity!}
+              onFetchRecords={handleFetchRecords}
+            />
+          )}
+        </>
       }
     />
   );
