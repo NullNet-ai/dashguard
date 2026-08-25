@@ -58,6 +58,19 @@ const gridColumns = [
     },
   },
   {
+    header: 'Device Group',
+    accessorKey: 'device_group_names',
+    data_type: 'array',
+    cell: ({ row }) => {
+      const raw = row?.original?.device_group_names;
+      // Group titles pass the grouped value as a scalar, not an array — normalize.
+      const groups = Array.isArray(raw) ? raw : raw ? [raw] : [];
+      return groups.map((name: string, index: number) => (
+        <StatusCell key={index} value={name} renderType="value" />
+      ));
+    },
+  },
+  {
     header: 'First Name',
     accessorKey: 'first_name',
   },

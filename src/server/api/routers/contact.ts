@@ -29,6 +29,7 @@ import {
   addCommonGridJoins,
   addCommonGridPluckObject,
 } from '~/server/utils/queryBuilder';
+import { fetchContactDeviceGroupNames } from '~/server/utils/contactDeviceGroups';
 import { dnaClient } from '~/server/dnaOrm';
 import { headers } from 'next/headers';
 import { ulid } from 'ulid';
@@ -346,9 +347,16 @@ export const contactRouter = createTRPCRouter({
     const { total_count: totalCount = 1, data: rawItems } =
       await query.execute();
 
+    // WP-824: one extra query for the whole page, merged in below.
+    const deviceGroupNames = await fetchContactDeviceGroupNames(
+      ctx.dnaClient,
+      ctx.token.value,
+      (rawItems ?? []).map((item: any) => item?.id),
+    );
+
     const items = await Bluebird.map(rawItems, async (item: any) => {
       const contactId = item?.id;
-      if (!contactId) return { ...item, roles: [] };
+      if (!contactId) return { ...item, roles: [], device_group_names: [] };
       const acctOrgs = await ctx.dnaClient
         .findAll({
           entity: 'account_organizations',
@@ -385,7 +393,11 @@ export const contactRouter = createTRPCRouter({
             .filter(Boolean),
         ),
       ];
-      return { ...item, roles };
+      return {
+        ...item,
+        roles,
+        device_group_names: deviceGroupNames.get(contactId) ?? [],
+      };
     });
 
     const totalPages = Math.ceil(totalCount / (input.limit || 100));
