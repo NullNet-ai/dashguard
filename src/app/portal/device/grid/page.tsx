@@ -350,15 +350,21 @@ export default function Page() {
         onFetchRecords: handleFetchRecords,
       }}
       customCreateButton={
-        <>
-          <AssignDeviceGroupButton onAssigned={handleFetchRecords} />
-          {isDeveloper ? null : (
+        isDeveloper ? undefined : (
+          // WP-830: gated on !isDeveloper like every other mutating control on
+          // this grid (hideCreateButton, archiveCustomComponent, enableAutoCreate
+          // above). Developers are scoped to their own devices and currently
+          // have no create or archive action here; assigning device groups is
+          // also a mutation, so it stays behind the same boundary rather than
+          // silently granting them a capability they did not have.
+          <>
+            <AssignDeviceGroupButton onAssigned={handleFetchRecords} />
             <CustomCreateButton
               entity={main_entity!}
               onFetchRecords={handleFetchRecords}
             />
-          )}
-        </>
+          </>
+        )
       }
     />
   );
