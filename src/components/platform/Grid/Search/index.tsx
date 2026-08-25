@@ -3,6 +3,7 @@ import { cn } from '~/lib/utils';
 import CreateButton from '../Header/ButtonHeader';
 import CardViewButton from '../Header/CardViewButton';
 import TableViewButton from '../Header/TableViewButton';
+import LiveSearch from './LiveSearch';
 import GridSearchProvider from './Provider';
 import SearchDialog from './SearchDialog';
 import SearchList from './SearchList';
@@ -22,6 +23,8 @@ export default function Main({
 }: any) {
   const { state, actions } = useGrid(); // Add this hook to get grid context
   const switchable = state?.config?.switchable || _switchable;
+  // WP-828 — opt-in live search replaces the default modal on the grids that ask for it.
+  const isLiveSearch = state?.config?.searchMode === 'live';
   const renderedCreateButton = () => {
     if (creatable && state?.customCreateButton) {
       return state?.customCreateButton;
@@ -57,7 +60,7 @@ export default function Main({
           </div>
           <div className="flex min-h-[40px] flex-row-reverse lg:hidden w-full">
             <div className="flex">
-              <SearchDialog />
+              {isLiveSearch ? <LiveSearch /> : <SearchDialog />}
             </div>
             <SearchListMobile gridType={gridType} parentType={parentType} />
           </div>
@@ -85,7 +88,7 @@ export default function Main({
           >
             <SearchListMobile gridType={gridType} parentType={parentType} />
           </div>
-          <SearchDialog />
+          {isLiveSearch ? <LiveSearch /> : <SearchDialog />}
         </div>
       ) : (
         <div className="ml-0 mt-0 flex w-full max-w-[100%] flex-col justify-end gap-x-2 sm:mt-0">

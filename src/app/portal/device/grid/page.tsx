@@ -205,6 +205,7 @@ export default function Page() {
         isInfinite: true,
         entity: main_entity!,
         title: 'Devices',
+        searchMode: 'live',
         columnsOrder: gridCacheData?.columns,
         columns: gridColumns,
         defaultValues: {

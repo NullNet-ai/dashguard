@@ -25,6 +25,7 @@ import {
   clearAllSearchItems,
   removeSearchItems,
 } from './utils/removeSearchItems';
+import { buildLiveSearchFilters } from './utils/buildLiveSearchFilters';
 import { resolveSearchItem } from './utils/resolveSearchItem';
 import { useQuery } from '@tanstack/react-query';
 
@@ -73,36 +74,22 @@ export default function GridSearchProvider({ children }: IProps) {
         ...(parse_as ? { parse_as } : {}),
       }),
     ) as ISearchItem[];
-    const searchResolver = searchableFields.reduce(
-      // eslint-disable-next-line no-unused-vars
-      (acc: any, { accessorKey: _, ...item }: any, index) => {
-        const resolveValue =
-          item?.field === 'raw_phone_number'
-            ? _query?.replace(/[^\d]/g, '')
-            : _query;
+    const liveFilters = buildLiveSearchFilters({
+      query: _query,
+      searchableFields,
+      entity: defaultEntity ?? '',
+    });
 
-        if (!resolveValue) return acc;
-        return [
-          {
-            type: 'criteria',
-            operator: 'equal',
-            values: [resolveValue],
-            entity: defaultEntity,
-            ...item,
-            is_search: true,
-          },
-          ...(index !== 0 ? [{ type: 'operator', operator: 'or' }] : []),
-          ...acc,
-        ];
-      },
-      [
-        ...(advanceFilter?.length
-          ? [{ type: 'operator', operator: 'and' }]
-          : []),
-        ...advanceFilter,
-      ],
-    );
-    return searchResolver;
+    // Flat advance_filters only — the OR chain is ANDed onto whatever the grid
+    // already had, and the `and` is only emitted when both sides exist so the
+    // chain never ends (or starts) on a dangling operator.
+    return [
+      ...liveFilters,
+      ...(liveFilters.length && advanceFilter?.length
+        ? [{ type: 'operator', operator: 'and' } as unknown as ISearchItem]
+        : []),
+      ...advanceFilter,
+    ] as ISearchItem[];
   }, [_query, columns.length]);
 
   const handleQuery = (data: React.SetStateAction<string>) => {

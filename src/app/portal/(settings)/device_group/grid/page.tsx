@@ -50,6 +50,7 @@ export default async function DeviceGroupGridPage() {
       config={{
         entity: 'device_group_settings',
         title: 'Device Groups',
+        searchMode: 'live',
         columns: gridColumns,
         columnsOrder: gridCacheData?.columns,
         enableAutoCreate: false,
