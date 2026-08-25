@@ -13,7 +13,10 @@ import { UpdateReportFilter } from '../Action/UpdateReportFilter';
 import { GridContext } from '../Provider';
 
 import { type ISearchItem } from './types';
-import { buildLiveSearchFilters } from './utils/buildLiveSearchFilters';
+import {
+  composeLiveSearchFilters,
+  readLiveSearchQuery,
+} from './utils/buildLiveSearchFilters';
 
 /**
  * WP-828 — inline live search, rendered instead of SearchDialog when a grid
@@ -35,10 +38,14 @@ export default function LiveSearch() {
   } = gridState?.config ?? {};
   const { gridKey } = gridState ?? {};
 
-  const [query, setQuery] = useState('');
+  // Rehydrate from the persisted filter so navigating away and back never shows
+  // an empty box over a still-filtered grid — the box and the rows agree.
+  const persistedQuery = readLiveSearchQuery(gridState?.advanceFilter ?? []);
+  const [query, setQuery] = useState(persistedQuery);
   const debouncedQuery = useDebounce(query, 500);
-  // Skip the apply on mount — an empty query would needlessly re-push the URL.
-  const appliedRef = useRef<string | null>(null);
+  // Seeded with what is already persisted, so mount never re-applies (and an
+  // empty grid never needlessly re-pushes the URL).
+  const appliedRef = useRef<string | null>(persistedQuery || null);
 
   useEffect(() => {
     if (!enableSearch) return;
@@ -50,24 +57,16 @@ export default function LiveSearch() {
     appliedRef.current = debouncedQuery;
 
     const apply = async () => {
-      const base = (gridState?.advanceFilter ?? []).filter(
-        (item) => !(item as ISearchItem & { is_search?: boolean })?.is_search,
-      );
-      const live = buildLiveSearchFilters({
+      // Always rebuilt from the persisted filter with any PREVIOUS live search
+      // stripped out: clearing the box restores exactly the user's own pills,
+      // and a second search replaces the first instead of ANDing onto it.
+      // Flat advance_filters only — never a nested group (see View.tsx:65-84).
+      const filters: ISearchItem[] = composeLiveSearchFilters({
         query: debouncedQuery,
         searchableFields,
         entity,
+        base: gridState?.advanceFilter ?? [],
       });
-      // Flat advance_filters only — never a nested group (see View.tsx:65-84).
-      const filters: ISearchItem[] = live.length
-        ? [
-            ...live,
-            ...(base.length
-              ? ([{ type: 'operator', operator: 'and' }] as ISearchItem[])
-              : []),
-            ...base,
-          ]
-        : base;
 
       const updatedFilterUrl = await UpdateReportFilter({ filters, gridKey });
 
