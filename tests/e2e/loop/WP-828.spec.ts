@@ -215,6 +215,11 @@ test.describe('WP-828: custom live search replaces the default grid search', () 
   test('a grid outside the ticket scope keeps the default modal search', async ({
     page,
   }) => {
+    // The organization grid is the heaviest of these pages to cold-compile
+    // under `next dev --turbopack`; it timed out at the 30s default. Triples
+    // the budget rather than shortening the assertions.
+    test.slow();
+
     // Regression guard: ~20 other grids must be untouched. Organization is the
     // representative sample (it already declares searchSuggestionConfig).
     await page.goto('/portal/organization/grid');
