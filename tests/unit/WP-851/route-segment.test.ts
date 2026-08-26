@@ -44,6 +44,18 @@ describe('toRouteSegment', () => {
     }
   });
 
+  it('lets the grid Create action recognise an aliased grid as its own', () => {
+    // Grid/Action/Create.ts compares the incoming entity against the route
+    // segment parsed out of x-pathname. Without the mapping the two never
+    // match for device_group and Create redirects to the nested
+    // `/portal/<segment>/<entity>/wizard/...` shape, which does not exist.
+    const pathname = '/portal/device_group/grid';
+    const [, , mainEntity] = pathname.split('/');
+
+    expect(toRouteSegment('device_group_settings')).toBe(mainEntity);
+    expect('device_group_settings').not.toBe(mainEntity);
+  });
+
   it('does NOT rewrite `contact` to the `student` sample alias', () => {
     // `mainEntities` carries a `student: 'contact'` sample, but there is no
     // `src/app/portal/student/` folder. A naively derived inverse map would
