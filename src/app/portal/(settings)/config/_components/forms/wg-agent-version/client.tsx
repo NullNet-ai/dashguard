@@ -42,6 +42,7 @@ export default function WGAgentVersionForm({ defaultValues }: IProps) {
       formKey="WGAgentVersion"
       formSchema={FormSchema}
       defaultValues={defaultValues}
+      properties={{ isEditable: false }}
       fields={[
         {
           id: 'latest_version',
