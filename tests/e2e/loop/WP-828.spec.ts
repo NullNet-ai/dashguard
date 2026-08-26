@@ -91,8 +91,19 @@ const liveSearchInput = (page: Page, grid: GridUnderTest): Locator =>
     .locator('visible=true')
     .first();
 
+/**
+ * Data rows, counted by their `code` cell rather than by `> tr`.
+ *
+ * TableBody.tsx:198 stamps every cell with
+ * `<entity>-grid-table-body-row-cell-<columnId>-<n>`, so a `code`-cell
+ * prefix match counts exactly the real records: it skips the empty spacer
+ * row the device grid renders first (innerText ""), and it will not count
+ * a "no records" placeholder row as a search result.
+ */
 const rows = (page: Page, grid: GridUnderTest): Locator =>
-  page.locator(`[data-test-id="${grid.tableEntity}-grid-table-body"] > tr`);
+  page.locator(
+    `[data-test-id^="${grid.tableEntity}-grid-table-body-row-cell-code-"]`,
+  );
 
 /** Land on a grid and wait for its rows, not for a networkidle that never comes. */
 const openGrid = async (page: Page, grid: GridUnderTest) => {
@@ -156,15 +167,17 @@ test.describe('WP-828: custom live search replaces the default grid search', () 
     }) => {
       await openGrid(page, grid);
 
-      // Record ids render as e.g. CO000001 / DE000042 — present in row 1 of
-      // every one of these grids, and unique enough to be a real match.
-      const firstRowText = await rows(page, grid).first().innerText();
-      const match = /\b[A-Z]{2}\d{4,}\b/.exec(firstRowText);
+      // Take the value straight out of the grid's own first `code` cell, so
+      // the term cannot rot as the data changes. `code` is deliberately the
+      // source: it is a real column on all four entities AND searchable on
+      // all four — unlike Role / Device Group, the very columns this ticket
+      // had to mark unsearchable. Formats differ per entity (CO000001 on
+      // contact, CTR6 on user_role), so read the value, never pattern-match it.
+      const knownValue = (await rows(page, grid).first().innerText()).trim();
       expect(
-        match,
-        `no record id found in first row text: ${JSON.stringify(firstRowText)}`,
-      ).not.toBeNull();
-      const knownValue = match![0]!;
+        knownValue,
+        `first row of ${grid.label} has an empty code cell`,
+      ).not.toEqual('');
 
       const input = liveSearchInput(page, grid);
       await input.fill(knownValue);
@@ -224,8 +237,14 @@ test.describe('WP-828: custom live search replaces the default grid search', () 
     // representative sample (it already declares searchSuggestionConfig).
     await page.goto('/portal/organization/grid');
 
+    // Same two-element responsive toolbar as the live-search input: the
+    // `lg:hidden` copy is in the DOM at 1440px, so a bare locator is a
+    // strict-mode violation. Assert on the one that is actually on screen.
     await expect(
-      page.locator('[data-test-id="organization-grid-search-button"]'),
+      page
+        .locator('[data-test-id="organization-grid-search-button"]')
+        .locator('visible=true')
+        .first(),
     ).toBeVisible({ timeout: 30000 });
     await expect(
       page.locator('[data-test-id="organization-grid-live-search-input"]'),
