@@ -49,6 +49,15 @@ const gridColumns = [
     header: 'Role',
     accessorKey: 'roles',
     data_type: 'array',
+    // WP-828 fix: `roles` is NOT a column on `contacts`. It is assembled in JS
+    // by a SEPARATE user_roles query in contact.mainGrid (contact.ts:359-399),
+    // so it is never in the grid query's FROM clause. A `like` criteria on it
+    // is rejected by the Store with
+    //   400 "Filter field 'roles' does not exist in entity 'contacts'"
+    // and because the live search emits ONE flat OR chain, that single bad
+    // criteria fails validation for the WHOLE query — every row disappears for
+    // every term. Not searchable until there is a real joined field to map to.
+    isSearchable: false,
     cell: ({ row }) => {
       const roles = row?.original?.roles || [];
       if (!Array.isArray(roles)) return null;
@@ -61,6 +70,11 @@ const gridColumns = [
     header: 'Device Group',
     accessorKey: 'device_group_names',
     data_type: 'array',
+    // WP-828 fix: same as `roles` above — built in JS from a separate lookup in
+    // contact.mainGrid, not a `contacts` column and not joined into the grid
+    // query. Store rejects it with 400 "Filter field 'device_group_names' does
+    // not exist in entity 'contacts'", zeroing the entire OR chain.
+    isSearchable: false,
     cell: ({ row }) => {
       const raw = row?.original?.device_group_names;
       // Group titles pass the grouped value as a scalar, not an array — normalize.
