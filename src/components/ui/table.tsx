@@ -4,6 +4,7 @@ import * as React from 'react';
 import { useRouter } from 'next/navigation';
 import { useToast } from '~/context/ToastProvider';
 import { cn } from '~/lib/utils';
+import { toRouteSegment } from '~/middleware-alias-entities';
 import { api } from '~/trpc/react';
 import { handleCustomAction } from '../platform/Grid/Handlers/rowClickCustomAction';
 import { useSideDrawer } from '../platform/SideDrawer';
@@ -178,6 +179,14 @@ const TableCell = React.forwardRef<
                 : row.original?.status,
           };
 
+          // `edit.entity` is the ORM entity (e.g. `device_group_settings`).
+          // URL paths need the route segment (e.g. `device_group`) — the
+          // folder that actually exists under src/app/portal. tRPC calls below
+          // keep using `edit.entity`.
+          const routeSegment = edit?.entity
+            ? toRouteSegment(edit.entity)
+            : edit?.entity;
+
           if (edit?.status === 'Draft') {
             _navigate
               .mutateAsync({
@@ -187,7 +196,7 @@ const TableCell = React.forwardRef<
               .then((res) => {
                 const { identifier, step } = res ?? {};
                 router.push(
-                  `/portal/${edit?.entity}/wizard/${identifier}/${step}`,
+                  `/portal/${routeSegment}/wizard/${identifier}/${step}`,
                 );
               })
               .catch((err) => {
@@ -206,7 +215,7 @@ const TableCell = React.forwardRef<
           }
 
           router.push(
-            `/portal/${edit?.entity}/record/${edit?.code}/${edit?.entity}`,
+            `/portal/${routeSegment}/record/${edit?.code}/${routeSegment}`,
           );
         }
       }}
