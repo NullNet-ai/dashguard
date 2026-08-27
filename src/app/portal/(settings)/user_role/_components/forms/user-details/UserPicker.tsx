@@ -44,6 +44,33 @@ interface UserPickerProps {
 // The grid's `roles` column is not disclosure (it is easy to miss and it is
 // dropped from card/mobile view), so the replacement is stated in copy up front
 // and then named per user in a confirmation step before anything is written.
+// WP-832 QA-FIX — the drawer footer must outrank the grid's pagination bar.
+//
+// `src/components/platform/Grid/views/GridDesktop.tsx:54` wraps the pagination
+// bar in `sticky z-50`. These footers are `absolute` overlays, so with no
+// z-index they are `z-index: auto` and LOSE to z-50 regardless of DOM order:
+// the "Review & replace" button rendered visible but was not hit-testable at
+// any desktop width (0/60 self-hits at 1680x1000, interceptor
+// `contact-grd-pagination-page1-btn`; 30/30 at 390x844, where Grid/index.tsx
+// branches to GridMobile which has no z-50 wrapper). Hence `z-[60]`.
+//
+// Raising the z-index alone would only swap which control is unclickable, so
+// the grid is also shortened to land its pagination bar ABOVE the footer.
+// Measured live at 1680x1000 (production, 2026-08-26):
+//   drawer Card bottom            1002  (md:h-[calc(100dvh-37px)] + translate-y-2)
+//   footer height                   67  (border-t 1 + py-4 32 + Button h-[34px])
+//   footer top                     935  => the band the footer occupies
+//   picker grid scroll-port top    239  (root top 83 + warning 44 + gap-4 16
+//                                        + grid header 96)
+//   pagination block below scroll    64  (8px card gap + 56px measured bar)
+// So the scroll port must end by 935 - 64 = 871, i.e. at most 632px tall at a
+// 1000px viewport => 100vh - 368px. Rounded to `100vh-24em` (384px) for ~16px
+// of clearance. The subtracted term is fixed chrome, so this holds at every
+// viewport HEIGHT (verified arithmetic at 900/1000/1080).
+// `pb-28` (112px) reserves space past the footer's 99px extent (bottom-8 32 + 67).
+//
+// ⚠️ Do NOT "fix" this by lowering z-50 in the shared Grid platform: that
+// wrapper is used by ~20 grids. See DC000730 §3.1.
 const REPLACEMENT_NOTICE =
   'A user can hold only one role. Assigning a user here REPLACES the role they hold today — their current role is revoked.';
 
@@ -158,7 +185,7 @@ export default function UserPicker({
   if (isConfirming) {
     return (
       <div
-        className="relative flex h-full flex-col gap-4 overflow-y-auto pb-16"
+        className="relative flex h-full flex-col gap-4 overflow-y-auto pb-28"
         data-test-id="user-role-rcrd-assign-user-confirm"
       >
         <div className="flex items-start gap-3 rounded-md border border-amber-300 bg-amber-50 p-4 text-sm text-amber-900">
@@ -205,7 +232,7 @@ export default function UserPicker({
           </ul>
         </div>
 
-        <div className="absolute inset-x-0 bottom-8 flex justify-end gap-2 border-t bg-background px-4 py-4">
+        <div className="absolute inset-x-0 bottom-8 z-[60] flex justify-end gap-2 border-t bg-background px-4 py-4">
           <Button
             disabled={assignMutation.isPending}
             variant="outline"
@@ -231,7 +258,7 @@ export default function UserPicker({
   }
 
   return (
-    <div className="relative flex h-full flex-col gap-4 pb-16">
+    <div className="relative flex h-full flex-col gap-4 pb-28">
       <div
         className="flex items-start gap-3 rounded-md border border-amber-300 bg-amber-50 p-3 text-sm text-amber-900"
         data-test-id="user-role-rcrd-assign-user-warning"
@@ -243,7 +270,7 @@ export default function UserPicker({
       <Grid
         {...gridProps}
         data={items}
-        gridChildClass="!h-[calc(100vh-18em)]"
+        gridChildClass="!h-[calc(100vh-24em)]"
         isLoading={isLoading}
         totalCount={totalCount || 0}
         onSelectRecords={setSelectedRows}
@@ -267,7 +294,7 @@ export default function UserPicker({
         }}
       />
 
-      <div className="absolute inset-x-0 bottom-8 flex justify-end gap-2 border-t bg-background px-4 py-4">
+      <div className="absolute inset-x-0 bottom-8 z-[60] flex justify-end gap-2 border-t bg-background px-4 py-4">
         <Button
           disabled={assignMutation.isPending}
           variant="outline"
