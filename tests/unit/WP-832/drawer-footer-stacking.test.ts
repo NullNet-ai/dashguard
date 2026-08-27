@@ -11,8 +11,9 @@ import { describe, expect, it } from 'vitest';
 //   bottom-8` with NO z-index, i.e. `z-index: auto`, which loses to z-50
 //   regardless of DOM order. The "Review & replace" button was therefore
 //   VISIBLE but not HIT-TESTABLE at every desktop width (0/30 self-hits at
-//   1600x900 / 1680x1000 / 1920x1080; 30/30 at 390x844, where Grid/index.tsx
-//   branches to GridMobile, which has no z-50 pagination wrapper).
+//   1600x900 / 1680x1000 / 1920x1080). Mobile is NOT a control: the Assign
+//   button is Grid's `customCreateButton`, which only the DESKTOP grid renders,
+//   so at 390x844 the drawer cannot be opened and there is nothing to hit-test.
 //
 // jsdom cannot lay out stacking contexts, so these tests guard the INVARIANT
 // against real source text rather than rendering: the drawer footer's z-index

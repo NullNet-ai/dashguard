@@ -50,24 +50,42 @@ interface UserPickerProps {
 // bar in `sticky z-50`. These footers are `absolute` overlays, so with no
 // z-index they are `z-index: auto` and LOSE to z-50 regardless of DOM order:
 // the "Review & replace" button rendered visible but was not hit-testable at
-// any desktop width (0/60 self-hits at 1680x1000, interceptor
-// `contact-grd-pagination-page1-btn`; 30/30 at 390x844, where Grid/index.tsx
-// branches to GridMobile which has no z-50 wrapper). Hence `z-[60]`.
+// any desktop width -- 0/60 self-hits at 1680x1000, with Playwright naming
+// `contact-grd-pagination-page1-btn` as the interceptor. Hence `z-[60]`.
+//
+// Mobile was NOT measured, and is not a control here: `customCreateButton`
+// (the Assign button, client.tsx) is only rendered by `Grid/Header/index.tsx`,
+// which only `GridDesktop.tsx` mounts. At 390x844 the drawer cannot be opened
+// at all, so there is no hit-test to compare against. That is a separate,
+// pre-existing product gap -- not evidence about this defect.
 //
 // Raising the z-index alone would only swap which control is unclickable, so
 // the grid is also shortened to land its pagination bar ABOVE the footer.
-// Measured live at 1680x1000 (production, 2026-08-26):
-//   drawer Card bottom            1002  (md:h-[calc(100dvh-37px)] + translate-y-2)
-//   footer height                   67  (border-t 1 + py-4 32 + Button h-[34px])
-//   footer top                     935  => the band the footer occupies
-//   picker grid scroll-port top    239  (root top 83 + warning 44 + gap-4 16
-//                                        + grid header 96)
-//   pagination block below scroll    64  (8px card gap + 56px measured bar)
-// So the scroll port must end by 935 - 64 = 871, i.e. at most 632px tall at a
-// 1000px viewport => 100vh - 368px. Rounded to `100vh-24em` (384px) for ~16px
-// of clearance. The subtracted term is fixed chrome, so this holds at every
-// viewport HEIGHT (verified arithmetic at 900/1000/1080).
-// `pb-28` (112px) reserves space past the footer's 99px extent (bottom-8 32 + 67).
+//
+// Two distinct quantities, both measured against the UserPicker ROOT (which
+// sits inside `CardContent p-3` -- NOT against the drawer Card):
+//   1. Footer EXTENT from the root's bottom edge = 99px
+//        bottom-8 32 + border-t 1 + py-4 32 + Button h-[34px] 34
+//      This is what `pb-28` (112px) must clear, and does, by 13px.
+//   2. Footer TOP in viewport coords at 1680x1000 = 935px (measured live on
+//      production 2026-08-26; do not re-derive it from the Card's bottom edge,
+//      that is a different origin and will not reconcile).
+//        picker grid scroll-port top    239  (root top 83 + warning 44
+//                                             + gap-4 16 + grid header 96)
+//        pagination block below scroll   64  (8px card gap + 56px measured bar)
+//      So the scroll port must end by 935 - 64 = 871 => at most 632px tall at a
+//      1000px viewport => 100vh - 368px. Rounded to `100vh-24em` (384px) for
+//      ~16px of clearance.
+//
+// The subtracted term is fixed chrome, so clearance is a CONSTANT rather than
+// something that degrades on short viewports (checked at 900/1000/1080). The
+// `min-h-[300px]` that would have broken this lives only on the
+// `parentType === 'record'` branch (`GridScrollContainer.tsx:197`); this picker
+// passes no `parentType` and takes the `:242` branch, which has none.
+//
+// KNOWN SOFT SPOT: `em` resolves against the element's own computed font-size.
+// The target div carries no font-size class, so 24em == 384px today, but `rem`
+// would have been the safe unit. The pre-existing `18em` had the same exposure.
 //
 // ⚠️ Do NOT "fix" this by lowering z-50 in the shared Grid platform: that
 // wrapper is used by ~20 grids. See DC000730 §3.1.

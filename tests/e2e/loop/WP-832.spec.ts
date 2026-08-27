@@ -285,10 +285,11 @@ test.describe('WP-832: Role Record > User - Add User Grid', () => {
       //     NOT this QA-fix's stacking defect, and is deliberately not "fixed"
       //     here — adding a mobile affordance would be new scope.
       //
-      // Resizing AFTER the drawer is open still genuinely exercises the mobile
-      // branch: isDesktop is a media-query hook, so the drawer's grid re-renders
-      // as GridMobile (no `sticky z-50` pagination wrapper) at 390px. That is
-      // exactly the surface AC2 is about.
+      // NOTE: every viewport in VIEWPORTS is a DESKTOP width, so the resize
+      // below is a no-op width change rather than a branch change. The mobile
+      // resize path described above was removed along with 390x844 -- it is
+      // documented here only because it is why the open-then-resize ordering
+      // exists at all.
       await page.setViewportSize({ width: 1680, height: 1000 });
 
       const code = await findRoleCode(page, ROLE_UNDER_TEST);
@@ -539,7 +540,17 @@ test.describe('WP-832: Role Record > User - Add User Grid', () => {
     ).toBe(probe.total);
 
     // Retreat via Back, then close the drawer. No mutation is ever completed.
-    await page.getByRole('button', { name: 'Back' }).click();
+    //
+    // Scoped to the confirm view on purpose. `SideDrawerView.tsx:348` renders
+    // aria-label={canGoBack ? 'Back' : 'Close side drawer'}, so an unscoped
+    // getByRole('button', { name: 'Back' }) matches TWO elements whenever the
+    // drawer was reached via a push (canGoBack === true) and trips Playwright
+    // strict mode. Neither match is the confirm button, so this is a locator
+    // trap rather than a safety one -- but it is this loop's recurring trap.
+    await page
+      .locator('[data-test-id="user-role-rcrd-assign-user-confirm"]')
+      .getByRole('button', { name: 'Back' })
+      .click();
     await expect(saveBtn).toBeVisible({ timeout: 30_000 });
     await page.keyboard.press('Escape');
 
