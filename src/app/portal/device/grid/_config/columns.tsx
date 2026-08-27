@@ -101,6 +101,14 @@ const gridColumns = [
   {
     header: 'Connection Status',
     accessorKey: 'is_device_online',
+    // WP-828 fix: `is_device_online` IS a real `devices` column, but it is a
+    // BOOLEAN. A `like` criteria on it is a Postgres type error —
+    //   500 "operator does not exist: boolean ~~* unknown"
+    // — and since the live search emits one flat OR chain, that single bad
+    // criteria failed the WHOLE query, emptying the device grid for every
+    // search term. Free-text `like` can never match a boolean anyway; users
+    // filter online/offline through the advance filter, not the search box.
+    isSearchable: false,
     enableSorting: true,
     sort_config: {
       type: 'boolean',

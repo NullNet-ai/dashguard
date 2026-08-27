@@ -1,4 +1,4 @@
-import { expect, test, type Page } from '@playwright/test';
+import { expect, test, type Locator, type Page } from '@playwright/test';
 
 import { LoginPage } from '../auth/LoginPage';
 
@@ -17,8 +17,17 @@ import { LoginPage } from '../auth/LoginPage';
 //     `_` -> `-`. So they are PATH-derived, not entity-derived:
 //       /portal/device_group/grid -> device-group-grid-search-button
 //       /portal/user_role/grid    -> user-role-grid-search-button
-//   * The CONTACT grid emits no test-id on rows or cells; assert on rendered
-//     text there instead.
+//   * The live-search input test-id matches TWO elements: the desktop toolbar
+//     and the `lg:hidden` responsive one (display:none at 1440px). Only one is
+//     Playwright-visible, so every interaction locator is filtered to the
+//     VISIBLE one — a bare locator is a strict-mode violation.
+//   * The CONTACT grid renders rows through DraggableRow, which does not
+//     forward the row `data-test-id` to the DOM, so per-row ids exist on the
+//     other three grids only. `[data-test-id="<entity>-grid-table-body"] > tr`
+//     works on all four and is what these tests count.
+//   * `waitForLoadState('networkidle')` never settles on the portal (socket.io
+//     holds an open connection), so these tests wait on the element they are
+//     about to use instead. That is what made the organization guard time out.
 //
 // Credentials: QA_E2E_EMAIL / QA_E2E_PASSWORD only. Never the hardcoded
 // ADMIN_CREDENTIALS in tests/e2e/utils/auth.ts.
@@ -31,8 +40,8 @@ interface GridUnderTest {
   url: string;
   /** usePathname()-derived test-id prefix used by the search components */
   pathPrefix: string;
-  /** config.entity-derived test-id prefix used by the table */
-  entityPrefix: string | null;
+  /** config.entity-derived test-id prefix used by the table body */
+  tableEntity: string;
 }
 
 const GRIDS: GridUnderTest[] = [
@@ -40,29 +49,31 @@ const GRIDS: GridUnderTest[] = [
     label: 'User (contact)',
     url: '/portal/contact/grid',
     pathPrefix: 'contact-grid',
-    // Contact grid emits no row/cell test-ids.
-    entityPrefix: null,
+    tableEntity: 'contact',
   },
   {
     label: 'Device',
     url: '/portal/device/grid',
     pathPrefix: 'device-grid',
-    entityPrefix: 'device-grid',
+    tableEntity: 'device',
   },
   {
     label: 'Role (user_role)',
     url: '/portal/user_role/grid',
     pathPrefix: 'user-role-grid',
-    entityPrefix: 'user-role-grid',
+    tableEntity: 'user-role',
   },
   {
     label: 'Device Group',
     url: '/portal/device_group/grid',
     pathPrefix: 'device-group-grid',
     // NOTE: entity is device_group_settings, not device_group.
-    entityPrefix: 'device-group-settings-grid',
+    tableEntity: 'device-group-settings',
   },
 ];
+
+/** Debounce is 500ms in LiveSearch; allow margin for the refetch. */
+const DEBOUNCE_SETTLE = 2500;
 
 const login = async (page: Page) => {
   const loginPage = new LoginPage(page);
@@ -71,6 +82,47 @@ const login = async (page: Page) => {
   await page.waitForURL((url) => !url.pathname.startsWith('/login'), {
     timeout: 15000,
   });
+};
+
+/** The one live-search input that is actually on screen. */
+const liveSearchInput = (page: Page, grid: GridUnderTest): Locator =>
+  page
+    .locator(`[data-test-id="${grid.pathPrefix}-live-search-input"]`)
+    .locator('visible=true')
+    .first();
+
+/**
+ * Data rows, counted by their `code` cell rather than by `> tr`.
+ *
+ * TableBody.tsx:198 stamps every cell with
+ * `<entity>-grid-table-body-row-cell-<columnId>-<n>` (or, on a draggable
+ * grid, `<entity>-grd-tbl-tbody-row-cell-<columnId>-<n>`), so a `code`-cell
+ * prefix match counts exactly the real records: it skips the empty spacer
+ * row the device grid renders first (innerText ""), and it will not count
+ * a "no records" placeholder row as a search result.
+ */
+const rows = (page: Page, grid: GridUnderTest): Locator =>
+  page.locator(
+    // Two row renderers stamp two different id shapes. `TableBody.tsx:199`
+    // emits `<entity>-grid-table-body-row-cell-<col>-<n>`; a grid with
+    // `isDraggable: true` routes through `common/DraggableRow.tsx:115`
+    // instead, which emits `<entity>-grd-tbl-tbody-row-cell-<col>-<n>`.
+    // Contact is currently the only draggable grid, so matching one shape
+    // silently counted 0 rows there and timed out every Contact test.
+    `[data-test-id^="${grid.tableEntity}-grid-table-body-row-cell-code-"], ` +
+      `[data-test-id^="${grid.tableEntity}-grd-tbl-tbody-row-cell-code-"]`,
+  );
+
+/** Land on a grid and wait for its rows, not for a networkidle that never comes. */
+const openGrid = async (page: Page, grid: GridUnderTest) => {
+  await page.goto(grid.url);
+  await liveSearchInput(page, grid).waitFor({
+    state: 'visible',
+    timeout: 30000,
+  });
+  await expect
+    .poll(async () => rows(page, grid).count(), { timeout: 30000 })
+    .toBeGreaterThan(0);
 };
 
 test.describe('WP-828: custom live search replaces the default grid search', () => {
@@ -87,8 +139,7 @@ test.describe('WP-828: custom live search replaces the default grid search', () 
     test(`${grid.label}: the default modal search is hidden`, async ({
       page,
     }) => {
-      await page.goto(grid.url);
-      await page.waitForLoadState('networkidle');
+      await openGrid(page, grid);
 
       // The default is a "Search" button that opens a headlessui Dialog.
       // Option A says hide/replace it.
@@ -100,87 +151,109 @@ test.describe('WP-828: custom live search replaces the default grid search', () 
     test(`${grid.label}: an inline live search input is present`, async ({
       page,
     }) => {
-      await page.goto(grid.url);
-      await page.waitForLoadState('networkidle');
+      await openGrid(page, grid);
 
-      const input = page.locator(
-        `[data-test-id="${grid.pathPrefix}-live-search-input"]`,
-      );
+      const input = liveSearchInput(page, grid);
       await expect(input).toBeVisible();
       // "Search live" — it must be usable without opening a dialog first.
       await expect(input).toBeEditable();
     });
 
+    // WP-828 REGRESSION GUARD (the gap that let the live search ship broken).
+    //
+    // The no-match and clear-restores tests below BOTH pass against a search
+    // that returns zero rows for every query, which is exactly what shipped on
+    // contact and device: `roles` / `device_group_names` are not columns on
+    // `contacts`, and `is_device_online` is a boolean that `like` cannot be
+    // applied to, so each emitted one bad criteria into the flat OR chain and
+    // the Store rejected the WHOLE query.
+    //
+    // This test takes a value out of the grid's OWN first row and searches for
+    // it. A search that can never match anything fails here.
+    test(`${grid.label}: a query taken from the grid's own first row returns rows`, async ({
+      page,
+    }) => {
+      await openGrid(page, grid);
+
+      // Take the value straight out of the grid's own first `code` cell, so
+      // the term cannot rot as the data changes. `code` is deliberately the
+      // source: it is a real column on all four entities AND searchable on
+      // all four — unlike Role / Device Group, the very columns this ticket
+      // had to mark unsearchable. Formats differ per entity (CO000001 on
+      // contact, CTR6 on user_role), so read the value, never pattern-match it.
+      const knownValue = (await rows(page, grid).first().innerText()).trim();
+      expect(
+        knownValue,
+        `first row of ${grid.label} has an empty code cell`,
+      ).not.toEqual('');
+
+      const input = liveSearchInput(page, grid);
+      await input.fill(knownValue);
+      await page.waitForTimeout(DEBOUNCE_SETTLE);
+
+      await expect
+        .poll(async () => rows(page, grid).count(), { timeout: 15000 })
+        .toBeGreaterThan(0);
+    });
+
     test(`${grid.label}: typing filters the grid without opening a dialog`, async ({
       page,
     }) => {
-      await page.goto(grid.url);
-      await page.waitForLoadState('networkidle');
+      await openGrid(page, grid);
 
-      const input = page.locator(
-        `[data-test-id="${grid.pathPrefix}-live-search-input"]`,
-      );
-      await input.waitFor({ state: 'visible', timeout: 15000 });
+      const input = liveSearchInput(page, grid);
 
       // A string that should match nothing anywhere.
       await input.fill('zzzzqqqqnomatch');
-      // Debounce is 500ms in the existing search components; allow margin.
-      await page.waitForTimeout(2000);
+      await page.waitForTimeout(DEBOUNCE_SETTLE);
 
       // No modal opened.
       await expect(page.locator('[role="dialog"]')).toHaveCount(0);
 
-      if (grid.entityPrefix) {
-        const rows = page.locator(
-          `[data-test-id^="${grid.entityPrefix}-table-body-row"]`,
-        );
-        await expect(rows).toHaveCount(0);
-      } else {
-        // Contact grid: no row test-ids — assert on the empty-state text.
-        await expect(page.getByText(/no (records|results|data)/i)).toBeVisible();
-      }
+      await expect
+        .poll(async () => rows(page, grid).count(), { timeout: 15000 })
+        .toBe(0);
     });
 
     test(`${grid.label}: clearing the live search restores rows`, async ({
       page,
     }) => {
-      await page.goto(grid.url);
-      await page.waitForLoadState('networkidle');
+      await openGrid(page, grid);
 
-      const input = page.locator(
-        `[data-test-id="${grid.pathPrefix}-live-search-input"]`,
-      );
-      await input.waitFor({ state: 'visible', timeout: 15000 });
+      const input = liveSearchInput(page, grid);
 
       await input.fill('zzzzqqqqnomatch');
-      await page.waitForTimeout(2000);
+      await page.waitForTimeout(DEBOUNCE_SETTLE);
       await input.fill('');
-      await page.waitForTimeout(2000);
+      await page.waitForTimeout(DEBOUNCE_SETTLE);
 
-      if (grid.entityPrefix) {
-        const rows = page.locator(
-          `[data-test-id^="${grid.entityPrefix}-table-body-row"]`,
-        );
-        expect(await rows.count()).toBeGreaterThan(0);
-      } else {
-        await expect(
-          page.getByText(/no (records|results|data)/i),
-        ).toHaveCount(0);
-      }
+      await expect
+        .poll(async () => rows(page, grid).count(), { timeout: 15000 })
+        .toBeGreaterThan(0);
     });
   }
 
   test('a grid outside the ticket scope keeps the default modal search', async ({
     page,
   }) => {
+    // The organization grid is the heaviest of these pages to cold-compile
+    // under `next dev --turbopack`; it timed out at the 30s default. Triples
+    // the budget rather than shortening the assertions.
+    test.slow();
+
     // Regression guard: ~20 other grids must be untouched. Organization is the
     // representative sample (it already declares searchSuggestionConfig).
     await page.goto('/portal/organization/grid');
-    await page.waitForLoadState('networkidle');
 
+    // Same two-element responsive toolbar as the live-search input: the
+    // `lg:hidden` copy is in the DOM at 1440px, so a bare locator is a
+    // strict-mode violation. Assert on the one that is actually on screen.
     await expect(
-      page.locator('[data-test-id="organization-grid-search-button"]'),
-    ).toBeVisible();
+      page
+        .locator('[data-test-id="organization-grid-search-button"]')
+        .locator('visible=true')
+        .first(),
+    ).toBeVisible({ timeout: 30000 });
     await expect(
       page.locator('[data-test-id="organization-grid-live-search-input"]'),
     ).toHaveCount(0);
