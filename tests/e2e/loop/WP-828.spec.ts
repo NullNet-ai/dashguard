@@ -95,14 +95,22 @@ const liveSearchInput = (page: Page, grid: GridUnderTest): Locator =>
  * Data rows, counted by their `code` cell rather than by `> tr`.
  *
  * TableBody.tsx:198 stamps every cell with
- * `<entity>-grid-table-body-row-cell-<columnId>-<n>`, so a `code`-cell
+ * `<entity>-grid-table-body-row-cell-<columnId>-<n>` (or, on a draggable
+ * grid, `<entity>-grd-tbl-tbody-row-cell-<columnId>-<n>`), so a `code`-cell
  * prefix match counts exactly the real records: it skips the empty spacer
  * row the device grid renders first (innerText ""), and it will not count
  * a "no records" placeholder row as a search result.
  */
 const rows = (page: Page, grid: GridUnderTest): Locator =>
   page.locator(
-    `[data-test-id^="${grid.tableEntity}-grid-table-body-row-cell-code-"]`,
+    // Two row renderers stamp two different id shapes. `TableBody.tsx:199`
+    // emits `<entity>-grid-table-body-row-cell-<col>-<n>`; a grid with
+    // `isDraggable: true` routes through `common/DraggableRow.tsx:115`
+    // instead, which emits `<entity>-grd-tbl-tbody-row-cell-<col>-<n>`.
+    // Contact is currently the only draggable grid, so matching one shape
+    // silently counted 0 rows there and timed out every Contact test.
+    `[data-test-id^="${grid.tableEntity}-grid-table-body-row-cell-code-"], ` +
+      `[data-test-id^="${grid.tableEntity}-grd-tbl-tbody-row-cell-code-"]`,
   );
 
 /** Land on a grid and wait for its rows, not for a networkidle that never comes. */
