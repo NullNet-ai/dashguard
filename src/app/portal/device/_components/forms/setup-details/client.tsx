@@ -598,7 +598,7 @@ const SetupDetails: React.FC<{ identifier: string; remoteAccessUrl?: string }> =
             {/* <div className="text-base font-semibold text-slate-900">
               Download and install the WallGuard Package on pfSense
             </div> */}
-          <div className="flex items-start justify-between gap-4">
+          <div className="flex items-start gap-4">
             <div className="">
               <div className="text-sm text-slate-600">{subtitle}</div>
               <div className="flex items-center gap-1 text-sm text-slate-600">
@@ -606,29 +606,40 @@ const SetupDetails: React.FC<{ identifier: string; remoteAccessUrl?: string }> =
                 <CircleCheck size={13} fill='#7FCEAB' className='text-white'/>
               </div>
             </div>
-            {/* WP-841: reissue the join code. Only offered once a code exists —
-                before that the install flow is still minting the first one. */}
-            {!!installationKey && (
-              <Button
-                className="shrink-0"
-                data-test-id="device-regenerate-join-code-button"
-                disabled={isRegenerating}
-                size="xs"
-                type="button"
-                variant="outline"
-                onClick={handleRegenerateJoinCode}
-              >
-                {isRegenerating ? 'Regenerating…' : 'Regenerate join code'}
-              </Button>
-            )}
           </div>
 
           <div>
-            {steps.map((s, idx) => (
-              <Step key={s.title} number={idx + 1} title={s.title} color={s.color} isLast={idx === steps.length - 1}>
-                {s.jsx}
-              </Step>
-            ))}
+            {steps.map((s, idx) => {
+              // Every device_category branch of getSteps ends with the
+              // "Complete the setup" join-code step, so the last step is the
+              // snippet the regenerate control belongs to.
+              const isLast = idx === steps.length - 1;
+
+              return (
+                <Step key={s.title} number={idx + 1} title={s.title} color={s.color} isLast={isLast}>
+                  {s.jsx}
+                  {/* WP-850: reissue the join code from the bottom right of the
+                      "Complete the setup" snippet. WP-841: only offered once a
+                      code exists — before that the install flow is still
+                      minting the first one. */}
+                  {isLast && !!installationKey && (
+                    <div className="mt-2 flex justify-end">
+                      <Button
+                        className="shrink-0"
+                        data-test-id="device-regenerate-join-code-button"
+                        disabled={isRegenerating}
+                        size="xs"
+                        type="button"
+                        variant="outline"
+                        onClick={handleRegenerateJoinCode}
+                      >
+                        {isRegenerating ? 'Regenerating…' : 'Regenerate join code'}
+                      </Button>
+                    </div>
+                  )}
+                </Step>
+              );
+            })}
           </div>
         </div>
       )}
