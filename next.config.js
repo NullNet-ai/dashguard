@@ -33,7 +33,7 @@ const config = {
   },
   reactStrictMode: false,
   images: {
-    dangerouslyAllowSVG: true,
+    dangerouslyAllowSVG: false,
     remotePatterns: [
       {
         protocol: "https",

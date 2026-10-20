@@ -39,7 +39,7 @@ export async function GET(
     .execute()
 
   const client = axios.create({
-    baseURL: `${process.env.STORE_URL}/api/file/${params.file_id}/download`,
+    baseURL: `${process.env.STORE_URL}/api/file/${encodeURIComponent(params.file_id)}/download`,
     headers: {
       'Content-Type': 'multipart/form-data',
       'Authorization': `Bearer ${token}`,

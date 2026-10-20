@@ -1,3 +1,5 @@
+import { faker } from '@faker-js/faker';
+
 it(`When they are redirected to the Wizard Step 1, then, they should be able to enter Phone Number, Email, First Name, Middle Name, Last Name, Goes By.`, () => {
   const random_number = Math.floor(Math.random() * 900) + 10000;
   const phone_number = `88888${random_number}`;

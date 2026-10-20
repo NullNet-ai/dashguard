@@ -1,6 +1,6 @@
 FROM node:20
 
-RUN npm install -g pnpm
+RUN npm install -g pnpm@8.15.4
 
 ENV SKIP_ENV_VALIDATION=true
 ENV NEXT_TELEMETRY_DISABLED=1
@@ -12,10 +12,10 @@ ENV STORE_URL "http://localhost:3000"
 ENV NEXT_PUBLIC_ORIGIN_WEBSITE_URL "https://portal.platform.dnaqa.net"
 
 WORKDIR /var/app
-COPY package.json /var/app/package.json
+COPY package.json pnpm-lock.yaml /var/app/
 # COPY bun.lockb /var/app/bun.lockb
 COPY .npmrc /var/app/.npmrc
-RUN pnpm install
+RUN pnpm install --frozen-lockfile
 COPY ./ /var/app
 RUN touch .env
 RUN echo $(pnpm -v)
