@@ -25,7 +25,7 @@
     "@dnd-kit/modifiers": "^9.0.0",
     "@dnd-kit/sortable": "^10.0.0",
     "@dnd-kit/utilities": "^3.2.2",
-    "@faker-js/faker": "^9.2.0",
+    "@faker-js/faker": "^10.5.0",
     "@headlessui/react": "^2.1.10",
     "@heroicons/react": "^2.1.5",
     "@hookform/resolvers": "^3.9.0",
@@ -89,7 +89,7 @@
     "@xterm/addon-fit": "^0.10.0",
     "@xyflow/react": "^12.10.0",
     "argon2": "^0.41.1",
-    "axios": "<1.10.0",
+    "axios": "^1.16.0",
     "bluebird": "^3.7.2",
     "chrono-node": "^2.7.7",
     "class-transformer": "^0.5.1",
@@ -125,9 +125,9 @@
     "moment": "^2.30.1",
     "moment-timezone": "^0.5.46",
     "monaco-editor": "^0.52.2",
-    "next": "16.2.6",
+    "next": "16.3.8",
     "next-themes": "^0.3.0",
-    "nodemailer": "^6.10.0",
+    "nodemailer": "^10.0.6",
     "platform": "file:",
     "pluralize": "^8.0.0",
     "react": "19.2.4",
@@ -176,7 +176,6 @@
     "@types/leaflet.heat": "^0.2.5",
     "@types/lodash": "^4.17.12",
     "@types/node": "^20.16.14",
-    "@types/nodemailer": "^6.4.17",
     "@types/pluralize": "^0.0.33",
     "@types/react": "19.2.10",
     "@types/react-dom": "19.2.3",
@@ -186,7 +185,7 @@
     "@vitejs/plugin-react": "^4",
     "cypress": "^13.16.0",
     "eslint": "^9.0.0",
-    "eslint-config-next": "16.2.6",
+    "eslint-config-next": "16.3.8",
     "eslint-config-prettier": "^9.1.0",
     "eslint-plugin-import": "^2.31.0",
     "eslint-plugin-jsx-a11y": "^6.10.2",
@@ -201,7 +200,7 @@
     "tailwindcss": "^3.4.14",
     "typescript": "^5.6.3",
     "vite-tsconfig-paths": "^5",
-    "vitest": "^3"
+    "vitest": "^4"
   },
   "ct3aMetadata": {
     "initVersion": "7.37.0"
@@ -216,5 +215,10 @@
   "overrides": {
     "@types/react": "19.2.10",
     "@types/react-dom": "19.2.3"
+  },
+  "pnpm": {
+    "overrides": {
+      "axios@<0.32.0": ">=0.32.0 <1"
+    }
   }
 }
